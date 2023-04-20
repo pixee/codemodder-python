@@ -1,39 +1,21 @@
 import argparse
-import json
+import glob
 import os
 import sys
-
 import libcst as cst
 
 
-def find_insecure_random_calls(tree):
-    """
-    Given a CST node tree, finds any calls to the `random.random()` function,
-    which is known to be cryptographically insecure.
-    """
-    for node in tree.find_all(cst.Name):
-        if node.value == "random":
-            parent = node.parent
-            if isinstance(parent, cst.Call) and parent.func == node:
-                grandparent = parent.parent
-                if isinstance(grandparent, cst.Expr) and isinstance(
-                    grandparent.parent, cst.Module
-                ):
-                    yield grandparent
+def find_files(parent_path):
+    # todo: convert to class and add includes, excludes
+    matching_files = []
+    for file_path in glob.glob(f"{parent_path}/*.py", recursive=True):
+        matching_files.append(file_path)
+    return matching_files
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Run codemods and change code.")
-    parser.add_argument(
-        "directory", metavar="file", type=str, nargs="+", help="path to find files"
-    )
-    # dry run
-    # output path, for now just print to stdout
-    args = parser.parse_args()
-
-    paths_to_analyze = (
-        []
-    )  # FileFinder(parser.directory) # pass in all includes/excludes
+def run(argv):
+    breakpoint()
+    paths_to_analyze = find_files(argv.directory)
     codemods = []  # secure_randomness, semgrep, etc
     changed_files = {}
     # some codemods take raw file paths, others need parsed CST
@@ -75,5 +57,27 @@ def main():
         # report = CodeTF.generate(results, config)
 
 
+class ArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        self.print_help(sys.stderr)
+        sys.exit(message)
+
+
+def parse_args(argv):
+    parser = ArgumentParser(description="Run codemods and change code.")
+    parser.add_argument("directory", type=str, help="path to find files")
+    parser.add_argument(
+        "output", type=str, help="name of output file to produce", default="stdout"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action=argparse.BooleanOptionalAction,
+        help="do everything except make changes to files",
+    )
+    # todo: includes, exludes
+
+    return parser.parse_args(argv)
+
+
 if __name__ == "__main__":
-    main()
+    run(parse_args(sys.argv[1:]))
