@@ -4,6 +4,10 @@ import os
 import sys
 import libcst as cst
 
+from libcst.codemod import CodemodContext
+from codemods.secure_random import SecureRandom
+from libcst.codemod._runner import transform_module
+
 
 def find_files(parent_path):
     # todo: convert to class and add includes, excludes
@@ -14,7 +18,7 @@ def find_files(parent_path):
 
 
 def run(argv):
-    breakpoint()
+
     paths_to_analyze = find_files(argv.directory)
     codemods = []  # secure_randomness, semgrep, etc
     changed_files = {}
@@ -36,14 +40,15 @@ def run(argv):
             code = f.read()
 
         try:
-            tree = cst.parse_module(code)
+            input_tree = cst.parse_module(code)
         except Exception as e:
             print(f"Error parsing file '{file_path}': {str(e)}")
             continue
-
         # for codemod in codemods:
         # if codemod.needs_cst:
-        # codemod.run(tree)
+        command_instance = SecureRandom(CodemodContext())  # **codemod_args)
+        result = transform_module(command_instance, code)
+        output_tree = command_instance.transform_module(input_tree)
         # changed_file = True
 
         # if changed_file:
