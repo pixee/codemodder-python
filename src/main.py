@@ -47,13 +47,14 @@ def run(argv):
         # for codemod in codemods:
         # if codemod.needs_cst:
         command_instance = SecureRandom(CodemodContext())  # **codemod_args)
-        result = transform_module(command_instance, code)
         output_tree = command_instance.transform_module(input_tree)
-        # changed_file = True
+        changed_file = True
 
         # if changed_file:
         #     changed_files.append(file_path)
-        # if changed_file and not args.dry_run:
+        if changed_file and not argv.dry_run:
+            print(output_tree.code)
+            # diff https://libcst.readthedocs.io/en/latest/tutorial.html
         #     actually write the changes to the file
 
         # if args.dry_run:
