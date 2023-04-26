@@ -6,7 +6,6 @@ import libcst as cst
 
 from libcst.codemod import CodemodContext
 from codemods.secure_random import SecureRandom
-from libcst.codemod._runner import transform_module
 
 
 def find_files(parent_path):

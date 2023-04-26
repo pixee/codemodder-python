@@ -1,7 +1,7 @@
 import libcst as cst
 import libcst.matchers as matchers
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
-from codemods.helper import split_module
+from .helper import split_module
 
 
 class SecureRandom(VisitorBasedCodemodCommand):

@@ -9,23 +9,64 @@ class TestSecureRandom:
         "input_code,expexted_output",
         [
             (
-                """import random
+                f"""import random
 
 random.random()
 var = "hello"
-
         """,
                 """import secrets
 
 secrets.randbits(10)
 var = "hello"
-
         """,
             ),
-            ("truthy", False),
-            ("", True),
-            (False, True),
-            (None, True),
+            (
+                f"""from random import random
+
+random()
+var = "hello"
+            """,
+                """import secrets
+
+secrets.randbits(10)
+var = "hello"
+            """,
+            ),
+            # other functions in random are not changed
+            (
+                f"""import random
+
+    random.uniform(1, 2)
+            """,
+                """import random
+
+    random.uniform(1, 2)
+            """,
+            ),
+            # random import isn't removed if other functions are used
+            (
+                f"""import random
+
+    random.random()
+    random.uniform(1, 2)
+            """,
+                """import random
+import secrets
+secrets.randbits(10)
+random.uniform(1, 2)
+            """,
+            ),
+            # code leads to error
+            (
+                f"""random.random()
+
+    import random
+            """,
+                """random.random()
+
+    import random
+            """,
+            ),
         ],
     )
     def test_expected_mod(self, input_code, expexted_output):
