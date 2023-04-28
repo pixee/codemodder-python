@@ -28,6 +28,14 @@ class SecureRandom(VisitorBasedCodemodCommand):
 
         return updated_node
 
+    def leave_ImportFrom(
+        self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
+    ) -> cst.ImportFrom:
+        if is_random_import(original_node):
+            return cst.RemoveFromParent()
+
+        return updated_node
+
     def leave_Module(
         self, original_node: cst.Module, updated_node: cst.Module
     ) -> cst.Module:
@@ -120,16 +128,27 @@ class SecureRandom(VisitorBasedCodemodCommand):
 
 
 def is_random_node(node: cst.Expr) -> bool:
+
+    library_dot_random = matchers.Expr(
+        value=matchers.Call(
+            func=matchers.Attribute(value=matchers.Name(value="random"))
+        )
+    )
+    direct_random = matchers.Expr(
+        value=matchers.Call(func=matchers.Name(value="random"))
+    )
+
     return matchers.matches(
         node,
-        matchers.Expr(
-            value=matchers.Call(
-                func=matchers.Attribute(value=matchers.Name(value="random"))
-            )
-        ),
+        matchers.OneOf(library_dot_random, direct_random),
     )
 
 
-def is_random_import(node: cst.Import) -> bool:
+def is_random_import(node: cst.Import | cst.ImportFrom) -> bool:
     import_alias = matchers.ImportAlias(name=matchers.Name(value="random"))
-    return matchers.matches(node, matchers.Import(names=[import_alias]))
+    direct_import = matchers.Import(names=[import_alias])
+    import_from = matchers.ImportFrom(names=[import_alias])
+    return matchers.matches(
+        node,
+        matchers.OneOf(direct_import, import_from),
+    )
