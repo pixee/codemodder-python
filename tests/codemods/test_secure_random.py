@@ -97,7 +97,7 @@ import random
         input_code = f"""import random
 
 random.random()
-random.randrange(10)
+random.__all__
         """
 
         expexted_output = """import random
@@ -105,7 +105,7 @@ import secrets
 
 gen = secrets.SystemRandom()
 gen.uniform(0, 1)
-random.randrange(10)
+random.__all__
     """
 
         self.run_and_assert(input_code, expexted_output)
