@@ -54,26 +54,26 @@ var = "hello"
 
 random.randint(0, 10)
 var = "hello"
-        """,
+""",
                 """import secrets
 
-    gen = secrets.SystemRandom()
-    gen.randint(0, 10)
-    var = "hello"
-            """,
+gen = secrets.SystemRandom()
+gen.randint(0, 10)
+var = "hello"
+""",
             ),
             (
                 f"""from random import randint
 
 randint(0, 10)
 var = "hello"
-            """,
+""",
                 """import secrets
 
-    gen = secrets.SystemRandom()
-    gen.randint(0, 10)
-    var = "hello"
-                """,
+gen = secrets.SystemRandom()
+gen.randint(0, 10)
+var = "hello"
+""",
             ),
         ],
     )

@@ -17,7 +17,8 @@ class SecureRandom(VisitorBasedCodemodCommand):
     )
 
     def __init__(self, context: CodemodContext):
-        self.random_called = False
+        self.random_func_called = False
+        self.randint_func_called = False
         super().__init__(context)
 
     def leave_Import(
@@ -45,7 +46,7 @@ class SecureRandom(VisitorBasedCodemodCommand):
             statements_after_imports,
         ) = split_module(original_node, updated_node)
 
-        if self.random_called:
+        if self.random_func_called:
             first_line = cst.SimpleStatementLine(
                 body=[
                     cst.Assign(
@@ -91,6 +92,52 @@ class SecureRandom(VisitorBasedCodemodCommand):
             new_code = [first_line, second_line]
             statements_after_imports = new_code + statements_after_imports
 
+        if self.randint_func_called:
+            first_line = cst.SimpleStatementLine(
+                body=[
+                    cst.Assign(
+                        targets=[
+                            cst.AssignTarget(
+                                target=cst.Name(
+                                    value="gen",
+                                ),
+                            ),
+                        ],
+                        value=cst.Call(
+                            func=cst.Attribute(
+                                value=cst.Name(
+                                    value="secrets",
+                                ),
+                                attr=cst.Name(
+                                    value="SystemRandom",
+                                ),
+                            ),
+                        ),
+                    )
+                ]
+            )
+
+            second_line = cst.SimpleStatementLine(
+                body=[
+                    cst.Expr(
+                        value=cst.Call(
+                            func=cst.Attribute(
+                                value=cst.Name(value="gen"),
+                                attr=cst.Name(value="randint"),
+                            ),
+                            args=[
+                                cst.Arg(value=cst.Integer(value="0")),
+                                cst.Arg(
+                                    value=cst.Integer(value="10"),
+                                ),
+                            ],
+                        )
+                    ),
+                ]
+            )
+            new_code = [first_line, second_line]
+            statements_after_imports = new_code + statements_after_imports
+
         return updated_node.with_changes(
             body=[
                 *statements_before_imports,
@@ -114,24 +161,29 @@ class SecureRandom(VisitorBasedCodemodCommand):
             ]
         )
 
-    def leave_Expr(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
+    def leave_Expr(self, original_node: cst.Expr, updated_node: cst.Expr) -> cst.Expr:
         if is_random_node(original_node):
-            self.random_called = True
+            self.random_func_called = True
+            return cst.RemoveFromParent()
+
+        if is_randint_node(original_node):
+            self.randint_func_called = True
             return cst.RemoveFromParent()
         return updated_node
 
-    # def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
-    #     if is_random_node(original_node):
-    #         breakpoint()
-    #         return updated_node.with_changes(func=cst.Name("secrets.SystemRandom()"))
-    #     return updated_node
-
 
 def is_random_node(node: cst.Expr) -> bool:
+    """
+    Check to see if either: random.random() or random() is called.
 
+    :param node:
+    :return: bool
+    """
     library_dot_random = matchers.Expr(
         value=matchers.Call(
-            func=matchers.Attribute(value=matchers.Name(value="random"))
+            func=matchers.Attribute(
+                value=matchers.Name(value="random"), attr=matchers.Name(value="random")
+            )
         )
     )
     direct_random = matchers.Expr(
@@ -144,11 +196,45 @@ def is_random_node(node: cst.Expr) -> bool:
     )
 
 
-def is_random_import(node: cst.Import | cst.ImportFrom) -> bool:
-    import_alias = matchers.ImportAlias(name=matchers.Name(value="random"))
-    direct_import = matchers.Import(names=[import_alias])
-    import_from = matchers.ImportFrom(names=[import_alias])
+def is_randint_node(node: cst.Expr) -> bool:
+    """
+    Check to see if either: random.randint() or randint() is called.
+
+    :param node:
+    :return: bool
+    """
+
+    library_dot_randint = matchers.Expr(
+        value=matchers.Call(
+            func=matchers.Attribute(
+                value=matchers.Name(value="random"), attr=matchers.Name(value="randint")
+            )
+        )
+    )
+    direct_randint = matchers.Expr(
+        value=matchers.Call(func=matchers.Name(value="randint"))
+    )
+
     return matchers.matches(
         node,
-        matchers.OneOf(direct_import, import_from),
+        matchers.OneOf(library_dot_randint, direct_randint),
+    )
+
+
+def is_random_import(node: cst.Import | cst.ImportFrom) -> bool:
+    import_alias_random = matchers.ImportAlias(name=matchers.Name(value="random"))
+    import_alias_randint = matchers.ImportAlias(name=matchers.Name(value="randint"))
+    direct_import = matchers.Import(names=[import_alias_random])
+    from_random_import_random = matchers.ImportFrom(
+        module=cst.Name(value="random"), names=[import_alias_random]
+    )
+    from_random_import_randint = matchers.ImportFrom(
+        module=cst.Name(value="random"), names=[import_alias_randint]
+    )
+
+    return matchers.matches(
+        node,
+        matchers.OneOf(
+            direct_import, from_random_import_random, from_random_import_randint
+        ),
     )
