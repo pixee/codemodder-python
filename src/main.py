@@ -6,6 +6,9 @@ import libcst as cst
 
 from libcst.codemod import CodemodContext
 from codemods.secure_random import SecureRandom
+from codemods.url_sandbox import UrlSandbox
+
+CODEMODS = {"secure_random": SecureRandom, "url_sandbox": UrlSandbox}
 
 
 def find_files(parent_path):
@@ -17,9 +20,7 @@ def find_files(parent_path):
 
 
 def run(argv):
-
     paths_to_analyze = find_files(argv.directory)
-    codemods = []  # secure_randomness, semgrep, etc
     changed_files = {}
     # some codemods take raw file paths, others need parsed CST
     for file_path in paths_to_analyze:
@@ -40,18 +41,23 @@ def run(argv):
 
         try:
             input_tree = cst.parse_module(code)
+            print("*** ORIGINAL:")
+            print(input_tree.code)
         except Exception as e:
             print(f"Error parsing file '{file_path}': {str(e)}")
             continue
         # for codemod in codemods:
         # if codemod.needs_cst:
-        command_instance = SecureRandom(CodemodContext())  # **codemod_args)
-        output_tree = command_instance.transform_module(input_tree)
-        changed_file = True
+        if argv.codemod:
+            codemod_kls = CODEMODS.get(argv.codemod)
+            command_instance = codemod_kls(CodemodContext())
+            output_tree = command_instance.transform_module(input_tree)
+            changed_file = True
 
         # if changed_file:
         #     changed_files.append(file_path)
         if changed_file and not argv.dry_run:
+            print("*** CHANGED:")
             print(output_tree.code)
             # diff https://libcst.readthedocs.io/en/latest/tutorial.html
         #     actually write the changes to the file
@@ -79,6 +85,7 @@ def parse_args(argv):
         action=argparse.BooleanOptionalAction,
         help="do everything except make changes to files",
     )
+    parser.add_argument("--codemod", type=str, help="name of codemod to run")
     # todo: includes, exludes
 
     return parser.parse_args(argv)

@@ -138,15 +138,11 @@ class SecureRandom(VisitorBasedCodemodCommand):
             new_code = [first_line, second_line]
             statements_after_imports = new_code + statements_after_imports
 
-        return updated_node.with_changes(
-            body=[
-                *statements_before_imports,
-                *statements_until_add_imports,
-                *[
-                    cst.parse_statement(
-                        replacement_import, config=updated_node.config_for_parsing
-                    )
-                ],
+        add_import = (
+            [
+                cst.parse_statement(
+                    replacement_import, config=updated_node.config_for_parsing
+                ),
                 cst.EmptyLine(
                     indent=True,
                     whitespace=cst.SimpleWhitespace(
@@ -157,6 +153,15 @@ class SecureRandom(VisitorBasedCodemodCommand):
                         value=None,
                     ),
                 ),
+            ]
+            if self.random_func_called or self.randint_func_called
+            else []
+        )
+        return updated_node.with_changes(
+            body=[
+                *statements_before_imports,
+                *statements_until_add_imports,
+                *add_import,
                 *statements_after_imports,
             ]
         )

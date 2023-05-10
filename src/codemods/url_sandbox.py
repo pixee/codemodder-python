@@ -33,7 +33,6 @@ class UrlSandbox(VisitorBasedCodemodCommand):
     def leave_ImportFrom(
         self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
     ) -> cst.ImportFrom:
-
         if is_requests_import(original_node):
             return updated_node.with_changes(
                 module=updated_node.module.with_changes(value=replacement_import)
