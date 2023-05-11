@@ -39,13 +39,26 @@ def parse_args(argv):
     https://www.notion.so/pixee/Codemodder-CLI-Arguments
     """
     parser = ArgumentParser(description="Run codemods and change code.")
+
+    parser.add_argument("directory", type=str, help="path to find files")
+    parser.add_argument(
+        "--output",
+        type=str,
+        help="name of output file to produce",
+        default="stdout",
+        required=True,
+    )
+
     parser.add_argument("--version", action="version", version=__VERSION__)
     parser.add_argument(
         "--list", action=ListAction, nargs=0, help="Print codemod(s) metadata"
     )
-    parser.add_argument("directory", type=str, help="path to find files")
     parser.add_argument(
-        "output", type=str, help="name of output file to produce", default="stdout"
+        "--output-format",
+        type=str,
+        help="the format for the data output file",
+        default="codetf",
+        choices=["codetf", "diff"],
     )
     parser.add_argument(
         "--dry-run",

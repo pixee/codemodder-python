@@ -1,6 +1,6 @@
 import mock
 import pytest
-from codemodder.__main__ import parse_args
+from codemodder.cli import parse_args
 from codemodder import __VERSION__
 from codemodder.codemods import CODEMODS
 
@@ -11,14 +11,20 @@ class TestParseArgs:
     def test_no_args(self):
         with pytest.raises(SystemExit) as err:
             parse_args([])
-        assert (
-            err.value.args[0]
-            == "CLI error: the following arguments are required: directory, output"
-        )
+        assert "CLI error: the following arguments are required:" in err.value.args[0]
 
     @pytest.mark.parametrize(
         "cli_args",
-        [["--help"], ["tests/samples/", "here.txt", "--codemod=url_sandbox", "--help"]],
+        [
+            ["--help"],
+            [
+                "tests/samples/",
+                "--output",
+                "here.txt",
+                "--codemod=url_sandbox",
+                "--help",
+            ],
+        ],
     )
     @mock.patch("argparse.ArgumentParser.print_help")
     def test_help_is_printed(self, mock_print_help, cli_args):
@@ -32,7 +38,13 @@ class TestParseArgs:
         "cli_args",
         [
             ["--version"],
-            ["tests/samples/", "here.txt", "--codemod=url_sandbox", "--version"],
+            [
+                "tests/samples/",
+                "--output",
+                "here.txt",
+                "--codemod=url_sandbox",
+                "--version",
+            ],
         ],
     )
     @mock.patch("argparse.ArgumentParser._print_message")
@@ -47,7 +59,13 @@ class TestParseArgs:
         "cli_args",
         [
             ["--list"],
-            ["tests/samples/", "here.txt", "--codemod=url_sandbox", "--list"],
+            [
+                "tests/samples/",
+                "--output",
+                "here.txt",
+                "--codemod=url_sandbox",
+                "--list",
+            ],
         ],
     )
     @mock.patch("builtins.print")
@@ -60,3 +78,20 @@ class TestParseArgs:
             assert print_call[0][0].endswith(NAMES)
 
         assert err.value.args[0] == 0
+
+    def test_bad_output_format(self):
+        with pytest.raises(SystemExit) as err:
+            parse_args(
+                [
+                    "tests/samples/",
+                    "--output",
+                    "here.txt",
+                    "--codemod=url_sandbox",
+                    "--output-format",
+                    "hello",
+                ]
+            )
+        assert (
+            err.value.args[0]
+            == "CLI error: argument --output-format: invalid choice: 'hello' (choose from 'codetf', 'diff')"
+        )

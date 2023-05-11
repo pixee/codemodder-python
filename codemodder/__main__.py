@@ -2,6 +2,7 @@ import glob
 import os
 import sys
 import libcst as cst
+import logging
 
 from libcst.codemod import CodemodContext
 from codemodder.cli import parse_args
@@ -59,10 +60,16 @@ def run(argv):
             # diff https://libcst.readthedocs.io/en/latest/tutorial.html
         #     actually write the changes to the file
 
-        # if argv.dry_run:
-        #     logger.info("Dry run, not changing files")
+        if argv.dry_run:
+            logging.info("Dry run, not changing files")
+            return
+
         # results = CombineResults(changed_files)
-        # report = CodeTF.generate(results, config)
+        if argv.output_format == "codetf":
+            pass
+            # report = CodeTF.generate(results, config)
+        else:
+            pass
 
 
 if __name__ == "__main__":
