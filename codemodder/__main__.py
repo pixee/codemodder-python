@@ -1,15 +1,11 @@
-import argparse
 import glob
 import os
 import sys
 import libcst as cst
 
 from libcst.codemod import CodemodContext
-from codemodder.codemods.secure_random import SecureRandom
-from codemodder.codemods.url_sandbox import UrlSandbox
-from codemodder import __VERSION__
-
-CODEMODS = {"secure_random": SecureRandom, "url_sandbox": UrlSandbox}
+from codemodder.cli import parse_args
+from codemodder.codemods import CODEMODS
 
 
 def find_files(parent_path):
@@ -67,31 +63,6 @@ def run(argv):
         #     logger.info("Dry run, not changing files")
         # results = CombineResults(changed_files)
         # report = CodeTF.generate(results, config)
-
-
-class ArgumentParser(argparse.ArgumentParser):
-    def error(self, message):
-        self.print_help(sys.stderr)
-        sys.exit(message)
-
-
-def parse_args(argv):
-    parser = ArgumentParser(description="Run codemods and change code.")
-    parser.add_argument("--version", action="version", version=__VERSION__)
-
-    parser.add_argument("directory", type=str, help="path to find files")
-    parser.add_argument(
-        "output", type=str, help="name of output file to produce", default="stdout"
-    )
-    parser.add_argument(
-        "--dry-run",
-        action=argparse.BooleanOptionalAction,
-        help="do everything except make changes to files",
-    )
-    parser.add_argument("--codemod", type=str, help="name of codemod to run")
-    # todo: includes, exludes
-
-    return parser.parse_args(argv)
 
 
 if __name__ == "__main__":
