@@ -1,4 +1,4 @@
-from src.main import parse_args, run
+from codemodder.__main__ import parse_args, run
 
 
 class TestSecureRandom:

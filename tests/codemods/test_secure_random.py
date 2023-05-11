@@ -1,7 +1,7 @@
 import libcst as cst
 from libcst.codemod import CodemodContext
 import pytest
-from src.codemods.secure_random import SecureRandom
+from codemodder.codemods.secure_random import SecureRandom
 
 
 class TestSecureRandom:

@@ -1,7 +1,7 @@
 import mock
 import pytest
-from src.main import parse_args
-from src import __VERSION__
+from codemodder.__main__ import parse_args
+from codemodder import __VERSION__
 
 
 class TestParseArgs:

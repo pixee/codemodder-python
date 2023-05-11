@@ -1,7 +1,7 @@
 import libcst as cst
 from libcst.codemod import CodemodContext
 import pytest
-from src.codemods.url_sandbox import UrlSandbox
+from codemodder.codemods.url_sandbox import UrlSandbox
 
 
 class TestUrlSandbox:

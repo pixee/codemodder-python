@@ -5,9 +5,9 @@ import sys
 import libcst as cst
 
 from libcst.codemod import CodemodContext
-from src.codemods.secure_random import SecureRandom
-from src.codemods.url_sandbox import UrlSandbox
-from src import __VERSION__
+from codemodder.codemods.secure_random import SecureRandom
+from codemodder.codemods.url_sandbox import UrlSandbox
+from codemodder import __VERSION__
 
 CODEMODS = {"secure_random": SecureRandom, "url_sandbox": UrlSandbox}
 
