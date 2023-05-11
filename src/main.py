@@ -5,8 +5,9 @@ import sys
 import libcst as cst
 
 from libcst.codemod import CodemodContext
-from codemods.secure_random import SecureRandom
-from codemods.url_sandbox import UrlSandbox
+from src.codemods.secure_random import SecureRandom
+from src.codemods.url_sandbox import UrlSandbox
+from src import __VERSION__
 
 CODEMODS = {"secure_random": SecureRandom, "url_sandbox": UrlSandbox}
 
@@ -62,7 +63,7 @@ def run(argv):
             # diff https://libcst.readthedocs.io/en/latest/tutorial.html
         #     actually write the changes to the file
 
-        # if args.dry_run:
+        # if argv.dry_run:
         #     logger.info("Dry run, not changing files")
         # results = CombineResults(changed_files)
         # report = CodeTF.generate(results, config)
@@ -76,6 +77,8 @@ class ArgumentParser(argparse.ArgumentParser):
 
 def parse_args(argv):
     parser = ArgumentParser(description="Run codemods and change code.")
+    parser.add_argument("--version", action="version", version=__VERSION__)
+
     parser.add_argument("directory", type=str, help="path to find files")
     parser.add_argument(
         "output", type=str, help="name of output file to produce", default="stdout"
