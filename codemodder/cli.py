@@ -66,6 +66,7 @@ def parse_args(argv):
         help="do everything except make changes to files",
     )
     parser.add_argument("--codemod", type=str, help="name of codemod to run")
+    parser.add_argument("--verbose", type=bool, help="print more to stdout")
     # todo: includes, exludes
 
     return parser.parse_args(argv)
