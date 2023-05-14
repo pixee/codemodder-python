@@ -97,7 +97,6 @@ class TestParseArgs:
         )
 
     def test_path_exclude(self):
-        # should split it into list
         parse_args(
             [
                 "tests/samples/",
@@ -105,6 +104,6 @@ class TestParseArgs:
                 "here.txt",
                 "--codemod=url-sandbox",
                 "--path-exclude",
-                "*request",
+                "*request.py",
             ]
         )

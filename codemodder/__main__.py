@@ -10,6 +10,11 @@ from codemodder.codemods import CODEMODS
 
 
 def run(argv):
+
+    if not os.path.exists(argv.directory):
+        # project directory doesn’t exist or can’t be read
+        raise SystemExit(1)
+
     paths_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
     changed_files = {}
     # some codemods take raw file paths, others need parsed CST
@@ -62,6 +67,14 @@ def run(argv):
             # report = CodeTF.generate(results, config)
         else:
             pass
+        report = ""
+
+        try:
+            with open(argv.output, "r") as output_f:
+                output_f.write(report)
+        except Exception:
+            # Any issues with writing the output file should exit status 2.
+            raise SystemExit(2)
 
 
 if __name__ == "__main__":
