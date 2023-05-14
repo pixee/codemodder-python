@@ -70,5 +70,7 @@ def parse_args(argv):
     parser.add_argument(
         "--path-exclude", help="Comma-separated set of UNIX glob patterns to exclude"
     )
-
+    parser.add_argument(
+        "--path-include", help="Comma-separated set of UNIX glob patterns to include"
+    )
     return parser.parse_args(argv)

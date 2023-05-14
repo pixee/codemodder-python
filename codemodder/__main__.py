@@ -10,7 +10,7 @@ from codemodder.codemods import CODEMODS
 
 
 def run(argv):
-    paths_to_analyze = match_files(argv.directory, argv.path_exclude)
+    paths_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
     changed_files = {}
     # some codemods take raw file paths, others need parsed CST
     for file_path in paths_to_analyze:

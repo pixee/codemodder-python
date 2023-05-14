@@ -17,3 +17,20 @@ class TestMatchFiles:
         expected = ["empty_for_testing.py", "insecure_random.py"]
         files = match_files("tests/samples/", "*request.py")
         self._assert_expected(files, expected)
+
+    def test_match_excluded_multiple(self):
+        expected = ["insecure_random.py"]
+        files = match_files("tests/samples/", "*request.py,*empty*")
+        self._assert_expected(files, expected)
+
+    def test_match_included(self):
+        expected = ["empty_for_testing.py", "insecure_random.py", "make_request.py"]
+        files = match_files("tests/samples/", include_paths="*request.py")
+        self._assert_expected(files, expected)
+
+    def test_match_excluded_precedence_over_included(self):
+        expected = ["empty_for_testing.py", "insecure_random.py"]
+        files = match_files(
+            "tests/samples/", exclude_paths="*request.py", include_paths="*request.py"
+        )
+        self._assert_expected(files, expected)
