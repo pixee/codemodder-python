@@ -1,4 +1,3 @@
-import glob
 import os
 import sys
 import libcst as cst
@@ -6,19 +5,12 @@ import logging
 
 from libcst.codemod import CodemodContext
 from codemodder.cli import parse_args
+from codemodder.code_directory import match_files
 from codemodder.codemods import CODEMODS
 
 
-def find_files(parent_path):
-    # todo: convert to class and add includes, excludes
-    matching_files = []
-    for file_path in glob.glob(f"{parent_path}/*.py", recursive=True):
-        matching_files.append(file_path)
-    return matching_files
-
-
 def run(argv):
-    paths_to_analyze = find_files(argv.directory)
+    paths_to_analyze = match_files(argv.directory, argv.path_exclude)
     changed_files = {}
     # some codemods take raw file paths, others need parsed CST
     for file_path in paths_to_analyze:

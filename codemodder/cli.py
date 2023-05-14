@@ -67,6 +67,8 @@ def parse_args(argv):
     )
     parser.add_argument("--codemod", type=str, help="name of codemod to run")
     parser.add_argument("--verbose", type=bool, help="print more to stdout")
-    # todo: includes, exludes
+    parser.add_argument(
+        "--path-exclude", help="Comma-separated set of UNIX glob patterns to exclude"
+    )
 
     return parser.parse_args(argv)
