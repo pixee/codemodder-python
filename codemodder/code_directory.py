@@ -1,6 +1,9 @@
 from pathlib import Path
 
 
+DEFAULT_INCLUDE = ["*.py"]
+
+
 def match_files(parent_path, exclude_paths=None, include_paths=None):
     """
     Find pattern-matching files starting at the parent_path, recursively.
@@ -16,7 +19,7 @@ def match_files(parent_path, exclude_paths=None, include_paths=None):
     # _ = include_paths.split(",") if include_paths else ""
 
     matching_files = []
-    for file_path in Path(parent_path).rglob("*.py"):
+    for file_path in Path(parent_path).rglob(DEFAULT_INCLUDE[0]):
         # Exclude patterns take precedence over include patterns.
         if any([file_path.match(exclude) for exclude in exclude_patterns]):
             # if a file matches any excluded pattern, do not include it
