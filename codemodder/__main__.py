@@ -13,7 +13,7 @@ def run(argv):
 
     if not os.path.exists(argv.directory):
         # project directory doesn’t exist or can’t be read
-        raise SystemExit(1)
+        return 1
 
     paths_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
     changed_files = {}
@@ -59,7 +59,7 @@ def run(argv):
 
         if argv.dry_run:
             logging.info("Dry run, not changing files")
-            return
+            return 0
 
         # results = CombineResults(changed_files)
         if argv.output_format == "codetf":
@@ -74,8 +74,10 @@ def run(argv):
                 output_f.write(report)
         except Exception:
             # Any issues with writing the output file should exit status 2.
-            raise SystemExit(2)
+            return 2
+
+    return 0
 
 
 if __name__ == "__main__":
-    run(parse_args(sys.argv[1:]))
+    sys.exit(run(parse_args(sys.argv[1:])))
