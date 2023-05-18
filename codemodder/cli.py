@@ -73,4 +73,10 @@ def parse_args(argv):
     parser.add_argument(
         "--path-include", help="Comma-separated set of UNIX glob patterns to include"
     )
+
+    # At this time we don't do anything with the sarif arg.
+    parser.add_argument(
+        "--sarif",
+        help="Comma-separated set of path(s) to SARIF file(s) to feed to the codemods",
+    )
     return parser.parse_args(argv)
