@@ -10,7 +10,6 @@ from codemodder.codemods import CODEMODS
 
 
 def run(argv) -> int:
-
     if not os.path.exists(argv.directory):
         # project directory doesn't exist or can’t be read
         return 1

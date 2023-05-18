@@ -20,15 +20,14 @@ class TestExitCode:
         )
 
     def test_bad_project_dir_1(self):
-        with pytest.raises(SystemExit) as err:
-            run(
-                parse_args(
-                    [
-                        "bad/path/",
-                        "--output",
-                        "here.txt",
-                        "--codemod=url-sandbox",
-                    ]
-                )
+        exit_code = run(
+            parse_args(
+                [
+                    "bad/path/",
+                    "--output",
+                    "here.txt",
+                    "--codemod=url-sandbox",
+                ]
             )
-        assert err.value.code == 1
+        )
+        assert exit_code == 1
