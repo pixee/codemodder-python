@@ -9,16 +9,16 @@ from codemodder.code_directory import match_files
 from codemodder.codemods import CODEMODS
 
 
-def run(argv):
+def run(argv) -> int:
 
     if not os.path.exists(argv.directory):
-        # project directory doesn’t exist or can’t be read
+        # project directory doesn't exist or can’t be read
         return 1
 
-    paths_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
+    files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
     changed_files = {}
     # some codemods take raw file paths, others need parsed CST
-    for file_path in paths_to_analyze:
+    for file_path in files_to_analyze:
         changed_file = False
 
         if not os.path.exists(file_path):
