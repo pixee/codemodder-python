@@ -7,3 +7,6 @@ You can run the codemodder program with
 ```bash
 python -m codemodder --help
 ```
+
+## Development
+See DEV_README.md
