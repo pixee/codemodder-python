@@ -9,6 +9,16 @@ from codemodder.code_directory import match_files
 from codemodder.codemods import CODEMODS
 
 
+def write_report(report, outfile):
+    # Move this func to an instance of `report`
+    try:
+        with open(outfile, "w") as output_f:
+            output_f.write(report)
+    except Exception:
+        # Any issues with writing the output file should exit status 2.
+        return 2
+
+
 def run(argv) -> int:
     if not os.path.exists(argv.directory):
         # project directory doesn't exist or can’t be read
@@ -16,6 +26,7 @@ def run(argv) -> int:
 
     files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
     changed_files = {}
+
     # some codemods take raw file paths, others need parsed CST
     for file_path in files_to_analyze:
         changed_file = False
@@ -68,12 +79,7 @@ def run(argv) -> int:
             pass
         report = ""
 
-        try:
-            with open(argv.output, "r") as output_f:
-                output_f.write(report)
-        except Exception:
-            # Any issues with writing the output file should exit status 2.
-            return 2
+        write_report(report, argv.output)
 
     return 0
 

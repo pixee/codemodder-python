@@ -1,5 +1,17 @@
 import mock
+import pytest
 from codemodder.__main__ import parse_args, run
+
+
+@pytest.fixture(autouse=True, scope="module")
+def disable_file_writing():
+    """
+    The tests in this module should not write the output file for ease of testing.
+    """
+    patch_write_report = mock.patch("codemodder.__main__.write_report")
+    patch_write_report.start()
+    yield
+    patch_write_report.stop()
 
 
 class TestSecureRandom:
