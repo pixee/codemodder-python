@@ -1,0 +1,32 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run pytest
+    runs-on: ubuntu-20.04
+    timeout-minutes: 3
+    steps:
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Install Dependencies
+        run: pip install -r requirements/test.txt
+      - name: Run pytest
+        run: pytest -v
