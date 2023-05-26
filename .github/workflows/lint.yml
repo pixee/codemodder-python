@@ -15,6 +15,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  linting:
+    name: Pylint Checks
+    runs-on: ubuntu-20.04
+    needs:
+      - complexity
+    timeout-minutes: 3
+    steps:
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Install Dependencies
+        run: pip install -r requirements/lint.txt
+      - name: Run pylint
+        run: pylint codemodder/ tests/
+
   complexity:
     name: Code Complexity
     runs-on: ubuntu-20.04
@@ -37,22 +55,3 @@ jobs:
           # threshold for pipeline to fail if we go below average, module, or block complexity
           # https://github.com/rubik/xenon
           xenon codemodder --max-average A --max-modules B --max-absolute B
-
-
-  linting:
-    name: Pylint Checks
-    runs-on: ubuntu-20.04
-    needs:
-      - complexity
-    timeout-minutes: 3
-    steps:
-      - name: Set Up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - name: Check out code
-        uses: actions/checkout@v3
-      - name: Install Dependencies
-        run: pip install -r requirements/lint.txt
-      - name: Run pylint
-        run: pylint codemodder/ tests/
