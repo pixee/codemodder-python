@@ -27,6 +27,7 @@ disable=
     broad-exception-caught,
     too-many-ancestors,
     too-few-public-methods,
+    duplicate-code,
 
 
 [FORMAT]
