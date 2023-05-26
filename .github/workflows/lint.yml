@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   linting:
-    name: Pylint Checks
+    name: Pylint & Black Checks
     runs-on: ubuntu-20.04
     timeout-minutes: 3
     steps:
@@ -28,6 +28,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Install Dependencies
         run: pip install -r requirements/lint.txt
+      - name: Black Format Check
+        run: black --check .
       - name: Run pylint
         run: pylint codemodder/ tests/ -v
 
