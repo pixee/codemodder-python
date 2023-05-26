@@ -1,5 +1,5 @@
 import libcst as cst
-import libcst.matchers as matchers
+from libcst import matchers
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from .helper import split_module
 

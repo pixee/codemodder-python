@@ -1,5 +1,3 @@
-import pytest
-
 from codemodder.__main__ import run
 from codemodder.cli import parse_args
 

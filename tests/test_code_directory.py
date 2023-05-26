@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 import pytest
 
 from codemodder.code_directory import match_files
@@ -16,7 +17,7 @@ def dir_structure(tmp_path_factory):
     (more_samples_dir / "empty_for_testing.py").touch()
     (more_samples_dir / "empty_for_testing.txt").touch()
 
-    assert len([x for x in tests_dir.rglob("*")]) == 6
+    assert len(list(tests_dir.rglob("*"))) == 6
 
     return tests_dir
 

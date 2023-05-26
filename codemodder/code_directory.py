@@ -17,6 +17,7 @@ def match_files(parent_path, exclude_paths=None, include_paths=None):
     :return: list of <pathlib.PosixPath> files found within (including recursively) the parent directory
     that match the criteria of both exclude and include patterns.
     """
+    # pylint: disable=unused-argument
     exclude_patterns = exclude_paths.split(",") if exclude_paths else ""
     # _ = include_paths.split(",") if include_paths else ""
 
@@ -33,4 +34,4 @@ def match_files(parent_path, exclude_paths=None, include_paths=None):
 
 def exclude_file(file_path, exclude_patterns):
     # if a file matches any excluded pattern, return True so it is not included for analysis
-    return any([file_path.match(exclude) for exclude in exclude_patterns])
+    return any(file_path.match(exclude) for exclude in exclude_patterns)

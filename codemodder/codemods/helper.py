@@ -1,19 +1,10 @@
 # split_module is 'borrowed' from libcst.codemod.visitors._add_imports.py
 
-from libcst import matchers as m, parse_statement
+from libcst import matchers as m
 from libcst import (
     SimpleStatementLine,
     BaseCompoundStatement,
     Module,
-    Call,
-    Assign,
-    AssignTarget,
-    Expr,
-    EmptyLine,
-    Arg,
-    Attribute,
-    Name,
-    SimpleWhitespace,
 )
 from typing import List, Tuple, Union
 

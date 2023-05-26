@@ -16,7 +16,7 @@ class TestSecureRandom:
         "input_code,expexted_output",
         [
             (
-                f"""import random
+                """import random
 
 random.random()
 var = "hello"
@@ -29,7 +29,7 @@ var = "hello"
         """,
             ),
             (
-                f"""from random import random
+                """from random import random
 
 random()
 var = "hello"
@@ -50,7 +50,7 @@ var = "hello"
         "input_code,expexted_output",
         [
             (
-                f"""import random
+                """import random
 
 random.randint(0, 10)
 var = "hello"
@@ -63,7 +63,7 @@ var = "hello"
 """,
             ),
             (
-                f"""from random import randint
+                """from random import randint
 
 randint(0, 10)
 var = "hello"
@@ -82,7 +82,7 @@ var = "hello"
 
     @pytest.mark.skip()
     def test_random_nameerror(self):
-        input_code = f"""random.random()
+        input_code = """random.random()
 
 import random
             """
@@ -94,7 +94,7 @@ import random
         # Test that `random` import isn't removed if code uses part of the random
         # library that isn't part of our codemods. If we add the function as one of
         # our codemods, this test would change.
-        input_code = f"""import random
+        input_code = """import random
 
 random.random()
 random.__all__

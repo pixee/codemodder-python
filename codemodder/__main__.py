@@ -12,11 +12,12 @@ from codemodder.codemods import CODEMODS
 def write_report(report, outfile):
     # Move this func to an instance of `report`
     try:
-        with open(outfile, "w") as output_f:
+        with open(outfile, "w", encoding="utf-8") as output_f:
             output_f.write(report)
     except Exception:
         # Any issues with writing the output file should exit status 2.
         return 2
+    return 0
 
 
 def run(argv) -> int:
@@ -25,7 +26,6 @@ def run(argv) -> int:
         return 1
 
     files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
-    changed_files = {}
 
     # some codemods take raw file paths, others need parsed CST
     for file_path in files_to_analyze:
@@ -41,7 +41,7 @@ def run(argv) -> int:
         # changed_file = True
 
         # get CST for codemods that need CST
-        with open(file_path, "r") as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             code = f.read()
 
         try:

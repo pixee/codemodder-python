@@ -16,7 +16,7 @@ class TestUrlSandbox:
         "input_code,expexted_output",
         [
             (
-                f"""import requests
+                """import requests
 
 requests.get("www.google.com")
 var = "hello"
@@ -28,7 +28,7 @@ var = "hello"
         """,
             ),
             (
-                f"""from requests import get
+                """from requests import get
 
 get("www.google.com")
 var = "hello"
@@ -46,7 +46,7 @@ var = "hello"
 
     @pytest.mark.skip()
     def test_requests_nameerror(self):
-        input_code = f"""requests.get("www.google.com")
+        input_code = """requests.get("www.google.com")
 
 import requests
             """
@@ -58,7 +58,7 @@ import requests
         # Test that `requests` import isn't removed if code uses part of the requests
         # library that isn't part of our codemods. If we add the function as one of
         # our codemods, this test would change.
-        input_code = f"""import requests
+        input_code = """import requests
 
 requests.get("www.google.com")
 requests.status_codes.codes.FORBIDDEN
@@ -75,7 +75,7 @@ requests.status_codes.codes.FORBIDDEN
 
     @pytest.mark.skip()
     def test_custom_get(self):
-        input_code = f"""from app_funcs import get
+        input_code = """from app_funcs import get
 
 get("www.google.com")
     """
