@@ -1,0 +1,16 @@
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      # This is how often dependabot checks for this package ecosystem,
+      # NOT how often PRs will be created
+      interval: "daily"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 2
