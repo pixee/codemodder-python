@@ -1,0 +1,40 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  complexity:
+    name: Code Complexity
+    runs-on: ubuntu-20.04
+    timeout-minutes: 3
+    steps:
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements/complexity.txt
+      - name: Run Radon
+        run: |
+          radon cc codemodder --min A --total-average
+      - name: Run Xenon
+        run: |
+          # threshold for pipeline to fail if we go below average, module, or block complexity
+          # https://github.com/rubik/xenon
+          xenon codemodder --max-average A --max-modules B --max-absolute B
