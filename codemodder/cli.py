@@ -33,6 +33,20 @@ class ListAction(argparse.Action):
         parser.exit()
 
 
+class CsvListAction(argparse.Action):
+    """
+    argparse Action to convert "a,b,c" into ["a", "b", "c"]
+    """
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        self.items = values.split(",")
+        self.validate_items()
+        setattr(namespace, self.dest, self.items)
+
+    def validate_items(self):
+        """Basic Action does not validate the items"""
+
+
 def parse_args(argv):
     """
     Parse CLI arguments according to:
@@ -75,10 +89,14 @@ def parse_args(argv):
 
     parser.add_argument("--verbose", type=bool, help="print more to stdout")
     parser.add_argument(
-        "--path-exclude", help="Comma-separated set of UNIX glob patterns to exclude"
+        "--path-exclude",
+        action=CsvListAction,
+        help="Comma-separated set of UNIX glob patterns to exclude",
     )
     parser.add_argument(
-        "--path-include", help="Comma-separated set of UNIX glob patterns to include"
+        "--path-include",
+        action=CsvListAction,
+        help="Comma-separated set of UNIX glob patterns to include",
     )
 
     # At this time we don't do anything with the sarif arg.

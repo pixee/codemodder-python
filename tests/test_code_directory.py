@@ -36,35 +36,35 @@ class TestMatchFiles:
 
     def test_match_excluded(self, dir_structure):
         expected = ["empty_for_testing.py", "insecure_random.py"]
-        files = match_files(dir_structure, "*request.py")
+        files = match_files(dir_structure, ["*request.py"])
         self._assert_expected(files, expected)
 
     def test_match_excluded_dir_incorrect_glob(self, dir_structure):
         incorrect_glob = "more_samples"
         expected = ["empty_for_testing.py", "insecure_random.py", "make_request.py"]
-        files = match_files(dir_structure, incorrect_glob)
+        files = match_files(dir_structure, [incorrect_glob])
         self._assert_expected(files, expected)
 
     def test_match_excluded_dir_correct_glob(self, dir_structure):
         correct_globs = ["**/more_samples/**", "*/more_samples/*"]
         for correct_glob in correct_globs:
             expected = ["insecure_random.py", "make_request.py"]
-            files = match_files(dir_structure, correct_glob)
+            files = match_files(dir_structure, [correct_glob])
             self._assert_expected(files, expected)
 
     def test_match_excluded_multiple(self, dir_structure):
         expected = ["insecure_random.py"]
-        files = match_files(dir_structure, "*request.py,*empty*")
+        files = match_files(dir_structure, ["*request.py", "*empty*"])
         self._assert_expected(files, expected)
 
     def test_match_included(self, dir_structure):
         expected = ["empty_for_testing.py", "insecure_random.py", "make_request.py"]
-        files = match_files(dir_structure, include_paths="*request.py")
+        files = match_files(dir_structure, include_paths=["*request.py"])
         self._assert_expected(files, expected)
 
     def test_match_excluded_precedence_over_included(self, dir_structure):
         expected = ["empty_for_testing.py", "insecure_random.py"]
         files = match_files(
-            dir_structure, exclude_paths="*request.py", include_paths="*request.py"
+            dir_structure, exclude_paths=["*request.py"], include_paths=["*request.py"]
         )
         self._assert_expected(files, expected)

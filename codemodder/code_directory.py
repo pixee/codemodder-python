@@ -18,13 +18,10 @@ def match_files(parent_path, exclude_paths=None, include_paths=None):
     that match the criteria of both exclude and include patterns.
     """
     # pylint: disable=unused-argument
-    exclude_patterns = exclude_paths.split(",") if exclude_paths else ""
-    # _ = include_paths.split(",") if include_paths else ""
-
     matching_files = []
     for file_path in Path(parent_path).rglob(DEFAULT_INCLUDE[0]):
         # Exclude patterns take precedence over include patterns.
-        if exclude_file(file_path, exclude_patterns):
+        if exclude_file(file_path, exclude_paths):
             continue
 
         # For now we can implement include paths without any additional code.
