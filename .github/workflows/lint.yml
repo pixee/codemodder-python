@@ -18,8 +18,6 @@ jobs:
   linting:
     name: Pylint Checks
     runs-on: ubuntu-20.04
-    needs:
-      - complexity
     timeout-minutes: 3
     steps:
       - name: Set Up Python
