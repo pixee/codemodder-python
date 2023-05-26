@@ -6,7 +6,7 @@ import logging
 from libcst.codemod import CodemodContext
 from codemodder.cli import parse_args
 from codemodder.code_directory import match_files
-from codemodder.codemods import CODEMODS
+from codemodder.codemods import match_codemods, IncludeExcludeConflict
 
 
 def write_report(report, outfile):
@@ -26,6 +26,10 @@ def run(argv) -> int:
         return 1
 
     files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
+    try:
+        codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
+    except IncludeExcludeConflict:
+        return 1  # for now, should be something else probably
 
     # some codemods take raw file paths, others need parsed CST
     for file_path in files_to_analyze:
@@ -34,11 +38,6 @@ def run(argv) -> int:
         if not os.path.exists(file_path):
             print(f"Error: file '{file_path}' does not exist")
             continue
-
-        # for codemod in codemods:
-        # if codemod.needs_raw_file:
-        # codemod.run(file_path)
-        # changed_file = True
 
         # get CST for codemods that need CST
         with open(file_path, "r", encoding="utf-8") as f:

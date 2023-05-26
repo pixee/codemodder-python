@@ -49,6 +49,13 @@ def parse_args(argv):
         required=True,
     )
 
+    parser.add_argument(
+        "--codemod-exclude", help="Comma-separated set of codemod ID(s) to exclude"
+    )
+    parser.add_argument(
+        "--codemod-include", help="Comma-separated set of codemod ID(s) to include"
+    )
+
     parser.add_argument("--version", action="version", version=__VERSION__)
     parser.add_argument(
         "--list", action=ListAction, nargs=0, help="Print codemod(s) metadata"
@@ -65,7 +72,7 @@ def parse_args(argv):
         action=argparse.BooleanOptionalAction,
         help="do everything except make changes to files",
     )
-    parser.add_argument("--codemod", type=str, help="name of codemod to run")
+
     parser.add_argument("--verbose", type=bool, help="print more to stdout")
     parser.add_argument(
         "--path-exclude", help="Comma-separated set of UNIX glob patterns to exclude"
