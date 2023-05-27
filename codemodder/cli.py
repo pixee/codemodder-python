@@ -47,6 +47,23 @@ class CsvListAction(argparse.Action):
         """Basic Action does not validate the items"""
 
 
+class ValidatedCodmods(CsvListAction):
+    """
+    argparse Action to convert "codemod1,codemod2,codemod3" into a list
+    representation and validate against existing codemods
+    """
+
+    def validate_items(self):
+        unrecognized_codemods = [name for name in self.items if name not in CODEMODS]
+        if unrecognized_codemods:
+            args = {
+                "values": unrecognized_codemods,
+                "choices": ", ".join(map(repr, CODEMODS.keys())),
+            }
+            msg = "invalid choice(s): %(values)r (choose from %(choices)s)"
+            raise argparse.ArgumentError(self, msg % args)
+
+
 def parse_args(argv):
     """
     Parse CLI arguments according to:
@@ -63,11 +80,16 @@ def parse_args(argv):
         required=True,
     )
 
-    parser.add_argument(
-        "--codemod-exclude", help="Comma-separated set of codemod ID(s) to exclude"
+    codemod_args_group = parser.add_mutually_exclusive_group()
+    codemod_args_group.add_argument(
+        "--codemod-exclude",
+        action=ValidatedCodmods,
+        help="Comma-separated set of codemod ID(s) to exclude",
     )
-    parser.add_argument(
-        "--codemod-include", help="Comma-separated set of codemod ID(s) to include"
+    codemod_args_group.add_argument(
+        "--codemod-include",
+        action=ValidatedCodmods,
+        help="Comma-separated set of codemod ID(s) to include",
     )
 
     parser.add_argument("--version", action="version", version=__VERSION__)

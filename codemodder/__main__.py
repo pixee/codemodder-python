@@ -26,15 +26,13 @@ def run(argv) -> int:
         return 1
 
     files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
+
     try:
         codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
     except IncludeExcludeConflict:
         return 1  # for now, should be something else probably
 
-    # some codemods take raw file paths, others need parsed CST
     for file_path in files_to_analyze:
-        changed_file = False
-
         if not os.path.exists(file_path):
             print(f"Error: file '{file_path}' does not exist")
             continue
@@ -50,19 +48,16 @@ def run(argv) -> int:
         except Exception as e:
             print(f"Error parsing file '{file_path}': {str(e)}")
             continue
-        # for codemod in codemods:
-        # if codemod.needs_cst:
-        if argv.codemod:
-            codemod_kls = CODEMODS.get(argv.codemod)
+
+        for name, codemod_kls in codemods_to_run.items():
+            logging.info("Running codemod %s", name)
             command_instance = codemod_kls(CodemodContext())
             output_tree = command_instance.transform_module(input_tree)
-            changed_file = True
+            changed_file = input_tree.code != output_tree.code
 
-        # if changed_file:
-        #     changed_files.append(file_path)
-        if changed_file and not argv.dry_run:
-            print("*** CHANGED:")
-            print(output_tree.code)
+            if changed_file and not argv.dry_run:
+                print("*** CHANGED:")
+                print(output_tree.code)
             # diff https://libcst.readthedocs.io/en/latest/tutorial.html
         #     actually write the changes to the file
 

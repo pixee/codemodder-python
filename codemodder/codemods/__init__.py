@@ -11,8 +11,8 @@ class IncludeExcludeConflict(Exception):
         super().__init__(message)
 
 
-def match_codemods(codemod_include: str, codemod_exclude: str):
-    if codemod_include is None and codemod_exclude is None:
+def match_codemods(codemod_include: list, codemod_exclude: list):
+    if not codemod_include and not codemod_exclude:
         return CODEMODS
 
     if codemod_include and codemod_exclude:
