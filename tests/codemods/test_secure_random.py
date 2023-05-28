@@ -80,6 +80,42 @@ var = "hello"
     def test_random_randint(self, input_code, expexted_output):
         self.run_and_assert(input_code, expexted_output)
 
+    @pytest.mark.parametrize(
+        "input_code,expexted_output",
+        [
+            (
+                """import random
+import csv
+random.random()
+csv.excel
+""",
+                """import secrets
+
+gen = secrets.SystemRandom()
+gen.uniform(0, 1)
+import csv
+csv.excel
+""",
+            ),
+            (
+                """import random
+from csv import excel
+random.random()
+excel
+    """,
+                """import secrets
+
+gen = secrets.SystemRandom()
+gen.uniform(0, 1)
+from csv import excel
+excel
+    """,
+            ),
+        ],
+    )
+    def test_random_other_import_untouched(self, input_code, expexted_output):
+        self.run_and_assert(input_code, expexted_output)
+
     @pytest.mark.skip()
     def test_random_nameerror(self):
         input_code = """random.random()

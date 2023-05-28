@@ -53,6 +53,38 @@ import requests
         expexted_output = input_code
         self.run_and_assert(input_code, expexted_output)
 
+    @pytest.mark.parametrize(
+        "input_code,expexted_output",
+        [
+            (
+                """import requests
+import csv
+requests.get("www.google.com")
+csv.excel
+""",
+                """import safe_requests
+import csv
+safe_requests.get("www.google.com")
+csv.excel
+""",
+            ),
+            (
+                """import requests
+from csv import excel
+requests.get("www.google.com")
+excel
+""",
+                """import safe_requests
+from csv import excel
+safe_requests.get("www.google.com")
+excel
+""",
+            ),
+        ],
+    )
+    def test_requests_other_import_untouched(self, input_code, expexted_output):
+        self.run_and_assert(input_code, expexted_output)
+
     @pytest.mark.skip()
     def test_requests_multifunctions(self):
         # Test that `requests` import isn't removed if code uses part of the requests

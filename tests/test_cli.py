@@ -110,3 +110,21 @@ class TestParseArgs:
             err.value.args[0]
             == "CLI error: ambiguous option: --codemod=url-sandbox could match --codemod-exclude, --codemod-include"
         )
+
+    def test_bad_codemod_name(self):
+        bad_codemod = "doesntexist"
+        with pytest.raises(SystemExit) as err:
+            parse_args(
+                [
+                    "tests/samples/",
+                    "--output",
+                    "here.txt",
+                    f"--codemod-include={bad_codemod}",
+                ]
+            )
+
+        names = ", ".join(map(repr, NAMES))
+        assert (
+            err.value.args[0]
+            == f"CLI error: argument --codemod-include: invalid choice(s): ['{bad_codemod}'] (choose from {names})"
+        )
