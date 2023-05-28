@@ -21,7 +21,7 @@ class TestParseArgs:
                 "tests/samples/",
                 "--output",
                 "here.txt",
-                "--codemod=url_sandbox",
+                "--codemod-include=url-sandbox",
                 "--help",
             ],
         ],
@@ -42,7 +42,7 @@ class TestParseArgs:
                 "tests/samples/",
                 "--output",
                 "here.txt",
-                "--codemod=url_sandbox",
+                "--codemod-include=url-sandbox",
                 "--version",
             ],
         ],
@@ -63,7 +63,6 @@ class TestParseArgs:
                 "tests/samples/",
                 "--output",
                 "here.txt",
-                "--codemod=url_sandbox",
                 "--list",
             ],
         ],
@@ -86,7 +85,6 @@ class TestParseArgs:
                     "tests/samples/",
                     "--output",
                     "here.txt",
-                    "--codemod=url_sandbox",
                     "--output-format",
                     "hello",
                 ]
@@ -96,14 +94,19 @@ class TestParseArgs:
             == "CLI error: argument --output-format: invalid choice: 'hello' (choose from 'codetf', 'diff')"
         )
 
-    def test_path_exclude(self):
-        parse_args(
-            [
-                "tests/samples/",
-                "--output",
-                "here.txt",
-                "--codemod=url-sandbox",
-                "--path-exclude",
-                "*request.py",
-            ]
+    def test_bad_option(self):
+        with pytest.raises(SystemExit) as err:
+            parse_args(
+                [
+                    "tests/samples/",
+                    "--output",
+                    "here.txt",
+                    "--codemod=url-sandbox",
+                    "--path-exclude",
+                    "*request.py",
+                ]
+            )
+        assert (
+            err.value.args[0]
+            == "CLI error: ambiguous option: --codemod=url-sandbox could match --codemod-exclude, --codemod-include"
         )

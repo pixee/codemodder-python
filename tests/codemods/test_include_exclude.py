@@ -1,14 +1,10 @@
 import pytest
-from codemodder.codemods import CODEMODS, match_codemods, IncludeExcludeConflict
+from codemodder.codemods import CODEMODS, match_codemods
 
 
 class TestMatchCodemods:
     def test_no_include_exclude(self):
         assert match_codemods(None, None) == CODEMODS
-
-    def test_both_include_exclude(self):
-        with pytest.raises(IncludeExcludeConflict):
-            match_codemods("secure-random", "url-sandbox")
 
     @pytest.mark.parametrize(
         "input_str,expexted_output",

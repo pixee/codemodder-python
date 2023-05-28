@@ -1,3 +1,4 @@
+import pytest
 from codemodder.__main__ import run
 from codemodder.cli import parse_args
 
@@ -10,7 +11,7 @@ class TestExitCode:
                     "tests/samples/",
                     "--output",
                     "here.txt",
-                    "--codemod=url-sandbox",
+                    "--codemod-include=url-sandbox",
                     "--path-exclude",
                     "*request.py",
                 ]
@@ -24,7 +25,7 @@ class TestExitCode:
                     "bad/path/",
                     "--output",
                     "here.txt",
-                    "--codemod=url-sandbox",
+                    "--codemod-include=url-sandbox",
                 ]
             )
         )

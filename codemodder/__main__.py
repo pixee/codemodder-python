@@ -6,7 +6,7 @@ import logging
 from libcst.codemod import CodemodContext
 from codemodder.cli import parse_args
 from codemodder.code_directory import match_files
-from codemodder.codemods import match_codemods, IncludeExcludeConflict
+from codemodder.codemods import match_codemods
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)

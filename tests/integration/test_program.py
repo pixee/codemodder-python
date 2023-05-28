@@ -21,5 +21,6 @@ class TestProgramFails:
                 "secure-random",
             ]
         )
-        # should be 1
-        assert completed_process.returncode == 0
+        # Change this test because it could error `1` for any other reason, too
+        # so it's not a good test
+        assert completed_process.returncode == 1

@@ -5,12 +5,6 @@ from codemodder.codemods.url_sandbox import UrlSandbox
 CODEMODS = {"secure-random": SecureRandom, "url-sandbox": UrlSandbox}
 
 
-class IncludeExcludeConflict(Exception):
-    def __init__(self):
-        message = "Cannot pass both include and exclude flag"
-        super().__init__(message)
-
-
 def match_codemods(codemod_include: list, codemod_exclude: list):
     if not codemod_include and not codemod_exclude:
         return CODEMODS
