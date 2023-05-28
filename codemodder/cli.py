@@ -39,7 +39,7 @@ class CsvListAction(argparse.Action):
     """
 
     def __call__(self, parser, namespace, values, option_string=None):
-        self.items = values.split(",")
+        self.items = set(values.split(","))
         self.validate_items()
         setattr(namespace, self.dest, self.items)
 

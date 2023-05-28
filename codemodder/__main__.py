@@ -9,6 +9,9 @@ from codemodder.code_directory import match_files
 from codemodder.codemods import match_codemods, IncludeExcludeConflict
 
 
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
+
 def write_report(report, outfile):
     # Move this func to an instance of `report`
     try:
@@ -26,11 +29,14 @@ def run(argv) -> int:
         return 1
 
     files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
+    if not files_to_analyze:
+        logging.warning("No files matched.")
+        return
+    else:
+        full_names = [str(path) for path in files_to_analyze]
+        logging.debug("Matched files:\n%s", "\n".join(full_names))
 
-    try:
-        codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
-    except IncludeExcludeConflict:
-        return 1  # for now, should be something else probably
+    codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
 
     for file_path in files_to_analyze:
         if not os.path.exists(file_path):
