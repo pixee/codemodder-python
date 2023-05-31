@@ -7,20 +7,10 @@ from libcst.codemod import CodemodContext
 from codemodder.cli import parse_args
 from codemodder.code_directory import match_files
 from codemodder.codemods import match_codemods
+from codemodder.report.codetf_reporter import CodeTF
 
-
+#
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-
-
-def write_report(report, outfile):
-    # Move this func to an instance of `report`
-    try:
-        with open(outfile, "w", encoding="utf-8") as output_f:
-            output_f.write(report)
-    except Exception:
-        # Any issues with writing the output file should exit status 2.
-        return 2
-    return 0
 
 
 def run(argv) -> int:
@@ -69,15 +59,8 @@ def run(argv) -> int:
                         f.write(output_tree.code)
 
         # results = CombineResults(changed_files)
-        if argv.output_format == "codetf":
-            pass
-            # report = CodeTF.generate(results, config)
-        else:
-            pass
-        report = ""
-
-        write_report(report, argv.output)
-
+        report = CodeTF()  # .generate()
+        report.write_report(argv.output)
     return 0
 
 
