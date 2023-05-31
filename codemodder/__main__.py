@@ -44,29 +44,29 @@ def run(argv) -> int:
             code = f.read()
 
         try:
-            input_tree = cst.parse_module(code)
+            source_tree = cst.parse_module(code)
         except Exception as e:
             print(f"Error parsing file '{file_path}': {str(e)}")
             continue
 
         print("*** ORIGINAL:")
-        print(input_tree.code)
+        print(source_tree.code)
         for name, codemod_kls in codemods_to_run.items():
             logging.info("Running codemod %s", name)
             command_instance = codemod_kls(CodemodContext())
-            output_tree = command_instance.transform_module(input_tree)
-            changed_file = input_tree.code != output_tree.code
+            output_tree = command_instance.transform_module(source_tree)
+            changed_file = not output_tree.deep_equals(source_tree)
 
             if changed_file:
-                print("*** CHANGED:")
+                print(f"*** CHANGED with {name}:")
                 print(output_tree.code)
-            # if not argv.dry_run:
-            # diff https://libcst.readthedocs.io/en/latest/tutorial.html
-        #     actually write the changes to the file
 
-        if argv.dry_run:
-            logging.info("Dry run, not changing files")
-            return 0
+                if argv.dry_run:
+                    logging.info("Dry run, not changing files")
+                else:
+                    print(f"Updated file {file_path}")
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        f.write(output_tree.code)
 
         # results = CombineResults(changed_files)
         if argv.output_format == "codetf":

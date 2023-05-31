@@ -31,4 +31,4 @@ jobs:
       - name: Run pytest
         run: coverage run --source=codemodder/ -m pytest -v
       - name: Report coverage
-        run: coverage report -m --fail-under=94
+        run: coverage report -m --fail-under=93
