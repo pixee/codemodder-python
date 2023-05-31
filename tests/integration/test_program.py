@@ -1,3 +1,4 @@
+import pathlib
 import subprocess
 
 
@@ -33,6 +34,8 @@ class TestFileRewrite:
         Tests that file is re-written correctly with new code.
 
         This test must ensure that original file is returned to previous state.
+        Mocks won't work when making a subprocess call so make sure to delete all
+        output files
         """
         expected_original_code = (
             'import requests\n\nrequests.get("www.google.com")\nvar = "hello"\n'
@@ -42,6 +45,7 @@ class TestFileRewrite:
             original_code = f.read()
         assert original_code == expected_original_code
 
+        output_path = "test-output.txt"
         completed_process = subprocess.run(
             [
                 "python",
@@ -49,7 +53,7 @@ class TestFileRewrite:
                 "codemodder",
                 "tests/samples/",
                 "--output",
-                "here.txt",
+                output_path,
                 "--codemod-include=url-sandbox",
             ],
             check=False,
@@ -60,3 +64,5 @@ class TestFileRewrite:
         assert new_code == expected_new_code
         with open("tests/samples/make_request.py", "w", encoding="utf-8") as f:
             f.write(original_code)
+
+        pathlib.Path(output_path).unlink(missing_ok=True)
