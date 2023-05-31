@@ -18,7 +18,7 @@ class TestRun:
                 ]
             )
         )
-        assert res is None
+        assert res == 0
 
         warning_log.assert_called()
         assert warning_log.call_args_list[0][0][0] == "No files matched."
@@ -34,7 +34,7 @@ class TestRun:
                 ]
             )
         )
-        assert res is 0
+        assert res == 0
         mock_parse.assert_called()
 
     @mock.patch("codemodder.__main__.logging.info")
@@ -49,7 +49,7 @@ class TestRun:
                 ]
             )
         )
-        assert res is 0
+        assert res == 0
 
         info_log.assert_called()
         assert info_log.call_args_list[-1][0][0] == "Dry run, not changing files"

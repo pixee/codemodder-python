@@ -3,7 +3,7 @@ import subprocess
 
 class TestProgramFails:
     def test_no_project_dir_provided(self):
-        completed_process = subprocess.run(["python", "-m", "codemodder"])
+        completed_process = subprocess.run(["python", "-m", "codemodder"], check=False)
         assert completed_process.returncode == 1
 
     def test_codemods_include_exclude_conflict(self):
@@ -19,7 +19,8 @@ class TestProgramFails:
                 "secure-random",
                 "--codemod-include",
                 "secure-random",
-            ]
+            ],
+            check=False,
         )
         # Change this test because it could error `1` for any other reason, too
         # so it's not a good test
@@ -50,7 +51,8 @@ class TestFileRewrite:
                 "--output",
                 "here.txt",
                 "--codemod-include=url-sandbox",
-            ]
+            ],
+            check=False,
         )
         assert completed_process.returncode == 0
         with open("tests/samples/make_request.py", "r", encoding="utf-8") as f:

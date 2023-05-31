@@ -39,11 +39,11 @@ class CsvListAction(argparse.Action):
     """
 
     def __call__(self, parser, namespace, values, option_string=None):
-        self.items = set(values.split(","))
-        self.validate_items()
-        setattr(namespace, self.dest, self.items)
+        items = set(values.split(","))
+        self.validate_items(items)
+        setattr(namespace, self.dest, items)
 
-    def validate_items(self):
+    def validate_items(self, items):
         """Basic Action does not validate the items"""
 
 
@@ -53,8 +53,8 @@ class ValidatedCodmods(CsvListAction):
     representation and validate against existing codemods
     """
 
-    def validate_items(self):
-        unrecognized_codemods = [name for name in self.items if name not in CODEMODS]
+    def validate_items(self, items):
+        unrecognized_codemods = [name for name in items if name not in CODEMODS]
         if unrecognized_codemods:
             args = {
                 "values": unrecognized_codemods,

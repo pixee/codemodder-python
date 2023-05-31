@@ -31,10 +31,10 @@ def run(argv) -> int:
     files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
     if not files_to_analyze:
         logging.warning("No files matched.")
-        return
-    else:
-        full_names = [str(path) for path in files_to_analyze]
-        logging.debug("Matched files:\n%s", "\n".join(full_names))
+        return 0
+
+    full_names = [str(path) for path in files_to_analyze]
+    logging.debug("Matched files:\n%s", "\n".join(full_names))
 
     codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
 

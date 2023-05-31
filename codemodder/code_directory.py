@@ -1,4 +1,3 @@
-import fnmatch
 from pathlib import Path
 
 
