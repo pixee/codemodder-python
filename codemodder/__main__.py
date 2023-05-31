@@ -1,30 +1,31 @@
+import datetime
 import os
 import sys
 import libcst as cst
-import logging
+
 
 from libcst.codemod import CodemodContext
+from codemodder.logging import logger
 from codemodder.cli import parse_args
 from codemodder.code_directory import match_files
 from codemodder.codemods import match_codemods
 from codemodder.report.codetf_reporter import CodeTF
 
-#
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
+def run(argv, original_args) -> int:
+    start = datetime.datetime.now()
 
-def run(argv) -> int:
     if not os.path.exists(argv.directory):
         # project directory doesn't exist or can’t be read
         return 1
 
     files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
     if not files_to_analyze:
-        logging.warning("No files matched.")
+        logger.warning("No files matched.")
         return 0
 
     full_names = [str(path) for path in files_to_analyze]
-    logging.debug("Matched files:\n%s", "\n".join(full_names))
+    logger.debug("Matched files:\n%s", "\n".join(full_names))
 
     codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
 
@@ -42,7 +43,7 @@ def run(argv) -> int:
         print("*** ORIGINAL:")
         print(source_tree.code)
         for name, codemod_kls in codemods_to_run.items():
-            logging.info("Running codemod %s", name)
+            logger.info("Running codemod %s", name)
             command_instance = codemod_kls(CodemodContext())
             output_tree = command_instance.transform_module(source_tree)
             changed_file = not output_tree.deep_equals(source_tree)
@@ -52,17 +53,23 @@ def run(argv) -> int:
                 print(output_tree.code)
 
                 if argv.dry_run:
-                    logging.info("Dry run, not changing files")
+                    logger.info("Dry run, not changing files")
                 else:
                     print(f"Updated file {file_path}")
                     with open(file_path, "w", encoding="utf-8") as f:
                         f.write(output_tree.code)
 
         # results = CombineResults(changed_files)
-        report = CodeTF()  # .generate()
+        report = CodeTF()
+        stop = datetime.datetime.now()
+        elapsed = stop - start
+        elapsed_ms = int(elapsed.total_seconds() * 1000)
+        absolute_path = os.path.abspath(argv.directory)
+        report.generate(elapsed_ms, original_args, absolute_path)
         report.write_report(argv.output)
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(run(parse_args(sys.argv[1:])))
+    original_args = sys.argv[1:]
+    sys.exit(run(parse_args(original_args), original_args))

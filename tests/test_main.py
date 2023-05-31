@@ -4,20 +4,17 @@ from codemodder.cli import parse_args
 
 
 class TestRun:
-    @mock.patch("codemodder.__main__.logging.warning")
+    @mock.patch("codemodder.__main__.logger.warning")
     def test_no_files_matched(self, warning_log):
-        res = run(
-            parse_args(
-                [
-                    "tests/samples/",
-                    "--output",
-                    "here.txt",
-                    "--codemod-include=url-sandbox",
-                    "--path-exclude",
-                    "*py",
-                ]
-            )
-        )
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            "--codemod-include=url-sandbox",
+            "--path-exclude",
+            "*py",
+        ]
+        res = run(parse_args(args), args)
         assert res == 0
 
         warning_log.assert_called()
@@ -25,30 +22,27 @@ class TestRun:
 
     @mock.patch("libcst.parse_module", side_effect=Exception)
     def test_cst_parsing_fails(self, mock_parse):
-        res = run(
-            parse_args(
-                [
-                    "tests/samples/",
-                    "--output",
-                    "here.txt",
-                ]
-            )
-        )
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+        ]
+
+        res = run(parse_args(args), args)
+
         assert res == 0
         mock_parse.assert_called()
 
-    @mock.patch("codemodder.__main__.logging.info")
+    @mock.patch("codemodder.__main__.logger.info")
     def test_dry_run(self, info_log):
-        res = run(
-            parse_args(
-                [
-                    "tests/samples/",
-                    "--output",
-                    "here.txt",
-                    "--dry-run",
-                ]
-            )
-        )
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            "--dry-run",
+        ]
+
+        res = run(parse_args(args), args)
         assert res == 0
 
         info_log.assert_called()
@@ -57,28 +51,25 @@ class TestRun:
 
 class TestExitCode:
     def test_success_0(self):
-        run(
-            parse_args(
-                [
-                    "tests/samples/",
-                    "--output",
-                    "here.txt",
-                    "--codemod-include=url-sandbox",
-                    "--path-exclude",
-                    "*request.py",
-                ]
-            )
-        )
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            "--codemod-include=url-sandbox",
+            "--path-exclude",
+            "*request.py",
+        ]
+
+        exit_code = run(parse_args(args), args)
+        assert exit_code == 0
 
     def test_bad_project_dir_1(self):
-        exit_code = run(
-            parse_args(
-                [
-                    "bad/path/",
-                    "--output",
-                    "here.txt",
-                    "--codemod-include=url-sandbox",
-                ]
-            )
-        )
+        args = [
+            "bad/path/",
+            "--output",
+            "here.txt",
+            "--codemod-include=url-sandbox",
+        ]
+
+        exit_code = run(parse_args(args), args)
         assert exit_code == 1
