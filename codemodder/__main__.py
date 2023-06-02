@@ -1,4 +1,5 @@
 import datetime
+import difflib
 import os
 import sys
 import libcst as cst
@@ -11,6 +12,29 @@ from codemodder.code_directory import match_files
 from codemodder.codemods import match_codemods
 from codemodder.report.codetf_reporter import report_default
 
+RESULTS_BY_CODEMOD = []
+from dataclasses import dataclass
+
+
+@dataclass
+class Change:
+    lineNumber: str
+    description: str
+    properties: dict
+    packageActions: list
+
+
+@dataclass
+class ChangeSet:
+    """A set of changes made to a file at `path`"""
+
+    path: str
+    diff: str
+    changes: list[Change]
+
+    def to_json(self):
+        return {"path": self.path, "diff": self.diff, "changes": self.changes}
+
 
 def update_code(file_path, new_code):
     """
@@ -22,9 +46,6 @@ def update_code(file_path, new_code):
 
 
 def run_codemods_for_file(file_path, codemods_to_run, source_tree, dry_run):
-    print("*** ORIGINAL:")
-    print(source_tree.code)
-
     for name, codemod_kls in codemods_to_run.items():
         logger.info("Running codemod %s", name)
         command_instance = codemod_kls(CodemodContext())
@@ -32,9 +53,16 @@ def run_codemods_for_file(file_path, codemods_to_run, source_tree, dry_run):
         changed_file = not output_tree.deep_equals(source_tree)
 
         if changed_file:
-            print(f"*** CHANGED with {name}:")
-            print(output_tree.code)
-
+            diff = "".join(
+                difflib.unified_diff(
+                    source_tree.code.splitlines(1), output_tree.code.splitlines(1)
+                )
+            )
+            print(f"*** CHANGED {file_path} with codemod {name}:")
+            print(diff)
+            codemod_kls.CHANGESET.append(
+                ChangeSet(str(file_path), diff, changes=[]).to_json()
+            )
             if dry_run:
                 logger.info("Dry run, not changing files")
             else:
@@ -71,10 +99,22 @@ def run(argv, original_args) -> int:
 
         run_codemods_for_file(file_path, codemods_to_run, source_tree, argv.dry_run)
 
+    for name, codemod_kls in codemods_to_run.items():
+        if not codemod_kls.CHANGESET:
+            continue
+        data = {
+            "codemod": f"pixee:python/{name}",
+            "summary": codemod_kls.DESCRIPTION,
+            "references": [],
+            "properties": {},
+            "failedFiles": [],
+            "changeset": codemod_kls.CHANGESET,
+        }
+
+        RESULTS_BY_CODEMOD.append(data)
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
-    breakpoint()
-    report_default(elapsed_ms, argv, original_args)
+    report_default(elapsed_ms, argv, original_args, RESULTS_BY_CODEMOD)
     return 0
 
 

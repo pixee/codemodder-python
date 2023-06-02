@@ -15,6 +15,7 @@ class SecureRandom(VisitorBasedCodemodCommand):
     DESCRIPTION: str = (
         "Replaces random.{func} with more secure secrets library functions."
     )
+    CHANGESET = []
 
     def __init__(self, context: CodemodContext):
         self.random_func_called = False

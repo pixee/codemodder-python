@@ -10,6 +10,7 @@ class UrlSandbox(VisitorBasedCodemodCommand):
     DESCRIPTION: str = (
         "Replaces request.{func} with more secure safe_request library functions."
     )
+    CHANGESET = []
 
     def leave_Import(
         self, original_node: cst.Import, updated_node: cst.Import

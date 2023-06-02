@@ -12,26 +12,26 @@ def base_report():
             "version": __VERSION__,
             "sarifs": [],
         },
-        "results": {},
+        "results": [],
     }
 
 
-def report_default(elapsed_ms, parsed_args, original_args):
+def report_default(elapsed_ms, parsed_args, original_args, results_by_codemod):
     report = CodeTF()
     absolute_path = abspath(parsed_args.directory)
-    report.generate(elapsed_ms, original_args, absolute_path)
+    report.generate(elapsed_ms, original_args, absolute_path, results_by_codemod)
     report.write_report(parsed_args.output)
 
 
 class CodeTF:
     def __init__(self):
         self.report = base_report()
-        # add version, command-line.. etc
 
-    def generate(self, elapsed_ms, original_args, absolute_path):
+    def generate(self, elapsed_ms, original_args, absolute_path, results_by_codemod):
         self.report["run"]["elapsed"] = str(elapsed_ms)
         self.report["run"]["commandLine"] = self._recreate_command(original_args)
         self.report["run"]["directory"] = absolute_path
+        self.report["results"] = results_by_codemod
 
     def _recreate_command(self, original_args):
         return f"python -m codemodder {' '.join(original_args)}"
