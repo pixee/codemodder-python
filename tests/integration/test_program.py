@@ -41,7 +41,7 @@ class TestOutputs:
         assert run["vendor"] == "pixee"
         assert run["tool"] == "codemodder-python"
         assert run["version"] == __VERSION__
-        assert run["elapsed"] is not ""
+        assert run["elapsed"] != ""
         assert (
             run["commandLine"]
             == f"python -m codemodder tests/samples/ --output {output_path} --codemod-include=url-sandbox"

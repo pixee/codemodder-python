@@ -1,4 +1,5 @@
 import json
+from os.path import abspath
 from codemodder import __VERSION__
 from codemodder.logging import logger
 
@@ -13,6 +14,13 @@ def base_report():
         },
         "results": {},
     }
+
+
+def report_default(elapsed_ms, parsed_args, original_args):
+    report = CodeTF()
+    absolute_path = abspath(parsed_args.directory)
+    report.generate(elapsed_ms, original_args, absolute_path)
+    report.write_report(parsed_args.output)
 
 
 class CodeTF:
