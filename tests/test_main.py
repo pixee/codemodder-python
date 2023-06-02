@@ -4,8 +4,9 @@ from codemodder.cli import parse_args
 
 
 class TestRun:
+    @mock.patch("libcst.parse_module")
     @mock.patch("codemodder.__main__.logger.warning")
-    def test_no_files_matched(self, warning_log):
+    def test_no_files_matched(self, warning_log, mock_parse):
         args = [
             "tests/samples/",
             "--output",
@@ -19,6 +20,8 @@ class TestRun:
 
         warning_log.assert_called()
         assert warning_log.call_args_list[0][0][0] == "No files matched."
+
+        mock_parse.assert_not_called()
 
     @mock.patch("libcst.parse_module", side_effect=Exception)
     def test_cst_parsing_fails(self, mock_parse):
@@ -34,7 +37,8 @@ class TestRun:
         mock_parse.assert_called()
 
     @mock.patch("codemodder.__main__.logger.info")
-    def test_dry_run(self, info_log):
+    @mock.patch("codemodder.__main__.update_code")
+    def test_dry_run(self, mock_update_code, info_log):
         args = [
             "tests/samples/",
             "--output",
@@ -47,6 +51,8 @@ class TestRun:
 
         info_log.assert_called()
         assert info_log.call_args_list[-1][0][0] == "Dry run, not changing files"
+
+        mock_update_code.assert_not_called()
 
 
 class TestExitCode:

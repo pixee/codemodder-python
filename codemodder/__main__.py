@@ -12,6 +12,15 @@ from codemodder.codemods import match_codemods
 from codemodder.report.codetf_reporter import report_default
 
 
+def update_code(file_path, new_code):
+    """
+    Write the `new_code` to the `file_path`
+    """
+    print(f"Updated file {file_path}")
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(new_code)
+
+
 def run_codemods_for_file(file_path, codemods_to_run, source_tree, dry_run):
     print("*** ORIGINAL:")
     print(source_tree.code)
@@ -29,9 +38,7 @@ def run_codemods_for_file(file_path, codemods_to_run, source_tree, dry_run):
             if dry_run:
                 logger.info("Dry run, not changing files")
             else:
-                print(f"Updated file {file_path}")
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(output_tree.code)
+                update_code(file_path, output_tree.code)
 
 
 def run(argv, original_args) -> int:
@@ -64,9 +71,10 @@ def run(argv, original_args) -> int:
 
         run_codemods_for_file(file_path, codemods_to_run, source_tree, argv.dry_run)
 
-        elapsed = datetime.datetime.now() - start
-        elapsed_ms = int(elapsed.total_seconds() * 1000)
-        report_default(elapsed_ms, argv, original_args)
+    elapsed = datetime.datetime.now() - start
+    elapsed_ms = int(elapsed.total_seconds() * 1000)
+    breakpoint()
+    report_default(elapsed_ms, argv, original_args)
     return 0
 
 
