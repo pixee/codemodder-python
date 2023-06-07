@@ -12,8 +12,8 @@ for pre-commit so commiting is fast.
 In general you can rely on Github workflows to see how to run things like linting and tests,
 but for local development here is a good workflow.
 
-1. To use virtualenv, create an environment with `virtualenv pixeeenv` or `/usr/local/bin/python3.11 -m venv pixeeenv`
-to specify a specific Python version. Activate with `pixeeenv/bin/activate`
+1. To use virtualenv, create an environment with `virtualenv pixeeenv` or `/usr/bin/env python3 -m venv pixeeenv`
+to specify a specific Python version. If using `bash` or any compatible shell, activate with `source pixeeenv/bin/activate`. Otherwise, look at [`venv`'s documentation](https://docs.python.org/3/library/venv.html) for instructions.
 
 2. `cd codemodder-python` and run `pip install -r` on all the files under `requirements/`
 
