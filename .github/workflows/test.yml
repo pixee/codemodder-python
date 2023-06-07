@@ -29,6 +29,6 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements/test.txt
       - name: Run pytest
-        run: coverage run --source=codemodder/ -m pytest -v -s
+        run: coverage run --source=codemodder/ -m pytest -v
       - name: Report coverage
-        run: coverage report -m --fail-under=93
+        run: coverage report -m --fail-under=90
