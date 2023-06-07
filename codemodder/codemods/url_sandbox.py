@@ -1,16 +1,16 @@
 import libcst as cst
 from libcst import matchers
 from libcst.codemod import VisitorBasedCodemodCommand
-
+from codemodder.codemods.base_codemod import BaseCodemod
 
 replacement_import = "safe_requests"
 
 
-class UrlSandbox(VisitorBasedCodemodCommand):
-    DESCRIPTION: str = (
+class UrlSandbox(BaseCodemod, VisitorBasedCodemodCommand):
+    NAME = "url-sandbox"
+    DESCRIPTION = (
         "Replaces request.{func} with more secure safe_request library functions."
     )
-    CHANGESET = []
 
     def leave_Import(
         self, original_node: cst.Import, updated_node: cst.Import

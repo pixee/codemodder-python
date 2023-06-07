@@ -2,6 +2,7 @@ import libcst as cst
 from libcst import matchers
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from .helper import split_module
+from codemodder.codemods.base_codemod import BaseCodemod
 
 
 replacement_import = "import secrets"
@@ -11,11 +12,9 @@ gen.uniform(0, 1)
 """
 
 
-class SecureRandom(VisitorBasedCodemodCommand):
-    DESCRIPTION: str = (
-        "Replaces random.{func} with more secure secrets library functions."
-    )
-    CHANGESET = []
+class SecureRandom(BaseCodemod, VisitorBasedCodemodCommand):
+    NAME = "secure-random"
+    DESCRIPTION = "Replaces random.{func} with more secure secrets library functions."
 
     def __init__(self, context: CodemodContext):
         self.random_func_called = False
