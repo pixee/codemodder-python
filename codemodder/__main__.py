@@ -11,6 +11,7 @@ from codemodder.cli import parse_args
 from codemodder.code_directory import match_files
 from codemodder.codemods import match_codemods
 from codemodder.report.codetf_reporter import report_default
+from codemodder.semgrep import run as semgrep_run
 
 RESULTS_BY_CODEMOD = []
 from dataclasses import dataclass
@@ -75,6 +76,9 @@ def run(argv, original_args) -> int:
     if not os.path.exists(argv.directory):
         # project directory doesn't exist or can’t be read
         return 1
+
+    # mock this in some tests to speed unit tests up
+    semgrep_run()
 
     files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
     if not files_to_analyze:

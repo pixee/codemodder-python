@@ -1,0 +1,11 @@
+rules:
+  - id: secure-random
+    pattern-either:
+      - pattern: import random
+      - pattern: random.random()
+      - pattern: from random import random
+      - pattern: random()
+    message: Insecure Random
+    languages:
+      - python
+    severity: WARNING

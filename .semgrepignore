@@ -1,0 +1,21 @@
+# This is the file that will be used for the codemodder internal semgrep run.
+
+# Common large paths
+node_modules/
+build/
+dist/
+vendor/
+.env/
+.venv/
+.tox/
+*.min.js
+.npm/
+
+# Common test paths
+# NONE
+
+# Semgrep rules folder
+.semgrep
+
+# Semgrep-action log folder
+.semgrep_logs/
