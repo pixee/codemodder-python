@@ -59,7 +59,12 @@ class TestRun:
         assert res == 0
 
         info_log.assert_called()
-        assert info_log.call_args_list[-1][0][0] == "Dry run, not changing files"
+
+        logged_msgs = [
+            info_log.call_args_list[x][0][0]
+            for x in range(len(info_log.call_args_list))
+        ]
+        assert "Dry run, not changing files" in logged_msgs
 
         mock_update_code.assert_not_called()
 
