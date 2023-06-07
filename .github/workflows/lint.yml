@@ -31,7 +31,7 @@ jobs:
       - name: Black Format Check
         run: black --check .
       - name: Run pylint
-        run: pylint codemodder/ tests/ -v
+        run: pylint codemodder/ tests/ integration_tests/ -v
 
   complexity:
     name: Code Complexity
