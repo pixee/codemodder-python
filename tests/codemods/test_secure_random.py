@@ -20,26 +20,26 @@ class TestSecureRandom:
 
 random.random()
 var = "hello"
-        """,
+""",
                 """import secrets
 
 gen = secrets.SystemRandom()
 gen.uniform(0, 1)
 var = "hello"
-        """,
+""",
             ),
             (
                 """from random import random
 
 random()
 var = "hello"
-            """,
+""",
                 """import secrets
 
 gen = secrets.SystemRandom()
 gen.uniform(0, 1)
 var = "hello"
-            """,
+""",
             ),
         ],
     )
@@ -102,14 +102,14 @@ csv.excel
 from csv import excel
 random.random()
 excel
-    """,
+""",
                 """import secrets
 
 gen = secrets.SystemRandom()
 gen.uniform(0, 1)
 from csv import excel
 excel
-    """,
+""",
             ),
         ],
     )
@@ -142,6 +142,6 @@ import secrets
 gen = secrets.SystemRandom()
 gen.uniform(0, 1)
 random.__all__
-    """
+"""
 
         self.run_and_assert(input_code, expexted_output)

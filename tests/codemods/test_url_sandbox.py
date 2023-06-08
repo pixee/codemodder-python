@@ -20,24 +20,24 @@ class TestUrlSandbox:
 
 requests.get("www.google.com")
 var = "hello"
-        """,
+""",
                 """import safe_requests
 
 safe_requests.get("www.google.com")
 var = "hello"
-        """,
+""",
             ),
             (
                 """from requests import get
 
 get("www.google.com")
 var = "hello"
-            """,
+""",
                 """from safe_requests import get
 
 get("www.google.com")
 var = "hello"
-            """,
+""",
             ),
         ],
     )
