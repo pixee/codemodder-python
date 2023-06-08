@@ -3,7 +3,7 @@ click==8.1.3
 distlib==0.3.6
 filelock==3.12.0
 identify==2.5.24
-libcst==1.0.1
+libcst==1.0.*
 mypy-extensions==1.0.0
 packaging==23.1
 pathspec==0.11.1
