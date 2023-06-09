@@ -35,10 +35,16 @@ def find_all_yaml_files(codemods) -> list[Path]:
     return list((Path("codemodder") / "codemods" / "semgrep").iterdir())
 
 
-def results_by_id(sarif_file):
+def results_by_rule_id(sarif_file):
     """
     Extract all the results of a sarif file and organize them by id.
     """
+    # TODO ruleId could be indirectly pointed by the rule field
+    # TODO test with webgoat sarif
+    with open(sarif_file.name, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    results = [result for sarif_run in data["runs"] for result in sarif_run["results"]]
+    return {r["ruleId"]: r for r in results}
 
 
 def get_results():
