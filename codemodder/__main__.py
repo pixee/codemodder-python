@@ -12,6 +12,7 @@ from codemodder.code_directory import match_files
 from codemodder.codemods import match_codemods
 from codemodder.report.codetf_reporter import report_default
 from codemodder.semgrep import run as semgrep_run
+from codemodder.semgrep import find_all_yaml_files
 
 RESULTS_BY_CODEMOD = []
 from dataclasses import dataclass
@@ -77,8 +78,10 @@ def run(argv, original_args) -> int:
         # project directory doesn't exist or can’t be read
         return 1
 
+    codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
+
     # mock this in some tests to speed unit tests up
-    semgrep_run()
+    semgrep_run(argv.directory, find_all_yaml_files(codemods_to_run))
 
     files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
     if not files_to_analyze:
@@ -87,8 +90,6 @@ def run(argv, original_args) -> int:
 
     full_names = [str(path) for path in files_to_analyze]
     logger.debug("Matched files:\n%s", "\n".join(full_names))
-
-    codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
 
     for file_path in files_to_analyze:
         # TODO: handle potential race condition that file no longer exists at this point
