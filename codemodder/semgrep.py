@@ -1,5 +1,6 @@
 import json
 import subprocess
+import itertools
 from tempfile import NamedTemporaryFile
 from typing import List
 from pathlib import Path
@@ -10,21 +11,26 @@ def run(project_root: Path, yaml_files: List[Path]):
     Runs Semgrep and outputs the result in a Sarif TemporaryFile.
     """
     # TODO Look into running semgrep from its module later
-    temp_sarif_file = NamedTemporaryFile(prefix="semgrep", suffix=".sarif")
-    command = [
-        "semgrep",
-        "scan",
-        "--no-error",
-        "--dataflow-traces",
-        "--sarif",
-        "-o",
-        temp_sarif_file.name,
-    ]
-    command += list(map(lambda f: "--config " + str(f), yaml_files))
-    command += [str(project_root)]
-    print(f"Executing semgrep with: {command}")
-    subprocess.run(" ".join(command), shell=True, check=True)
-    return temp_sarif_file
+    with NamedTemporaryFile(prefix="semgrep", suffix=".sarif") as temp_sarif_file:
+        command = [
+            "semgrep",
+            "scan",
+            "--no-error",
+            "--dataflow-traces",
+            "--sarif",
+            "-o",
+            temp_sarif_file.name,
+        ]
+        command.extend(
+            itertools.chain.from_iterable(
+                map(lambda f: ["--config", str(f)], yaml_files)
+            )
+        )
+        command.append(str(project_root))
+        print(f"Executing semgrep with: {command}")
+        subprocess.run(" ".join(command), shell=True, check=True)
+        results = results_by_rule_id(temp_sarif_file)
+        return results
 
 
 def find_all_yaml_files(codemods) -> list[Path]:
