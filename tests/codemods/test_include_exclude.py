@@ -1,7 +1,7 @@
 import pytest
-from codemodder.codemods import DEFAULT_CODEMODS, grab_name, match_codemods
+from codemodder.codemods import DEFAULT_CODEMODS, match_codemods
 
-CODEMODS = {grab_name(codemod): codemod for codemod in DEFAULT_CODEMODS}
+CODEMODS = {codemod.NAME: codemod for codemod in DEFAULT_CODEMODS}
 
 
 class TestMatchCodemods:

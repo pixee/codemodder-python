@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from codemodder import __VERSION__
-from codemodder.codemods import DEFAULT_CODEMODS, grab_name
+from codemodder.codemods import DEFAULT_CODEMODS
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -54,7 +54,7 @@ class ValidatedCodmods(CsvListAction):
     """
 
     def validate_items(self, items):
-        codemod_names = list(map(grab_name, DEFAULT_CODEMODS))
+        codemod_names = list(map(lambda c: c.NAME, DEFAULT_CODEMODS))
         unrecognized_codemods = [name for name in items if name not in codemod_names]
         print(unrecognized_codemods)
         if unrecognized_codemods:

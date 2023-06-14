@@ -3,7 +3,6 @@ import pytest
 from codemodder.cli import parse_args
 from codemodder import __VERSION__
 from codemodder.codemods import DEFAULT_CODEMODS
-from codemodder.codemods import grab_name
 
 NAMES = tuple(codemod.NAME for codemod in DEFAULT_CODEMODS)
 
