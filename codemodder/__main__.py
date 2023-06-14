@@ -3,9 +3,9 @@ import difflib
 import os
 import sys
 import libcst as cst
-
-
 from libcst.codemod import CodemodContext
+
+
 from codemodder.logging import logger
 from codemodder.cli import parse_args
 from codemodder.code_directory import match_files
@@ -47,11 +47,16 @@ def update_code(file_path, new_code):
         f.write(new_code)
 
 
-def run_codemods_for_file(file_path, codemods_to_run, source_tree, dry_run):
+def run_codemods_for_file(
+    file_path, codemods_to_run, source_tree, results_by_id, dry_run
+):
     for name, codemod_kls in codemods_to_run.items():
         logger.info("Running codemod %s", name)
-        command_instance = codemod_kls(CodemodContext())
+        wrapper = cst.MetadataWrapper(source_tree)
+        command_instance = codemod_kls(CodemodContext(wrapper=wrapper), results_by_id)
+        # command_instance = codemod_kls(results_by_id)
         output_tree = command_instance.transform_module(source_tree)
+        # output_tree = wrapper.visit(command_instance)
         changed_file = not output_tree.deep_equals(source_tree)
 
         if changed_file:
@@ -79,9 +84,10 @@ def run(argv, original_args) -> int:
         return 1
 
     codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
+    print(codemods_to_run)
 
     # mock this in some tests to speed unit tests up
-    semgrep_run(argv.directory, find_all_yaml_files(codemods_to_run))
+    results_by_id = semgrep_run(argv.directory, find_all_yaml_files(codemods_to_run))
 
     files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
     if not files_to_analyze:
@@ -102,7 +108,9 @@ def run(argv, original_args) -> int:
             print(f"Error parsing file '{file_path}': {str(e)}")
             continue
 
-        run_codemods_for_file(file_path, codemods_to_run, source_tree, argv.dry_run)
+        run_codemods_for_file(
+            file_path, codemods_to_run, source_tree, results_by_id, argv.dry_run
+        )
 
     for name, codemod_kls in codemods_to_run.items():
         if not codemod_kls.CHANGESET:

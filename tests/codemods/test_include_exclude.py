@@ -1,5 +1,7 @@
 import pytest
-from codemodder.codemods import CODEMODS, match_codemods
+from codemodder.codemods import DEFAULT_CODEMODS, grab_name, match_codemods
+
+CODEMODS = {grab_name(codemod): codemod for codemod in DEFAULT_CODEMODS}
 
 
 class TestMatchCodemods:
@@ -7,7 +9,7 @@ class TestMatchCodemods:
         assert match_codemods(None, None) == CODEMODS
 
     @pytest.mark.parametrize(
-        "input_str,expexted_output",
+        "input_str,expected_output",
         [
             ("secure-random", {"secure-random": CODEMODS["secure-random"]}),
             (
@@ -19,15 +21,15 @@ class TestMatchCodemods:
             ),
         ],
     )
-    def test_include(self, input_str, expexted_output):
-        assert match_codemods(input_str, None) == expexted_output
+    def test_include(self, input_str, expected_output):
+        assert match_codemods(input_str, None) == expected_output
 
     @pytest.mark.parametrize(
-        "input_str,expexted_output",
+        "input_str,expected_output",
         [
             ("secure-random", {"url-sandbox": CODEMODS["url-sandbox"]}),
             ("secure-random,url-sandbox", {}),
         ],
     )
-    def test_exclude(self, input_str, expexted_output):
-        assert match_codemods(None, input_str) == expexted_output
+    def test_exclude(self, input_str, expected_output):
+        assert match_codemods(None, input_str) == expected_output

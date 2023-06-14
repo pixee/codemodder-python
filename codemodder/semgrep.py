@@ -4,13 +4,13 @@ import itertools
 from tempfile import NamedTemporaryFile
 from typing import List
 from pathlib import Path
+from collections import defaultdict
 
 
 def run(project_root: Path, yaml_files: List[Path]):
     """
-    Runs Semgrep and outputs the result in a Sarif TemporaryFile.
+    Runs Semgrep and outputs a dict with the results organized by rule_id.
     """
-    # TODO Look into running semgrep from its module later
     with NamedTemporaryFile(prefix="semgrep", suffix=".sarif") as temp_sarif_file:
         command = [
             "semgrep",
@@ -50,7 +50,12 @@ def results_by_rule_id(sarif_file):
     with open(sarif_file.name, "r", encoding="utf-8") as f:
         data = json.load(f)
     results = [result for sarif_run in data["runs"] for result in sarif_run["results"]]
-    return {r["ruleId"]: r for r in results}
+    rule_id_dict = defaultdict(list)
+    for r in results:
+        # semgrep preprends the folders into the rule-id, we want the base name only
+        rule_id = r["ruleId"].rsplit(".")[-1]
+        rule_id_dict.setdefault(rule_id, []).append(r)
+    return rule_id_dict
 
 
 def get_results():

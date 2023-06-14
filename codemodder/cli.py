@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from codemodder import __VERSION__
-from codemodder.codemods import CODEMODS
+from codemodder.codemods import DEFAULT_CODEMODS, grab_name
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -16,8 +16,8 @@ class ListAction(argparse.Action):
     """ """
 
     def _print_codemods(self):
-        for codemod_name in CODEMODS:
-            print(f"pixee:python/{codemod_name}")
+        for codemod in DEFAULT_CODEMODS:
+            print(f"pixee:python/{codemod.full_name()}")
 
     def __call__(self, parser, *args, **kwargs):
         """
@@ -54,11 +54,13 @@ class ValidatedCodmods(CsvListAction):
     """
 
     def validate_items(self, items):
-        unrecognized_codemods = [name for name in items if name not in CODEMODS]
+        codemod_names = list(map(grab_name, DEFAULT_CODEMODS))
+        unrecognized_codemods = [name for name in items if name not in codemod_names]
+        print(unrecognized_codemods)
         if unrecognized_codemods:
             args = {
                 "values": unrecognized_codemods,
-                "choices": ", ".join(map(repr, CODEMODS.keys())),
+                "choices": ", ".join(map(repr, codemod_names)),
             }
             msg = "invalid choice(s): %(values)r (choose from %(choices)s)"
             raise argparse.ArgumentError(self, msg % args)

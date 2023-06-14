@@ -7,7 +7,7 @@ from codemodder.codemods.secure_random import SecureRandom
 class TestSecureRandom:
     def run_and_assert(self, input_code, expexted_output):
         input_tree = cst.parse_module(input_code)
-        command_instance = SecureRandom(CodemodContext())
+        command_instance = SecureRandom(CodemodContext(), {})
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == expexted_output
