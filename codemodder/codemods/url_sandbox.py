@@ -47,7 +47,7 @@ class UrlSandbox(BaseCodemod, VisitorBasedCodemodCommand):
         if self.filter_by_result(original_node) and is_requests_get_call(original_node):
             print(f"Updating node at {pos}")
             AddImportsVisitor.add_needed_import(
-                self.context, "pixee", replacement_import
+                self.context, "pixee.safe_requests", asname="safe_requests"
             )
             return updated_node.with_changes(
                 func=updated_node.func.with_changes(value=Name(replacement_import))
@@ -56,6 +56,7 @@ class UrlSandbox(BaseCodemod, VisitorBasedCodemodCommand):
 
 
 def match_pos(pos, x):
+    # needs some leeway because the semgrep and libcst won't exactly match
     return (
         pos.start.line == x[0]
         and (pos.start.column in (x[1] - 1, x[1]))

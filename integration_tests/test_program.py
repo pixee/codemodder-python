@@ -63,6 +63,7 @@ class TestOutputs:
         results = codetf["results"]
         self._assert_results_fields(results, code_path)
 
+    # TODO this test will rewrite the original sample file when failing, change it
     def test_file_rewritten(self):
         """
         Tests that file is re-written correctly with new code and correct codetf output.
@@ -75,7 +76,7 @@ class TestOutputs:
         expected_original_code = (
             'import requests\n\nrequests.get("www.google.com")\nvar = "hello"\n'
         )
-        expected_new_code = 'import requests\nfrom pixee import safe_requests\n\nsafe_requests.get("www.google.com")\nvar = "hello"\n'
+        expected_new_code = 'import requests\nimport pixee.safe_requests as safe_requests\n\nsafe_requests.get("www.google.com")\nvar = "hello"\n'
         with open(code_path, "r", encoding="utf-8") as f:
             original_code = f.read()
         assert original_code == expected_original_code
