@@ -1,204 +1,132 @@
+from typing import Union
 import libcst as cst
-from libcst import matchers
-from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
-from .helper import split_module
+from libcst import (
+    BaseStatement,
+    CSTTransformer,
+    FlattenSentinel,
+    Module,
+    RemovalSentinel,
+    SimpleStatementLine,
+    matchers,
+)
+from libcst.codemod import (
+    Codemod,
+    CodemodContext,
+    ContextAwareTransformer,
+    VisitorBasedCodemodCommand,
+)
+from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
+from libcst.metadata import PositionProvider
 from codemodder.codemods.base_codemod import BaseCodemod
+import itertools
+
+system_random_object_name = "gen"
 
 
-replacement_import = "import secrets"
-replacement_random_code = """secrets.SystemRandom()
-gen = secrets.SystemRandom()
-gen.uniform(0, 1)
-"""
+class SecureRandom(BaseCodemod, Codemod):
+    METADATA_DEPENDENCIES = (PositionProvider,)
 
-
-class SecureRandom(BaseCodemod, VisitorBasedCodemodCommand):
     NAME = "secure-random"
     DESCRIPTION = "Replaces random.{func} with more secure secrets library functions."
+    AUTHOR = "dani.alcala@pixee.ai"
+    YAML_FILES = [
+        "secure-random.yaml",
+    ]
+    # TODO may be recovered by the yaml files themselves
+    RULE_IDS = [
+        "secure-random",
+    ]
 
+    # TODO we need to filter files by results
     def __init__(self, context: CodemodContext, results_by_id):
-        self.random_func_called = False
-        self.randint_func_called = False
         super().__init__(context)
-
-    def leave_Import(
-        self, original_node: cst.Import, updated_node: cst.Import
-    ) -> cst.Import:
-        if is_random_import(original_node):
-            return cst.RemoveFromParent()
-
-        return updated_node
-
-    def leave_ImportFrom(
-        self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
-    ) -> cst.ImportFrom:
-        if is_random_import(original_node):
-            return cst.RemoveFromParent()
-
-        return updated_node
-
-    def leave_Module(
-        self, original_node: cst.Module, updated_node: cst.Module
-    ) -> cst.Module:
-        (
-            statements_before_imports,
-            statements_until_add_imports,
-            statements_after_imports,
-        ) = split_module(original_node, updated_node)
-
-        if self.random_func_called:
-            first_line = cst.SimpleStatementLine(
-                body=[
-                    cst.Assign(
-                        targets=[
-                            cst.AssignTarget(
-                                target=cst.Name(
-                                    value="gen",
-                                ),
-                            ),
-                        ],
-                        value=cst.Call(
-                            func=cst.Attribute(
-                                value=cst.Name(
-                                    value="secrets",
-                                ),
-                                attr=cst.Name(
-                                    value="SystemRandom",
-                                ),
-                            ),
-                        ),
-                    )
-                ]
+        self.__results = list(
+            itertools.chain.from_iterable(
+                map(lambda rId: results_by_id[rId], self.RULE_IDS)
             )
-
-            second_line = cst.SimpleStatementLine(
-                body=[
-                    cst.Expr(
-                        value=cst.Call(
-                            func=cst.Attribute(
-                                value=cst.Name(value="gen"),
-                                attr=cst.Name(value="uniform"),
-                            ),
-                            args=[
-                                cst.Arg(value=cst.Integer(value="0")),
-                                cst.Arg(
-                                    value=cst.Integer(value="1"),
-                                ),
-                            ],
-                        )
-                    ),
-                ]
-            )
-            new_code = [first_line, second_line]
-            statements_after_imports = new_code + statements_after_imports
-
-        if self.randint_func_called:
-            first_line = cst.SimpleStatementLine(
-                body=[
-                    cst.Assign(
-                        targets=[
-                            cst.AssignTarget(
-                                target=cst.Name(
-                                    value="gen",
-                                ),
-                            ),
-                        ],
-                        value=cst.Call(
-                            func=cst.Attribute(
-                                value=cst.Name(
-                                    value="secrets",
-                                ),
-                                attr=cst.Name(
-                                    value="SystemRandom",
-                                ),
-                            ),
-                        ),
-                    )
-                ]
-            )
-
-            second_line = cst.SimpleStatementLine(
-                body=[
-                    cst.Expr(
-                        value=cst.Call(
-                            func=cst.Attribute(
-                                value=cst.Name(value="gen"),
-                                attr=cst.Name(value="randint"),
-                            ),
-                            args=[
-                                cst.Arg(value=cst.Integer(value="0")),
-                                cst.Arg(
-                                    value=cst.Integer(value="10"),
-                                ),
-                            ],
-                        )
-                    ),
-                ]
-            )
-            new_code = [first_line, second_line]
-            statements_after_imports = new_code + statements_after_imports
-
-        add_import = (
-            [
-                cst.parse_statement(
-                    replacement_import, config=updated_node.config_for_parsing
-                ),
-                cst.EmptyLine(
-                    indent=True,
-                    whitespace=cst.SimpleWhitespace(
-                        value="",
-                    ),
-                    comment=None,
-                    newline=cst.Newline(
-                        value=None,
-                    ),
-                ),
-            ]
-            if self.random_func_called or self.randint_func_called
-            else []
-        )
-        return updated_node.with_changes(
-            body=[
-                *statements_before_imports,
-                *statements_until_add_imports,
-                *add_import,
-                *statements_after_imports,
-            ]
         )
 
-    def leave_Expr(self, original_node: cst.Expr, updated_node: cst.Expr) -> cst.Expr:
-        if is_random_node(original_node):
-            self.random_func_called = True
-            return cst.RemoveFromParent()
+    def transform_module_impl(self, tree: Module) -> Module:
+        # We first try to replace any random() call found by semgrep
+        new_tree = SecureRandomVisitor(self.context, self.__results).transform_module(
+            tree
+        )
+        # If any changes were made, we need to apply another transform, adding the import and gen object
+        # TODO expensive, should probably use a boolean in the SecureRandomVisitor
+        if not new_tree.deep_equals(tree):
+            new_tree = AddImportAndGen(self.context).transform_module(new_tree)
+            new_tree = RemoveImportsVisitor(
+                self.context, [("random", None, None)]
+            ).transform_module(new_tree)
+            return new_tree
+        return tree
 
-        if is_randint_node(original_node):
-            self.randint_func_called = True
-            return cst.RemoveFromParent()
+
+class AddImportAndGen(Codemod):
+    def transform_module_impl(self, tree: Module) -> Module:
+        first_statement = tree.children[0]
+        new_import = cst.parse_statement("import secrets")
+        add_gen = cst.parse_statement("gen = secrets.SystemRandom()")
+        sentinel = FlattenSentinel((new_import, add_gen, first_statement))
+        return tree.deep_replace(first_statement, sentinel)
+
+
+class SecureRandomVisitor(VisitorBasedCodemodCommand):
+    METADATA_DEPENDENCIES = (PositionProvider,)
+
+    def __init__(self, context: CodemodContext, results):
+        super(VisitorBasedCodemodCommand, self).__init__(context)
+        self.added_gen_and_import = False
+        self.__results = results
+
+    @property
+    def results(self):
+        return self.__results
+
+    def filter_by_result(self, node):
+        pos = self.get_metadata(PositionProvider, node)
+        all_pos = map(extract_pos_from_result, self.results)
+        return any(match_pos(pos, x) for x in all_pos)
+
+    def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
+        if self.filter_by_result(original_node):
+            # since it matched by position, this is a random call
+            return cst.parse_expression("gen.uniform(0,1)")
+            # return cst.Call(func=cst.Attribute(value=cst.Name(system_random_object_name),attr=cst.Name('uniform')),args=(cst.Arg(value=cst.Integer('0')),cst.Arg(value=cst.Integer('1'))))
         return updated_node
 
 
-def is_random_node(node: cst.Expr) -> bool:
+def match_pos(pos, x):
+    # needs some leeway because the semgrep and libcst won't exactly match
+    return (
+        pos.start.line == x[0]
+        and (pos.start.column in (x[1] - 1, x[1]))
+        and pos.end.line == x[2]
+        and (pos.end.column in (x[3] - 1, x[3]))
+    )
+
+
+def extract_pos_from_result(result):
+    region = result["locations"][0]["physicalLocation"]["region"]
+    # TODO it may be the case some of these attributes do not exist
+    return (
+        region.get("startLine"),
+        region["startColumn"],
+        region.get("endLine") or region.get("startLine"),
+        region["endColumn"],
+    )
+
+
+def is_random_call(node: cst.Call) -> bool:
     """
-    Check to see if either: random.random() or random() is called.
-
-    :param node:
-    :return: bool
+    Matches x.random() or random()
     """
-    library_dot_random = matchers.Expr(
-        value=matchers.Call(
-            func=matchers.Attribute(
-                value=matchers.Name(value="random"), attr=matchers.Name(value="random")
-            )
+    is_random = matchers.Call(
+        func=matchers.Attribute(
+            value=matchers.DoNotCare(), attr=matchers.Name(value="random")
         )
     )
-    direct_random = matchers.Expr(
-        value=matchers.Call(func=matchers.Name(value="random"))
-    )
-
-    return matchers.matches(
-        node,
-        matchers.OneOf(library_dot_random, direct_random),
-    )
+    return matchers.matches(node, is_random)
 
 
 def is_randint_node(node: cst.Expr) -> bool:

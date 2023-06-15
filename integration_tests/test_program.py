@@ -76,7 +76,7 @@ class TestOutputs:
         expected_original_code = (
             'import requests\n\nrequests.get("www.google.com")\nvar = "hello"\n'
         )
-        expected_new_code = 'import requests\nimport pixee.safe_requests as safe_requests\n\nsafe_requests.get("www.google.com")\nvar = "hello"\n'
+        expected_new_code = 'import pixee.safe_requests as safe_requests\n\nsafe_requests.get("www.google.com")\nvar = "hello"\n'
         with open(code_path, "r", encoding="utf-8") as f:
             original_code = f.read()
         assert original_code == expected_original_code

@@ -2,7 +2,7 @@ import itertools
 import libcst as cst
 from libcst import Name, matchers
 from libcst.codemod import VisitorBasedCodemodCommand
-from libcst.codemod.visitors import AddImportsVisitor
+from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from libcst.metadata import PositionProvider
 from codemodder.codemods.base_codemod import BaseCodemod
 
@@ -45,10 +45,10 @@ class UrlSandbox(BaseCodemod, VisitorBasedCodemodCommand):
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
         pos = self.get_metadata(PositionProvider, original_node)
         if self.filter_by_result(original_node) and is_requests_get_call(original_node):
-            print(f"Updating node at {pos}")
             AddImportsVisitor.add_needed_import(
                 self.context, "pixee.safe_requests", asname="safe_requests"
             )
+            RemoveImportsVisitor.remove_unused_import(self.context, "requests")
             return updated_node.with_changes(
                 func=updated_node.func.with_changes(value=Name(replacement_import))
             )
@@ -104,19 +104,4 @@ def is_requests_get_node(node: cst.Expr) -> bool:
     return matchers.matches(
         node,
         library_dot_get,
-    )
-
-
-def is_requests_import(node: cst.Import | cst.ImportFrom) -> bool:
-    import_alias_requests = matchers.ImportAlias(name=matchers.Name(value="requests"))
-    import_alias_get = matchers.ImportAlias(name=matchers.Name(value="get"))
-
-    direct_import = matchers.Import(names=[import_alias_requests])
-    from_requests_import_get = matchers.ImportFrom(
-        module=cst.Name(value="requests"), names=[import_alias_get]
-    )
-
-    return matchers.matches(
-        node,
-        matchers.OneOf(direct_import, from_requests_import_get),
     )
