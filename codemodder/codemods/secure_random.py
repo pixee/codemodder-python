@@ -91,6 +91,7 @@ class SecureRandomVisitor(VisitorBasedCodemodCommand):
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         if self.filter_by_result(original_node):
             # since it matched by position, this is a random call
+            # TODO make this gather nodes only to change later
             return cst.parse_expression("gen.uniform(0,1)")
             # return cst.Call(func=cst.Attribute(value=cst.Name(system_random_object_name),attr=cst.Name('uniform')),args=(cst.Arg(value=cst.Integer('0')),cst.Arg(value=cst.Integer('1'))))
         return updated_node

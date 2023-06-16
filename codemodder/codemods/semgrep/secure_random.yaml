@@ -10,10 +10,12 @@ rules:
           - pattern: $X.random()
           - pattern-inside: |
               import random as $X
+              ...
       - patterns:
           - pattern: random()
           - pattern-inside: |
               from random import random
+              ...
     message: Insecure Random
     languages: [python]
     severity: WARNING
