@@ -46,7 +46,7 @@ class UrlSandbox(BaseCodemod, VisitorBasedCodemodCommand):
         pos = self.get_metadata(PositionProvider, original_node)
         if self.filter_by_result(original_node) and is_requests_get_call(original_node):
             AddImportsVisitor.add_needed_import(
-                self.context, "pixee.safe_requests", asname="safe_requests"
+                self.context, "security", "safe_requests"
             )
             RemoveImportsVisitor.remove_unused_import(self.context, "requests")
             return updated_node.with_changes(

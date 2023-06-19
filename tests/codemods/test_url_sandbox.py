@@ -22,8 +22,7 @@ class TestUrlSandbox:
 requests.get("www.google.com")
 var = "hello"
 """,
-                """import requests
-                   from pixee import safe_requests
+                """from security import safe_requests
 
 safe_requests.get("www.google.com")
 var = "hello"
@@ -35,7 +34,7 @@ var = "hello"
 get("www.google.com")
 var = "hello"
 """,
-                """from safe_requests import get
+                """from security.safe_requests import get
 
 get("www.google.com")
 var = "hello"
@@ -65,7 +64,7 @@ import csv
 requests.get("www.google.com")
 csv.excel
 """,
-                """import safe_requests
+                """import security.safe_requests
 import csv
 safe_requests.get("www.google.com")
 csv.excel
@@ -77,7 +76,7 @@ from csv import excel
 requests.get("www.google.com")
 excel
 """,
-                """import safe_requests
+                """import security.safe_requests
 from csv import excel
 safe_requests.get("www.google.com")
 excel
