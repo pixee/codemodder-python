@@ -1,21 +1,15 @@
-from typing import Union
 import libcst as cst
 from libcst import (
-    BaseStatement,
-    CSTTransformer,
     FlattenSentinel,
     Module,
-    RemovalSentinel,
-    SimpleStatementLine,
     matchers,
 )
 from libcst.codemod import (
     Codemod,
     CodemodContext,
-    ContextAwareTransformer,
     VisitorBasedCodemodCommand,
 )
-from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
+from libcst.codemod.visitors import RemoveImportsVisitor
 from libcst.metadata import PositionProvider
 from codemodder.codemods.base_codemod import BaseCodemod
 import itertools

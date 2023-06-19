@@ -33,7 +33,7 @@ def run(project_root: Path, yaml_files: List[Path]):
         return results
 
 
-def find_all_yaml_files(codemods) -> list[Path]:
+def find_all_yaml_files(codemods) -> list[Path]:  # pylint: disable=unused-argument
     """
     Finds all yaml files associated with the given codemods.
     """

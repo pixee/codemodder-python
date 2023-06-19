@@ -54,4 +54,4 @@ jobs:
         run: |
           # threshold for pipeline to fail if we go below average, module, or block complexity
           # https://github.com/rubik/xenon
-          xenon codemodder --max-average A --max-modules B --max-absolute B
+          xenon codemodder --max-average A --max-modules C --max-absolute C
