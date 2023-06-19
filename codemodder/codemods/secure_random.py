@@ -84,9 +84,9 @@ class SecureRandomVisitor(VisitorBasedCodemodCommand):
         return self.__results
 
     def filter_by_result(self, node):
-        pos = self.get_metadata(PositionProvider, node)
-        all_pos = map(extract_pos_from_result, self.results)
-        return any(match_pos(pos, x) for x in all_pos)
+        pos_to_match = self.get_metadata(PositionProvider, node)
+        all_pos = [extract_pos_from_result(result) for result in self.results]
+        return any(match_pos(pos_to_match, position) for position in all_pos)
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         if self.filter_by_result(original_node):

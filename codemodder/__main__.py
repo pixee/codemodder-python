@@ -54,9 +54,7 @@ def run_codemods_for_file(
         logger.info("Running codemod %s", name)
         wrapper = cst.MetadataWrapper(source_tree)
         command_instance = codemod_kls(CodemodContext(wrapper=wrapper), results_by_id)
-        # command_instance = codemod_kls(results_by_id)
         output_tree = command_instance.transform_module(source_tree)
-        # output_tree = wrapper.visit(command_instance)
         changed_file = not output_tree.deep_equals(source_tree)
 
         if changed_file:
@@ -88,6 +86,10 @@ def run(argv, original_args) -> int:
 
     # mock this in some tests to speed unit tests up
     results_by_id = semgrep_run(argv.directory, find_all_yaml_files(codemods_to_run))
+
+    if not results_by_id:
+        logger.warning("No semgrep results.")
+        return 0
 
     files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
     if not files_to_analyze:

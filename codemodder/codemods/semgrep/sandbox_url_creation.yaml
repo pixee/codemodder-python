@@ -1,11 +1,14 @@
 rules:
   - id: sandbox-url-creation
-    # TODO: need to fix this rule
-    patterns:
+    pattern-either:
       - pattern: requests.get(...)
       - pattern-inside: |
           import requests
           ...
+#      - pattern: get(...)
+#      - pattern-inside: |
+#          from requests import get
+#          ...
     message: Unbounded URL creation
     languages:
       - python

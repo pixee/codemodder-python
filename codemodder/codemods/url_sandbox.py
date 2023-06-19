@@ -38,13 +38,12 @@ class UrlSandbox(BaseCodemod, VisitorBasedCodemodCommand):
         return self.__results
 
     def filter_by_result(self, node):
-        pos = self.get_metadata(PositionProvider, node)
-        all_pos = map(extract_pos_from_result, self.results)
-        return any(match_pos(pos, x) for x in all_pos)
+        pos_to_match = self.get_metadata(PositionProvider, node)
+        all_pos = [extract_pos_from_result(result) for result in self.results]
+        return any(match_pos(pos_to_match, position) for position in all_pos)
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
-        pos = self.get_metadata(PositionProvider, original_node)
-        if self.filter_by_result(original_node) and is_requests_get_call(original_node):
+        if is_requests_get_call(original_node) and self.filter_by_result(original_node):
             AddImportsVisitor.add_needed_import(
                 self.context, "security", "safe_requests"
             )
@@ -76,7 +75,6 @@ def extract_pos_from_result(result):
     )
 
 
-# TODO having a proper module for these may be quite useful
 def is_requests_get_call(node: cst.Call) -> bool:
     matches_requests_get_call = matchers.Call(
         func=matchers.Attribute(
@@ -84,24 +82,3 @@ def is_requests_get_call(node: cst.Call) -> bool:
         )
     )
     return matchers.matches(node, matches_requests_get_call)
-
-
-def is_requests_get_node(node: cst.Expr) -> bool:
-    """
-    Check to see if either: requests.get() or get() is called.
-
-    :param node:
-    :return: bool
-    """
-    library_dot_get = matchers.Expr(
-        value=matchers.Call(
-            func=matchers.Attribute(
-                value=matchers.Name(value="requests"), attr=matchers.Name(value="get")
-            )
-        )
-    )
-
-    return matchers.matches(
-        node,
-        library_dot_get,
-    )
