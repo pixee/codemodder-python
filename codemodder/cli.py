@@ -56,7 +56,7 @@ class ValidatedCodmods(CsvListAction):
     def validate_items(self, items):
         codemod_names = [codemod.NAME for codemod in DEFAULT_CODEMODS]
         unrecognized_codemods = [name for name in items if name not in codemod_names]
-        print(unrecognized_codemods)
+
         if unrecognized_codemods:
             args = {
                 "values": unrecognized_codemods,

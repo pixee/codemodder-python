@@ -5,6 +5,7 @@ from tempfile import NamedTemporaryFile
 from typing import List
 from pathlib import Path
 from collections import defaultdict
+from codemodder.logging import logger
 
 
 def run(project_root: Path, yaml_files: List[Path]):
@@ -27,8 +28,9 @@ def run(project_root: Path, yaml_files: List[Path]):
             )
         )
         command.append(str(project_root))
-        print(f"Executing semgrep with: {command}")
-        subprocess.run(" ".join(command), shell=True, check=True)
+        joined_command = " ".join(command)
+        logger.debug("Executing semgrep with: `%s`", joined_command)
+        subprocess.run(joined_command, shell=True, check=True)
         results = results_by_rule_id(temp_sarif_file)
         return results
 

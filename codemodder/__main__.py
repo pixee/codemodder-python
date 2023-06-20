@@ -42,7 +42,7 @@ def update_code(file_path, new_code):
     """
     Write the `new_code` to the `file_path`
     """
-    print(f"Updated file {file_path}")
+    logger.info("Updated file %s", file_path)
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(new_code)
 
@@ -63,8 +63,8 @@ def run_codemods_for_file(
                     source_tree.code.splitlines(1), output_tree.code.splitlines(1)
                 )
             )
-            print(f"*** CHANGED {file_path} with codemod {name}:")
-            print(diff)
+            logger.debug("CHANGED %s with codemod %s", file_path, name)
+            logger.debug(diff)
             codemod_kls.CHANGESET.append(
                 ChangeSet(str(file_path), diff, changes=[]).to_json()
             )
@@ -82,7 +82,7 @@ def run(argv, original_args) -> int:
         return 1
 
     codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
-    print(codemods_to_run)
+    logger.debug("Codemods to run: %s", codemods_to_run)
 
     # mock this in some tests to speed unit tests up
     results_by_id = semgrep_run(argv.directory, find_all_yaml_files(codemods_to_run))
@@ -106,8 +106,8 @@ def run(argv, original_args) -> int:
 
         try:
             source_tree = cst.parse_module(code)
-        except Exception as e:
-            print(f"Error parsing file '{file_path}': {str(e)}")
+        except Exception:
+            logger.exception("Error parsing file %s", file_path)
             continue
 
         run_codemods_for_file(
