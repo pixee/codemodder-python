@@ -2,7 +2,6 @@ import libcst as cst
 from libcst import (
     FlattenSentinel,
     Module,
-    matchers,
 )
 from libcst.codemod import (
     Codemod,
@@ -56,13 +55,7 @@ class AddImportAndGen(Codemod):
 
 
 class RandomVisitor(BaseVisitor):
-    def __init__(self, context: CodemodContext, results):
-        super().__init__(context, results)
-
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         if self.filter_by_result(original_node):
-            # since it matched by position, this is a random call
-            # TODO make this gather nodes only to change later
             return cst.parse_expression("gen.uniform(0, 1)")
-            # return cst.Call(func=cst.Attribute(value=cst.Name(system_random_object_name),attr=cst.Name('uniform')),args=(cst.Arg(value=cst.Integer('0')),cst.Arg(value=cst.Integer('1'))))
         return updated_node

@@ -1,5 +1,5 @@
 import libcst as cst
-from libcst import Name, matchers
+from libcst import Name
 
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from libcst.metadata import PositionProvider
