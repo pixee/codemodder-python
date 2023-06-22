@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 import json
 import os
 import pathlib
@@ -7,6 +8,10 @@ from codemodder import __VERSION__
 
 
 class BaseIntegrationTest:
+    codemod = NotImplementedError
+    code_path = NotImplementedError
+    original_code = NotImplementedError
+    expected_new_code = NotImplementedError
     output_path = "test-codetf.txt"
 
     @classmethod
@@ -23,7 +28,7 @@ class BaseIntegrationTest:
         assert run["elapsed"] != ""
         assert (
             run["commandLine"]
-            == f"python -m codemodder tests/samples/ --output {output_path} --codemod-include={self.codemod_name}"
+            == f"python -m codemodder tests/samples/ --output {output_path} --codemod-include={self.codemod.NAME}"
         )
         assert run["directory"] == os.path.abspath("tests/samples/")
         assert run["sarifs"] == []
@@ -68,7 +73,7 @@ class BaseIntegrationTest:
                 "tests/samples/",
                 "--output",
                 self.output_path,
-                f"--codemod-include={self.codemod_name}",
+                f"--codemod-include={self.codemod.NAME}",
             ],
             check=False,
         )
