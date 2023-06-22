@@ -6,7 +6,8 @@ class BaseCodemod:
     NAME = NotImplemented
     DESCRIPTION = NotImplemented
     RULE_IDS = NotImplemented
-    CHANGESET = []
+    CHANGESET_ALL_FILES = []
+    CHANGES_IN_FILE = []
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)

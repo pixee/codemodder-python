@@ -10,20 +10,13 @@ from codemodder.logging import logger
 from codemodder.cli import parse_args
 from codemodder.code_directory import match_files
 from codemodder.codemods import match_codemods
+from codemodder.codemods.change import Change
 from codemodder.report.codetf_reporter import report_default
 from codemodder.semgrep import run as semgrep_run
 from codemodder.semgrep import find_all_yaml_files
 
 RESULTS_BY_CODEMOD = []
 from dataclasses import dataclass
-
-
-@dataclass
-class Change:
-    lineNumber: str
-    description: str
-    properties: dict
-    packageActions: list
 
 
 @dataclass
@@ -65,8 +58,11 @@ def run_codemods_for_file(
             )
             logger.debug("CHANGED %s with codemod %s", file_path, name)
             logger.debug(diff)
-            codemod_kls.CHANGESET.append(
-                ChangeSet(str(file_path), diff, changes=[]).to_json()
+
+            codemod_kls.CHANGESET_ALL_FILES.append(
+                ChangeSet(
+                    str(file_path), diff, changes=codemod_kls.CHANGES_IN_FILE
+                ).to_json()
             )
             if dry_run:
                 logger.info("Dry run, not changing files")
@@ -115,7 +111,7 @@ def run(argv, original_args) -> int:
         )
 
     for name, codemod_kls in codemods_to_run.items():
-        if not codemod_kls.CHANGESET:
+        if not codemod_kls.CHANGESET_ALL_FILES:
             continue
         data = {
             "codemod": f"pixee:python/{name}",
@@ -123,7 +119,7 @@ def run(argv, original_args) -> int:
             "references": [],
             "properties": {},
             "failedFiles": [],
-            "changeset": codemod_kls.CHANGESET,
+            "changeset": codemod_kls.CHANGESET_ALL_FILES,
         }
 
         RESULTS_BY_CODEMOD.append(data)

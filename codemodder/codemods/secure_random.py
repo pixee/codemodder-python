@@ -8,6 +8,7 @@ from libcst.codemod import (
     CodemodContext,
 )
 from libcst.codemod.visitors import RemoveImportsVisitor
+from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import BaseCodemod
 from codemodder.codemods.base_visitor import BaseVisitor
 
@@ -37,6 +38,7 @@ class SecureRandom(BaseCodemod, Codemod):
         # If any changes were made, we need to apply another transform, adding the import and gen object
         # TODO expensive, should probably use a boolean in the RandomVisitor
         if not new_tree.deep_equals(tree):
+            SecureRandom.CHANGES_IN_FILE = RandomVisitor.CHANGES_IN_FILE
             new_tree = AddImportAndGen(self.context).transform_module(new_tree)
             new_tree = RemoveImportsVisitor(
                 self.context, [("random", None, None)]
@@ -55,7 +57,15 @@ class AddImportAndGen(Codemod):
 
 
 class RandomVisitor(BaseVisitor):
+    CHANGE_DESCRIPTION = "Switch use of requests for security.safe_requests"
+    CHANGES_IN_FILE = []
+
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
-        if self.filter_by_result(original_node):
+        pos_to_match = self.get_metadata(self.METADATA_DEPENDENCIES[0], original_node)
+        if self.filter_by_result(pos_to_match):
+            line_number = pos_to_match.start.line
+            self.CHANGES_IN_FILE.append(
+                Change(line_number, self.CHANGE_DESCRIPTION).to_json()
+            )
             return cst.parse_expression("gen.uniform(0, 1)")
         return updated_node

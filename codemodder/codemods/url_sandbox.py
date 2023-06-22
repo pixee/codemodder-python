@@ -2,7 +2,7 @@ import libcst as cst
 from libcst import Name
 
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
-from libcst.metadata import PositionProvider
+from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import BaseCodemod
 from codemodder.codemods.base_visitor import BaseVisitor
 
@@ -10,12 +10,11 @@ replacement_import = "safe_requests"
 
 
 class UrlSandbox(BaseCodemod, BaseVisitor):
-    METADATA_DEPENDENCIES = (PositionProvider,)
-
     NAME = "url-sandbox"
     DESCRIPTION = (
         "Replaces request.{func} with more secure safe_request library functions."
     )
+    CHANGE_DESCRIPTION = "Switch use of requests for security.safe_requests"
     AUTHOR = "dani.alcala@pixee.ai"
     YAML_FILES = [
         "sandbox_url_creation.yaml",
@@ -30,7 +29,12 @@ class UrlSandbox(BaseCodemod, BaseVisitor):
         BaseVisitor.__init__(self, context, self._results)
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
-        if self.filter_by_result(original_node):
+        pos_to_match = self.get_metadata(self.METADATA_DEPENDENCIES[0], original_node)
+        if self.filter_by_result(pos_to_match):
+            line_number = pos_to_match.start.line
+            self.CHANGES_IN_FILE.append(
+                Change(line_number, self.CHANGE_DESCRIPTION).to_json()
+            )
             AddImportsVisitor.add_needed_import(
                 self.context, "security", "safe_requests"
             )

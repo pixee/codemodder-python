@@ -9,8 +9,7 @@ class BaseVisitor(VisitorBasedCodemodCommand):
         super().__init__(context)
         self.results = results
 
-    def filter_by_result(self, node):
-        pos_to_match = self.get_metadata(PositionProvider, node)
+    def filter_by_result(self, pos_to_match):
         all_pos = [extract_pos_from_result(result) for result in self.results]
         return any(match_pos(pos_to_match, position) for position in all_pos)
 

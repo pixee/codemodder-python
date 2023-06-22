@@ -40,7 +40,14 @@ class BaseIntegrationTest:
         assert len(result["changeset"]) == 1
         change = result["changeset"][0]
         assert change["path"] == output_path
-        assert change["changes"] == []
+        assert change["diff"] == self.expected_diff
+
+        assert len(change["changes"]) == 1
+        line_change = change["changes"][0]
+        assert line_change["lineNumber"] == self.expected_line_change
+        assert line_change["description"] == self.change_description
+        assert line_change["packageActions"] == []
+        assert line_change["properties"] == {}
 
     def _assert_codetf_output(self):
         with open(self.output_path, "r", encoding="utf-8") as f:
