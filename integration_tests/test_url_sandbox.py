@@ -12,7 +12,7 @@ class TestUrlSandbox:
 
     @classmethod
     def teardown_class(cls):
-        with open("tests/samples/make_request.py", "w", encoding="utf-8") as f:
+        with open(cls.code_path, "w", encoding="utf-8") as f:
             f.write(cls.original_code)
 
         pathlib.Path(cls.output_path).unlink(missing_ok=True)
@@ -74,7 +74,7 @@ class TestUrlSandbox:
             check=False,
         )
         assert completed_process.returncode == 0
-        with open("tests/samples/make_request.py", "r", encoding="utf-8") as f:
+        with open(self.code_path, "r", encoding="utf-8") as f:
             new_code = f.read()
         assert new_code == expected_new_code
 
