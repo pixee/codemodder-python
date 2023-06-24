@@ -1,5 +1,5 @@
 coverage==7.2.*
 mock==5.0.*
-pytest==7.3.*
+pytest==7.4.*
 types-mock==5.0.*
 -r codemodder.txt
