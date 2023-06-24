@@ -8,5 +8,5 @@ class TestUrlSandbox(BaseIntegrationTest):
     original_code = 'import requests\n\nrequests.get("www.google.com")\nvar = "hello"\n'
     expected_new_code = 'from security import safe_requests\n\nsafe_requests.get("www.google.com")\nvar = "hello"\n'
     expected_diff = '--- \n+++ \n@@ -1,4 +1,4 @@\n-import requests\n+from security import safe_requests\n \n-requests.get("www.google.com")\n+safe_requests.get("www.google.com")\n var = "hello"\n'
-    expected_line_change = 3
+    expected_line_change = "3"
     change_description = UrlSandbox.CHANGE_DESCRIPTION
