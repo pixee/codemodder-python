@@ -1,13 +1,14 @@
 import itertools
+from typing import List, ClassVar
 
 
 class BaseCodemod:
     # Implementation borrowed from https://stackoverflow.com/a/45250114
-    NAME = NotImplemented
-    DESCRIPTION = NotImplemented
-    RULE_IDS = NotImplemented
-    CHANGESET_ALL_FILES = []
-    CHANGES_IN_FILE = []
+    NAME: ClassVar[str] = NotImplemented
+    DESCRIPTION: ClassVar[str] = NotImplemented
+    RULE_IDS: List[str] = NotImplemented
+    CHANGESET_ALL_FILES: List = []
+    CHANGES_IN_FILE: List = []
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)

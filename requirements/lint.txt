@@ -1,4 +1,5 @@
 black==23.3.0
+mypy==1.4.*
 pylint==2.17.*
 -r codemodder.txt
 -r test.txt

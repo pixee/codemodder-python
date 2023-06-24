@@ -8,6 +8,7 @@ from libcst.codemod import (
     CodemodContext,
 )
 from libcst.codemod.visitors import RemoveImportsVisitor
+from typing import List
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import BaseCodemod
 from codemodder.codemods.base_visitor import BaseVisitor
@@ -58,14 +59,14 @@ class AddImportAndGen(Codemod):
 
 class RandomVisitor(BaseVisitor):
     CHANGE_DESCRIPTION = "Switch use of requests for security.safe_requests"
-    CHANGES_IN_FILE = []
+    CHANGES_IN_FILE: List = []
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         pos_to_match = self.get_metadata(self.METADATA_DEPENDENCIES[0], original_node)
         if self.filter_by_result(pos_to_match):
             line_number = pos_to_match.start.line
             self.CHANGES_IN_FILE.append(
-                Change(line_number, self.CHANGE_DESCRIPTION).to_json()
+                Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
             )
             return cst.parse_expression("gen.uniform(0, 1)")
         return updated_node

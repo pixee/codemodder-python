@@ -11,3 +11,16 @@ repos:
     rev: 23.3.0
     hooks:
     -   id: black
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.4.0
+  hooks:
+   - id: mypy
+     exclude: |
+       (?x)^(
+           tests/samples/.*|
+           integration_tests/.*
+       )$
+     additional_dependencies:
+       [
+         "types-mock==5.0.*",
+    ]

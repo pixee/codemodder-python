@@ -33,7 +33,7 @@ class UrlSandbox(BaseCodemod, BaseVisitor):
         if self.filter_by_result(pos_to_match):
             line_number = pos_to_match.start.line
             self.CHANGES_IN_FILE.append(
-                Change(line_number, self.CHANGE_DESCRIPTION).to_json()
+                Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
             )
             AddImportsVisitor.add_needed_import(
                 self.context, "security", "safe_requests"
