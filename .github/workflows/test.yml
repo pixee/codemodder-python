@@ -32,10 +32,17 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements/test.txt
       - name: Run pytest
+        env:
+          COVERAGE_FILE: coverage/py${{ matrix.python-version }}-coverage
         run: coverage run --source=codemodder/ -m pytest -v
       - name: Report coverage
+        env:
+          COVERAGE_FILE: coverage/py${{ matrix.python-version }}-coverage
         run: coverage report -m --fail-under=96
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
+        with:
+          name: py${{ matrix.python-version }}-coverage
+          path: ./coverage/py${{ matrix.python-version }}-coverage
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
