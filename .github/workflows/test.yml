@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 3
     strategy:
       matrix:
-        python-version: ['3.9', '3.10',  '3.11' ]
+        python-version: ['3.9', '3.10',  '3.11']
     steps:
       - name: Set Up Python
         uses: actions/setup-python@v4
@@ -43,6 +43,6 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           name: py${{ matrix.python-version }}-coverage
-          path: ./coverage/py${{ matrix.python-version }}-coverage
+          files: ./coverage/py${{ matrix.python-version }}-coverage
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
