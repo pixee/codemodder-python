@@ -46,6 +46,18 @@ class TestUrlSandbox:
 
         assert output_tree.code == expected
 
+    def test_with_empty_results(self):
+        input_code = """import requests
+
+requests.get("www.google.com")
+var = "hello"
+"""
+        input_tree = cst.parse_module(input_code)
+        command_instance = UrlSandbox(CodemodContext(), defaultdict(list))
+        output_tree = command_instance.transform_module(input_tree)
+
+        assert output_tree.code == input_code
+
     def test_import_requests(self):
         input_code = """import requests
 
