@@ -1,3 +1,4 @@
+from collections import defaultdict
 import libcst as cst
 from libcst.codemod import CodemodContext
 import pytest
@@ -5,33 +6,38 @@ from codemodder.codemods.url_sandbox import UrlSandbox
 
 
 class TestUrlSandbox:
-    RESULTS_BY_ID = {
-        "sandbox-url-creation": [
-            {
-                "fingerprints": {"matchBasedId/v1": "6fa4"},
-                "locations": [
-                    {
-                        "physicalLocation": {
-                            "artifactLocation": {
-                                "uri": "tests/samples/make_request.py",
-                                "uriBaseId": "%SRCROOT%",
-                            },
-                            "region": {
-                                "endColumn": 31,
-                                "endLine": 3,
-                                "snippet": {"text": "requests.get('www.google.com')"},
-                                "startColumn": 1,
-                                "startLine": 3,
-                            },
-                        }
-                    },
-                ],
-                "message": {"text": "Unbounded URL creation"},
-                "properties": {},
-                "ruleId": "codemodder.codemods.semgrep.sandbox-url-creation",
-            }
-        ],
-    }
+    RESULTS_BY_ID = defaultdict(
+        list,
+        {
+            "sandbox-url-creation": [
+                {
+                    "fingerprints": {"matchBasedId/v1": "6fa4"},
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "tests/samples/make_request.py",
+                                    "uriBaseId": "%SRCROOT%",
+                                },
+                                "region": {
+                                    "endColumn": 31,
+                                    "endLine": 3,
+                                    "snippet": {
+                                        "text": "requests.get('www.google.com')"
+                                    },
+                                    "startColumn": 1,
+                                    "startLine": 3,
+                                },
+                            }
+                        },
+                    ],
+                    "message": {"text": "Unbounded URL creation"},
+                    "properties": {},
+                    "ruleId": "codemodder.codemods.semgrep.sandbox-url-creation",
+                }
+            ],
+        },
+    )
 
     def run_and_assert(self, input_code, expected):
         input_tree = cst.parse_module(input_code)

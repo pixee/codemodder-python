@@ -1,3 +1,4 @@
+from collections import defaultdict
 import libcst as cst
 from libcst.codemod import CodemodContext
 import pytest
@@ -5,33 +6,36 @@ from codemodder.codemods.secure_random import SecureRandom
 
 
 class TestSecureRandom:
-    RESULTS_BY_ID = {
-        "secure-random": [
-            {
-                "fingerprints": {"matchBasedId/v1": "3f3a "},
-                "locations": [
-                    {
-                        "physicalLocation": {
-                            "artifactLocation": {
-                                "uri": "tests/samples/insecure_random.py ",
-                                "uriBaseId": "%SRCROOT% ",
-                            },
-                            "region": {
-                                "endColumn": 16,
-                                "endLine": 3,
-                                "snippet": {"text": "random.random() "},
-                                "startColumn": 1,
-                                "startLine": 3,
-                            },
+    RESULTS_BY_ID = defaultdict(
+        list,
+        {
+            "secure-random": [
+                {
+                    "fingerprints": {"matchBasedId/v1": "3f3a "},
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "tests/samples/insecure_random.py ",
+                                    "uriBaseId": "%SRCROOT% ",
+                                },
+                                "region": {
+                                    "endColumn": 16,
+                                    "endLine": 3,
+                                    "snippet": {"text": "random.random() "},
+                                    "startColumn": 1,
+                                    "startLine": 3,
+                                },
+                            }
                         }
-                    }
-                ],
-                "message": {"text": "Insecure Random "},
-                "properties": {},
-                "ruleId": "codemodder.codemods.semgrep.secure-random ",
-            }
-        ]
-    }
+                    ],
+                    "message": {"text": "Insecure Random "},
+                    "properties": {},
+                    "ruleId": "codemodder.codemods.semgrep.secure-random ",
+                }
+            ]
+        },
+    )
 
     def run_and_assert(self, input_code, expexted_output):
         input_tree = cst.parse_module(input_code)
