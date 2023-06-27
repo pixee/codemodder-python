@@ -80,7 +80,6 @@ def run(argv, original_args) -> int:
     codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
     logger.debug("Codemods to run: %s", codemods_to_run)
 
-    # mock this in some tests to speed unit tests up
     results_by_id = semgrep_run(argv.directory, find_all_yaml_files(codemods_to_run))
 
     if not results_by_id:
