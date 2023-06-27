@@ -90,3 +90,21 @@ class BaseIntegrationTest:
         assert new_code == self.expected_new_code
 
         self._assert_codetf_output()
+
+        # idempotency test, run it again and assert no files changed
+        completed_process = subprocess.run(
+            [
+                "python",
+                "-m",
+                "codemodder",
+                "tests/samples/",
+                "--output",
+                self.output_path,
+                f"--codemod-include={self.codemod.NAME}",
+            ],
+            check=False,
+        )
+        assert completed_process.returncode == 0
+        with open(self.output_path, "r", encoding="utf-8") as f:
+            codetf = json.load(f)
+        assert codetf["results"] == []
