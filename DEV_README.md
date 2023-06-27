@@ -18,3 +18,9 @@ to specify a specific Python version. If using `bash` or any compatible shell, a
 2. `cd codemodder-python` and run `pip install -r` on all the files under `requirements/`
 
 3. You should now be able to run `pylint`, `pytest`, etc.
+
+
+## Docker
+
+You can build the docker image with `docker build .` and run it with `docker run`. You can also do
+`docker run <image_id> python -m codemodder ....`
