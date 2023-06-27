@@ -68,20 +68,22 @@ class BaseIntegrationTest:
         output files
         """
 
+        command = [
+            "python",
+            "-m",
+            "codemodder",
+            "tests/samples/",
+            "--output",
+            self.output_path,
+            f"--codemod-include={self.codemod.NAME}",
+        ]
+
         with open(self.code_path, "r", encoding="utf-8") as f:
             code = f.read()
         assert code == self.original_code
 
         completed_process = subprocess.run(
-            [
-                "python",
-                "-m",
-                "codemodder",
-                "tests/samples/",
-                "--output",
-                self.output_path,
-                f"--codemod-include={self.codemod.NAME}",
-            ],
+            command,
             check=False,
         )
         assert completed_process.returncode == 0
@@ -93,18 +95,13 @@ class BaseIntegrationTest:
 
         # idempotency test, run it again and assert no files changed
         completed_process = subprocess.run(
-            [
-                "python",
-                "-m",
-                "codemodder",
-                "tests/samples/",
-                "--output",
-                self.output_path,
-                f"--codemod-include={self.codemod.NAME}",
-            ],
+            command,
             check=False,
         )
         assert completed_process.returncode == 0
         with open(self.output_path, "r", encoding="utf-8") as f:
             codetf = json.load(f)
         assert codetf["results"] == []
+        with open(self.code_path, "r", encoding="utf-8") as f:
+            still_new_code = f.read()
+        assert still_new_code == self.expected_new_code
