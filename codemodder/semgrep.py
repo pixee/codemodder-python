@@ -58,13 +58,3 @@ def results_by_rule_id(sarif_file):
         rule_id = r["ruleId"].rsplit(".")[-1]
         rule_id_dict.setdefault(rule_id, []).append(r)
     return rule_id_dict
-
-
-def get_results():
-    """
-    Extract the results of a semgrep run.
-    """
-    with open("sarif.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    return data["runs"][0]["results"]
