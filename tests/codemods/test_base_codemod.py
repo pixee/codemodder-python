@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import DefaultDict
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
+import pytest
 from codemodder.codemods.base_codemod import BaseCodemod
 
 
@@ -31,3 +32,22 @@ class TestEmptyResults:
     def test_empty_results(self):
         input_code = """print('Hello World')"""
         self.run_and_assert(input_code, input_code)
+
+
+class TestBaseCodemod:
+    def test_missing_class_attrs(self):
+        with pytest.raises(NotImplementedError):
+
+            class MissingInfoCodemod(BaseCodemod):
+                ...
+
+        with pytest.raises(NotImplementedError):
+
+            class MissingInfoCodemod(BaseCodemod):
+                NAME = "something"
+
+        with pytest.raises(NotImplementedError):
+
+            class MissingInfoCodemod(BaseCodemod):
+                NAME = "something"
+                DESCRIPTION = "something else"
