@@ -17,10 +17,9 @@ def match_codemods(codemod_include: list, codemod_exclude: list):
             for codemod in DEFAULT_CODEMODS
             if (name := codemod.NAME) not in codemod_exclude
         }
-    if codemod_include:
-        return {
-            name: codemod
-            for codemod in DEFAULT_CODEMODS
-            if (name := codemod.NAME) in codemod_include
-        }
-    return {}
+
+    return {
+        name: codemod
+        for codemod in DEFAULT_CODEMODS
+        if (name := codemod.NAME) in codemod_include
+    }
