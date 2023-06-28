@@ -35,6 +35,7 @@ class TestEmptyResults:
 
 
 class TestBaseCodemod:
+    # pylint: disable=unused-variable
     def test_missing_class_attrs(self):
         with pytest.raises(NotImplementedError):
 
@@ -43,11 +44,11 @@ class TestBaseCodemod:
 
         with pytest.raises(NotImplementedError):
 
-            class MissingInfoCodemod(BaseCodemod):
+            class MissingDescriptionCodemod(BaseCodemod):
                 NAME = "something"
 
         with pytest.raises(NotImplementedError):
 
-            class MissingInfoCodemod(BaseCodemod):
+            class MissingRuleIdsCodemod(BaseCodemod):
                 NAME = "something"
                 DESCRIPTION = "something else"
