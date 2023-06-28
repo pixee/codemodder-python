@@ -56,6 +56,9 @@ var = "hello"
 
         assert output_tree.code == input_code
 
+    def test_rule_ids(self):
+        assert SecureRandom.RULE_IDS == ["secure-random"]
+
     def test_import_random(self):
         input_code = """import random
 

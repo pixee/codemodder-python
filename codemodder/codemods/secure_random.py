@@ -12,6 +12,7 @@ from typing import List
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import BaseCodemod
 from codemodder.codemods.base_visitor import BaseVisitor
+from codemodder.semgrep import rule_ids_from_yaml_files
 
 
 system_random_object_name = "gen"
@@ -22,12 +23,10 @@ class SecureRandom(BaseCodemod, Codemod):
     DESCRIPTION = "Replaces random.{func} with more secure secrets library functions."
     AUTHOR = "dani.alcala@pixee.ai"
     YAML_FILES = [
-        "secure-random.yaml",
+        "secure_random.yaml",
     ]
-    # TODO may be recovered by the yaml files themselves
-    RULE_IDS = [
-        "secure-random",
-    ]
+
+    RULE_IDS = rule_ids_from_yaml_files(YAML_FILES)
 
     def __init__(self, context: CodemodContext, results_by_id):
         Codemod.__init__(self, context)

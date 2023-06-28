@@ -1,11 +1,14 @@
 import json
 import subprocess
 import itertools
+import yaml
 from tempfile import NamedTemporaryFile
 from typing import List
 from pathlib import Path
 from collections import defaultdict
 from codemodder.logging import logger
+
+YAML_FILES_DIR = Path("codemodder") / "codemods" / "semgrep"
 
 
 def run(project_root: Path, yaml_files: List[Path]):
@@ -40,7 +43,7 @@ def find_all_yaml_files(codemods) -> list[Path]:  # pylint: disable=unused-argum
     Finds all yaml files associated with the given codemods.
     """
     # TODO for now, just pass everything until we figure out semgrep codemods
-    return list((Path("codemodder") / "codemods" / "semgrep").iterdir())
+    return list(YAML_FILES_DIR.iterdir())
 
 
 def results_by_rule_id(sarif_file):
@@ -58,3 +61,11 @@ def results_by_rule_id(sarif_file):
         rule_id = r["ruleId"].rsplit(".")[-1]
         rule_id_dict.setdefault(rule_id, []).append(r)
     return rule_id_dict
+
+
+def rule_ids_from_yaml_files(yaml_files):
+    all_yaml = []
+    for file in yaml_files:
+        with open(YAML_FILES_DIR / file, encoding="utf-8") as yaml_file:
+            all_yaml.append(yaml.load(yaml_file, Loader=yaml.Loader))
+    return [r["id"] for yaml_file in all_yaml for r in yaml_file["rules"]]

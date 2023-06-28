@@ -71,6 +71,9 @@ var = "hello"
 """
         self.run_and_assert(input_code, expected)
 
+    def test_rule_ids(self):
+        assert UrlSandbox.RULE_IDS == ["sandbox-url-creation"]
+
     @pytest.mark.skip()
     def test_from_requests(self):
         input_code = """from requests import get
