@@ -1,7 +1,9 @@
 import mock
 import pytest
 from codemodder.__main__ import run
+from codemodder.semgrep import run as semgrep_run
 from codemodder.cli import parse_args
+from .conftest import CODEMOD_NAMES
 
 
 class TestRun:
@@ -47,7 +49,8 @@ class TestRun:
 
     @mock.patch("codemodder.__main__.logger.info")
     @mock.patch("codemodder.__main__.update_code")
-    def test_dry_run(self, mock_update_code, info_log):
+    @mock.patch("codemodder.__main__.semgrep_run", side_effect=semgrep_run)
+    def test_dry_run(self, _, mock_update_code, info_log):
         args = [
             "tests/samples/",
             "--output",
@@ -90,6 +93,20 @@ class TestRun:
 
         for codemod_results in results_by_codemod:
             assert len(codemod_results["changeset"]) > 0
+
+    @mock.patch("codemodder.__main__.semgrep_run")
+    def test_no_codemods_to_run(self, mock_semgrep_run):
+        names = ",".join(CODEMOD_NAMES)
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            f"--codemod-exclude={names}",
+        ]
+
+        exit_code = run(parse_args(args), args)
+        assert exit_code == 0
+        mock_semgrep_run.assert_not_called()
 
 
 class TestExitCode:

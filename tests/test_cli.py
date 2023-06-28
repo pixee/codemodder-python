@@ -2,9 +2,7 @@ import mock
 import pytest
 from codemodder.cli import parse_args
 from codemodder import __VERSION__
-from codemodder.codemods import DEFAULT_CODEMODS
-
-NAMES = tuple(codemod.NAME for codemod in DEFAULT_CODEMODS)
+from .conftest import CODEMOD_NAMES
 
 
 class TestParseArgs:
@@ -74,7 +72,7 @@ class TestParseArgs:
 
         for print_call in mock_print.call_args_list:
             assert print_call[0][0].startswith("pixee:python/")
-            assert print_call[0][0].endswith(NAMES)
+            assert print_call[0][0].endswith(CODEMOD_NAMES)
 
         assert err.value.args[0] == 0
 
@@ -123,7 +121,7 @@ class TestParseArgs:
                 ]
             )
 
-        names = ", ".join(map(repr, NAMES))
+        names = ", ".join(map(repr, CODEMOD_NAMES))
         assert (
             err.value.args[0]
             == f"CLI error: argument --codemod-include: invalid choice(s): ['{bad_codemod}'] (choose from {names})"

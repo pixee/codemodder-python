@@ -78,8 +78,12 @@ def run(argv, original_args) -> int:
         return 1
 
     codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
-    logger.debug("Codemods to run: %s", codemods_to_run)
+    if not codemods_to_run:
+        # We only currently have semgrep codemods so don't go on if no codemods matched.
+        logger.warning("No codemods to run")
+        return 0
 
+    logger.debug("Codemods to run: %s", codemods_to_run)
     results_by_id = semgrep_run(argv.directory, find_all_yaml_files(codemods_to_run))
 
     if not results_by_id:
