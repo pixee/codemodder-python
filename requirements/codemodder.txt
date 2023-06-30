@@ -9,6 +9,6 @@ packaging==23.1
 pathspec==0.11.1
 platformdirs==3.8.0
 PyYAML==6.0
-semgrep==1.29.*
+semgrep==1.30.*
 typing-inspect==0.9.0
 typing_extensions==4.7.0
