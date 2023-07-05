@@ -45,7 +45,7 @@ class TestSemgrep:
         assert location["region"]["snippet"]["text"] == "random.random()"
 
     def test_two_codemods(self):
-        results_by_id = semgrep_run(
+        results_by_path_and_id = semgrep_run(
             "tests/samples/",
             [
                 "codemodder/codemods/semgrep/secure_random.yaml",
@@ -53,10 +53,17 @@ class TestSemgrep:
             ],
         )
 
-        assert sorted(results_by_id.keys()) == ["sandbox-url-creation", "secure-random"]
+        assert sorted(results_by_path_and_id.keys()) == [
+            "tests/samples/insecure_random.py",
+            "tests/samples/make_request.py",
+        ]
 
-        url_sandbox_results = results_by_id["sandbox-url-creation"]
+        url_sandbox_results = results_by_path_and_id["tests/samples/make_request.py"][
+            "sandbox-url-creation"
+        ]
         self._assert_url_sandbox_results(url_sandbox_results)
 
-        secure_random = results_by_id["secure-random"]
+        secure_random = results_by_path_and_id["tests/samples/insecure_random.py"][
+            "secure-random"
+        ]
         self._assert_secure_random_results(secure_random)

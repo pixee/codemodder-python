@@ -22,10 +22,11 @@ class BaseCodemod:
         if cls.RULE_IDS is NotImplemented:
             raise NotImplementedError("You forgot to define class attribute: RULE_IDS")
 
-    def __init__(self, results_by_id):
+    def __init__(self, file_context):
+        self.file_context = file_context
         self._results = list(
             itertools.chain.from_iterable(
-                map(lambda rId: results_by_id[rId], self.RULE_IDS)
+                map(lambda rId: file_context.results_by_id[rId], self.RULE_IDS)
             )
         )
 

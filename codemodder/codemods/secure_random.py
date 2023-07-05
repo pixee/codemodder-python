@@ -12,6 +12,7 @@ from typing import List
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import BaseCodemod
 from codemodder.codemods.base_visitor import BaseVisitor
+from codemodder.file_context import FileContext
 from codemodder.semgrep import rule_ids_from_yaml_files
 
 
@@ -28,13 +29,18 @@ class SecureRandom(BaseCodemod, Codemod):
 
     RULE_IDS = rule_ids_from_yaml_files(YAML_FILES)
 
-    def __init__(self, context: CodemodContext, results_by_id):
-        Codemod.__init__(self, context)
-        BaseCodemod.__init__(self, results_by_id)
+    def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
+        Codemod.__init__(self, codemod_context)
+        BaseCodemod.__init__(self, file_context)
 
     def transform_module_impl(self, tree: Module) -> Module:
         # We first try to replace any random() call found by semgrep
-        new_tree = RandomVisitor(self.context, self._results).transform_module(tree)
+        new_tree = RandomVisitor(
+            self.context,
+            self._results,
+            self.file_context.line_exclude,
+            self.file_context.line_include,
+        ).transform_module(tree)
         # If any changes were made, we need to apply another transform, adding the import and gen object
         # TODO expensive, should probably use a boolean in the RandomVisitor
         if not new_tree.deep_equals(tree):
@@ -62,7 +68,9 @@ class RandomVisitor(BaseVisitor):
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         pos_to_match = self.get_metadata(self.METADATA_DEPENDENCIES[0], original_node)
-        if self.filter_by_result(pos_to_match):
+        if self.filter_by_result(
+            pos_to_match
+        ) and self.filter_by_path_includes_or_excludes(pos_to_match):
             line_number = pos_to_match.start.line
             self.CHANGES_IN_FILE.append(
                 Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()

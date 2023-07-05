@@ -34,7 +34,7 @@ def run(project_root: Path, yaml_files: List[Path]):
         joined_command = " ".join(command)
         logger.debug("Executing semgrep with: `%s`", joined_command)
         subprocess.run(joined_command, shell=True, check=True)
-        results = results_by_rule_id(temp_sarif_file)
+        results = results_by_path_and_rule_id(temp_sarif_file)
         return results
 
 
@@ -46,7 +46,7 @@ def find_all_yaml_files(codemods) -> list[Path]:  # pylint: disable=unused-argum
     return list(YAML_FILES_DIR.iterdir())
 
 
-def results_by_rule_id(sarif_file):
+def results_by_path_and_rule_id(sarif_file):
     """
     Extract all the results of a sarif file and organize them by id.
     """
@@ -55,12 +55,21 @@ def results_by_rule_id(sarif_file):
     with open(sarif_file.name, "r", encoding="utf-8") as f:
         data = json.load(f)
     results = [result for sarif_run in data["runs"] for result in sarif_run["results"]]
-    rule_id_dict = defaultdict(list)
+
+    path_dict = defaultdict(list)
     for r in results:
-        # semgrep preprends the folders into the rule-id, we want the base name only
-        rule_id = r["ruleId"].rsplit(".")[-1]
-        rule_id_dict.setdefault(rule_id, []).append(r)
-    return rule_id_dict
+        path = r["locations"][0]["physicalLocation"]["artifactLocation"]["uri"]
+        path_dict.setdefault(path, []).append(r)
+
+    path_and_ruleid_dict = defaultdict(lambda: defaultdict(list))
+    for path in path_dict.keys():
+        rule_id_dict = defaultdict(list)
+        for r in path_dict.get(path):
+            # semgrep preprends the folders into the rule-id, we want the base name only
+            rule_id = r["ruleId"].rsplit(".")[-1]
+            rule_id_dict.setdefault(rule_id, []).append(r)
+        path_and_ruleid_dict[path] = rule_id_dict
+    return path_and_ruleid_dict
 
 
 def rule_ids_from_yaml_files(yaml_files):

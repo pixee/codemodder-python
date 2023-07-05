@@ -1,8 +1,10 @@
 from collections import defaultdict
+from pathlib import Path
 import libcst as cst
 from libcst.codemod import CodemodContext
 import pytest
 from codemodder.codemods.url_sandbox import UrlSandbox
+from codemodder.file_context import FileContext
 
 
 class TestUrlSandbox:
@@ -41,7 +43,8 @@ class TestUrlSandbox:
 
     def run_and_assert(self, input_code, expected):
         input_tree = cst.parse_module(input_code)
-        command_instance = UrlSandbox(CodemodContext(), self.RESULTS_BY_ID)
+        file_context = FileContext(Path(""), False, [], [], self.RESULTS_BY_ID)
+        command_instance = UrlSandbox(CodemodContext(), file_context)
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == expected
@@ -53,7 +56,8 @@ requests.get("www.google.com")
 var = "hello"
 """
         input_tree = cst.parse_module(input_code)
-        command_instance = UrlSandbox(CodemodContext(), defaultdict(list))
+        file_context = FileContext(Path(""), False, [], [], defaultdict(list))
+        command_instance = UrlSandbox(CodemodContext(), file_context)
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == input_code

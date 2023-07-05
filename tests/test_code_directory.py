@@ -1,7 +1,8 @@
 # pylint: disable=redefined-outer-name
+from pathlib import Path
 import pytest
 
-from codemodder.code_directory import match_files
+from codemodder.code_directory import file_line_patterns, match_files
 
 
 @pytest.fixture(scope="module")
@@ -39,6 +40,26 @@ class TestMatchFiles:
         files = match_files(dir_structure, ["*request.py"])
         self._assert_expected(files, expected)
 
+    def test_match_included_file_with_line(self, dir_structure):
+        expected = ["insecure_random.py"]
+        files = match_files(dir_structure, include_paths=["insecure_random.py:2"])
+        self._assert_expected(files, expected)
+
+    def test_match_excluded_line(self, dir_structure):
+        expected = ["empty_for_testing.py", "insecure_random.py", "make_request.py"]
+        files = match_files(dir_structure, exclude_paths=["insecure_random.py:2"])
+        self._assert_expected(files, expected)
+
+    def test_match_included_line_and_glob(self, dir_structure):
+        expected = ["insecure_random.py"]
+        files = match_files(dir_structure, include_paths=["insecure*.py:3"])
+        self._assert_expected(files, expected)
+
+    def test_match_excluded_line_and_glob(self, dir_structure):
+        expected = ["empty_for_testing.py", "insecure_random.py", "make_request.py"]
+        files = match_files(dir_structure, exclude_paths=["insecure*.py:3"])
+        self._assert_expected(files, expected)
+
     def test_match_excluded_dir_incorrect_glob(self, dir_structure):
         incorrect_glob = "more_samples"
         expected = ["empty_for_testing.py", "insecure_random.py", "make_request.py"]
@@ -70,3 +91,7 @@ class TestMatchFiles:
             include_paths=["*request.py", "*empty*.py", "*random.py"],
         )
         self._assert_expected(files, expected)
+
+    def test_extract_line_from_pattern(self):
+        lines = file_line_patterns(Path("insecure_random.py"), ["insecure_*.py:3"])
+        assert lines == [3]

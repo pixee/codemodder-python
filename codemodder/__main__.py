@@ -4,11 +4,12 @@ import os
 import sys
 import libcst as cst
 from libcst.codemod import CodemodContext
+from codemodder.file_context import FileContext
 
 
 from codemodder.logging import logger
 from codemodder.cli import parse_args
-from codemodder.code_directory import match_files
+from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.codemods import match_codemods
 from codemodder.codemods.change import Change
 from codemodder.report.codetf_reporter import report_default
@@ -41,12 +42,17 @@ def update_code(file_path, new_code):
 
 
 def run_codemods_for_file(
-    file_path, codemods_to_run, source_tree, results_by_id, dry_run
+    file_context,
+    codemods_to_run,
+    source_tree,
 ):
     for name, codemod_kls in codemods_to_run.items():
         logger.info("Running codemod %s", name)
         wrapper = cst.MetadataWrapper(source_tree)
-        command_instance = codemod_kls(CodemodContext(wrapper=wrapper), results_by_id)
+        command_instance = codemod_kls(
+            CodemodContext(wrapper=wrapper),
+            file_context,
+        )
         output_tree = command_instance.transform_module(source_tree)
         changed_file = not output_tree.deep_equals(source_tree)
 
@@ -56,18 +62,20 @@ def run_codemods_for_file(
                     source_tree.code.splitlines(1), output_tree.code.splitlines(1)
                 )
             )
-            logger.debug("CHANGED %s with codemod %s", file_path, name)
+            logger.debug("CHANGED %s with codemod %s", file_context.file_path, name)
             logger.debug(diff)
 
             codemod_kls.CHANGESET_ALL_FILES.append(
                 ChangeSet(
-                    str(file_path), diff, changes=codemod_kls.CHANGES_IN_FILE
+                    str(file_context.file_path),
+                    diff,
+                    changes=codemod_kls.CHANGES_IN_FILE,
                 ).to_json()
             )
-            if dry_run:
+            if file_context.dry_run:
                 logger.info("Dry run, not changing files")
             else:
-                update_code(file_path, output_tree.code)
+                update_code(file_context.file_path, output_tree.code)
 
 
 def run(argv, original_args) -> int:
@@ -84,9 +92,11 @@ def run(argv, original_args) -> int:
         return 0
 
     logger.debug("Codemods to run: %s", codemods_to_run)
-    results_by_id = semgrep_run(argv.directory, find_all_yaml_files(codemods_to_run))
+    results_by_path_and_rule_id = semgrep_run(
+        argv.directory, find_all_yaml_files(codemods_to_run)
+    )
 
-    if not results_by_id:
+    if not results_by_path_and_rule_id:
         logger.warning("No semgrep results.")
         return 0
 
@@ -109,8 +119,21 @@ def run(argv, original_args) -> int:
             logger.exception("Error parsing file %s", file_path)
             continue
 
+        line_exclude = file_line_patterns(file_path, argv.path_exclude)
+        line_include = file_line_patterns(file_path, argv.path_include)
+
+        file_context = FileContext(
+            file_path,
+            argv.dry_run,
+            line_exclude,
+            line_include,
+            results_by_path_and_rule_id[str(file_path)],
+        )
+
         run_codemods_for_file(
-            file_path, codemods_to_run, source_tree, results_by_id, argv.dry_run
+            file_context,
+            codemods_to_run,
+            source_tree,
         )
 
     for name, codemod_kls in codemods_to_run.items():

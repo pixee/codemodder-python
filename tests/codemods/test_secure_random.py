@@ -1,8 +1,10 @@
 from collections import defaultdict
+from pathlib import Path
 import libcst as cst
 from libcst.codemod import CodemodContext
 import pytest
 from codemodder.codemods.secure_random import SecureRandom
+from codemodder.file_context import FileContext
 
 
 class TestSecureRandom:
@@ -39,7 +41,8 @@ class TestSecureRandom:
 
     def run_and_assert(self, input_code, expexted_output):
         input_tree = cst.parse_module(input_code)
-        command_instance = SecureRandom(CodemodContext(), self.RESULTS_BY_ID)
+        file_context = FileContext(Path(""), False, [], [], self.RESULTS_BY_ID)
+        command_instance = SecureRandom(CodemodContext(), file_context)
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == expexted_output
@@ -51,7 +54,8 @@ random.random()
 var = "hello"
 """
         input_tree = cst.parse_module(input_code)
-        command_instance = SecureRandom(CodemodContext(), defaultdict(list))
+        file_context = FileContext(Path(""), False, [], [], defaultdict(list))
+        command_instance = SecureRandom(CodemodContext(), file_context)
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == input_code

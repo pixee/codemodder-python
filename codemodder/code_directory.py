@@ -11,7 +11,22 @@ def py_file_matches(file_path, patterns):
     is_py_file = file_path.match(DEFAULT_INCLUDE)
     if not patterns:
         return is_py_file
-    return is_py_file and any(file_path.match(pattern) for pattern in patterns)
+    return is_py_file and any(
+        file_path.match(pattern.rsplit(":")[0]) for pattern in patterns
+    )
+
+
+def file_line_patterns(file_path, patterns):
+    """
+    Find the lines included or excluded for a given file_path among the patterns
+    """
+    lines = []
+    for pattern in patterns or []:
+        split = pattern.rsplit(":")
+        if len(split) == 2:
+            if file_path.match(split[0]):
+                lines.append(int(split[1]))
+    return lines
 
 
 def match_files(parent_path, exclude_paths=None, include_paths=None):
