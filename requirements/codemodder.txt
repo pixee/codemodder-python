@@ -7,7 +7,7 @@ libcst==1.0.*
 mypy-extensions==1.0.0
 packaging==23.1
 pathspec==0.11.1
-platformdirs==3.8.0
+platformdirs==3.8.1
 PyYAML==6.0
 semgrep==1.30.*
 typing-inspect==0.9.0
