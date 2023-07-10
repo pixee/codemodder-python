@@ -3,7 +3,7 @@ from pathlib import Path
 import libcst as cst
 from libcst.codemod import CodemodContext
 import pytest
-from codemodder.codemods.url_sandbox import UrlSandbox
+from codemodder.codemods.process_creation_sandbox import ProcessSandbox
 from codemodder.file_context import FileContext
 
 
@@ -11,91 +11,195 @@ class TestProcessCreationSandbox:
     RESULTS_BY_ID = defaultdict(
         list,
         {
-            "sandbox-url-creation": [
+            "sandbox-process-creation": [
                 {
-                    "fingerprints": {"matchBasedId/v1": "6fa4"},
+                    "fingerprints": {"matchBasedId/v1": "1f266"},
                     "locations": [
                         {
                             "physicalLocation": {
                                 "artifactLocation": {
-                                    "uri": "tests/samples/make_request.py",
+                                    "uri": "tests/samples/make_process.py",
                                     "uriBaseId": "%SRCROOT%",
                                 },
                                 "region": {
-                                    "endColumn": 31,
+                                    "endColumn": 14,
+                                    "endLine": 11,
+                                    "snippet": {
+                                        "text": 'import subprocess\n\nsubprocess.run("echo \'hi\'", shell=True)\nsubprocess.run(["ls", "-l"])\n\nsubprocess.call("echo \'hi\'", shell=True)\nsubprocess.call(["ls", "-l"])\n\nsubprocess.check_output(["ls", "-l"])\n\nvar = "hello"'
+                                    },
+                                    "startColumn": 1,
+                                    "startLine": 1,
+                                },
+                            }
+                        }
+                    ],
+                    "message": {"text": "Unbounded Process Creation"},
+                    "properties": {},
+                    "ruleId": "codemodder.codemods.semgrep.sandbox-process-creation",
+                },
+                {
+                    "fingerprints": {"matchBasedId/v1": "1f266"},
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "tests/samples/make_process.py",
+                                    "uriBaseId": "%SRCROOT%",
+                                },
+                                "region": {
+                                    "endColumn": 40,
                                     "endLine": 3,
                                     "snippet": {
-                                        "text": "requests.get('www.google.com')"
+                                        "text": "subprocess.run(\"echo 'hi'\", shell=True)"
                                     },
                                     "startColumn": 1,
                                     "startLine": 3,
                                 },
                             }
-                        },
+                        }
                     ],
-                    "message": {"text": "Unbounded URL creation"},
+                    "message": {"text": "Unbounded Process Creation"},
                     "properties": {},
-                    "ruleId": "codemodder.codemods.semgrep.sandbox-url-creation",
-                }
-            ],
+                    "ruleId": "codemodder.codemods.semgrep.sandbox-process-creation",
+                },
+                {
+                    "fingerprints": {"matchBasedId/v1": "1f266"},
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "tests/samples/make_process.py",
+                                    "uriBaseId": "%SRCROOT%",
+                                },
+                                "region": {
+                                    "endColumn": 29,
+                                    "endLine": 4,
+                                    "snippet": {"text": 'subprocess.run(["ls", "-l"])'},
+                                    "startColumn": 1,
+                                    "startLine": 4,
+                                },
+                            }
+                        }
+                    ],
+                    "message": {"text": "Unbounded Process Creation"},
+                    "properties": {},
+                    "ruleId": "codemodder.codemods.semgrep.sandbox-process-creation",
+                },
+                {
+                    "fingerprints": {"matchBasedId/v1": "1f266"},
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "tests/samples/make_process.py",
+                                    "uriBaseId": "%SRCROOT%",
+                                },
+                                "region": {
+                                    "endColumn": 41,
+                                    "endLine": 6,
+                                    "snippet": {
+                                        "text": "subprocess.call(\"echo 'hi'\", shell=True)"
+                                    },
+                                    "startColumn": 1,
+                                    "startLine": 6,
+                                },
+                            }
+                        }
+                    ],
+                    "message": {"text": "Unbounded Process Creation"},
+                    "properties": {},
+                    "ruleId": "codemodder.codemods.semgrep.sandbox-process-creation",
+                },
+                {
+                    "fingerprints": {"matchBasedId/v1": "1f266"},
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "tests/samples/make_process.py",
+                                    "uriBaseId": "%SRCROOT%",
+                                },
+                                "region": {
+                                    "endColumn": 30,
+                                    "endLine": 7,
+                                    "snippet": {
+                                        "text": 'subprocess.call(["ls", "-l"])'
+                                    },
+                                    "startColumn": 1,
+                                    "startLine": 7,
+                                },
+                            }
+                        }
+                    ],
+                    "message": {"text": "Unbounded Process Creation"},
+                    "properties": {},
+                    "ruleId": "codemodder.codemods.semgrep.sandbox-process-creation",
+                },
+            ]
         },
     )
 
     def run_and_assert(self, input_code, expected):
         input_tree = cst.parse_module(input_code)
-        file_context = FileContext(Path(""), False, [], [], self.RESULTS_BY_ID)
-        command_instance = UrlSandbox(CodemodContext(), file_context)
+        file_context = FileContext(
+            Path("tests/samples/make_process.py"), False, [], [], self.RESULTS_BY_ID
+        )
+        command_instance = ProcessSandbox(CodemodContext(), file_context)
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == expected
 
     def test_with_empty_results(self):
-        input_code = """import requests
+        input_code = """import subprocess
 
-requests.get("www.google.com")
+subprocess.run("echo 'hi'", shell=True)
 var = "hello"
 """
         input_tree = cst.parse_module(input_code)
-        file_context = FileContext(Path(""), False, [], [], defaultdict(list))
-        command_instance = UrlSandbox(CodemodContext(), file_context)
+        file_context = FileContext(
+            Path("tests/samples/make_process.py"), False, [], [], defaultdict(list)
+        )
+        command_instance = ProcessSandbox(CodemodContext(), file_context)
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == input_code
 
-    def test_import_requests(self):
-        input_code = """import requests
+    def test_import_subprocess(self):
+        input_code = """import subprocess
 
-requests.get("www.google.com")
+subprocess.run("echo 'hi'", shell=True)
 var = "hello"
 """
-        expected = """from security import safe_requests
+        expected = """import subprocess
+from security import safe_command
 
-safe_requests.get("www.google.com")
+safe_command.run(subprocess.run, "echo 'hi'", shell=True)
 var = "hello"
 """
         self.run_and_assert(input_code, expected)
 
     def test_rule_ids(self):
-        assert UrlSandbox.RULE_IDS == ["sandbox-url-creation"]
+        assert ProcessSandbox.RULE_IDS == ["sandbox-process-creation"]
 
     @pytest.mark.skip()
-    def test_from_requests(self):
-        input_code = """from requests import get
+    def test_from_subprocess(self):
+        input_code = """from subprocess import run
 
-get("www.google.com")
+run("echo 'hi'", shell=True)
 var = "hello"
 """
-        expected = """from security.safe_requests import get
+        expected = """from subprocess import run
+from security import safe_command
 
-get("www.google.com")
+safe_command.run(run, "echo 'hi'", shell=True)
 var = "hello"
 """
         self.run_and_assert(input_code, expected)
 
-    def test_requests_nameerror(self):
-        input_code = """requests.get("www.google.com")
+    def test_subprocess_nameerror(self):
+        input_code = """subprocess.run("echo 'hi'", shell=True)
 
-import requests
+import subprocess
 """
         expected = input_code
         self.run_and_assert(input_code, expected)
@@ -104,57 +208,59 @@ import requests
         "input_code,expected",
         [
             (
-                """import requests
+                """import subprocess
 import csv
-requests.get("www.google.com")
+subprocess.run("echo 'hi'", shell=True)
 csv.excel
 """,
-                """import csv
-from security import safe_requests
+                """import subprocess
+import csv
+from security import safe_command
 
-safe_requests.get("www.google.com")
+safe_command.run(subprocess.run, "echo 'hi'", shell=True)
 csv.excel
 """,
             ),
             (
-                """import requests
+                """import subprocess
 from csv import excel
-requests.get("www.google.com")
+subprocess.run("echo 'hi'", shell=True)
 excel
 """,
-                """from csv import excel
-from security import safe_requests
+                """import subprocess
+from csv import excel
+from security import safe_command
 
-safe_requests.get("www.google.com")
+safe_command.run(subprocess.run, "echo 'hi'", shell=True)
 excel
 """,
             ),
         ],
     )
-    def test_requests_other_import_untouched(self, input_code, expected):
+    def test_other_import_untouched(self, input_code, expected):
         self.run_and_assert(input_code, expected)
 
-    def test_requests_multifunctions(self):
-        # Test that `requests` import isn't removed if code uses part of the requests
-        # library that isn't part of our codemods. If we add the function as one of
+    def test_multifunctions(self):
+        # Test that subprocess methods that aren't part of the codemod are not changed.
+        # If we add the function as one of
         # our codemods, this test would change.
-        input_code = """import requests
+        input_code = """import subprocess
 
-requests.get("www.google.com")
-requests.status_codes.codes.FORBIDDEN
+subprocess.run("echo 'hi'", shell=True)
+subprocess.check_output(["ls", "-l"])
         """
 
-        expected = """import requests
-from security import safe_requests
+        expected = """import subprocess
+from security import safe_command
 
-safe_requests.get("www.google.com")
-requests.status_codes.codes.FORBIDDEN"""
+safe_command.run(subprocess.run, "echo 'hi'", shell=True)
+subprocess.check_output(["ls", "-l"])"""
 
         self.run_and_assert(input_code, expected)
 
-    def test_custom_get(self):
-        input_code = """from app_funcs import get
+    def test_custom_run(self):
+        input_code = """from app_funcs import run
 
-get("www.google.com")"""
+run("echo 'hi'", shell=True)"""
         expected = input_code
         self.run_and_assert(input_code, expected)

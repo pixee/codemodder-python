@@ -1,5 +1,5 @@
 import libcst as cst
-from libcst import Name
+from libcst import Arg, Name
 from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
 from codemodder.semgrep import rule_ids_from_yaml_files
@@ -47,8 +47,8 @@ class ProcessSandbox(BaseCodemod, BaseVisitor):
             AddImportsVisitor.add_needed_import(
                 self.context, "security", "safe_command"
             )
-            # Do NOT remove `import subprocess`
             return updated_node.with_changes(
-                func=updated_node.func.with_changes(value=Name(replacement_import))
+                func=updated_node.func.with_changes(value=Name(replacement_import)),
+                args=[Arg(updated_node.func), *updated_node.args],
             )
         return updated_node
