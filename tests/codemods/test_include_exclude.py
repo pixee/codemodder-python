@@ -27,8 +27,18 @@ class TestMatchCodemods:
     @pytest.mark.parametrize(
         "input_str,expected_output",
         [
-            ("secure-random", {"url-sandbox": CODEMODS["url-sandbox"]}),
-            ("secure-random,url-sandbox", {}),
+            (
+                "secure-random",
+                {k: v for (k, v) in CODEMODS.items() if k not in ("secure-random")},
+            ),
+            (
+                "secure-random,url-sandbox",
+                {
+                    k: v
+                    for (k, v) in CODEMODS.items()
+                    if k not in ("secure-random", "url-sandbox")
+                },
+            ),
         ],
     )
     def test_exclude(self, input_str, expected_output):
