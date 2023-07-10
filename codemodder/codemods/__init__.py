@@ -1,7 +1,8 @@
 from codemodder.codemods.secure_random import SecureRandom
 from codemodder.codemods.url_sandbox import UrlSandbox
+from codemodder.codemods.process_creation_sandbox import ProcessSandbox
 
-DEFAULT_CODEMODS = {SecureRandom, UrlSandbox}
+DEFAULT_CODEMODS = {SecureRandom, UrlSandbox, ProcessSandbox}
 
 
 def match_codemods(codemod_include: list, codemod_exclude: list):

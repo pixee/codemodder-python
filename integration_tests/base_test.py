@@ -13,6 +13,7 @@ class BaseIntegrationTest:
     original_code = NotImplementedError
     expected_new_code = NotImplementedError
     output_path = "test-codetf.txt"
+    num_changes = 1
 
     @classmethod
     def teardown_class(cls):
@@ -42,7 +43,7 @@ class BaseIntegrationTest:
         assert change["path"] == output_path
         assert change["diff"] == self.expected_diff
 
-        assert len(change["changes"]) == 1
+        assert len(change["changes"]) == self.num_changes
         line_change = change["changes"][0]
         assert line_change["lineNumber"] == self.expected_line_change
         assert line_change["description"] == self.change_description

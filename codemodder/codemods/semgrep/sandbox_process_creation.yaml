@@ -1,0 +1,12 @@
+rules:
+  - id: sandbox-process-creation
+    pattern-either:
+      - pattern: subprocess.run(...)
+      - pattern: subprocess.call(...)
+      - pattern-inside: |
+          import subprocess
+          ...
+    message: Unbounded Process Creation
+    languages:
+      - python
+    severity: WARNING
