@@ -2,7 +2,6 @@ import libcst as cst
 from libcst import Name
 from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
-from codemodder.semgrep import rule_ids_from_yaml_files
 
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from codemodder.codemods.change import Change
@@ -22,8 +21,6 @@ class UrlSandbox(BaseCodemod, BaseVisitor):
     YAML_FILES = [
         "sandbox_url_creation.yaml",
     ]
-
-    RULE_IDS = rule_ids_from_yaml_files(YAML_FILES)
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         BaseCodemod.__init__(self, file_context)

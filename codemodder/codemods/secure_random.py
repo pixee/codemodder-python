@@ -13,7 +13,6 @@ from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import BaseCodemod
 from codemodder.codemods.base_visitor import BaseVisitor
 from codemodder.file_context import FileContext
-from codemodder.semgrep import rule_ids_from_yaml_files
 
 
 system_random_object_name = "gen"
@@ -26,8 +25,6 @@ class SecureRandom(BaseCodemod, Codemod):
     YAML_FILES = [
         "secure_random.yaml",
     ]
-
-    RULE_IDS = rule_ids_from_yaml_files(YAML_FILES)
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         Codemod.__init__(self, codemod_context)

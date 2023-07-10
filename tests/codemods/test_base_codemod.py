@@ -9,7 +9,7 @@ from codemodder.codemods.base_codemod import BaseCodemod
 class DoNothingCodemod(BaseCodemod, Codemod):
     NAME = "do-nothing"
     DESCRIPTION = "An identity codemod for testing purposes."
-    RULE_IDS = []
+    YAML_FILES = []
 
     def __init__(self, context: CodemodContext, results_by_id):
         Codemod.__init__(self, context)
