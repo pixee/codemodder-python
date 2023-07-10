@@ -18,7 +18,7 @@ class TestSecureRandom:
                         {
                             "physicalLocation": {
                                 "artifactLocation": {
-                                    "uri": "tests/samples/insecure_random.py ",
+                                    "uri": "tests/samples/insecure_random.py",
                                     "uriBaseId": "%SRCROOT% ",
                                 },
                                 "region": {
@@ -41,7 +41,9 @@ class TestSecureRandom:
 
     def run_and_assert(self, input_code, expexted_output):
         input_tree = cst.parse_module(input_code)
-        file_context = FileContext(Path(""), False, [], [], self.RESULTS_BY_ID)
+        file_context = FileContext(
+            Path("tests/samples/insecure_random.py"), False, [], [], self.RESULTS_BY_ID
+        )
         command_instance = SecureRandom(CodemodContext(), file_context)
         output_tree = command_instance.transform_module(input_tree)
 
