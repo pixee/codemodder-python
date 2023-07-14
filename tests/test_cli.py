@@ -6,10 +6,16 @@ from .conftest import CODEMOD_NAMES
 
 
 class TestParseArgs:
-    def test_no_args(self):
+    @mock.patch("codemodder.cli.logger.error")
+    def test_no_args(self, error_logger):
         with pytest.raises(SystemExit) as err:
             parse_args([])
-        assert "CLI error: the following arguments are required:" in err.value.args[0]
+        assert err.value.args[0] == 3
+        error_logger.assert_called()
+        assert (
+            error_logger.call_args_list[0][0][0]
+            == "CLI error: the following arguments are required: directory, --output"
+        )
 
     @pytest.mark.parametrize(
         "cli_args",
@@ -76,7 +82,8 @@ class TestParseArgs:
 
         assert err.value.args[0] == 0
 
-    def test_bad_output_format(self):
+    @mock.patch("codemodder.cli.logger.error")
+    def test_bad_output_format(self, error_logger):
         with pytest.raises(SystemExit) as err:
             parse_args(
                 [
@@ -87,12 +94,15 @@ class TestParseArgs:
                     "hello",
                 ]
             )
+        assert err.value.args[0] == 3
+        error_logger.assert_called()
         assert (
-            err.value.args[0]
+            error_logger.call_args_list[0][0][0]
             == "CLI error: argument --output-format: invalid choice: 'hello' (choose from 'codetf', 'diff')"
         )
 
-    def test_bad_option(self):
+    @mock.patch("codemodder.cli.logger.error")
+    def test_bad_option(self, error_logger):
         with pytest.raises(SystemExit) as err:
             parse_args(
                 [
@@ -104,25 +114,9 @@ class TestParseArgs:
                     "*request.py",
                 ]
             )
+        assert err.value.args[0] == 3
+        error_logger.assert_called()
         assert (
-            err.value.args[0]
+            error_logger.call_args_list[0][0][0]
             == "CLI error: ambiguous option: --codemod=url-sandbox could match --codemod-exclude, --codemod-include"
-        )
-
-    def test_bad_codemod_name(self):
-        bad_codemod = "doesntexist"
-        with pytest.raises(SystemExit) as err:
-            parse_args(
-                [
-                    "tests/samples/",
-                    "--output",
-                    "here.txt",
-                    f"--codemod-include={bad_codemod}",
-                ]
-            )
-
-        names = ", ".join(map(repr, CODEMOD_NAMES))
-        assert (
-            err.value.args[0]
-            == f"CLI error: argument --codemod-include: invalid choice(s): ['{bad_codemod}'] (choose from {names})"
         )

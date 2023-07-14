@@ -3,13 +3,16 @@ import sys
 
 from codemodder import __VERSION__
 from codemodder.codemods import DEFAULT_CODEMODS
+from codemodder.logging import logger
 
 
 class ArgumentParser(argparse.ArgumentParser):
     def error(self, message):
-        """If there is an argument parsing error, print the `--help` message and the error."""
+        """If there is an argument parsing error, print the `--help` message,
+        log the error, and exit with status code `3`."""
         self.print_help(sys.stderr)
-        sys.exit(f"CLI error: {message}")
+        logger.error(f"CLI error: {message}")
+        sys.exit(3)
 
 
 class ListAction(argparse.Action):

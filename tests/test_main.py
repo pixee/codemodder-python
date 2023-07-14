@@ -133,3 +133,29 @@ class TestExitCode:
 
         exit_code = run(parse_args(args), args)
         assert exit_code == 1
+
+    def test_conflicting_include_exclude(self):
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            "--codemod-exclude",
+            "secure-random",
+            "--codemod-include",
+            "secure-random",
+        ]
+        with pytest.raises(SystemExit) as err:
+            run(parse_args(args), args)
+        assert err.value.args[0] == 3
+
+    def test_bad_codemod_name(self):
+        bad_codemod = "doesntexist"
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            f"--codemod-include={bad_codemod}",
+        ]
+        with pytest.raises(SystemExit) as err:
+            run(parse_args(args), args)
+        assert err.value.args[0] == 3
