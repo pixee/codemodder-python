@@ -12,9 +12,9 @@ class TestParseArgs:
             parse_args([])
         assert err.value.args[0] == 3
         error_logger.assert_called()
-        assert (
-            error_logger.call_args_list[0][0][0]
-            == "CLI error: the following arguments are required: directory, --output"
+        assert error_logger.call_args_list[0][0] == (
+            "CLI error: %s",
+            "the following arguments are required: directory, --output",
         )
 
     @pytest.mark.parametrize(
@@ -96,9 +96,9 @@ class TestParseArgs:
             )
         assert err.value.args[0] == 3
         error_logger.assert_called()
-        assert (
-            error_logger.call_args_list[0][0][0]
-            == "CLI error: argument --output-format: invalid choice: 'hello' (choose from 'codetf', 'diff')"
+        assert error_logger.call_args_list[0][0] == (
+            "CLI error: %s",
+            "argument --output-format: invalid choice: 'hello' (choose from 'codetf', 'diff')",
         )
 
     @mock.patch("codemodder.cli.logger.error")
@@ -116,7 +116,7 @@ class TestParseArgs:
             )
         assert err.value.args[0] == 3
         error_logger.assert_called()
-        assert (
-            error_logger.call_args_list[0][0][0]
-            == "CLI error: ambiguous option: --codemod=url-sandbox could match --codemod-exclude, --codemod-include"
+        assert error_logger.call_args_list[0][0] == (
+            "CLI error: %s",
+            "ambiguous option: --codemod=url-sandbox could match --codemod-exclude, --codemod-include",
         )

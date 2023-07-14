@@ -11,7 +11,7 @@ class ArgumentParser(argparse.ArgumentParser):
         """If there is an argument parsing error, print the `--help` message,
         log the error, and exit with status code `3`."""
         self.print_help(sys.stderr)
-        logger.error(f"CLI error: {message}")
+        logger.error("CLI error: %s", message)
         sys.exit(3)
 
 
