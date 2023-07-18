@@ -2,6 +2,7 @@ import datetime
 import difflib
 import os
 import sys
+from pathlib import Path
 import libcst as cst
 from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
@@ -15,6 +16,9 @@ from codemodder.codemods.change import Change
 from codemodder.report.codetf_reporter import report_default
 from codemodder.semgrep import run as semgrep_run
 from codemodder.semgrep import find_all_yaml_files
+
+# Must use from import here to point to latest state
+from codemodder import global_state
 
 RESULTS_BY_CODEMOD = []
 from dataclasses import dataclass
@@ -85,6 +89,8 @@ def run(argv, original_args) -> int:
         # project directory doesn't exist or can’t be read
         return 1
 
+    global_state.set_directory(Path(argv.directory))
+
     codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
     if not codemods_to_run:
         # We only currently have semgrep codemods so don't go on if no codemods matched.
@@ -92,15 +98,15 @@ def run(argv, original_args) -> int:
         return 0
 
     logger.debug("Codemods to run: %s", codemods_to_run)
-    results_by_path_and_rule_id = semgrep_run(
-        argv.directory, find_all_yaml_files(codemods_to_run)
-    )
+    results_by_path_and_rule_id = semgrep_run(find_all_yaml_files(codemods_to_run))
 
     if not results_by_path_and_rule_id:
         logger.warning("No semgrep results.")
         return 0
 
-    files_to_analyze = match_files(argv.directory, argv.path_exclude, argv.path_include)
+    files_to_analyze = match_files(
+        global_state.DIRECTORY, argv.path_exclude, argv.path_include
+    )
     if not files_to_analyze:
         logger.warning("No files matched.")
         return 0

@@ -1,6 +1,8 @@
 import mock
 import pytest
+from pathlib import Path
 from codemodder.__main__ import run
+from codemodder import global_state
 from codemodder.semgrep import run as semgrep_run
 from codemodder.cli import parse_args
 from .conftest import CODEMOD_NAMES
@@ -107,6 +109,30 @@ class TestRun:
         exit_code = run(parse_args(args), args)
         assert exit_code == 0
         mock_semgrep_run.assert_not_called()
+
+    @mock.patch("codemodder.semgrep.results_by_path_and_rule_id")
+    @mock.patch("codemodder.__main__.semgrep_run", side_effect=semgrep_run)
+    @mock.patch("codemodder.semgrep.subprocess.run")
+    @mock.patch(
+        "codemodder.__main__.global_state.set_directory",
+        side_effect=global_state.set_directory,
+    )
+    def test_global_state(self, set_dir_mock, subprocess_run_mock, *args):
+        """We want to ensure that once the source code dir is set, it's never changed."""
+        directory = "tests/samples"
+        args = [
+            directory,
+            "--output",
+            "here.txt",
+        ]
+        assert global_state.DIRECTORY == ""
+        res = run(parse_args(args), args)
+        assert res == 0
+        set_dir_mock.assert_called_once()
+        assert global_state.DIRECTORY == Path(directory)
+
+        semgrep_command = subprocess_run_mock.call_args_list[0][0][0]
+        semgrep_command.endswith(directory)
 
 
 class TestExitCode:

@@ -6,12 +6,13 @@ from tempfile import NamedTemporaryFile
 from typing import List
 from pathlib import Path
 from collections import defaultdict
+from codemodder import global_state
 from codemodder.logging import logger
 
 YAML_FILES_DIR = Path("codemodder") / "codemods" / "semgrep"
 
 
-def run(project_root: Path, yaml_files: List[Path]):
+def run(yaml_files: List[Path]):
     """
     Runs Semgrep and outputs a dict with the results organized by rule_id.
     """
@@ -30,7 +31,7 @@ def run(project_root: Path, yaml_files: List[Path]):
                 map(lambda f: ["--config", str(f)], yaml_files)
             )
         )
-        command.append(str(project_root))
+        command.append(str(global_state.DIRECTORY))
         joined_command = " ".join(command)
         logger.debug("Executing semgrep with: `%s`", joined_command)
         subprocess.run(joined_command, shell=True, check=True)

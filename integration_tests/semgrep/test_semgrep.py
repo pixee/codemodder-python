@@ -1,3 +1,4 @@
+from codemodder import global_state
 from codemodder.semgrep import run as semgrep_run
 
 
@@ -45,8 +46,8 @@ class TestSemgrep:
         assert location["region"]["snippet"]["text"] == "random.random()"
 
     def test_two_codemods(self):
+        global_state.set_directory("tests/samples/")
         results_by_path_and_id = semgrep_run(
-            "tests/samples/",
             [
                 "codemodder/codemods/semgrep/secure_random.yaml",
                 "codemodder/codemods/semgrep/sandbox_url_creation.yaml",
