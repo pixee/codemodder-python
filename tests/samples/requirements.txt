@@ -1,0 +1,5 @@
+# file used to test dependency management
+requests==2.31.0
+black==23.7.*
+mypy~=1.4
+pylint>1
