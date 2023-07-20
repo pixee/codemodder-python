@@ -7,7 +7,6 @@ import libcst as cst
 from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
 
-
 from codemodder.logging import logger
 from codemodder.cli import parse_args
 from codemodder.code_directory import file_line_patterns, match_files

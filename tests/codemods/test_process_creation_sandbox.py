@@ -142,7 +142,11 @@ class TestProcessCreationSandbox:
     def run_and_assert(self, input_code, expected):
         input_tree = cst.parse_module(input_code)
         file_context = FileContext(
-            Path("tests/samples/make_process.py"), False, [], [], self.RESULTS_BY_ID
+            Path("tests/samples/make_process.py"),
+            False,
+            [],
+            [],
+            self.RESULTS_BY_ID,
         )
         command_instance = ProcessSandbox(CodemodContext(), file_context)
         output_tree = command_instance.transform_module(input_tree)
@@ -157,7 +161,11 @@ var = "hello"
 """
         input_tree = cst.parse_module(input_code)
         file_context = FileContext(
-            Path("tests/samples/make_process.py"), False, [], [], defaultdict(list)
+            Path("tests/samples/make_process.py"),
+            False,
+            [],
+            [],
+            defaultdict(list),
         )
         command_instance = ProcessSandbox(CodemodContext(), file_context)
         output_tree = command_instance.transform_module(input_tree)

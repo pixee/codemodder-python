@@ -44,7 +44,11 @@ class TestUrlSandbox:
     def run_and_assert(self, input_code, expected):
         input_tree = cst.parse_module(input_code)
         file_context = FileContext(
-            Path("tests/samples/make_request.py"), False, [], [], self.RESULTS_BY_ID
+            Path("tests/samples/make_request.py"),
+            False,
+            [],
+            [],
+            self.RESULTS_BY_ID,
         )
         command_instance = UrlSandbox(CodemodContext(), file_context)
         output_tree = command_instance.transform_module(input_tree)

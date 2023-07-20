@@ -3,6 +3,7 @@ click==8.1.*
 distlib==0.3.*
 filelock==3.12.*
 identify==2.5.*
+isort==5.12.*
 libcst==1.0.*
 mypy-extensions==1.0.*
 packaging==23.*
