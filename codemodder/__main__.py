@@ -12,6 +12,7 @@ from codemodder.cli import parse_args
 from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.codemods import match_codemods
 from codemodder.codemods.change import Change
+from codemodder.dependency_manager import DependencyManager
 from codemodder.report.codetf_reporter import report_default
 from codemodder.semgrep import run as semgrep_run
 from codemodder.semgrep import find_all_yaml_files
@@ -50,7 +51,7 @@ def run_codemods_for_file(
     source_tree,
 ):
     for name, codemod_kls in codemods_to_run.items():
-        logger.info("Running codemod %s", name)
+        logger.info("Running codemod %s for %s", name, file_context.file_path)
         wrapper = cst.MetadataWrapper(source_tree)
         command_instance = codemod_kls(
             CodemodContext(wrapper=wrapper),
@@ -155,8 +156,7 @@ def run(argv, original_args) -> int:
 
         RESULTS_BY_CODEMOD.append(data)
 
-    # only run DM if it was ever instantiated, not if no codemods needed it
-    # DependencyManager().write()
+    DependencyManager().write()
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
     report_default(elapsed_ms, argv, original_args, RESULTS_BY_CODEMOD)

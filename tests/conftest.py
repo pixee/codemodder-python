@@ -42,3 +42,15 @@ def disable_semgrep_run():
     semgrep_run.start()
     yield
     semgrep_run.stop()
+
+
+@pytest.fixture(autouse=True, scope="module")
+def disable_write_dependencies():
+    """
+    Unit tests should not write any dependency files
+    """
+    dm_write = mock.patch("codemodder.dependency_manager.DependencyManager._write")
+
+    dm_write.start()
+    yield
+    dm_write.stop()
