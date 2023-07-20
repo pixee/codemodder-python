@@ -10,3 +10,9 @@ class TestUrlSandbox(BaseIntegrationTest):
     expected_diff = '--- \n+++ \n@@ -1,4 +1,4 @@\n-import requests\n+from security import safe_requests\n \n-requests.get("www.google.com")\n+safe_requests.get("www.google.com")\n var = "hello"\n'
     expected_line_change = "3"
     change_description = UrlSandbox.CHANGE_DESCRIPTION
+
+    requirements_path = "tests/samples/requirements.txt"
+    original_requirements = "# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"
+    expected_new_reqs = (
+        "requests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\nsecurity==1.0.1"
+    )

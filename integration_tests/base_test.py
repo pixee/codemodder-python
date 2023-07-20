@@ -15,10 +15,19 @@ class BaseIntegrationTest:
     output_path = "test-codetf.txt"
     num_changes = 1
 
+    # Only for codemods that modify requirements should these be overridden
+    requirements_path = ""
+    original_requirements = ""
+    expected_new_reqs = ""
+
     @classmethod
     def teardown_class(cls):
         with open(cls.code_path, "w", encoding="utf-8") as f:
             f.write(cls.original_code)
+
+        if cls.requirements_path:
+            with open(cls.requirements_path, "w", encoding="utf-8") as f:
+                f.write(cls.original_requirements)
 
         pathlib.Path(cls.output_path).unlink(missing_ok=True)
 
@@ -83,6 +92,11 @@ class BaseIntegrationTest:
             code = f.read()
         assert code == self.original_code
 
+        if self.requirements_path:
+            with open(self.requirements_path, "r", encoding="utf-8") as f:
+                requirements_txt = f.read()
+            assert requirements_txt == self.original_requirements
+
         completed_process = subprocess.run(
             command,
             check=False,
@@ -91,6 +105,11 @@ class BaseIntegrationTest:
         with open(self.code_path, "r", encoding="utf-8") as f:
             new_code = f.read()
         assert new_code == self.expected_new_code
+
+        if self.requirements_path:
+            with open(self.requirements_path, "r", encoding="utf-8") as f:
+                new_requirements_txt = f.read()
+            assert new_requirements_txt == self.expected_new_reqs
 
         self._assert_codetf_output()
 
