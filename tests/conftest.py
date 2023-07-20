@@ -1,7 +1,7 @@
 import pytest
 import mock
 from codemodder.codemods import DEFAULT_CODEMODS
-from tests.shared import reset_global_directory  # pylint: disable=unused-import
+from tests.shared import reset_global_state  # pylint: disable=unused-import
 
 CODEMOD_NAMES = tuple(codemod.NAME for codemod in DEFAULT_CODEMODS)
 
