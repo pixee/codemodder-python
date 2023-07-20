@@ -19,7 +19,7 @@ class TestDependencyManager:
         expected_path = Path(self.TEST_DIR)
         assert dm.parent_directory == expected_path
         assert dm.dependency_file == expected_path / "samples" / "requirements.txt"
-        assert len(dm.dependencies) == 1
+        assert len(dm.dependencies) == 4
 
         dep = dm.dependencies[0]
         assert str(dep) == "requests==2.31.0"
