@@ -4,7 +4,6 @@ from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
 
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
-from dependency_manager import Dependency
 from codemodder.dependency_manager import DependencyManager
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import BaseCodemod
@@ -46,7 +45,7 @@ class UrlSandbox(BaseCodemod, BaseVisitor):
             AddImportsVisitor.add_needed_import(
                 self.context, "security", "safe_requests"
             )
-            DependencyManager().add([Dependency(name="security", version="1.0.1")])
+            DependencyManager().add(["security==1.0.1"])
             RemoveImportsVisitor.remove_unused_import(self.context, "requests")
             return updated_node.with_changes(
                 func=updated_node.func.with_changes(value=Name(replacement_import))
