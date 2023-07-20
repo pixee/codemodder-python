@@ -7,7 +7,32 @@ import subprocess
 from codemodder import __VERSION__
 
 
-class BaseIntegrationTest:
+class DependencyTestMixin:
+    # Only for codemods that modify requirements should these be overridden
+    requirements_path = ""
+    original_requirements = ""
+    expected_new_reqs = ""
+
+    @classmethod
+    def _reverse_dependencies(cls):
+        if cls.requirements_path:
+            with open(cls.requirements_path, "w", encoding="utf-8") as f:
+                f.write(cls.original_requirements)
+
+    def check_dependencies_before(self):
+        if self.requirements_path:
+            with open(self.requirements_path, "r", encoding="utf-8") as f:
+                requirements_txt = f.read()
+            assert requirements_txt == self.original_requirements
+
+    def check_dependencies_after(self):
+        if self.requirements_path:
+            with open(self.requirements_path, "r", encoding="utf-8") as f:
+                new_requirements_txt = f.read()
+            assert new_requirements_txt == self.expected_new_reqs
+
+
+class BaseIntegrationTest(DependencyTestMixin):
     codemod = NotImplementedError
     code_path = NotImplementedError
     original_code = NotImplementedError
@@ -15,20 +40,12 @@ class BaseIntegrationTest:
     output_path = "test-codetf.txt"
     num_changes = 1
 
-    # Only for codemods that modify requirements should these be overridden
-    requirements_path = ""
-    original_requirements = ""
-    expected_new_reqs = ""
-
     @classmethod
     def teardown_class(cls):
         with open(cls.code_path, "w", encoding="utf-8") as f:
             f.write(cls.original_code)
 
-        if cls.requirements_path:
-            with open(cls.requirements_path, "w", encoding="utf-8") as f:
-                f.write(cls.original_requirements)
-
+        cls._reverse_dependencies()
         pathlib.Path(cls.output_path).unlink(missing_ok=True)
 
     def _assert_run_fields(self, run, output_path):
@@ -69,6 +86,16 @@ class BaseIntegrationTest:
         results = codetf["results"]
         self._assert_results_fields(results, self.code_path)
 
+    def check_code_before(self):
+        with open(self.code_path, "r", encoding="utf-8") as f:
+            code = f.read()
+        assert code == self.original_code
+
+    def check_code_after(self):
+        with open(self.code_path, "r", encoding="utf-8") as f:
+            new_code = f.read()
+        assert new_code == self.expected_new_code
+
     def test_file_rewritten(self):
         """
         Tests that file is re-written correctly with new code and correct codetf output.
@@ -88,31 +115,21 @@ class BaseIntegrationTest:
             f"--codemod-include={self.codemod.NAME}",
         ]
 
-        with open(self.code_path, "r", encoding="utf-8") as f:
-            code = f.read()
-        assert code == self.original_code
-
-        if self.requirements_path:
-            with open(self.requirements_path, "r", encoding="utf-8") as f:
-                requirements_txt = f.read()
-            assert requirements_txt == self.original_requirements
+        self.check_code_before()
+        self.check_dependencies_before()
 
         completed_process = subprocess.run(
             command,
             check=False,
         )
         assert completed_process.returncode == 0
-        with open(self.code_path, "r", encoding="utf-8") as f:
-            new_code = f.read()
-        assert new_code == self.expected_new_code
 
-        if self.requirements_path:
-            with open(self.requirements_path, "r", encoding="utf-8") as f:
-                new_requirements_txt = f.read()
-            assert new_requirements_txt == self.expected_new_reqs
-
+        self.check_code_after()
+        self.check_dependencies_after()
         self._assert_codetf_output()
+        self._run_idempotency_chec(command)
 
+    def _run_idempotency_chec(self, command):
         # idempotency test, run it again and assert no files changed
         completed_process = subprocess.run(
             command,
