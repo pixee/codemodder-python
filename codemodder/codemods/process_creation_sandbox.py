@@ -3,7 +3,7 @@ from libcst import Arg, Name
 from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
 from codemodder.semgrep import rule_ids_from_yaml_files
-
+from codemodder.dependency_manager import DependencyManager
 from libcst.codemod.visitors import AddImportsVisitor
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import BaseCodemod
@@ -47,6 +47,7 @@ class ProcessSandbox(BaseCodemod, BaseVisitor):
             AddImportsVisitor.add_needed_import(
                 self.context, "security", "safe_command"
             )
+            DependencyManager().add(["security==1.0.1"])
             return updated_node.with_changes(
                 func=updated_node.func.with_changes(value=Name(replacement_import)),
                 args=[Arg(updated_node.func), *updated_node.args],
