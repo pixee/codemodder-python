@@ -1,25 +1,42 @@
+from dataclasses import dataclass, asdict
+from enum import Enum
 import itertools
 from typing import List, ClassVar
 from codemodder.semgrep import rule_ids_from_yaml_files
 
 
+class ReviewGuidance(Enum):
+    MERGE_AFTER_REVIEW = 1
+    MERGE_AFTER_CURSORY_REVIEW = 2
+    MERGE_WITHOUT_REVIEW = 3
+
+
+@dataclass(frozen=True)
+class CodemodMetadata:
+    AUTHOR: str
+    DESCRIPTION: str
+    NAME: str
+    REVIEW_GUIDANCE: ReviewGuidance
+
+
 class BaseCodemod:
     # Implementation borrowed from https://stackoverflow.com/a/45250114
-    NAME: ClassVar[str] = NotImplemented
-    DESCRIPTION: ClassVar[str] = NotImplemented
-    YAML_FILES: List[str] = NotImplemented
-    CHANGESET_ALL_FILES: List = []
-    CHANGES_IN_FILE: List = []
+    METADATA: ClassVar[CodemodMetadata] = NotImplemented
+    CHANGESET_ALL_FILES: ClassVar[List] = []
+    CHANGES_IN_FILE: ClassVar[List] = []
+    RULE_IDS: ClassVar[List] = []
+    YAML_FILES: ClassVar[List[str]] = NotImplemented
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         # Generalize this
-        if cls.NAME is NotImplemented:
-            raise NotImplementedError("You forgot to define class attribute: NAME")
-        if cls.DESCRIPTION is NotImplemented:
-            raise NotImplementedError(
-                "You forgot to define class attribute: DESCRIPTION"
-            )
+        if cls.METADATA is NotImplemented:
+            raise NotImplementedError("You forgot to define METADATA")
+        for k, v in asdict(cls.METADATA).items():
+            if v is NotImplemented:
+                raise NotImplementedError(f"You forgot to define METADATA.{k}")
+            if not v:
+                raise NotImplementedError(f"METADATA.{k} should not be None or empty")
         if cls.YAML_FILES is NotImplemented:
             raise NotImplementedError(
                 "You forgot to define class attribute: YAML_FILES"
@@ -37,4 +54,5 @@ class BaseCodemod:
 
     @classmethod
     def full_name(cls):
-        return f"pixee:python/{cls.NAME}"
+        # pylint: disable=no-member
+        return f"pixee:python/{cls.METADATA.NAME}"

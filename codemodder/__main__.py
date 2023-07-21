@@ -147,7 +147,7 @@ def run(argv, original_args) -> int:
             continue
         data = {
             "codemod": f"pixee:python/{name}",
-            "summary": codemod_kls.DESCRIPTION,
+            "summary": codemod_kls.METADATA.DESCRIPTION,
             "references": [],
             "properties": {},
             "failedFiles": [],

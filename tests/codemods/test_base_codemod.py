@@ -3,12 +3,20 @@ from typing import DefaultDict
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
 import pytest
-from codemodder.codemods.base_codemod import BaseCodemod
+from codemodder.codemods.base_codemod import (
+    BaseCodemod,
+    CodemodMetadata,
+    ReviewGuidance,
+)
 
 
 class DoNothingCodemod(BaseCodemod, Codemod):
-    NAME = "do-nothing"
-    DESCRIPTION = "An identity codemod for testing purposes."
+    METADATA = CodemodMetadata(
+        AUTHOR="author@example.com",
+        DESCRIPTION="An identity codemod for testing purposes.",
+        NAME="do-nothing",
+        REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    )
     YAML_FILES = []
 
     def __init__(self, context: CodemodContext, results_by_id):
@@ -44,11 +52,24 @@ class TestBaseCodemod:
 
         with pytest.raises(NotImplementedError):
 
-            class MissingDescriptionCodemod(BaseCodemod):
-                NAME = "something"
+            class MissingNameCodemod(BaseCodemod):
+                METADATA = CodemodMetadata(
+                    "Author", "Description", None, ReviewGuidance.MERGE_WITHOUT_REVIEW
+                )
 
         with pytest.raises(NotImplementedError):
 
-            class MissingRuleIdsCodemod(BaseCodemod):
-                NAME = "something"
-                DESCRIPTION = "something else"
+            class MissingDescriptionCodemod(BaseCodemod):
+                METADATA = CodemodMetadata(
+                    "Author", "", "Name", ReviewGuidance.MERGE_WITHOUT_REVIEW
+                )
+
+        with pytest.raises(NotImplementedError):
+
+            class MissingAuthorCodemod(BaseCodemod):
+                METADATA = CodemodMetadata(
+                    NotImplemented,
+                    "Description",
+                    "Name",
+                    ReviewGuidance.MERGE_WITHOUT_REVIEW,
+                )

@@ -55,7 +55,7 @@ class BaseIntegrationTest(DependencyTestMixin):
         assert run["elapsed"] != ""
         assert (
             run["commandLine"]
-            == f"python -m codemodder tests/samples/ --output {output_path} --codemod-include={self.codemod.NAME}"
+            == f"python -m codemodder tests/samples/ --output {output_path} --codemod-include={self.codemod.METADATA.NAME}"
         )
         assert run["directory"] == os.path.abspath("tests/samples/")
         assert run["sarifs"] == []
@@ -112,7 +112,7 @@ class BaseIntegrationTest(DependencyTestMixin):
             "tests/samples/",
             "--output",
             self.output_path,
-            f"--codemod-include={self.codemod.NAME}",
+            f"--codemod-include={self.codemod.METADATA.NAME}",
         ]
 
         self.check_code_before()

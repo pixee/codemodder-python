@@ -6,19 +6,26 @@ from codemodder.semgrep import rule_ids_from_yaml_files
 from codemodder.dependency_manager import DependencyManager
 from libcst.codemod.visitors import AddImportsVisitor
 from codemodder.codemods.change import Change
-from codemodder.codemods.base_codemod import BaseCodemod
+from codemodder.codemods.base_codemod import (
+    BaseCodemod,
+    CodemodMetadata,
+    ReviewGuidance,
+)
 from codemodder.codemods.base_visitor import BaseVisitor
 
 replacement_import = "safe_command"
 
 
 class ProcessSandbox(BaseCodemod, BaseVisitor):
-    NAME = "process-sandbox"
-    DESCRIPTION = (
-        "Replaces subprocess.{func} with more secure safe_command library functions."
+    METADATA = CodemodMetadata(
+        AUTHOR="dani.alcala@pixee.ai",
+        DESCRIPTION=(
+            "Replaces subprocess.{func} with more secure safe_command library functions."
+        ),
+        NAME="process-sandbox",
+        REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
     )
     CHANGE_DESCRIPTION = "Switch use of subprocess for security.safe_command"
-    AUTHOR = "dani.alcala@pixee.ai"
     YAML_FILES = [
         "sandbox_process_creation.yaml",
     ]

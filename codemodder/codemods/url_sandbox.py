@@ -6,19 +6,26 @@ from codemodder.file_context import FileContext
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from codemodder.dependency_manager import DependencyManager
 from codemodder.codemods.change import Change
-from codemodder.codemods.base_codemod import BaseCodemod
+from codemodder.codemods.base_codemod import (
+    BaseCodemod,
+    CodemodMetadata,
+    ReviewGuidance,
+)
 from codemodder.codemods.base_visitor import BaseVisitor
 
 replacement_import = "safe_requests"
 
 
 class UrlSandbox(BaseCodemod, BaseVisitor):
-    NAME = "url-sandbox"
-    DESCRIPTION = (
-        "Replaces request.{func} with more secure safe_request library functions."
+    METADATA = CodemodMetadata(
+        AUTHOR="dani.alcala@pixee.ai",
+        DESCRIPTION=(
+            "Replaces request.{func} with more secure safe_request library functions."
+        ),
+        NAME="url-sandbox",
+        REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
     )
     CHANGE_DESCRIPTION = "Switch use of requests for security.safe_requests"
-    AUTHOR = "dani.alcala@pixee.ai"
     YAML_FILES = [
         "sandbox_url_creation.yaml",
     ]

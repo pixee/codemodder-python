@@ -10,7 +10,11 @@ from libcst.codemod import (
 from libcst.codemod.visitors import RemoveImportsVisitor
 from typing import List
 from codemodder.codemods.change import Change
-from codemodder.codemods.base_codemod import BaseCodemod
+from codemodder.codemods.base_codemod import (
+    BaseCodemod,
+    CodemodMetadata,
+    ReviewGuidance,
+)
 from codemodder.codemods.base_visitor import BaseVisitor
 from codemodder.file_context import FileContext
 
@@ -19,9 +23,12 @@ system_random_object_name = "gen"
 
 
 class SecureRandom(BaseCodemod, Codemod):
-    NAME = "secure-random"
-    DESCRIPTION = "Replaces random.{func} with more secure secrets library functions."
-    AUTHOR = "dani.alcala@pixee.ai"
+    METADATA = CodemodMetadata(
+        AUTHOR="dani.alcala@pixee.ai",
+        DESCRIPTION="Replaces random.{func} with more secure secrets library functions.",
+        NAME="secure-random",
+        REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    )
     YAML_FILES = [
         "secure_random.yaml",
     ]

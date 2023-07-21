@@ -1,7 +1,7 @@
 import pytest
 from codemodder.codemods import DEFAULT_CODEMODS, match_codemods
 
-CODEMODS = {codemod.NAME: codemod for codemod in DEFAULT_CODEMODS}
+CODEMODS = {codemod.METADATA.NAME: codemod for codemod in DEFAULT_CODEMODS}
 
 
 class TestMatchCodemods:
