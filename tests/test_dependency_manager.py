@@ -25,7 +25,7 @@ class TestDependencyManager:
         assert str(dep) == "requests==2.31.0"
 
     @mock.patch("codemodder.__main__.semgrep_run", side_effect=semgrep_run)
-    def test_dont_write(self, semgrep_mock):
+    def test_dont_write(self, _):
         # Tests that dependency manager does not write to file if only
         # codemods that don't change dependencies run.
         args = [
@@ -40,7 +40,7 @@ class TestDependencyManager:
 
     @mock.patch("codemodder.dependency_manager.DependencyManager._write")
     @mock.patch("codemodder.__main__.semgrep_run", side_effect=semgrep_run)
-    def test_write_expected(self, semgrep_mock, write_mock):
+    def test_write_expected(self, _, write_mock):
         args = [
             "tests/samples/",
             "--output",
