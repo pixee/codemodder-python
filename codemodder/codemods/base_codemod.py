@@ -56,3 +56,9 @@ class BaseCodemod:
     def full_name(cls):
         # pylint: disable=no-member
         return f"pixee:python/{cls.METADATA.NAME}"
+
+    @property
+    def should_transform(self):
+        # Determine if a codemod should attempt a tranformation based on
+        # if semgrep results exist.
+        return bool(self._results)

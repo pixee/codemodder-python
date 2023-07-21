@@ -51,12 +51,15 @@ def run_codemods_for_file(
     source_tree,
 ):
     for name, codemod_kls in codemods_to_run.items():
-        logger.info("Running codemod %s for %s", name, file_context.file_path)
         wrapper = cst.MetadataWrapper(source_tree)
         command_instance = codemod_kls(
             CodemodContext(wrapper=wrapper),
             file_context,
         )
+        if not command_instance.should_transform:
+            continue
+
+        logger.info("Running codemod %s for %s", name, file_context.file_path)
         output_tree = command_instance.transform_module(source_tree)
         changed_file = not output_tree.deep_equals(source_tree)
 
