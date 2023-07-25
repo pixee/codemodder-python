@@ -12,7 +12,6 @@ from codemodder.codemods.base_codemod import (
 
 class DoNothingCodemod(BaseCodemod, Codemod):
     METADATA = CodemodMetadata(
-        AUTHOR="author@example.com",
         DESCRIPTION="An identity codemod for testing purposes.",
         NAME="do-nothing",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
@@ -54,14 +53,14 @@ class TestBaseCodemod:
 
             class MissingNameCodemod(BaseCodemod):
                 METADATA = CodemodMetadata(
-                    "Author", "Description", None, ReviewGuidance.MERGE_WITHOUT_REVIEW
+                    "Description", None, ReviewGuidance.MERGE_WITHOUT_REVIEW
                 )
 
         with pytest.raises(NotImplementedError):
 
             class MissingDescriptionCodemod(BaseCodemod):
                 METADATA = CodemodMetadata(
-                    "Author", "", "Name", ReviewGuidance.MERGE_WITHOUT_REVIEW
+                    "", "Name", ReviewGuidance.MERGE_WITHOUT_REVIEW
                 )
 
         with pytest.raises(NotImplementedError):
@@ -69,7 +68,6 @@ class TestBaseCodemod:
             class MissingAuthorCodemod(BaseCodemod):
                 METADATA = CodemodMetadata(
                     NotImplemented,
-                    "Description",
                     "Name",
                     ReviewGuidance.MERGE_WITHOUT_REVIEW,
                 )

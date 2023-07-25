@@ -7,7 +7,6 @@ from libcst.codemod import (
     Codemod,
     CodemodContext,
 )
-from libcst.codemod.visitors import RemoveImportsVisitor
 from typing import List
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import (
@@ -15,8 +14,11 @@ from codemodder.codemods.base_codemod import (
     CodemodMetadata,
     ReviewGuidance,
 )
+from codemodder import global_state
 from codemodder.codemods.base_visitor import BaseVisitor
 from codemodder.file_context import FileContext
+from codemodder.codemods.transformations.clean_imports import CleanImports
+from pathlib import Path
 
 
 system_random_object_name = "gen"
@@ -24,7 +26,6 @@ system_random_object_name = "gen"
 
 class SecureRandom(BaseCodemod, Codemod):
     METADATA = CodemodMetadata(
-        AUTHOR="dani.alcala@pixee.ai",
         DESCRIPTION="Replaces random.{func} with more secure secrets library functions.",
         NAME="secure-random",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
@@ -39,19 +40,19 @@ class SecureRandom(BaseCodemod, Codemod):
 
     def transform_module_impl(self, tree: Module) -> Module:
         # We first try to replace any random() call found by semgrep
-        new_tree = RandomVisitor(
+        random_visitor = RandomVisitor(
             self.context,
             self._results,
             self.file_context.line_exclude,
             self.file_context.line_include,
-        ).transform_module(tree)
+        )
+        new_tree = random_visitor.transform_module(tree)
         # If any changes were made, we need to apply another transform, adding the import and gen object
-        # TODO expensive, should probably use a boolean in the RandomVisitor
-        if not new_tree.deep_equals(tree):
+        if random_visitor.made_changes:
             SecureRandom.CHANGES_IN_FILE = RandomVisitor.CHANGES_IN_FILE
             new_tree = AddImportAndGen(self.context).transform_module(new_tree)
-            new_tree = RemoveImportsVisitor(
-                self.context, [("random", None, None)]
+            new_tree = CleanImports(
+                self.context, Path(global_state.DIRECTORY)
             ).transform_module(new_tree)
             return new_tree
         return tree
@@ -70,6 +71,10 @@ class RandomVisitor(BaseVisitor):
     CHANGE_DESCRIPTION = "Switch use of requests for security.safe_requests"
     CHANGES_IN_FILE: List = []
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.made_changes = False
+
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         pos_to_match = self.get_metadata(self.METADATA_DEPENDENCIES[0], original_node)
         if self.filter_by_result(
@@ -79,5 +84,6 @@ class RandomVisitor(BaseVisitor):
             self.CHANGES_IN_FILE.append(
                 Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
             )
+            self.made_changes = True
             return cst.parse_expression("gen.uniform(0, 1)")
         return updated_node

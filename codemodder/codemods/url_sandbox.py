@@ -18,7 +18,6 @@ replacement_import = "safe_requests"
 
 class UrlSandbox(BaseCodemod, BaseVisitor):
     METADATA = CodemodMetadata(
-        AUTHOR="dani.alcala@pixee.ai",
         DESCRIPTION=(
             "Replaces request.{func} with more secure safe_request library functions."
         ),

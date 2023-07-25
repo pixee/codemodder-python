@@ -18,7 +18,6 @@ replacement_import = "safe_command"
 
 class ProcessSandbox(BaseCodemod, BaseVisitor):
     METADATA = CodemodMetadata(
-        AUTHOR="dani.alcala@pixee.ai",
         DESCRIPTION=(
             "Replaces subprocess.{func} with more secure safe_command library functions."
         ),

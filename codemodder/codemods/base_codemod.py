@@ -13,7 +13,6 @@ class ReviewGuidance(Enum):
 
 @dataclass(frozen=True)
 class CodemodMetadata:
-    AUTHOR: str
     DESCRIPTION: str
     NAME: str
     REVIEW_GUIDANCE: ReviewGuidance

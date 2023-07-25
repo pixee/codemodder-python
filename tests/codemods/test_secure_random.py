@@ -76,6 +76,7 @@ random.random()
 var = "hello"
 """
         expexted_output = """import secrets
+
 gen = secrets.SystemRandom()
 
 gen.uniform(0, 1)
@@ -143,9 +144,10 @@ import csv
 random.random()
 csv.excel
 """,
-                """import secrets
+                """import csv
+import secrets
+
 gen = secrets.SystemRandom()
-import csv
 gen.uniform(0, 1)
 csv.excel
 """,
@@ -156,9 +158,10 @@ from csv import excel
 random.random()
 excel
 """,
-                """import secrets
+                """from csv import excel
+import secrets
+
 gen = secrets.SystemRandom()
-from csv import excel
 gen.uniform(0, 1)
 excel
 """,
@@ -185,9 +188,10 @@ random.random()
 random.__all__
 """
 
-        expexted_output = """import secrets
+        expexted_output = """import random
+import secrets
+
 gen = secrets.SystemRandom()
-import random
 
 gen.uniform(0, 1)
 random.__all__
