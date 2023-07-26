@@ -21,14 +21,11 @@ class CodemodMetadata:
 class BaseCodemod:
     # Implementation borrowed from https://stackoverflow.com/a/45250114
     METADATA: ClassVar[CodemodMetadata] = NotImplemented
-    CHANGESET_ALL_FILES: ClassVar[List] = []
-    CHANGES_IN_FILE: ClassVar[List] = []
-    RULE_IDS: ClassVar[List] = []
     YAML_FILES: ClassVar[List[str]] = NotImplemented
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        # Generalize this
+
         if cls.METADATA is NotImplemented:
             raise NotImplementedError("You forgot to define METADATA")
         for k, v in asdict(cls.METADATA).items():
@@ -42,6 +39,8 @@ class BaseCodemod:
             )
 
         cls.RULE_IDS = rule_ids_from_yaml_files(cls.YAML_FILES)
+        cls.CHANGESET_ALL_FILES: list = []
+        cls.CHANGES_IN_FILE: list = []
 
     def __init__(self, file_context):
         self.file_context = file_context

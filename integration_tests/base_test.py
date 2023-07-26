@@ -1,4 +1,5 @@
 # pylint: disable=no-member
+import git
 import json
 import os
 import pathlib
@@ -7,17 +8,21 @@ import subprocess
 from codemodder import __VERSION__
 
 
+class CleanRepoMixin:
+    @classmethod
+    def teardown_class(cls):
+        """Ensure any re-written file is undone after integration test class"""
+        repo = git.Git(os.getcwd())
+        repo.execute(["git", "checkout", os.getcwd() + "/tests/samples"])
+
+        pathlib.Path(cls.output_path).unlink(missing_ok=True)
+
+
 class DependencyTestMixin:
     # Only for codemods that modify requirements should these be overridden
     requirements_path = ""
     original_requirements = ""
     expected_new_reqs = ""
-
-    @classmethod
-    def _reverse_dependencies(cls):
-        if cls.requirements_path:
-            with open(cls.requirements_path, "w", encoding="utf-8") as f:
-                f.write(cls.original_requirements)
 
     def check_dependencies_before(self):
         if self.requirements_path:
@@ -32,21 +37,13 @@ class DependencyTestMixin:
             assert new_requirements_txt == self.expected_new_reqs
 
 
-class BaseIntegrationTest(DependencyTestMixin):
+class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     codemod = NotImplementedError
     code_path = NotImplementedError
     original_code = NotImplementedError
     expected_new_code = NotImplementedError
     output_path = "test-codetf.txt"
     num_changes = 1
-
-    @classmethod
-    def teardown_class(cls):
-        with open(cls.code_path, "w", encoding="utf-8") as f:
-            f.write(cls.original_code)
-
-        cls._reverse_dependencies()
-        pathlib.Path(cls.output_path).unlink(missing_ok=True)
 
     def _assert_run_fields(self, run, output_path):
         assert run["vendor"] == "pixee"
