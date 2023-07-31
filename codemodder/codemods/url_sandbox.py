@@ -1,9 +1,11 @@
+from typing import List, Optional, Union
 import libcst as cst
-from libcst import Name
-from libcst.codemod import CodemodContext
+from libcst import CSTNode, matchers
+from libcst.codemod import Codemod, CodemodContext
+from libcst.metadata import PositionProvider, ScopeProvider
 from codemodder.file_context import FileContext
 
-from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
+from libcst.codemod.visitors import AddImportsVisitor, ImportItem
 from codemodder.dependency_manager import DependencyManager
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import (
@@ -12,11 +14,15 @@ from codemodder.codemods.base_codemod import (
     ReviewGuidance,
 )
 from codemodder.codemods.base_visitor import BaseVisitor
+from codemodder.codemods.transformations.remove_unused_imports import (
+    RemoveUnusedImportsCodemod,
+)
 
+replacement_package = "security"
 replacement_import = "safe_requests"
 
 
-class UrlSandbox(BaseCodemod, BaseVisitor):
+class UrlSandbox(BaseCodemod, Codemod):
     METADATA = CodemodMetadata(
         DESCRIPTION=(
             "Replaces request.{func} with more secure safe_request library functions."
@@ -29,31 +35,121 @@ class UrlSandbox(BaseCodemod, BaseVisitor):
         "sandbox_url_creation.yaml",
     ]
 
+    METADATA_DEPENDENCIES = (PositionProvider, ScopeProvider)
+
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
+        Codemod.__init__(self, codemod_context)
         BaseCodemod.__init__(self, file_context)
-        BaseVisitor.__init__(
-            self,
+
+    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        # we first gather all the nodes we want to change together with their replacements
+        find_requests_visitor = FindRequestCallsAndImports(
+            self.context, self.file_context, self._results
+        )
+        tree.visit(find_requests_visitor)
+        if find_requests_visitor.nodes_to_change:
+            UrlSandbox.CHANGES_IN_FILE.extend(find_requests_visitor.changes_in_file)
+            new_tree = tree.visit(ReplaceNodes(find_requests_visitor.nodes_to_change))
+            DependencyManager().add(["security==1.0.1"])
+            # if it finds any request.get(...), try to remove the imports
+            if any(
+                (
+                    matchers.matches(n, matchers.Call())
+                    for n in find_requests_visitor.nodes_to_change
+                )
+            ):
+                new_tree = AddImportsVisitor(
+                    self.context,
+                    [ImportItem(replacement_package, replacement_import, None, 0)],
+                ).transform_module(new_tree)
+                new_tree = RemoveUnusedImportsCodemod(self.context).transform_module(
+                    new_tree
+                )
+            return new_tree
+        return tree
+
+
+class ReplaceNodes(cst.CSTTransformer):
+    def __init__(self, replacements):
+        self.replacements = replacements
+
+    def on_leave(self, original_node, updated_node):
+        if original_node in self.replacements.keys():
+            return self.replacements[original_node]
+        return updated_node
+
+
+class FindRequestCallsAndImports(BaseVisitor):
+    METADATA_DEPENDENCIES = (*BaseVisitor.METADATA_DEPENDENCIES, ScopeProvider)
+
+    def __init__(
+        self, codemod_context: CodemodContext, file_context: FileContext, results
+    ):
+        super().__init__(
             codemod_context,
-            self._results,
+            results,
             file_context.line_exclude,
             file_context.line_include,
         )
+        self.nodes_to_change: dict[
+            cst.CSTNode, Union[cst.CSTNode, cst.FlattenSentinel, cst.RemovalSentinel]
+        ] = {}
+        self.changes_in_file: List[Change] = []
 
-    def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
+    def leave_Call(self, original_node: cst.Call):
         pos_to_match = self.get_metadata(self.METADATA_DEPENDENCIES[0], original_node)
         if self.filter_by_result(
             pos_to_match
         ) and self.filter_by_path_includes_or_excludes(pos_to_match):
             line_number = pos_to_match.start.line
-            self.CHANGES_IN_FILE.append(
-                Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
-            )
-            AddImportsVisitor.add_needed_import(
-                self.context, "security", "safe_requests"
-            )
-            DependencyManager().add(["security==1.0.1"])
-            RemoveImportsVisitor.remove_unused_import(self.context, "requests")
-            return updated_node.with_changes(
-                func=updated_node.func.with_changes(value=Name(replacement_import))
-            )
-        return updated_node
+            # case get(...)
+            if matchers.matches(original_node, matchers.Call(func=matchers.Name())):
+                # find if get(...) comes from an from requests import get
+                maybe_node = self.find_single_assignment(original_node)
+                if maybe_node and matchers.matches(maybe_node, matchers.ImportFrom()):
+                    self.nodes_to_change.update(
+                        {
+                            maybe_node: cst.ImportFrom(
+                                module=cst.parse_expression(
+                                    replacement_package + "." + replacement_import
+                                ),
+                                names=maybe_node.names,
+                            )
+                        }
+                    )
+                    self.changes_in_file.append(
+                        Change(
+                            str(line_number), UrlSandbox.CHANGE_DESCRIPTION
+                        ).to_json()
+                    )
+
+            # case req.get(...)
+            else:
+                self.nodes_to_change.update(
+                    {
+                        original_node: cst.Call(
+                            func=cst.parse_expression(replacement_import + ".get"),
+                            args=original_node.args,
+                        )
+                    }
+                )
+                self.changes_in_file.append(
+                    Change(str(line_number), UrlSandbox.CHANGE_DESCRIPTION).to_json()
+                )
+
+    def _find_assignments(self, node: CSTNode):
+        """
+        Given a MetadataWrapper and a CSTNode representing an access, find all the possible assignments that it refers.
+        """
+        scope = self.get_metadata(ScopeProvider, node)
+        # pylint: disable=protected-access
+        return next(iter(scope.accesses[node]))._Access__assignments
+
+    def find_single_assignment(self, node: CSTNode) -> Optional[CSTNode]:
+        """
+        Given a MetadataWrapper and a CSTNode representing an access, find if there is a single assignment that it refers to.
+        """
+        assignments = self._find_assignments(node)
+        if len(assignments) == 1:
+            return next(iter(assignments)).node
+        return None

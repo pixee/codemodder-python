@@ -11,12 +11,12 @@ from codemodder.codemods.base_codemod import (
     CodemodMetadata,
     ReviewGuidance,
 )
-from codemodder.codemods.base_visitor import BaseVisitor
+from codemodder.codemods.base_visitor import BaseTransformer
 
 replacement_import = "safe_command"
 
 
-class ProcessSandbox(BaseCodemod, BaseVisitor):
+class ProcessSandbox(BaseCodemod, BaseTransformer):
     METADATA = CodemodMetadata(
         DESCRIPTION=(
             "Replaces subprocess.{func} with more secure safe_command library functions."
@@ -33,7 +33,7 @@ class ProcessSandbox(BaseCodemod, BaseVisitor):
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         BaseCodemod.__init__(self, file_context)
-        BaseVisitor.__init__(
+        BaseTransformer.__init__(
             self,
             codemod_context,
             self._results,

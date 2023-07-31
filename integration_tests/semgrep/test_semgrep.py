@@ -4,28 +4,14 @@ from codemodder.semgrep import run as semgrep_run
 
 class TestSemgrep:
     def _assert_url_sandbox_results(self, results):
-        assert len(results) == 2
+        assert len(results) == 1
 
-        result1 = results[0]
-        assert result1["ruleId"] == "codemodder.codemods.semgrep.sandbox-url-creation"
-        assert result1["message"]["text"] == "Unbounded URL creation"
+        result = results[0]
 
-        location = result1["locations"][0]["physicalLocation"]
-        assert location["artifactLocation"]["uri"] == "tests/samples/make_request.py"
+        assert result["ruleId"] == "codemodder.codemods.semgrep.sandbox-url-creation"
+        assert result["message"]["text"] == "Unbounded URL creation"
 
-        assert location["region"]["startLine"] == 1
-        assert location["region"]["endLine"] == 4
-        assert (
-            location["region"]["snippet"]["text"]
-            == 'import requests\n\nrequests.get("www.google.com")\nvar = "hello"'
-        )
-
-        result2 = results[1]
-
-        assert result2["ruleId"] == "codemodder.codemods.semgrep.sandbox-url-creation"
-        assert result2["message"]["text"] == "Unbounded URL creation"
-
-        location = result2["locations"][0]["physicalLocation"]
+        location = result["locations"][0]["physicalLocation"]
         assert location["artifactLocation"]["uri"] == "tests/samples/make_request.py"
 
         assert location["region"]["startLine"] == 3

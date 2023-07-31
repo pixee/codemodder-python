@@ -14,8 +14,8 @@ from codemodder.codemods.base_codemod import (
     CodemodMetadata,
     ReviewGuidance,
 )
+from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder import global_state
-from codemodder.codemods.base_visitor import BaseVisitor
 from codemodder.file_context import FileContext
 from codemodder.codemods.transformations.clean_imports import CleanImports
 from pathlib import Path
@@ -67,7 +67,7 @@ class AddImportAndGen(Codemod):
         return tree.deep_replace(first_statement, sentinel)
 
 
-class RandomVisitor(BaseVisitor):
+class RandomVisitor(BaseTransformer):
     CHANGE_DESCRIPTION = "Switch use of requests for security.safe_requests"
     CHANGES_IN_FILE: List = []
 

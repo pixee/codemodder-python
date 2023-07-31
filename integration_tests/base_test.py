@@ -124,6 +124,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         self.check_code_after()
         self.check_dependencies_after()
         self._assert_codetf_output()
+        pathlib.Path(self.output_path).unlink(missing_ok=True)
         self._run_idempotency_chec(command)
 
     def _run_idempotency_chec(self, command):
@@ -133,9 +134,13 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             check=False,
         )
         assert completed_process.returncode == 0
-        with open(self.output_path, "r", encoding="utf-8") as f:
-            codetf = json.load(f)
-        assert codetf["results"] == []
+        # codemodder stops earlier when no semgrep results are found
+        # this output_path file may not exist.
+        if pathlib.Path(self.output_path).exists():
+            with open(self.output_path, "r", encoding="utf-8") as f:
+                codetf = json.load(f)
+            assert codetf["results"] == []
+
         with open(self.code_path, "r", encoding="utf-8") as f:
             still_new_code = f.read()
         assert still_new_code == self.expected_new_code

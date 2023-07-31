@@ -5,50 +5,29 @@ from libcst.codemod import CodemodContext
 import pytest
 from codemodder.codemods.url_sandbox import UrlSandbox
 from codemodder.file_context import FileContext
+from codemodder.semgrep import run_on_directory as semgrep_run
+from codemodder.semgrep import find_all_yaml_files
 
 
 class TestUrlSandbox:
-    RESULTS_BY_ID = defaultdict(
-        list,
-        {
-            "sandbox-url-creation": [
-                {
-                    "fingerprints": {"matchBasedId/v1": "6fa4"},
-                    "locations": [
-                        {
-                            "physicalLocation": {
-                                "artifactLocation": {
-                                    "uri": "tests/samples/make_request.py",
-                                    "uriBaseId": "%SRCROOT%",
-                                },
-                                "region": {
-                                    "endColumn": 31,
-                                    "endLine": 3,
-                                    "snippet": {
-                                        "text": "requests.get('www.google.com')"
-                                    },
-                                    "startColumn": 1,
-                                    "startLine": 3,
-                                },
-                            }
-                        },
-                    ],
-                    "message": {"text": "Unbounded URL creation"},
-                    "properties": {},
-                    "ruleId": "codemodder.codemods.semgrep.sandbox-url-creation",
-                }
-            ],
-        },
-    )
+    def results_by_id(self, input_code, tmpdir):
+        tmp_file_path = tmpdir / "code.py"
+        with open(tmp_file_path, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(input_code)
 
-    def run_and_assert(self, input_code, expected):
+        return semgrep_run(
+            find_all_yaml_files({UrlSandbox.METADATA.NAME: UrlSandbox}), tmpdir
+        )
+
+    def run_and_assert(self, tmpdir, input_code, expected):
         input_tree = cst.parse_module(input_code)
+        results = self.results_by_id(input_code, tmpdir)[tmpdir / "code.py"]
         file_context = FileContext(
-            Path("tests/samples/make_request.py"),
+            tmpdir / "code.py",
             False,
             [],
             [],
-            self.RESULTS_BY_ID,
+            results,
         )
         command_instance = UrlSandbox(CodemodContext(), file_context)
         output_tree = command_instance.transform_module(input_tree)
@@ -68,7 +47,7 @@ var = "hello"
 
         assert output_tree.code == input_code
 
-    def test_import_requests(self):
+    def test_import_requests(self, tmpdir):
         input_code = """import requests
 
 requests.get("www.google.com")
@@ -79,13 +58,12 @@ var = "hello"
 safe_requests.get("www.google.com")
 var = "hello"
 """
-        self.run_and_assert(input_code, expected)
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_rule_ids(self):
         assert UrlSandbox.RULE_IDS == ["sandbox-url-creation"]
 
-    @pytest.mark.skip()
-    def test_from_requests(self):
+    def test_from_requests(self, tmpdir):
         input_code = """from requests import get
 
 get("www.google.com")
@@ -96,15 +74,15 @@ var = "hello"
 get("www.google.com")
 var = "hello"
 """
-        self.run_and_assert(input_code, expected)
+        self.run_and_assert(tmpdir, input_code, expected)
 
-    def test_requests_nameerror(self):
+    def test_requests_nameerror(self, tmpdir):
         input_code = """requests.get("www.google.com")
 
 import requests
 """
         expected = input_code
-        self.run_and_assert(input_code, expected)
+        self.run_and_assert(tmpdir, input_code, expected)
 
     @pytest.mark.parametrize(
         "input_code,expected",
@@ -137,10 +115,10 @@ excel
             ),
         ],
     )
-    def test_requests_other_import_untouched(self, input_code, expected):
-        self.run_and_assert(input_code, expected)
+    def test_requests_other_import_untouched(self, tmpdir, input_code, expected):
+        self.run_and_assert(tmpdir, input_code, expected)
 
-    def test_requests_multifunctions(self):
+    def test_requests_multifunctions(self, tmpdir):
         # Test that `requests` import isn't removed if code uses part of the requests
         # library that isn't part of our codemods. If we add the function as one of
         # our codemods, this test would change.
@@ -156,11 +134,47 @@ from security import safe_requests
 safe_requests.get("www.google.com")
 requests.status_codes.codes.FORBIDDEN"""
 
-        self.run_and_assert(input_code, expected)
+        self.run_and_assert(tmpdir, input_code, expected)
 
-    def test_custom_get(self):
+    def test_custom_get(self, tmpdir):
         input_code = """from app_funcs import get
 
 get("www.google.com")"""
         expected = input_code
-        self.run_and_assert(input_code, expected)
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_ambiguous_get(self, tmpdir):
+        input_code = """from requests import get
+
+def get(url):
+    pass
+
+get("www.google.com")"""
+        expected = input_code
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_from_requests_with_alias(self, tmpdir):
+        input_code = """from requests import get as got
+
+got("www.google.com")
+var = "hello"
+"""
+        expected = """from security.safe_requests import get as got
+
+got("www.google.com")
+var = "hello"
+"""
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_requests_with_alias(self, tmpdir):
+        input_code = """import requests as req
+
+req.get("www.google.com")
+var = "hello"
+"""
+        expected = """from security import safe_requests
+
+safe_requests.get("www.google.com")
+var = "hello"
+"""
+        self.run_and_assert(tmpdir, input_code, expected)

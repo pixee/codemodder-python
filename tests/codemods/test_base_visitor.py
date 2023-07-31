@@ -3,14 +3,16 @@ from collections import defaultdict
 import libcst as cst
 from libcst.codemod import CodemodContext
 from libcst.metadata import PositionProvider
-from codemodder.codemods.base_visitor import BaseVisitor
+from codemodder.codemods.base_visitor import BaseTransformer
 
 
-class DeleteStatementLinesCodemod(BaseVisitor):
+class DeleteStatementLinesCodemod(BaseTransformer):
     METADATA_DEPENDENCIES = (PositionProvider,)
 
     def __init__(self, context, results, line_exclude=None, line_include=None):
-        BaseVisitor.__init__(self, context, [], line_exclude or [], line_include or [])
+        BaseTransformer.__init__(
+            self, context, [], line_exclude or [], line_include or []
+        )
 
     def filter_by_result(self, pos_to_match):
         return True

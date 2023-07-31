@@ -34,8 +34,7 @@ def disable_update_code():
 @pytest.fixture(autouse=True, scope="module")
 def disable_semgrep_run():
     """
-    Semgrep run is slow so unit tests should not run it. instead, if semgrep results
-    are needed, mock them or pass hardcoded results
+    Semgrep run is slow so we mock them or pass hardcoded results when possible.
     """
     semgrep_run = mock.patch("codemodder.__main__.semgrep_run")
 

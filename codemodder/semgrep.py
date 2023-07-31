@@ -12,7 +12,7 @@ from codemodder.logging import logger
 YAML_FILES_DIR = Path("codemodder") / "codemods" / "semgrep"
 
 
-def run(yaml_files: List[Path]):
+def run_on_directory(yaml_files: List[Path], directory: Path):
     """
     Runs Semgrep and outputs a dict with the results organized by rule_id.
     """
@@ -31,7 +31,7 @@ def run(yaml_files: List[Path]):
                 map(lambda f: ["--config", str(f)], yaml_files)
             )
         )
-        command.append(str(global_state.DIRECTORY))
+        command.append(str(directory))
         joined_command = " ".join(command)
         logger.debug("Executing semgrep with: `%s`", joined_command)
         subprocess.run(joined_command, shell=True, check=True)
@@ -39,12 +39,19 @@ def run(yaml_files: List[Path]):
         return results
 
 
-def find_all_yaml_files(codemods) -> list[Path]:  # pylint: disable=unused-argument
+def run(yaml_files: List[Path]):
+    return run_on_directory(yaml_files, Path(global_state.DIRECTORY))
+
+
+def find_all_yaml_files(codemods) -> list[Path]:
     """
     Finds all yaml files associated with the given codemods.
     """
-    # TODO for now, just pass everything until we figure out semgrep codemods
-    return list(YAML_FILES_DIR.iterdir())
+    return [
+        YAML_FILES_DIR / yaml_file
+        for codemod in codemods.values()
+        for yaml_file in codemod.YAML_FILES
+    ]
 
 
 def results_by_path_and_rule_id(sarif_file):
