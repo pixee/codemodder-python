@@ -21,7 +21,7 @@ class TestDependencyManager:
         assert dm.dependency_file == expected_path / "samples" / "requirements.txt"
         assert len(dm.dependencies) == 4
 
-        dep = dm.dependencies[0]
+        dep = next(iter(dm.dependencies))
         assert str(dep) == "requests==2.31.0"
 
     @mock.patch("codemodder.__main__.semgrep_run", side_effect=semgrep_run)

@@ -159,7 +159,7 @@ def run(argv, original_args) -> int:
 
         RESULTS_BY_CODEMOD.append(data)
 
-    DependencyManager().write()
+    DependencyManager().write(dry_run=argv.dry_run)
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
     report_default(elapsed_ms, argv, original_args, RESULTS_BY_CODEMOD)

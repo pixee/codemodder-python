@@ -20,6 +20,7 @@ def run_on_directory(yaml_files: List[Path], directory: Path):
         command = [
             "semgrep",
             "scan",
+            "--legacy",
             "--no-error",
             "--dataflow-traces",
             "--sarif",
