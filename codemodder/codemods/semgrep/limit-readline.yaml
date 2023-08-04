@@ -1,0 +1,22 @@
+rules:
+  - id: limit-readline
+    mode: taint
+    pattern-sources:
+      - pattern-either:
+          - patterns:
+            - pattern: io.StringIO(...)
+            - pattern-inside: |
+                import io
+                ...
+          - patterns:
+            - pattern: io.BytesIO(...)
+            - pattern-inside: |
+                import io
+                ...
+          - pattern: open(...)
+    pattern-sinks:
+      - pattern: $SINK.readline()
+    message: readline() without size limit
+    languages:
+      - python
+    severity: WARNING

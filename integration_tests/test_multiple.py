@@ -31,24 +31,32 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         assert sorted(codetf.keys()) == ["results", "run"]
 
         results = codetf["results"]
-        assert len(results) == 3
+        assert len(results) == 4
         sorted_results = sorted(results, key=lambda x: x["codemod"])
 
-        process_sandbox = sorted_results[0]
+        limit_readline = sorted_results[0]
+        assert len(limit_readline["changeset"]) == 1
+        assert (
+            limit_readline["changeset"][0]["path"]
+            == "tests/samples/unlimited_readline.py"
+        )
+        assert len(limit_readline["changeset"][0]["changes"]) == 1
+
+        process_sandbox = sorted_results[1]
         assert len(process_sandbox["changeset"]) == 1
         assert (
             process_sandbox["changeset"][0]["path"] == "tests/samples/make_process.py"
         )
         assert len(process_sandbox["changeset"][0]["changes"]) == 4
 
-        secure_random = sorted_results[1]
+        secure_random = sorted_results[2]
         assert len(secure_random["changeset"]) == 1
         assert (
             secure_random["changeset"][0]["path"] == "tests/samples/insecure_random.py"
         )
         assert len(secure_random["changeset"][0]["changes"]) == 1
 
-        url_sandbox = sorted_results[2]
+        url_sandbox = sorted_results[3]
         assert len(url_sandbox["changeset"]) == 1
         assert url_sandbox["changeset"][0]["path"] == "tests/samples/make_request.py"
         assert len(url_sandbox["changeset"][0]["changes"]) == 1
