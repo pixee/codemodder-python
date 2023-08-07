@@ -21,7 +21,6 @@ class TestLimitReadline:
     def run_and_assert(self, tmpdir, input_code, expected):
         input_tree = cst.parse_module(input_code)
         results = self.results_by_id(input_code, tmpdir)[tmpdir / "code.py"]
-        print(results)
         file_context = FileContext(
             tmpdir / "code.py",
             False,
