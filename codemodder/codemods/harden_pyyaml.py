@@ -1,5 +1,6 @@
 import libcst as cst
 from libcst.codemod import CodemodContext
+import yaml
 
 from codemodder.codemods.base_codemod import (
     BaseCodemod,
@@ -11,21 +12,22 @@ from codemodder.codemods.change import Change
 from codemodder.file_context import FileContext
 
 
-default_limit = "5_000_000"
+UNSAFE_LOADERS = yaml.loader.__all__.copy()  # type: ignore
+UNSAFE_LOADERS.remove("SafeLoader")
 
 
-class LimitReadline(BaseCodemod, BaseTransformer):
+class HardenPyyaml(BaseCodemod, BaseTransformer):
     METADATA = CodemodMetadata(
-        DESCRIPTION=("Adds a size limit argument to readline() calls."),
-        NAME="limit-readline",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        DESCRIPTION=("Ensures all calls to yaml.load use `SafeLoader`."),
+        NAME="harden-pyyaml",
+        REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
     )
-    CHANGE_DESCRIPTION = "Adds a size limit argument to readline() calls."
+    CHANGE_DESCRIPTION = "Ensures all calls to yaml.load use `SafeLoader`."
     YAML_FILES = [
-        "limit-readline.yaml",
+        "harden-pyyaml.yaml",
     ]
 
-    CHANGE_DESCRIPTION = "Adds a size limit argument to readline() calls."
+    CHANGE_DESCRIPTION = "Adds `yaml.SafeLoader` to yaml.load calls"
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         BaseCodemod.__init__(self, file_context)
@@ -46,5 +48,6 @@ class LimitReadline(BaseCodemod, BaseTransformer):
             self.CHANGES_IN_FILE.append(
                 Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
             )
-            return updated_node.with_changes(args=[cst.Arg(cst.Integer(default_limit))])
+            second_arg = cst.Arg(value=cst.parse_expression("yaml.SafeLoader"))
+            return updated_node.with_changes(args=[*updated_node.args[:1], second_arg])
         return updated_node

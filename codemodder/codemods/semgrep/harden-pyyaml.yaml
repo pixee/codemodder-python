@@ -1,0 +1,29 @@
+rules:
+  - id: harden-pyyaml
+    pattern-either:
+      - patterns:
+          - pattern: yaml.load(...)
+          - pattern-inside: |
+              import yaml
+              ...
+              yaml.load(...,$ARG)
+          - metavariable-pattern:
+              metavariable: $ARG
+              patterns:
+                - pattern-not:
+                    pattern: yaml.SafeLoader
+      - patterns:
+          - pattern: yaml.load(...)
+          - pattern-inside: |
+              import yaml
+              ...
+              yaml.load(...,Loader=$ARG)
+          - metavariable-pattern:
+              metavariable: $ARG
+              patterns:
+                - pattern-not:
+                    pattern: yaml.SafeLoader
+    message: Unsafe call to yaml.load
+    languages:
+      - python
+    severity: WARNING
