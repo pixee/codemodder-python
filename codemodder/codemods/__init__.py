@@ -1,9 +1,11 @@
+from codemodder.codemods.harden_pyyaml import HardenPyyaml
 from codemodder.codemods.limit_readline import LimitReadline
 from codemodder.codemods.secure_random import SecureRandom
 from codemodder.codemods.url_sandbox import UrlSandbox
 from codemodder.codemods.process_creation_sandbox import ProcessSandbox
 
 DEFAULT_CODEMODS = {
+    HardenPyyaml,
     LimitReadline,
     ProcessSandbox,
     SecureRandom,
