@@ -1,11 +1,16 @@
 rules:
   - id: sandbox-process-creation
     pattern-either:
-      - pattern: subprocess.run(...)
-      - pattern: subprocess.call(...)
-      - pattern-inside: |
-          import subprocess
-          ...
+      - patterns:
+        - pattern: subprocess.run(...)
+        - pattern-inside: |
+            import subprocess
+            ...
+      - patterns:
+        - pattern: subprocess.call(...)
+        - pattern-inside: |
+            import subprocess
+            ...
     message: Unbounded Process Creation
     languages:
       - python
