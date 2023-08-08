@@ -6,6 +6,7 @@ from codemodder.codemods.django_session_cookie_secure_off import (
 from codemodder.codemods.harden_pyyaml import HardenPyyaml
 from codemodder.codemods.limit_readline import LimitReadline
 from codemodder.codemods.secure_random import SecureRandom
+from codemodder.codemods.upgrade_sslcontext_tls import UpgradeSSLContextTLS
 from codemodder.codemods.url_sandbox import UrlSandbox
 from codemodder.codemods.process_creation_sandbox import ProcessSandbox
 from codemodder.codemods.remove_unnecessary_f_str import RemoveUnnecessaryFStr
@@ -19,6 +20,7 @@ DEFAULT_CODEMODS = {
     RemoveUnnecessaryFStr,
     RemoveUnusedImports,
     SecureRandom,
+    UpgradeSSLContextTLS,
     UrlSandbox,
 }
 ALL_CODEMODS = DEFAULT_CODEMODS
