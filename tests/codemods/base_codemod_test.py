@@ -1,3 +1,4 @@
+# pylint: disable=no-member,not-callable
 import libcst as cst
 from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
