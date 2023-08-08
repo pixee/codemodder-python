@@ -1,51 +1,13 @@
-from collections import defaultdict
-from pathlib import Path
-import libcst as cst
-from libcst.codemod import CodemodContext
 import pytest
 from codemodder.codemods.url_sandbox import UrlSandbox
-from codemodder.file_context import FileContext
-from codemodder.semgrep import run_on_directory as semgrep_run
-from codemodder.semgrep import find_all_yaml_files
+from tests.codemods.base_codemod_test import BaseCodemodTest
 
 
-class TestUrlSandbox:
-    def results_by_id(self, input_code, tmpdir):
-        tmp_file_path = tmpdir / "code.py"
-        with open(tmp_file_path, "w", encoding="utf-8") as tmp_file:
-            tmp_file.write(input_code)
+class TestUrlSandbox(BaseCodemodTest):
+    codemod = UrlSandbox
 
-        return semgrep_run(
-            find_all_yaml_files({UrlSandbox.METADATA.NAME: UrlSandbox}), tmpdir
-        )
-
-    def run_and_assert(self, tmpdir, input_code, expected):
-        input_tree = cst.parse_module(input_code)
-        results = self.results_by_id(input_code, tmpdir)[tmpdir / "code.py"]
-        file_context = FileContext(
-            tmpdir / "code.py",
-            False,
-            [],
-            [],
-            results,
-        )
-        command_instance = UrlSandbox(CodemodContext(), file_context)
-        output_tree = command_instance.transform_module(input_tree)
-
-        assert output_tree.code == expected
-
-    def test_with_empty_results(self):
-        input_code = """import requests
-
-requests.get("www.google.com")
-var = "hello"
-"""
-        input_tree = cst.parse_module(input_code)
-        file_context = FileContext(Path(""), False, [], [], defaultdict(list))
-        command_instance = UrlSandbox(CodemodContext(), file_context)
-        output_tree = command_instance.transform_module(input_tree)
-
-        assert output_tree.code == input_code
+    def test_rule_ids(self):
+        assert self.codemod.RULE_IDS == ["sandbox-url-creation"]
 
     def test_import_requests(self, tmpdir):
         input_code = """import requests
@@ -59,9 +21,6 @@ safe_requests.get("www.google.com")
 var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expected)
-
-    def test_rule_ids(self):
-        assert UrlSandbox.RULE_IDS == ["sandbox-url-creation"]
 
     def test_from_requests(self, tmpdir):
         input_code = """from requests import get

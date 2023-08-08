@@ -1,53 +1,13 @@
-from collections import defaultdict
-from pathlib import Path
-import libcst as cst
-from libcst.codemod import CodemodContext
 import pytest
 from codemodder.codemods.secure_random import SecureRandom
-from codemodder.file_context import FileContext
-from codemodder.semgrep import find_all_yaml_files, run_on_directory as semgrep_run
+from tests.codemods.base_codemod_test import BaseCodemodTest
 
 
-class TestSecureRandom:
-    def results_by_id(self, input_code, tmpdir):
-        tmp_file_path = tmpdir / "code.py"
-        with open(tmp_file_path, "w", encoding="utf-8") as tmp_file:
-            tmp_file.write(input_code)
-
-        return semgrep_run(
-            find_all_yaml_files({SecureRandom.METADATA.NAME: SecureRandom}), tmpdir
-        )
-
-    def run_and_assert(self, tmpdir, input_code, expected):
-        input_tree = cst.parse_module(input_code)
-        results = self.results_by_id(input_code, tmpdir)[tmpdir / "code.py"]
-        file_context = FileContext(
-            tmpdir / "code.py",
-            False,
-            [],
-            [],
-            results,
-        )
-        command_instance = SecureRandom(CodemodContext(), file_context)
-        output_tree = command_instance.transform_module(input_tree)
-
-        assert output_tree.code == expected
-
-    def test_with_empty_results(self):
-        input_code = """import random
-
-random.random()
-var = "hello"
-"""
-        input_tree = cst.parse_module(input_code)
-        file_context = FileContext(Path(""), False, [], [], defaultdict(list))
-        command_instance = SecureRandom(CodemodContext(), file_context)
-        output_tree = command_instance.transform_module(input_tree)
-
-        assert output_tree.code == input_code
+class TestSecureRandom(BaseCodemodTest):
+    codemod = SecureRandom
 
     def test_rule_ids(self):
-        assert SecureRandom.RULE_IDS == ["secure-random"]
+        assert self.codemod.RULE_IDS == ["secure-random"]
 
     def test_import_random(self, tmpdir):
         input_code = """import random
