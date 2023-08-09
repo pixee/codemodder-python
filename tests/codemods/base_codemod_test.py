@@ -10,20 +10,20 @@ from typing import ClassVar
 class BaseCodemodTest:
     codemod: ClassVar = NotImplemented
 
-    def results_by_id(self, input_code, tmpdir):
-        tmp_file_path = tmpdir / "code.py"
-        with open(tmp_file_path, "w", encoding="utf-8") as tmp_file:
+    def results_by_id_filepath(self, input_code, root, file_path):
+        with open(file_path, "w", encoding="utf-8") as tmp_file:
             tmp_file.write(input_code)
 
         return semgrep_run(
-            find_all_yaml_files({self.codemod.METADATA.NAME: self.codemod}), tmpdir
+            find_all_yaml_files({self.codemod.METADATA.NAME: self.codemod}), root
         )
 
-    def run_and_assert(self, tmpdir, input_code, expected):
+    def run_and_assert_filepath(self, root, file_path, input_code, expected):
         input_tree = cst.parse_module(input_code)
-        results = self.results_by_id(input_code, tmpdir)[tmpdir / "code.py"]
+        all_results = self.results_by_id_filepath(input_code, root, file_path)
+        results = all_results[str(file_path)]
         file_context = FileContext(
-            tmpdir / "code.py",
+            file_path,
             False,
             [],
             [],
@@ -33,3 +33,11 @@ class BaseCodemodTest:
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == expected
+
+    def results_by_id(self, input_code, tmpdir):
+        tmp_file_path = tmpdir / "code.py"
+        return self.results_by_id_filepath(input_code, tmpdir, tmp_file_path)
+
+    def run_and_assert(self, tmpdir, input_code, expected):
+        tmp_file_path = tmpdir / "code.py"
+        self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)

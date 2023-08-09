@@ -44,6 +44,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     expected_new_code = NotImplementedError
     output_path = "test-codetf.txt"
     num_changes = 1
+    _lines = []
 
     def _assert_run_fields(self, run, output_path):
         assert run["vendor"] == "pixee"
@@ -144,3 +145,24 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         with open(self.code_path, "r", encoding="utf-8") as f:
             still_new_code = f.read()
         assert still_new_code == self.expected_new_code
+
+
+def original_and_expected_from_code_path(code_path, replacements):
+    """
+    Returns a pair (original_code, expected) where original_code contains the contents of the code_path file and expected contains the code_path file where, for each (i,replacement) in replacements, the lines numbered i in original_code are replaced with replacement.
+    """
+    lines = _lines_from_codepath(code_path)
+    original_code = "".join(lines)
+    _replace_lines_with(lines, replacements)
+    return (original_code, "".join(lines))
+
+
+def _lines_from_codepath(code_path):
+    with open(code_path, mode="r", encoding="utf-8") as f:
+        return f.readlines()
+
+
+def _replace_lines_with(lines, replacements):
+    for i, replacement in replacements:
+        lines[i] = replacement
+    return lines

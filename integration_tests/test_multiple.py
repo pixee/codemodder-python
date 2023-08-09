@@ -31,15 +31,23 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         assert sorted(codetf.keys()) == ["results", "run"]
 
         results = codetf["results"]
-        assert len(results) == 5
+        assert len(results) == 6
         sorted_results = sorted(results, key=lambda x: x["codemod"])
 
-        harden_pyyaml = sorted_results[0]
+        django_debug = sorted_results[0]
+        assert len(django_debug["changeset"]) == 1
+        assert (
+            django_debug["changeset"][0]["path"]
+            == "tests/samples/django-project/mysite/mysite/settings.py"
+        )
+        assert len(django_debug["changeset"][0]["changes"]) == 1
+
+        harden_pyyaml = sorted_results[1]
         assert len(harden_pyyaml["changeset"]) == 1
         assert harden_pyyaml["changeset"][0]["path"] == "tests/samples/unsafe_yaml.py"
         assert len(harden_pyyaml["changeset"][0]["changes"]) == 1
 
-        limit_readline = sorted_results[1]
+        limit_readline = sorted_results[2]
         assert len(limit_readline["changeset"]) == 1
         assert (
             limit_readline["changeset"][0]["path"]
@@ -47,21 +55,21 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         )
         assert len(limit_readline["changeset"][0]["changes"]) == 1
 
-        process_sandbox = sorted_results[2]
+        process_sandbox = sorted_results[3]
         assert len(process_sandbox["changeset"]) == 1
         assert (
             process_sandbox["changeset"][0]["path"] == "tests/samples/make_process.py"
         )
         assert len(process_sandbox["changeset"][0]["changes"]) == 4
 
-        secure_random = sorted_results[3]
+        secure_random = sorted_results[4]
         assert len(secure_random["changeset"]) == 1
         assert (
             secure_random["changeset"][0]["path"] == "tests/samples/insecure_random.py"
         )
         assert len(secure_random["changeset"][0]["changes"]) == 1
 
-        url_sandbox = sorted_results[4]
+        url_sandbox = sorted_results[5]
         assert len(url_sandbox["changeset"]) == 1
         assert url_sandbox["changeset"][0]["path"] == "tests/samples/make_request.py"
         assert len(url_sandbox["changeset"][0]["changes"]) == 1
