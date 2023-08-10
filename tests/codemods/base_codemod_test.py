@@ -1,6 +1,8 @@
 # pylint: disable=no-member,not-callable
 import libcst as cst
 from libcst.codemod import CodemodContext
+from pathlib import Path
+import os
 from codemodder.file_context import FileContext
 from codemodder.semgrep import run_on_directory as semgrep_run
 from codemodder.semgrep import find_all_yaml_files
@@ -41,3 +43,11 @@ class BaseCodemodTest:
     def run_and_assert(self, tmpdir, input_code, expected):
         tmp_file_path = tmpdir / "code.py"
         self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)
+
+
+class BaseDjangoCodemodTest(BaseCodemodTest):
+    def create_dir_structure(self, tmpdir):
+        django_root = Path(tmpdir) / "mysite"
+        settings_folder = django_root / "mysite"
+        os.makedirs(settings_folder)
+        return (django_root, settings_folder)

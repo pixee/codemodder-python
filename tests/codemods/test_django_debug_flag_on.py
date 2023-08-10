@@ -2,20 +2,14 @@ from pathlib import Path
 from codemodder.codemods.django_debug_flag_on import DjangoDebugFlagOn
 import os
 
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from tests.codemods.base_codemod_test import BaseDjangoCodemodTest
 
 
-class TestDjangoDebugFlagOn(BaseCodemodTest):
+class TestDjangoDebugFlagOn(BaseDjangoCodemodTest):
     codemod = DjangoDebugFlagOn
 
     def test_rule_ids(self):
         assert self.codemod.RULE_IDS == ["django-debug-flag-on"]
-
-    def create_dir_structure(self, tmpdir):
-        django_root = Path(tmpdir) / "mysite"
-        settings_folder = django_root / "mysite"
-        os.makedirs(settings_folder)
-        return (django_root, settings_folder)
 
     def test_settings_dot_py(self, tmpdir):
         django_root, settings_folder = self.create_dir_structure(tmpdir)
