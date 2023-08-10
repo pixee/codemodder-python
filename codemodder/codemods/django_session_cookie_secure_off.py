@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import List
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
@@ -10,6 +9,7 @@ from codemodder.codemods.base_codemod import (
     CodemodMetadata,
     ReviewGuidance,
 )
+from codemodder.codemods.utils import is_django_settings_file
 from codemodder.file_context import FileContext
 
 
@@ -76,9 +76,6 @@ class SessionCookieSecureTransformer(BaseTransformer):
             # something else and we changed it in `leave_Assign`.
             return updated_node
 
-        final_line = cst.parse_statement("SESSION_COOKIE_SECURE = True")
-        new_body = updated_node.body + (final_line,)
-
         pos_to_match = self.get_metadata(self.METADATA_DEPENDENCIES[0], original_node)
         # line_number is the end of the module where we will insert the new flag.
         line_number = pos_to_match.end.line
@@ -87,6 +84,8 @@ class SessionCookieSecureTransformer(BaseTransformer):
                 str(line_number), DjangoSessionCookieSecureOff.CHANGE_DESCRIPTION
             ).to_json()
         )
+        final_line = cst.parse_statement("SESSION_COOKIE_SECURE = True")
+        new_body = updated_node.body + (final_line,)
         return updated_node.with_changes(body=new_body)
 
     def leave_Assign(
@@ -129,13 +128,3 @@ def is_assigned_to_True(original_node: cst.Assign):
         isinstance(original_node.value, cst.Name)
         and original_node.value.value == "True"
     )
-
-
-# todo: move this to shared location
-def is_django_settings_file(file_path: Path):
-    if "settings.py" not in file_path.name:
-        return
-    # the most telling fact is the presence of a manage.py file in the parent directory
-    if file_path.parent.parent.is_dir():
-        return "manage.py" in (f.name for f in file_path.parent.parent.iterdir())
-    return False

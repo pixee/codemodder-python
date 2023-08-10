@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import List
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
@@ -11,6 +10,7 @@ from codemodder.codemods.base_codemod import (
     ReviewGuidance,
 )
 from codemodder.file_context import FileContext
+from codemodder.codemods.utils import is_django_settings_file
 
 
 class DjangoDebugFlagOn(BaseCodemod, Codemod):
@@ -68,10 +68,3 @@ class DebugFlagTransformer(BaseTransformer):
             )
             return updated_node.with_changes(value=cst.Name("False"))
         return updated_node
-
-
-def is_django_settings_file(file_path: Path):
-    # the most telling fact is the presence of a manage.py file in the parent directory
-    if file_path.parent.parent.is_dir():
-        return "manage.py" in (f.name for f in file_path.parent.parent.iterdir())
-    return False
