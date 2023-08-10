@@ -30,15 +30,6 @@ class DjangoSessionCookieSecureOff(BaseCodemod, Codemod):
         Codemod.__init__(self, codemod_context)
         BaseCodemod.__init__(self, file_context)
 
-    @property
-    def should_transform(self):
-        """This codemod should always attempt to transform regardless of
-        semgrep results because empty semgrep results can mean
-        `SESSION_COOKIE_SECURE` is missing from settings.py which means
-        it's set to the default of False.
-        """
-        return True
-
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         if is_django_settings_file(self.file_context.file_path):
             transformer = SessionCookieSecureTransformer(
