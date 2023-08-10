@@ -1,7 +1,4 @@
-from pathlib import Path
 from codemodder.codemods.django_debug_flag_on import DjangoDebugFlagOn
-import os
-
 from tests.codemods.base_codemod_test import BaseDjangoCodemodTest
 
 
