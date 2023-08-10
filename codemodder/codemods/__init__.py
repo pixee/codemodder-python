@@ -1,4 +1,7 @@
 from codemodder.codemods.django_debug_flag_on import DjangoDebugFlagOn
+from codemodder.codemods.django_session_cookie_secure_off import (
+    DjangoSessionCookieSecureOff,
+)
 from codemodder.codemods.harden_pyyaml import HardenPyyaml
 from codemodder.codemods.limit_readline import LimitReadline
 from codemodder.codemods.secure_random import SecureRandom
@@ -7,6 +10,7 @@ from codemodder.codemods.process_creation_sandbox import ProcessSandbox
 
 DEFAULT_CODEMODS = {
     DjangoDebugFlagOn,
+    DjangoSessionCookieSecureOff,
     HardenPyyaml,
     LimitReadline,
     ProcessSandbox,

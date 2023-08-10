@@ -1,0 +1,15 @@
+# See https://github.com/returntocorp/semgrep/issues/2438
+rules:
+  - id: found-settings-file
+    message: Detected a Potential Django settings.py file
+    languages: [python]
+    severity: INFO
+    pattern: ...
+#    pattern-regex: (.*){1}
+    # failed attempt at getting to only create one result for the entire file
+#    options:
+#      # prevent ellipses from matching multiple lines
+#      generic_ellipsis_max_span: 0
+    paths:
+      include:
+        - settings.py
