@@ -163,6 +163,10 @@ def _lines_from_codepath(code_path):
 
 
 def _replace_lines_with(lines, replacements):
-    for i, replacement in replacements:
-        lines[i] = replacement
+    total_lines = len(lines)
+    for lineno, replacement in replacements:
+        if lineno > total_lines:
+            lines.extend(replacement)
+            continue
+        lines[lineno] = replacement
     return lines

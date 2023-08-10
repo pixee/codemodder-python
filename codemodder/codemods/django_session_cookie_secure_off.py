@@ -78,6 +78,15 @@ class SessionCookieSecureTransformer(BaseTransformer):
 
         final_line = cst.parse_statement("SESSION_COOKIE_SECURE = True")
         new_body = updated_node.body + (final_line,)
+
+        pos_to_match = self.get_metadata(self.METADATA_DEPENDENCIES[0], original_node)
+        # line_number is the end of the module where we will insert the new flag.
+        line_number = pos_to_match.end.line
+        self.changes_in_file.append(
+            Change(
+                str(line_number), DjangoSessionCookieSecureOff.CHANGE_DESCRIPTION
+            ).to_json()
+        )
         return updated_node.with_changes(body=new_body)
 
     def leave_Assign(
