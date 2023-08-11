@@ -39,8 +39,13 @@ def run_on_directory(yaml_files: List[Path], directory: Path):
         return results
 
 
-def run(yaml_files: List[Path]):
-    return run_on_directory(yaml_files, Path(global_state.DIRECTORY))
+def run(codemods):
+    semgrep_codemods = only_semgrep(codemods)
+    if semgrep_codemods:
+        return run_on_directory(
+            find_all_yaml_files(semgrep_codemods), Path(global_state.DIRECTORY)
+        )
+    return {}
 
 
 def find_all_yaml_files(codemods) -> list[Path]:
@@ -52,6 +57,13 @@ def find_all_yaml_files(codemods) -> list[Path]:
         for codemod in codemods.values()
         for yaml_file in codemod.YAML_FILES
     ]
+
+
+def only_semgrep(codemods) -> dict:
+    """
+    Returns only semgrep codemods.
+    """
+    return {name: codemod for name, codemod in codemods.items() if codemod.IS_SEMGREP}
 
 
 def rule_ids_from_yaml_files(yaml_files):

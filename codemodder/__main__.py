@@ -15,7 +15,6 @@ from codemodder.codemods.change import Change
 from codemodder.dependency_manager import DependencyManager
 from codemodder.report.codetf_reporter import report_default
 from codemodder.semgrep import run as semgrep_run
-from codemodder.semgrep import find_all_yaml_files
 from codemodder.sarifs import parse_sarif_files
 
 # Must use from import here to point to latest state
@@ -86,6 +85,62 @@ def run_codemods_for_file(
                 update_code(file_context.file_path, output_tree.code)
 
 
+def analyze_files(
+    files_to_analyze,
+    codemods_to_run,
+    semgrep_results,
+    path_include,
+    path_exclude,
+    dry_run,
+):
+    for file_path in files_to_analyze:
+        # TODO: handle potential race condition that file no longer exists at this point
+        with open(file_path, "r", encoding="utf-8") as f:
+            code = f.read()
+
+        try:
+            source_tree = cst.parse_module(code)
+        except Exception:
+            logger.exception("Error parsing file %s", file_path)
+            continue
+
+        line_exclude = file_line_patterns(file_path, path_exclude)
+        line_include = file_line_patterns(file_path, path_include)
+        semgrep_results_for_file = (
+            semgrep_results[str(file_path)] if semgrep_results else None
+        )
+
+        file_context = FileContext(
+            file_path,
+            dry_run,
+            line_exclude,
+            line_include,
+            semgrep_results_for_file,
+        )
+
+        run_codemods_for_file(
+            file_context,
+            codemods_to_run,
+            source_tree,
+        )
+
+
+def compile_results(codemods):
+    for name, codemod_kls in codemods.items():
+        if not codemod_kls.CHANGESET_ALL_FILES:
+            continue
+        data = {
+            "codemod": f"pixee:python/{name}",
+            "summary": codemod_kls.METADATA.DESCRIPTION,
+            "references": [],
+            "properties": {},
+            "failedFiles": [],
+            "changeset": codemod_kls.CHANGESET_ALL_FILES,
+        }
+
+        RESULTS_BY_CODEMOD.append(data)
+
+
 def run(argv, original_args) -> int:
     start = datetime.datetime.now()
 
@@ -107,7 +162,7 @@ def run(argv, original_args) -> int:
     sarif_results = parse_sarif_files(argv.sarif or [])
 
     # run semgrep and gather the results
-    semgrep_results = semgrep_run(find_all_yaml_files(codemods_to_run))
+    semgrep_results = semgrep_run(codemods_to_run)
 
     # merge the results
     sarif_results.update(semgrep_results)
@@ -125,47 +180,16 @@ def run(argv, original_args) -> int:
     full_names = [str(path) for path in files_to_analyze]
     logger.debug("Matched files:\n%s", "\n".join(full_names))
 
-    for file_path in files_to_analyze:
-        # TODO: handle potential race condition that file no longer exists at this point
-        with open(file_path, "r", encoding="utf-8") as f:
-            code = f.read()
+    analyze_files(
+        files_to_analyze,
+        codemods_to_run,
+        sarif_results,
+        argv.path_include,
+        argv.path_exclude,
+        argv.dry_run,
+    )
 
-        try:
-            source_tree = cst.parse_module(code)
-        except Exception:
-            logger.exception("Error parsing file %s", file_path)
-            continue
-
-        line_exclude = file_line_patterns(file_path, argv.path_exclude)
-        line_include = file_line_patterns(file_path, argv.path_include)
-
-        file_context = FileContext(
-            file_path,
-            argv.dry_run,
-            line_exclude,
-            line_include,
-            sarif_results[str(file_path)],
-        )
-
-        run_codemods_for_file(
-            file_context,
-            codemods_to_run,
-            source_tree,
-        )
-
-    for name, codemod_kls in codemods_to_run.items():
-        if not codemod_kls.CHANGESET_ALL_FILES:
-            continue
-        data = {
-            "codemod": f"pixee:python/{name}",
-            "summary": codemod_kls.METADATA.DESCRIPTION,
-            "references": [],
-            "properties": {},
-            "failedFiles": [],
-            "changeset": codemod_kls.CHANGESET_ALL_FILES,
-        }
-
-        RESULTS_BY_CODEMOD.append(data)
+    compile_results(codemods_to_run)
 
     DependencyManager().write(dry_run=argv.dry_run)
     elapsed = datetime.datetime.now() - start
