@@ -1,9 +1,9 @@
 import pytest
 from codemodder.codemods.url_sandbox import UrlSandbox
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 
-class TestUrlSandbox(BaseCodemodTest):
+class TestUrlSandbox(BaseSemgrepCodemodTest):
     codemod = UrlSandbox
 
     def test_rule_ids(self):

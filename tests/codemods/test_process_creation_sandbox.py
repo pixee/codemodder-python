@@ -1,9 +1,9 @@
 import pytest
 from codemodder.codemods.process_creation_sandbox import ProcessSandbox
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 
-class TestProcessCreationSandbox(BaseCodemodTest):
+class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
     codemod = ProcessSandbox
 
     def test_rule_ids(self):

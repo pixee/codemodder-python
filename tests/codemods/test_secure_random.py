@@ -1,9 +1,9 @@
 import pytest
 from codemodder.codemods.secure_random import SecureRandom
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 
-class TestSecureRandom(BaseCodemodTest):
+class TestSecureRandom(BaseSemgrepCodemodTest):
     codemod = SecureRandom
 
     def test_rule_ids(self):

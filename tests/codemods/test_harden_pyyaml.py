@@ -1,9 +1,9 @@
 import pytest
 from codemodder.codemods.harden_pyyaml import HardenPyyaml, UNSAFE_LOADERS
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 
-class TestHardenPyyaml(BaseCodemodTest):
+class TestHardenPyyaml(BaseSemgrepCodemodTest):
     codemod = HardenPyyaml
 
     def test_rule_ids(self):

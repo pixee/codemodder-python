@@ -9,7 +9,7 @@ from codemodder.semgrep import find_all_yaml_files
 from typing import ClassVar
 
 
-class BaseCodemodTest:
+class BaseSemgrepCodemodTest:
     codemod: ClassVar = NotImplemented
 
     def results_by_id_filepath(self, input_code, root, file_path):
@@ -45,7 +45,7 @@ class BaseCodemodTest:
         self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)
 
 
-class BaseDjangoCodemodTest(BaseCodemodTest):
+class BaseDjangoCodemodTest(BaseSemgrepCodemodTest):
     def create_dir_structure(self, tmpdir):
         django_root = Path(tmpdir) / "mysite"
         settings_folder = django_root / "mysite"
