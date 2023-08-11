@@ -7,7 +7,7 @@ from codemodder.dependency_manager import DependencyManager
 from libcst.codemod.visitors import AddImportsVisitor
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import (
-    BaseCodemod,
+    SemgrepCodemod,
     CodemodMetadata,
     ReviewGuidance,
 )
@@ -16,7 +16,7 @@ from codemodder.codemods.base_visitor import BaseTransformer
 replacement_import = "safe_command"
 
 
-class ProcessSandbox(BaseCodemod, BaseTransformer):
+class ProcessSandbox(SemgrepCodemod, BaseTransformer):
     METADATA = CodemodMetadata(
         DESCRIPTION=(
             "Replaces subprocess.{func} with more secure safe_command library functions."
@@ -32,7 +32,7 @@ class ProcessSandbox(BaseCodemod, BaseTransformer):
     RULE_IDS = rule_ids_from_yaml_files(YAML_FILES)
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
-        BaseCodemod.__init__(self, file_context)
+        SemgrepCodemod.__init__(self, file_context)
         BaseTransformer.__init__(
             self,
             codemod_context,

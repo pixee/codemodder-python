@@ -10,7 +10,7 @@ from libcst.codemod import (
 from typing import List
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import (
-    BaseCodemod,
+    SemgrepCodemod,
     CodemodMetadata,
     ReviewGuidance,
 )
@@ -24,7 +24,7 @@ from pathlib import Path
 system_random_object_name = "gen"
 
 
-class SecureRandom(BaseCodemod, Codemod):
+class SecureRandom(SemgrepCodemod, Codemod):
     METADATA = CodemodMetadata(
         DESCRIPTION="Replaces random.{func} with more secure secrets library functions.",
         NAME="secure-random",
@@ -36,7 +36,7 @@ class SecureRandom(BaseCodemod, Codemod):
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         Codemod.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, file_context)
+        SemgrepCodemod.__init__(self, file_context)
 
     def transform_module_impl(self, tree: Module) -> Module:
         # We first try to replace any random() call found by semgrep

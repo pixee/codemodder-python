@@ -5,7 +5,7 @@ from libcst.metadata import PositionProvider
 from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import (
-    BaseCodemod,
+    SemgrepCodemod,
     CodemodMetadata,
     ReviewGuidance,
 )
@@ -13,7 +13,7 @@ from codemodder.codemods.utils import is_django_settings_file
 from codemodder.file_context import FileContext
 
 
-class DjangoSessionCookieSecureOff(BaseCodemod, Codemod):
+class DjangoSessionCookieSecureOff(SemgrepCodemod, Codemod):
     METADATA = CodemodMetadata(
         DESCRIPTION=("Sets Django's `SESSION_COOKIE_SECURE` flag if off or missing."),
         NAME="django-session-cookie-secure-off",
@@ -28,7 +28,7 @@ class DjangoSessionCookieSecureOff(BaseCodemod, Codemod):
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         Codemod.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, file_context)
+        SemgrepCodemod.__init__(self, file_context)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         if is_django_settings_file(self.file_context.file_path):

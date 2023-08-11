@@ -2,7 +2,7 @@ import libcst as cst
 from libcst.codemod import CodemodContext
 
 from codemodder.codemods.base_codemod import (
-    BaseCodemod,
+    SemgrepCodemod,
     CodemodMetadata,
     ReviewGuidance,
 )
@@ -14,7 +14,7 @@ from codemodder.file_context import FileContext
 default_limit = "5_000_000"
 
 
-class LimitReadline(BaseCodemod, BaseTransformer):
+class LimitReadline(SemgrepCodemod, BaseTransformer):
     METADATA = CodemodMetadata(
         DESCRIPTION=("Adds a size limit argument to readline() calls."),
         NAME="limit-readline",
@@ -28,7 +28,7 @@ class LimitReadline(BaseCodemod, BaseTransformer):
     CHANGE_DESCRIPTION = "Adds a size limit argument to readline() calls."
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
-        BaseCodemod.__init__(self, file_context)
+        SemgrepCodemod.__init__(self, file_context)
         BaseTransformer.__init__(
             self,
             codemod_context,

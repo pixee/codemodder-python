@@ -5,7 +5,7 @@ from libcst.metadata import PositionProvider
 from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import (
-    BaseCodemod,
+    SemgrepCodemod,
     CodemodMetadata,
     ReviewGuidance,
 )
@@ -13,7 +13,7 @@ from codemodder.file_context import FileContext
 from codemodder.codemods.utils import is_django_settings_file
 
 
-class DjangoDebugFlagOn(BaseCodemod, Codemod):
+class DjangoDebugFlagOn(SemgrepCodemod, Codemod):
     METADATA = CodemodMetadata(
         DESCRIPTION=("Flips django's debug flag if on."),
         NAME="django-debug-flag-on",
@@ -28,7 +28,7 @@ class DjangoDebugFlagOn(BaseCodemod, Codemod):
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         Codemod.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, file_context)
+        SemgrepCodemod.__init__(self, file_context)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         # checks if the file we looking is a settings.py file from django's default directory structure

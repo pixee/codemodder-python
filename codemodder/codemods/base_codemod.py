@@ -21,10 +21,16 @@ class CodemodMetadata:
 class BaseCodemod:
     # Implementation borrowed from https://stackoverflow.com/a/45250114
     METADATA: ClassVar[CodemodMetadata] = NotImplemented
-    YAML_FILES: ClassVar[List[str]] = NotImplemented
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
+        cls.CHANGESET_ALL_FILES: list = []
+        cls.CHANGES_IN_FILE: list = []
+
+        if "codemodder.codemods.base_codemod.SemgrepCodemod" in str(cls):
+            # hack: SemgrepCodemod won't NotImplementedError but all other child
+            # classes will.
+            return
 
         if cls.METADATA is NotImplemented:
             raise NotImplementedError("You forgot to define METADATA")
@@ -33,22 +39,9 @@ class BaseCodemod:
                 raise NotImplementedError(f"You forgot to define METADATA.{k}")
             if not v:
                 raise NotImplementedError(f"METADATA.{k} should not be None or empty")
-        if cls.YAML_FILES is NotImplemented:
-            raise NotImplementedError(
-                "You forgot to define class attribute: YAML_FILES"
-            )
-
-        cls.RULE_IDS = rule_ids_from_yaml_files(cls.YAML_FILES)
-        cls.CHANGESET_ALL_FILES: list = []
-        cls.CHANGES_IN_FILE: list = []
 
     def __init__(self, file_context):
         self.file_context = file_context
-        self._results = list(
-            itertools.chain.from_iterable(
-                map(lambda rId: file_context.results_by_id[rId], self.RULE_IDS)
-            )
-        )
 
     @classmethod
     def full_name(cls):
@@ -57,6 +50,32 @@ class BaseCodemod:
 
     @property
     def should_transform(self):
-        # Determine if a codemod should attempt a tranformation based on
-        # if semgrep results exist.
+        return True
+
+
+class SemgrepCodemod(BaseCodemod):
+    YAML_FILES: ClassVar[List[str]] = NotImplemented
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+
+        if cls.YAML_FILES is NotImplemented:
+            raise NotImplementedError(
+                "You forgot to define class attribute: YAML_FILES"
+            )
+
+        cls.RULE_IDS = rule_ids_from_yaml_files(cls.YAML_FILES)
+
+    def __init__(self, file_context):
+        super().__init__(file_context)
+        self._results = list(
+            itertools.chain.from_iterable(
+                map(lambda rId: file_context.results_by_id[rId], self.RULE_IDS)
+            )
+        )
+
+    @property
+    def should_transform(self):
+        """Semgrep codemods should attempt transform only if there are
+        semgrep results"""
         return bool(self._results)

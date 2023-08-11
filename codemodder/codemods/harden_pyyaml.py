@@ -3,7 +3,7 @@ from libcst.codemod import CodemodContext
 import yaml
 
 from codemodder.codemods.base_codemod import (
-    BaseCodemod,
+    SemgrepCodemod,
     CodemodMetadata,
     ReviewGuidance,
 )
@@ -16,7 +16,7 @@ UNSAFE_LOADERS = yaml.loader.__all__.copy()  # type: ignore
 UNSAFE_LOADERS.remove("SafeLoader")
 
 
-class HardenPyyaml(BaseCodemod, BaseTransformer):
+class HardenPyyaml(SemgrepCodemod, BaseTransformer):
     METADATA = CodemodMetadata(
         DESCRIPTION=("Ensures all calls to yaml.load use `SafeLoader`."),
         NAME="harden-pyyaml",
@@ -30,7 +30,7 @@ class HardenPyyaml(BaseCodemod, BaseTransformer):
     CHANGE_DESCRIPTION = "Adds `yaml.SafeLoader` to yaml.load calls"
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
-        BaseCodemod.__init__(self, file_context)
+        SemgrepCodemod.__init__(self, file_context)
         BaseTransformer.__init__(
             self,
             codemod_context,

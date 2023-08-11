@@ -4,13 +4,13 @@ import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
 import pytest
 from codemodder.codemods.base_codemod import (
-    BaseCodemod,
+    SemgrepCodemod,
     CodemodMetadata,
     ReviewGuidance,
 )
 
 
-class DoNothingCodemod(BaseCodemod, Codemod):
+class DoNothingCodemod(SemgrepCodemod, Codemod):
     METADATA = CodemodMetadata(
         DESCRIPTION="An identity codemod for testing purposes.",
         NAME="do-nothing",
@@ -20,7 +20,7 @@ class DoNothingCodemod(BaseCodemod, Codemod):
 
     def __init__(self, context: CodemodContext, results_by_id):
         Codemod.__init__(self, context)
-        BaseCodemod.__init__(self, results_by_id)
+        SemgrepCodemod.__init__(self, results_by_id)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         return tree
@@ -41,31 +41,31 @@ class TestEmptyResults:
         self.run_and_assert(input_code, input_code)
 
 
-class TestBaseCodemod:
+class TestSemgrepCodemod:
     # pylint: disable=unused-variable
     def test_missing_class_attrs(self):
         with pytest.raises(NotImplementedError):
 
-            class MissingInfoCodemod(BaseCodemod):
+            class MissingInfoCodemod(SemgrepCodemod):
                 ...
 
         with pytest.raises(NotImplementedError):
 
-            class MissingNameCodemod(BaseCodemod):
+            class MissingNameCodemod(SemgrepCodemod):
                 METADATA = CodemodMetadata(
                     "Description", None, ReviewGuidance.MERGE_WITHOUT_REVIEW
                 )
 
         with pytest.raises(NotImplementedError):
 
-            class MissingDescriptionCodemod(BaseCodemod):
+            class MissingDescriptionCodemod(SemgrepCodemod):
                 METADATA = CodemodMetadata(
                     "", "Name", ReviewGuidance.MERGE_WITHOUT_REVIEW
                 )
 
         with pytest.raises(NotImplementedError):
 
-            class MissingAuthorCodemod(BaseCodemod):
+            class MissingAuthorCodemod(SemgrepCodemod):
                 METADATA = CodemodMetadata(
                     NotImplemented,
                     "Name",

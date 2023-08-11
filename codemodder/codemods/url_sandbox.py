@@ -9,7 +9,7 @@ from libcst.codemod.visitors import AddImportsVisitor, ImportItem
 from codemodder.dependency_manager import DependencyManager
 from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import (
-    BaseCodemod,
+    SemgrepCodemod,
     CodemodMetadata,
     ReviewGuidance,
 )
@@ -22,7 +22,7 @@ replacement_package = "security"
 replacement_import = "safe_requests"
 
 
-class UrlSandbox(BaseCodemod, Codemod):
+class UrlSandbox(SemgrepCodemod, Codemod):
     METADATA = CodemodMetadata(
         DESCRIPTION=(
             "Replaces request.{func} with more secure safe_request library functions."
@@ -39,7 +39,7 @@ class UrlSandbox(BaseCodemod, Codemod):
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         Codemod.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, file_context)
+        SemgrepCodemod.__init__(self, file_context)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         # we first gather all the nodes we want to change together with their replacements
