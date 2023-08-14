@@ -1,4 +1,4 @@
-cfgv==3.3.*
+cfgv==3.4.*
 click==8.1.*
 distlib==0.3.*
 filelock==3.12.*
