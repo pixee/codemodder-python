@@ -88,7 +88,7 @@ def run_codemods_for_file(
 def analyze_files(
     files_to_analyze,
     codemods_to_run,
-    semgrep_results,
+    sarif,
     path_include,
     path_exclude,
     dry_run,
@@ -106,16 +106,14 @@ def analyze_files(
 
         line_exclude = file_line_patterns(file_path, path_exclude)
         line_include = file_line_patterns(file_path, path_include)
-        semgrep_results_for_file = (
-            semgrep_results[str(file_path)] if semgrep_results else None
-        )
+        sarif_for_file = sarif[str(file_path)]
 
         file_context = FileContext(
             file_path,
             dry_run,
             line_exclude,
             line_include,
-            semgrep_results_for_file,
+            sarif_for_file,
         )
 
         run_codemods_for_file(

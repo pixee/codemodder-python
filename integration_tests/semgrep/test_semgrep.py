@@ -1,5 +1,6 @@
 from codemodder import global_state
 from codemodder.semgrep import run as semgrep_run
+from codemodder.codemods import SecureRandom, UrlSandbox
 
 
 class TestSemgrep:
@@ -34,10 +35,7 @@ class TestSemgrep:
     def test_two_codemods(self):
         global_state.set_directory("tests/samples/")
         results_by_path_and_id = semgrep_run(
-            [
-                "codemodder/codemods/semgrep/secure_random.yaml",
-                "codemodder/codemods/semgrep/sandbox_url_creation.yaml",
-            ],
+            {"secure-random": SecureRandom, "url-sandbox": UrlSandbox}
         )
 
         assert sorted(results_by_path_and_id.keys()) == [

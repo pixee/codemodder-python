@@ -20,7 +20,7 @@ DEFAULT_CODEMODS = {
 ALL_CODEMODS = DEFAULT_CODEMODS
 
 
-def match_codemods(codemod_include: list, codemod_exclude: list):
+def match_codemods(codemod_include: list, codemod_exclude: list) -> dict:
     if not codemod_include and not codemod_exclude:
         return {codemod.METADATA.NAME: codemod for codemod in DEFAULT_CODEMODS}
 

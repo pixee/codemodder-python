@@ -39,7 +39,7 @@ def run_on_directory(yaml_files: List[Path], directory: Path):
         return results
 
 
-def run(codemods):
+def run(codemods: dict) -> dict:
     semgrep_codemods = only_semgrep(codemods)
     if semgrep_codemods:
         return run_on_directory(
