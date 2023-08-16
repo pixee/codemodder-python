@@ -39,7 +39,7 @@ class TestSarifProcessing:
         rule_in_path = next(iter(results[expected_path].keys()))
         assert expected_rule == rule_in_path
 
-    def test_codeql_sarif_input(self):
+    def test_codeql_sarif_input(self, tmpdir):
         completed_process = subprocess.run(
             [
                 "python",
@@ -49,7 +49,7 @@ class TestSarifProcessing:
                 "--sarif",
                 "tests/samples/webgoat_v8.2.0_codeql.sarif",
                 "--output",
-                "doesntmatter.txt",
+                tmpdir / "doesntmatter.txt",
                 "--codemod-include",
                 "secure-random",
                 "--dry-run",
