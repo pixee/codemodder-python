@@ -24,7 +24,7 @@ class TestRun:
         assert res == 0
 
         warning_log.assert_called()
-        assert warning_log.call_args_list[0][0][0] == "No files matched."
+        assert warning_log.call_args_list[1][0][0] == "No files matched."
 
         mock_parse.assert_not_called()
 

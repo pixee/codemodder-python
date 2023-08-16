@@ -1,0 +1,70 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": []
+        }
+      ],
+      "results": [
+        {
+          "fingerprints": {
+            "matchBasedId/v1": "3f3a6a72297040e2d8a9a0ff6d0eed04cba09aa7d3f86ceef72a0aeec4b17a5a5ff55913cabea108083a9e4824245305fc7e9a6fbe21f73daf0f1cbcf517efe4_0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tests/samples/insecure_random.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "endColumn": 16,
+                  "endLine": 3,
+                  "snippet": {
+                    "text": "random.random()"
+                  },
+                  "startColumn": 1,
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Insecure Random"
+          },
+          "properties": {},
+          "ruleId": "codemodder.codemods.semgrep.secure-random"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "semgrep",
+          "rules": [
+            {
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "fullDescription": {
+                "text": "Insecure Random"
+              },
+              "id": "codemodder.codemods.semgrep.secure-random",
+              "name": "codemodder.codemods.semgrep.secure-random",
+              "properties": {
+                "precision": "very-high",
+                "tags": []
+              },
+              "shortDescription": {
+                "text": "Semgrep Finding: codemodder.codemods.semgrep.secure-random"
+              }
+            }
+          ],
+          "semanticVersion": "1.34.1"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

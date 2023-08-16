@@ -16,6 +16,7 @@ from codemodder.dependency_manager import DependencyManager
 from codemodder.report.codetf_reporter import report_default
 from codemodder.semgrep import run as semgrep_run
 from codemodder.semgrep import find_all_yaml_files
+from codemodder.sarifs import parse_sarif_files
 
 # Must use from import here to point to latest state
 from codemodder import global_state
@@ -101,11 +102,18 @@ def run(argv, original_args) -> int:
         return 0
 
     logger.debug("Codemods to run: %s", codemods_to_run)
-    results_by_path_and_rule_id = semgrep_run(find_all_yaml_files(codemods_to_run))
 
-    if not results_by_path_and_rule_id:
-        logger.warning("No semgrep results.")
-        return 0
+    # parse sarifs from --sarif flags
+    sarif_results = parse_sarif_files(argv.sarif or [])
+
+    # run semgrep and gather the results
+    semgrep_results = semgrep_run(find_all_yaml_files(codemods_to_run))
+
+    # merge the results
+    sarif_results.update(semgrep_results)
+
+    if not sarif_results:
+        logger.warning("No sarif results.")
 
     files_to_analyze = match_files(
         global_state.DIRECTORY, argv.path_exclude, argv.path_include
@@ -136,7 +144,7 @@ def run(argv, original_args) -> int:
             argv.dry_run,
             line_exclude,
             line_include,
-            results_by_path_and_rule_id[str(file_path)],
+            sarif_results[str(file_path)],
         )
 
         run_codemods_for_file(

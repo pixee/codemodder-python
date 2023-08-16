@@ -129,6 +129,7 @@ def parse_args(argv):
     # At this time we don't do anything with the sarif arg.
     parser.add_argument(
         "--sarif",
+        action=CsvListAction,
         help="Comma-separated set of path(s) to SARIF file(s) to feed to the codemods",
     )
     return parser.parse_args(argv)
