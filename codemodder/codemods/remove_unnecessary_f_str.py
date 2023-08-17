@@ -1,6 +1,5 @@
-from typing import List
 import libcst as cst
-from libcst.codemod import Codemod, CodemodContext
+from libcst.codemod import CodemodContext
 from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatString
 from libcst.metadata import PositionProvider
 from codemodder.codemods.change import Change
