@@ -16,7 +16,7 @@ class BaseCodemodTest:
         tmp_file_path = tmpdir / "code.py"
         self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)
 
-    def run_and_assert_filepath(self, root, file_path, input_code, expected):
+    def run_and_assert_filepath(self, _, file_path, input_code, expected):
         input_tree = cst.parse_module(input_code)
         file_context = FileContext(
             file_path,

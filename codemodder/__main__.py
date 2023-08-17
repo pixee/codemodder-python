@@ -89,9 +89,7 @@ def analyze_files(
     files_to_analyze,
     codemods_to_run,
     sarif,
-    path_include,
-    path_exclude,
-    dry_run,
+    cli_args,
 ):
     for file_path in files_to_analyze:
         # TODO: handle potential race condition that file no longer exists at this point
@@ -104,13 +102,13 @@ def analyze_files(
             logger.exception("Error parsing file %s", file_path)
             continue
 
-        line_exclude = file_line_patterns(file_path, path_exclude)
-        line_include = file_line_patterns(file_path, path_include)
+        line_exclude = file_line_patterns(file_path, cli_args.path_exclude)
+        line_include = file_line_patterns(file_path, cli_args.path_include)
         sarif_for_file = sarif[str(file_path)]
 
         file_context = FileContext(
             file_path,
-            dry_run,
+            cli_args.dry_run,
             line_exclude,
             line_include,
             sarif_for_file,
@@ -182,9 +180,7 @@ def run(argv, original_args) -> int:
         files_to_analyze,
         codemods_to_run,
         sarif_results,
-        argv.path_include,
-        argv.path_exclude,
-        argv.dry_run,
+        argv,
     )
 
     compile_results(codemods_to_run)
