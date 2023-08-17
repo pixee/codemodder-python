@@ -3,7 +3,6 @@ import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
 from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatString
 from libcst.metadata import PositionProvider
-from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.codemods.change import Change
 import libcst.matchers as m
 from codemodder.codemods.base_codemod import (
@@ -18,7 +17,7 @@ class UnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
     METADATA = CodemodMetadata(
         DESCRIPTION=UnnecessaryFormatString.DESCRIPTION,
         NAME="remove-unnecessary-f-str",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
     )
     CHANGE_DESCRIPTION = UnnecessaryFormatString.DESCRIPTION
 
