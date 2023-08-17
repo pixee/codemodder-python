@@ -12,7 +12,7 @@ from codemodder.codemods.base_codemod import (
 from codemodder.file_context import FileContext
 
 
-class UnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
+class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
     METADATA = CodemodMetadata(
         DESCRIPTION=UnnecessaryFormatString.DESCRIPTION,
         NAME="remove-unnecessary-f-str",

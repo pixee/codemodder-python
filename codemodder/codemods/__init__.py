@@ -7,7 +7,7 @@ from codemodder.codemods.limit_readline import LimitReadline
 from codemodder.codemods.secure_random import SecureRandom
 from codemodder.codemods.url_sandbox import UrlSandbox
 from codemodder.codemods.process_creation_sandbox import ProcessSandbox
-from codemodder.codemods.remove_unnecessary_f_str import UnnecessaryFStr
+from codemodder.codemods.remove_unnecessary_f_str import RemoveUnnecessaryFStr
 
 DEFAULT_CODEMODS = {
     DjangoDebugFlagOn,
@@ -15,9 +15,9 @@ DEFAULT_CODEMODS = {
     HardenPyyaml,
     LimitReadline,
     ProcessSandbox,
+    RemoveUnnecessaryFStr,
     SecureRandom,
     UrlSandbox,
-    UnnecessaryFStr,
 }
 ALL_CODEMODS = DEFAULT_CODEMODS
 

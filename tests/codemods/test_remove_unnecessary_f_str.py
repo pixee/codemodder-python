@@ -1,9 +1,9 @@
-from codemodder.codemods.remove_unnecessary_f_str import UnnecessaryFStr
+from codemodder.codemods.remove_unnecessary_f_str import RemoveUnnecessaryFStr
 from tests.codemods.base_codemod_test import BaseCodemodTest
 
 
 class TestLimitReadline(BaseCodemodTest):
-    codemod = UnnecessaryFStr
+    codemod = RemoveUnnecessaryFStr
 
     def test_no_change(self, tmpdir):
         before = r"""
