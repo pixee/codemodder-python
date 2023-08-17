@@ -23,7 +23,20 @@ var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expected)
 
-    @pytest.mark.skip()
+    def test_import_alias(self, tmpdir):
+        input_code = """import subprocess as sub
+
+sub.run("echo 'hi'", shell=True)
+var = "hello"
+"""
+        expected = """import subprocess as sub
+from security import safe_command
+
+safe_command.run(sub.run, "echo 'hi'", shell=True)
+var = "hello"
+"""
+        self.run_and_assert(tmpdir, input_code, expected)
+
     def test_from_subprocess(self, tmpdir):
         input_code = """from subprocess import run
 

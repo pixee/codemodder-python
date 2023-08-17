@@ -1,5 +1,4 @@
 import libcst as cst
-from libcst import Arg, Name
 from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
 from codemodder.semgrep import rule_ids_from_yaml_files
@@ -12,6 +11,7 @@ from codemodder.codemods.base_codemod import (
     ReviewGuidance,
 )
 from codemodder.codemods.base_visitor import BaseTransformer
+from codemodder.codemods.utils import get_call_name
 
 replacement_import = "safe_command"
 
@@ -54,8 +54,12 @@ class ProcessSandbox(SemgrepCodemod, BaseTransformer):
                 self.context, "security", "safe_command"
             )
             DependencyManager().add(["security==1.0.1"])
-            return updated_node.with_changes(
-                func=updated_node.func.with_changes(value=Name(replacement_import)),
-                args=[Arg(updated_node.func), *updated_node.args],
+            new_call = cst.Call(
+                func=cst.Attribute(
+                    value=cst.Name(value=replacement_import),
+                    attr=cst.Name(value=get_call_name(original_node)),
+                ),
+                args=[cst.Arg(original_node.func), *original_node.args],
             )
+            return new_call
         return updated_node
