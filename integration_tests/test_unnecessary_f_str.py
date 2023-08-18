@@ -5,7 +5,7 @@ from integration_tests.base_test import (
 )
 
 
-class TestLimitReadline(BaseIntegrationTest):
+class TestFStr(BaseIntegrationTest):
     codemod = RemoveUnnecessaryFStr
     code_path = "tests/samples/unnecessary_f_str.py"
     original_code, expected_new_code = original_and_expected_from_code_path(

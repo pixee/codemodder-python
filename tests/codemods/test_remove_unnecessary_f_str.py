@@ -2,7 +2,7 @@ from codemodder.codemods.remove_unnecessary_f_str import RemoveUnnecessaryFStr
 from tests.codemods.base_codemod_test import BaseCodemodTest
 
 
-class TestLimitReadline(BaseCodemodTest):
+class TestFStr(BaseCodemodTest):
     codemod = RemoveUnnecessaryFStr
 
     def test_no_change(self, tmpdir):
