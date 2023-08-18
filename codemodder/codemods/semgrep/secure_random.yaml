@@ -2,20 +2,10 @@ rules:
   - id: secure-random
     pattern-either:
       - patterns:
-        - pattern: random.random()
+        - pattern: random.$F(...)
         - pattern-inside: |
             import random
             ...
-      - patterns:
-          - pattern: $X.random()
-          - pattern-inside: |
-              import random as $X
-              ...
-      - patterns:
-          - pattern: random()
-          - pattern-inside: |
-              from random import random
-              ...
     message: Insecure Random
     languages: [python]
     severity: WARNING

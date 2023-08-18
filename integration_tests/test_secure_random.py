@@ -1,4 +1,4 @@
-from codemodder.codemods.secure_random import SecureRandom, RandomVisitor
+from codemodder.codemods.secure_random import SecureRandom
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
@@ -12,11 +12,11 @@ class TestSecureRandom(BaseIntegrationTest):
         code_path,
         [
             (0, """import secrets\n\n"""),
-            (1, """gen = secrets.SystemRandom()\n\n"""),
-            (2, """gen.uniform(0, 1)\n"""),
+            (1, ""),
+            (2, """secrets.SystemRandom().random()\n"""),
         ],
     )
 
-    expected_diff = '--- \n+++ \n@@ -1,4 +1,6 @@\n-import random\n+import secrets\n \n-random.random()\n+gen = secrets.SystemRandom()\n+\n+gen.uniform(0, 1)\n var = "hello"\n'
+    expected_diff = '--- \n+++ \n@@ -1,4 +1,4 @@\n-import random\n+import secrets\n \n-random.random()\n+secrets.SystemRandom().random()\n var = "hello"\n'
     expected_line_change = "3"
-    change_description = RandomVisitor.CHANGE_DESCRIPTION
+    change_description = SecureRandom.CHANGE_DESCRIPTION

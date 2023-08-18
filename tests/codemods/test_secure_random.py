@@ -17,15 +17,12 @@ var = "hello"
 """
         expexted_output = """import secrets
 
-gen = secrets.SystemRandom()
-
-gen.uniform(0, 1)
+secrets.SystemRandom().random()
 var = "hello"
 """
 
         self.run_and_assert(tmpdir, input_code, expexted_output)
 
-    @pytest.mark.skip()
     def test_from_random(self, tmpdir):
         input_code = """from random import random
 
@@ -34,8 +31,20 @@ var = "hello"
 """
         expexted_output = """import secrets
 
-gen = secrets.SystemRandom()
-gen.uniform(0, 1)
+secrets.SystemRandom().random()
+var = "hello"
+"""
+        self.run_and_assert(tmpdir, input_code, expexted_output)
+
+    def test_random_alias(self, tmpdir):
+        input_code = """import random as alleatory
+
+alleatory.random()
+var = "hello"
+"""
+        expexted_output = """import secrets
+
+secrets.SystemRandom().random()
 var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expexted_output)
@@ -51,8 +60,7 @@ var = "hello"
 """,
                 """import secrets
 
-gen = secrets.SystemRandom()
-gen.randint(0, 10)
+secrets.SystemRandom().randint(0, 10)
 var = "hello"
 """,
             ),
@@ -64,15 +72,28 @@ var = "hello"
 """,
                 """import secrets
 
-gen = secrets.SystemRandom()
-gen.randint(0, 10)
+secrets.SystemRandom().randint(0, 10)
 var = "hello"
 """,
             ),
         ],
     )
-    @pytest.mark.skip()
     def test_random_randint(self, tmpdir, input_code, expexted_output):
+        self.run_and_assert(tmpdir, input_code, expexted_output)
+
+    def test_multiple_calls(self, tmpdir):
+        input_code = """import random
+
+random.random()
+random.randint()
+var = "hello"
+"""
+        expexted_output = """import secrets
+
+secrets.SystemRandom().random()
+secrets.SystemRandom().randint()
+var = "hello"
+"""
         self.run_and_assert(tmpdir, input_code, expexted_output)
 
     @pytest.mark.parametrize(
@@ -87,8 +108,7 @@ csv.excel
                 """import csv
 import secrets
 
-gen = secrets.SystemRandom()
-gen.uniform(0, 1)
+secrets.SystemRandom().random()
 csv.excel
 """,
             ),
@@ -101,8 +121,7 @@ excel
                 """from csv import excel
 import secrets
 
-gen = secrets.SystemRandom()
-gen.uniform(0, 1)
+secrets.SystemRandom().random()
 excel
 """,
             ),
@@ -131,9 +150,7 @@ random.__all__
         expexted_output = """import random
 import secrets
 
-gen = secrets.SystemRandom()
-
-gen.uniform(0, 1)
+secrets.SystemRandom().random()
 random.__all__
 """
 
