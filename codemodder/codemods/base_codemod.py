@@ -54,6 +54,7 @@ class BaseCodemod:
         return True
 
     def node_position(self, node):
+        # pylint: disable=no-member
         # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
         return self.get_metadata(self.METADATA_DEPENDENCIES[0], node)
 
