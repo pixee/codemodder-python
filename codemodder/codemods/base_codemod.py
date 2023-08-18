@@ -53,6 +53,13 @@ class BaseCodemod:
     def should_transform(self):
         return True
 
+    def node_position(self, node):
+        # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
+        return self.get_metadata(self.METADATA_DEPENDENCIES[0], node)
+
+    def lineno_for_node(self, node):
+        return self.node_position(node).start.line
+
 
 class SemgrepCodemod(BaseCodemod):
     YAML_FILES: ClassVar[List[str]] = NotImplemented

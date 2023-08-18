@@ -34,10 +34,7 @@ class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
     ):
         transformed_node = super()._check_formatted_string(_original_node, updated_node)
         if not _original_node.deep_equals(transformed_node):
-            pos_to_match = self.get_metadata(
-                self.METADATA_DEPENDENCIES[0], _original_node
-            )
-            line_number = pos_to_match.start.line
+            line_number = self.lineno_for_node(_original_node)
             self.CHANGES_IN_FILE.append(
                 Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
             )

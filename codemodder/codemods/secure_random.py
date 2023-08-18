@@ -42,7 +42,7 @@ class SecureRandom(SemgrepCodemod, BaseTransformer):
         )
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
-        pos_to_match = self.get_metadata(self.METADATA_DEPENDENCIES[0], original_node)
+        pos_to_match = self.node_position(original_node)
         if self.filter_by_result(
             pos_to_match
         ) and self.filter_by_path_includes_or_excludes(pos_to_match):

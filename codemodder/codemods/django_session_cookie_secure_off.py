@@ -67,8 +67,8 @@ class SessionCookieSecureTransformer(BaseTransformer):
             # something else and we changed it in `leave_Assign`.
             return updated_node
 
-        pos_to_match = self.get_metadata(self.METADATA_DEPENDENCIES[0], original_node)
         # line_number is the end of the module where we will insert the new flag.
+        pos_to_match = self.node_position(original_node)
         line_number = pos_to_match.end.line
         self.changes_in_file.append(
             Change(
@@ -85,7 +85,7 @@ class SessionCookieSecureTransformer(BaseTransformer):
         """
         Handle case for `SESSION_COOKIE_SECURE = not True` in settings.py
         """
-        pos_to_match = self.get_metadata(self.METADATA_DEPENDENCIES[0], original_node)
+        pos_to_match = self.node_position(original_node)
         if is_session_cookie_secure(
             original_node
         ) and self.filter_by_path_includes_or_excludes(pos_to_match):

@@ -7,7 +7,7 @@ from integration_tests.base_test import (
 )
 
 
-class TestDjangoDebugFlagFlip(BaseIntegrationTest):
+class TestDjangoSessionCookieSecureOff(BaseIntegrationTest):
     codemod = DjangoSessionCookieSecureOff
     code_path = "tests/samples/django-project/mysite/mysite/settings.py"
 
