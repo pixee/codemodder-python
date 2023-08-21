@@ -26,5 +26,5 @@ You can run the codemodder program with
 python -m codemodder --help
 ```
 
-## Development
-See [Developer Readme](DEV_README.md)
+## Contributing
+See [CONTRIBUTING.md](CONTRIBUTING.md).
