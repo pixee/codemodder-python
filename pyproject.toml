@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codemodder-python"
+version = "0.57.0"
+requires-python = ">=3.9.0"
+readme = "README.md"
+license = {file = "LICENSE"}
+dependencies = [
+    "semgrep~=1.36.0",
+    "PyYAML~=6.0.0",
+    "libcst~=1.0.0",
+    "dependency-manager @ git+https://github.com/pixee/python-dependency-manager#egg=dependency-manager",
+]
+
+[project.scripts]
+codemodder = "codemodder.__main__:run"
+
+[tool.setuptools]
+
+[tool.setuptools.package-data]
+"codemodder.codemods.semgrep" = ["**/codemodder/codemods/semgrep/**.yaml"]
