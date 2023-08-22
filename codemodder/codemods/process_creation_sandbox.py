@@ -1,7 +1,6 @@
 import libcst as cst
 from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
-from codemodder.semgrep import rule_ids_from_yaml_files
 from codemodder.dependency_manager import DependencyManager
 from libcst.codemod.visitors import AddImportsVisitor
 from codemodder.codemods.change import Change
@@ -28,8 +27,6 @@ class ProcessSandbox(SemgrepCodemod, BaseTransformer):
     YAML_FILES = [
         "sandbox_process_creation.yaml",
     ]
-
-    RULE_IDS = rule_ids_from_yaml_files(YAML_FILES)
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         SemgrepCodemod.__init__(self, file_context)
