@@ -1,6 +1,7 @@
 import subprocess
 import itertools
 import yaml
+from importlib.resources import files
 from tempfile import NamedTemporaryFile
 from typing import List
 from pathlib import Path
@@ -8,7 +9,7 @@ from codemodder import global_state
 from codemodder.sarifs import results_by_path_and_rule_id
 from codemodder.logging import logger
 
-YAML_FILES_DIR = Path("codemodder") / "codemods" / "semgrep"
+YAML_FILES_DIR = files("codemodder.codemods.semgrep")
 
 
 def run_on_directory(yaml_files: List[Path], directory: Path):
