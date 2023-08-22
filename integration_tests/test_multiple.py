@@ -31,7 +31,7 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         assert sorted(codetf.keys()) == ["results", "run"]
 
         results = codetf["results"]
-        assert len(results) == 8
+        assert len(results) == 9
         sorted_results = sorted(results, key=lambda x: x["codemod"])
 
         django_debug = sorted_results[0]
@@ -70,12 +70,13 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         )
         assert len(process_sandbox["changeset"][0]["changes"]) == 4
 
-        url_sandbox = sorted_results[5]
-        assert len(url_sandbox["changeset"]) == 1
+        unnecessary_f_str = sorted_results[5]
+        assert len(unnecessary_f_str["changeset"]) == 1
         assert (
-            url_sandbox["changeset"][0]["path"] == "tests/samples/unnecessary_f_str.py"
+            unnecessary_f_str["changeset"][0]["path"]
+            == "tests/samples/unnecessary_f_str.py"
         )
-        assert len(url_sandbox["changeset"][0]["changes"]) == 1
+        assert len(unnecessary_f_str["changeset"][0]["changes"]) == 1
 
         secure_random = sorted_results[6]
         assert len(secure_random["changeset"]) == 1
@@ -84,7 +85,15 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         )
         assert len(secure_random["changeset"][0]["changes"]) == 1
 
-        url_sandbox = sorted_results[7]
+        remove_unused_imports = sorted_results[7]
+        assert len(remove_unused_imports["changeset"]) == 1
+        assert (
+            remove_unused_imports["changeset"][0]["path"]
+            == "tests/samples/unused_imports.py"
+        )
+        assert len(remove_unused_imports["changeset"][0]["changes"]) == 1
+
+        url_sandbox = sorted_results[8]
         assert len(url_sandbox["changeset"]) == 1
         assert url_sandbox["changeset"][0]["path"] == "tests/samples/make_request.py"
         assert len(url_sandbox["changeset"][0]["changes"]) == 1

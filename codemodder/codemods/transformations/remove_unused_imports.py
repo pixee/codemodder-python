@@ -6,7 +6,7 @@ from libcst.codemod.visitors import GatherUnusedImportsVisitor
 
 class RemoveUnusedImportsCodemod(Codemod):
     """
-    Removes unused imports.
+    Removes unused imports. Combines GatherUnusedImportsVisitor and RemoveUnusedImportsTransformer.
     """
 
     METADATA_DEPENDENCIES = (*GatherUnusedImportsVisitor.METADATA_DEPENDENCIES,)
