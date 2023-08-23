@@ -24,6 +24,7 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         assert completed_process.returncode == 0
         self._assert_codetf_output()
 
+    # pylint: disable=too-many-statements
     def _assert_codetf_output(self):
         with open(self.output_path, "r", encoding="utf-8") as f:
             codetf = json.load(f)
