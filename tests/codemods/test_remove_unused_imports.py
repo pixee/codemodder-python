@@ -73,3 +73,9 @@ from b import *
 a.something
 """
         self.run_and_assert(tmpdir, before, before)
+
+    def test_keep_format(self, tmpdir):
+        before = "from a import b,c,d   \nprint(b)\nprint(d)"
+        after = "from a import b,d   \nprint(b)\nprint(d)"
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.codemod.CHANGES_IN_FILE) == 1

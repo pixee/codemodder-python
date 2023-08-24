@@ -37,9 +37,11 @@ class RemoveUnusedImportsTransformer(cst.CSTTransformer):
         names_to_keep = []
         for ia in original_node.names:
             if (ia, original_node) not in self.unused_imports:
-                names_to_keep.append(ia.with_changes(comma=cst.MaybeSentinel.DEFAULT))
+                names_to_keep.append(ia)
         if len(names_to_keep) == 0:
             return cst.RemoveFromParent()
+        if len(names_to_keep) != len(original_node.names):
+            names_to_keep[-1] = names_to_keep[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
         return updated_node.with_changes(names=names_to_keep)
 
     def leave_Import(
