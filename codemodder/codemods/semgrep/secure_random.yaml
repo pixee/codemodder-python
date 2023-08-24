@@ -4,9 +4,8 @@ rules:
     severity: WARNING
     languages:
       - python
-    pattern-either:
-      - patterns:
-        - pattern: random.$F(...)
-        - pattern-inside: |
-            import random
-            ...
+    patterns:
+    - pattern: random.$F(...)
+    - pattern-inside: |
+        import random
+        ...
