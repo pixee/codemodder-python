@@ -13,7 +13,7 @@ class ReviewGuidance(Enum):
 
 @dataclass(frozen=True)
 class CodemodMetadata:
-    DESCRIPTION: str
+    DESCRIPTION: str  # TODO: this field should be optional
     NAME: str
     REVIEW_GUIDANCE: ReviewGuidance
 
