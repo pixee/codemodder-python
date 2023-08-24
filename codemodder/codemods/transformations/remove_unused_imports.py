@@ -2,6 +2,7 @@ from typing import Set, Tuple, Union
 import libcst as cst
 from libcst.codemod import Codemod
 from libcst.codemod.visitors import GatherUnusedImportsVisitor
+from libcst import matchers
 
 
 class RemoveUnusedImportsCodemod(Codemod):
@@ -44,9 +45,14 @@ class RemoveUnusedImportsTransformer(cst.CSTTransformer):
     def leave_Import(
         self, original_node: cst.Import, updated_node: cst.Import
     ) -> cst.Import:
+        # GatherUnusedImportsVisitor will never include a ImportStar, we skip those
+        if matchers.matches(original_node.names, matchers.ImportStar()):
+            return updated_node
         return self.leave_import_alike(original_node, updated_node)
 
     def leave_ImportFrom(
         self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
     ) -> cst.ImportFrom:
+        if matchers.matches(original_node.names, matchers.ImportStar()):
+            return updated_node
         return self.leave_import_alike(original_node, updated_node)
