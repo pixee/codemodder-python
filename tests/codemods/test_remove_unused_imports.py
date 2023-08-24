@@ -66,3 +66,10 @@ def something():
 
         self.run_and_assert(tmpdir, before, after)
         assert len(self.codemod.CHANGES_IN_FILE) == 1
+
+    def test_no_import_star_removal(self, tmpdir):
+        before = r"""import a
+from b import *
+a.something
+"""
+        self.run_and_assert(tmpdir, before, before)
