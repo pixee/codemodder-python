@@ -2,8 +2,9 @@
 rules:
   - id: found-settings-file
     message: Detected a Potential Django settings.py file
-    languages: [python]
     severity: INFO
+    languages:
+      - python
     # This pattern creates one finding with no text for settings.py file.
     pattern-regex: ^
     paths:

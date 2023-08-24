@@ -1,10 +1,10 @@
 rules:
   - id: django-debug-flag-on
-    pattern: DEBUG = True
     message: Django's debug flag is on
+    severity: WARNING
     languages:
       - python
-    severity: WARNING
+    pattern: DEBUG = True
     paths:
       include:
         - settings.py

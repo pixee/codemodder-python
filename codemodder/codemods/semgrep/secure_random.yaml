@@ -1,11 +1,12 @@
 rules:
   - id: secure-random
+    message: Insecure Random
+    severity: WARNING
+    languages:
+      - python
     pattern-either:
       - patterns:
         - pattern: random.$F(...)
         - pattern-inside: |
             import random
             ...
-    message: Insecure Random
-    languages: [python]
-    severity: WARNING

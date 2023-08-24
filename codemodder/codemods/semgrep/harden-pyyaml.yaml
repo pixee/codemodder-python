@@ -1,5 +1,9 @@
 rules:
   - id: harden-pyyaml
+    message: Unsafe call to yaml.load
+    severity: WARNING
+    languages:
+      - python
     pattern-either:
       - patterns:
           - pattern: yaml.load(...)
@@ -23,7 +27,3 @@ rules:
               patterns:
                 - pattern-not:
                     pattern: yaml.SafeLoader
-    message: Unsafe call to yaml.load
-    languages:
-      - python
-    severity: WARNING

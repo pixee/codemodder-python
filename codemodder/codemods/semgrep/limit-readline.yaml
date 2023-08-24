@@ -1,5 +1,9 @@
 rules:
   - id: limit-readline
+    message: readline() without size limit
+    severity: WARNING
+    languages:
+      - python
     mode: taint
     pattern-sources:
       - pattern-either:
@@ -16,7 +20,3 @@ rules:
           - pattern: open(...)
     pattern-sinks:
       - pattern: $SINK.readline()
-    message: readline() without size limit
-    languages:
-      - python
-    severity: WARNING

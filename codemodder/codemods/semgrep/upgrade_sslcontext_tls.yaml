@@ -4,8 +4,6 @@ rules:
     severity: WARNING
     languages:
       - python
-    message: Weak TLS protocol
-    severity: WARNING
     patterns:
       - pattern-either:
         - pattern: ssl.SSLContext(...,ssl.PROTOCOL_SSLv2,...)

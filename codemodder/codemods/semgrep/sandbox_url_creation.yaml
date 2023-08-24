@@ -1,12 +1,12 @@
 rules:
   - id: sandbox-url-creation
+    message: Unbounded URL creation
+    severity: WARNING
+    languages:
+      - python
     pattern-either:
       - patterns:
         - pattern: requests.get(...)
         - pattern-inside: |
             import requests
             ...
-    message: Unbounded URL creation
-    languages:
-      - python
-    severity: WARNING
