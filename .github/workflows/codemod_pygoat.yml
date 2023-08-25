@@ -1,0 +1,37 @@
+name: Codemod Pygoat
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: (${{ github.workflow }}-${{ github.event.inputs.branch || github.event.pull_request.head.ref }})
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run Codemod on Pygoat
+    runs-on: ubuntu-20.04
+    timeout-minutes: 10
+    steps:
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Check out codemodder
+        uses: actions/checkout@v3
+      - name: Install Dependencies
+        run: pip install -r requirements/codemodder.txt
+      - name: Check out Pygoat
+        uses: actions/checkout@v3
+        with:
+          repository: pixee/pygoat
+          path: pygoat
+      - name: Run Codemodder
+        run: python -m codemodder --output output.codetf pygoat
