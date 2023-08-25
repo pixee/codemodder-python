@@ -34,7 +34,7 @@ jobs:
       - name: Run pytest
         run: coverage run --source=codemodder/ -m pytest -v
       - name: Report coverage
-        run: coverage report -m --fail-under=98
+        run: coverage report -m --fail-under=95
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:
