@@ -4,6 +4,7 @@ from codemodder.codemods.django_session_cookie_secure_off import (
     DjangoSessionCookieSecureOff,
 )
 from codemodder.codemods.harden_pyyaml import HardenPyyaml
+from codemodder.codemods.harden_ruamel import HardenRuamel
 from codemodder.codemods.limit_readline import LimitReadline
 from codemodder.codemods.secure_random import SecureRandom
 from codemodder.codemods.upgrade_sslcontext_tls import UpgradeSSLContextTLS
@@ -15,6 +16,7 @@ DEFAULT_CODEMODS = {
     DjangoDebugFlagOn,
     DjangoSessionCookieSecureOff,
     HardenPyyaml,
+    HardenRuamel,
     LimitReadline,
     ProcessSandbox,
     RemoveUnnecessaryFStr,
