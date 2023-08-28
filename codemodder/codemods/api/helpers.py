@@ -7,7 +7,9 @@ from codemodder.codemods.utils import get_call_name
 class Helpers:
     def add_needed_import(self, import_name):
         # TODO: do we need to check if this import already exists?
-        AddImportsVisitor.add_needed_import(self.context, import_name)
+        AddImportsVisitor.add_needed_import(
+            self.context, import_name  # pylint: disable=no-member
+        )
 
     def update_call_target(self, original_node, new_target):
         # TODO: is an assertion the best way to handle this?
