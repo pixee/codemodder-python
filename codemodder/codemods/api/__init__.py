@@ -102,9 +102,8 @@ class SemgrepCodemod(
                 Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
             )
             if (attr := getattr(self, "on_result_found", None)) is not None:
-                new_node = attr(
-                    original_node, updated_node
-                )  # pylint: disable=not-callable
+                # pylint: disable=not-callable
+                new_node = attr(original_node, updated_node)
                 return new_node
 
         return updated_node
