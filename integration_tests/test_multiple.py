@@ -32,7 +32,7 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         assert sorted(codetf.keys()) == ["results", "run"]
 
         results = codetf["results"]
-        assert len(results) == 10
+        assert len(results) == 11
         sorted_results = sorted(results, key=lambda x: x["codemod"])
 
         django_debug = sorted_results[0]
@@ -56,7 +56,12 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         assert harden_pyyaml["changeset"][0]["path"] == "tests/samples/unsafe_yaml.py"
         assert len(harden_pyyaml["changeset"][0]["changes"]) == 1
 
-        limit_readline = sorted_results[3]
+        harden_ruamel = sorted_results[3]
+        assert len(harden_ruamel["changeset"]) == 1
+        assert harden_ruamel["changeset"][0]["path"] == "tests/samples/unsafe_ruamel.py"
+        assert len(harden_ruamel["changeset"][0]["changes"]) == 2
+
+        limit_readline = sorted_results[4]
         assert len(limit_readline["changeset"]) == 1
         assert (
             limit_readline["changeset"][0]["path"]
@@ -64,14 +69,14 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         )
         assert len(limit_readline["changeset"][0]["changes"]) == 1
 
-        process_sandbox = sorted_results[4]
+        process_sandbox = sorted_results[5]
         assert len(process_sandbox["changeset"]) == 1
         assert (
             process_sandbox["changeset"][0]["path"] == "tests/samples/make_process.py"
         )
         assert len(process_sandbox["changeset"][0]["changes"]) == 4
 
-        unnecessary_f_str = sorted_results[5]
+        unnecessary_f_str = sorted_results[6]
         assert len(unnecessary_f_str["changeset"]) == 1
         assert (
             unnecessary_f_str["changeset"][0]["path"]
@@ -79,14 +84,14 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         )
         assert len(unnecessary_f_str["changeset"][0]["changes"]) == 1
 
-        secure_random = sorted_results[6]
+        secure_random = sorted_results[7]
         assert len(secure_random["changeset"]) == 1
         assert (
             secure_random["changeset"][0]["path"] == "tests/samples/insecure_random.py"
         )
         assert len(secure_random["changeset"][0]["changes"]) == 1
 
-        remove_unused_imports = sorted_results[7]
+        remove_unused_imports = sorted_results[8]
         assert len(remove_unused_imports["changeset"]) == 1
         assert (
             remove_unused_imports["changeset"][0]["path"]
@@ -94,12 +99,12 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         )
         assert len(remove_unused_imports["changeset"][0]["changes"]) == 1
 
-        upgrade_weak_tls = sorted_results[8]
+        upgrade_weak_tls = sorted_results[9]
         assert len(upgrade_weak_tls["changeset"]) == 1
         assert upgrade_weak_tls["changeset"][0]["path"] == "tests/samples/weak_tls.py"
         assert len(upgrade_weak_tls["changeset"][0]["changes"]) == 1
 
-        url_sandbox = sorted_results[9]
+        url_sandbox = sorted_results[10]
         assert len(url_sandbox["changeset"]) == 1
         assert url_sandbox["changeset"][0]["path"] == "tests/samples/make_request.py"
         assert len(url_sandbox["changeset"][0]["changes"]) == 1
