@@ -10,7 +10,7 @@ packaging==23.*
 pathspec==0.11.*
 platformdirs==3.10.*
 PyYAML==6.0.1
-semgrep==1.36.*
+semgrep==1.37.*
 typing-inspect==0.9.*
 typing_extensions==4.7.*
 git+https://github.com/pixee/python-dependency-manager
