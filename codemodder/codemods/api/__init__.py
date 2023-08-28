@@ -12,7 +12,6 @@ import yaml
 
 from codemodder.codemods.base_codemod import (
     CodemodMetadata,
-    ReviewGuidance,
     SemgrepCodemod as _SemgrepCodemod,
 )
 from codemodder.codemods.base_visitor import BaseTransformer
@@ -52,12 +51,14 @@ class _CodemodSubclassWithMetadata:
             # NAME, DESCRIPTION, and REVIEW_GUIDANCE here.
 
             cls.METADATA = CodemodMetadata(
-                cls.DESCRIPTION, cls.NAME, cls.REVIEW_GUIDANCE
+                cls.DESCRIPTION,  # pylint: disable=no-member
+                cls.NAME,  # pylint: disable=no-member
+                cls.REVIEW_GUIDANCE,  # pylint: disable=no-member
             )
             cls.YAML_FILES = _create_temp_yaml_file(cls, cls.METADATA)
 
             # This is a little bit hacky, but it also feels like the right solution?
-            cls.CHANGE_DESCRIPTION = cls.DESCRIPTION
+            cls.CHANGE_DESCRIPTION = cls.DESCRIPTION  # pylint: disable=no-member
 
             super().__init_subclass__()
 
@@ -102,7 +103,7 @@ class SemgrepCodemod(
                 Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
             )
             if (attr := getattr(self, "on_result_found", None)) is not None:
-                new_node = attr(updated_node)
+                new_node = attr(updated_node)  # pylint: disable=not-callable
                 # TODO: where does this actually belong?
                 RemoveImportsVisitor.remove_unused_import_by_node(
                     self.context, original_node
