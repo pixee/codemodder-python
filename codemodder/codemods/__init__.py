@@ -1,3 +1,4 @@
+from codemodder.codemods.order_imports import OrderImports
 from codemodder.codemods.remove_unused_imports import RemoveUnusedImports
 from codemodder.codemods.django_debug_flag_on import DjangoDebugFlagOn
 from codemodder.codemods.django_session_cookie_secure_off import (
@@ -19,6 +20,7 @@ DEFAULT_CODEMODS = {
     HardenPyyaml,
     HardenRuamel,
     LimitReadline,
+    OrderImports,
     ProcessSandbox,
     RemoveUnnecessaryFStr,
     RemoveUnusedImports,

@@ -59,9 +59,12 @@ class OrderTopLevelImports(Codemod):
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         top_imports_visitor = GatherTopLevelImports()
         tree.visit(top_imports_visitor)
-        return tree.visit(
-            OrderImportsTransform(self.src_path, top_imports_visitor.top_imports)
-        )
+        # Do not change anything if not top level imports are found
+        if top_imports_visitor.top_imports:
+            return tree.visit(
+                OrderImportsTransform(self.src_path, top_imports_visitor.top_imports)
+            )
+        return tree
 
 
 class OrderImportsTransform(CSTTransformer):
@@ -150,16 +153,18 @@ class OrderImportsTransform(CSTTransformer):
 
         # rewrite all the imports, tree may be empty
         if result_tree.children:
+            # Find first child that is not a comment or docstring
+            first_statement = result_tree.children[0]
             all_import_statement.append(
                 [
                     cst.EmptyLine(),
-                    result_tree.children[0].with_changes(leading_lines=[]),
+                    first_statement.with_changes(leading_lines=[]),
                 ]
             )
             sentinel = cst.FlattenSentinel(
                 itertools.chain.from_iterable(all_import_statement)
             )
-            result_tree = result_tree.deep_replace(result_tree.children[0], sentinel)
+            result_tree = result_tree.deep_replace(first_statement, sentinel)
             return result_tree
         return result_tree.with_changes(
             body=list(itertools.chain.from_iterable(all_import_statement))
@@ -180,6 +185,38 @@ class RemoveNodes(CSTTransformer):
         if original_node in self.nodes_to_remove:
             return RemovalSentinel.REMOVE
         return updated_node
+
+
+class GatherTopLevelImportBlocks(CSTVisitor):
+    """
+    Gather all the import blocks at the "top level" of global scope.
+    """
+
+    def __init__(self) -> None:
+        self.top_imports_blocks: List[List[cst.SimpleStatementLine]] = []
+
+    def leave_Module(self, original_node: cst.Module):
+        blocks = []
+        current_block: List[cst.SimpleStatementLine] | None = None
+        for stmt in original_node.body:
+            if matchers.matches(
+                stmt,
+                matchers.SimpleStatementLine(
+                    body=[matchers.ImportFrom() | matchers.Import()]
+                ),
+            ):
+                if current_block:
+                    current_block.append(stmt)
+                else:
+                    current_block = [stmt]
+            else:
+                if current_block:
+                    blocks.append(current_block)
+                current_block = None
+
+        if current_block:
+            blocks.append(current_block)
+        self.top_imports_blocks = blocks
 
 
 class GatherTopLevelImports(CSTVisitor):
