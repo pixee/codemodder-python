@@ -18,6 +18,7 @@ class SecureRandom(SemgrepCodemod):
                 ...
         """
 
-    def on_result_found(self, node):
+    def on_result_found(self, original_node, updated_node):
+        self.remove_unused_import(original_node)
         self.add_needed_import("secrets")
-        return self.update_call_target(node, "secrets.SystemRandom()")
+        return self.update_call_target(updated_node, "secrets.SystemRandom()")
