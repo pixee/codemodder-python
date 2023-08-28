@@ -1,62 +1,39 @@
 import libcst as cst
-from libcst.codemod import CodemodContext
-from codemodder.file_context import FileContext
 from codemodder.dependency_manager import DependencyManager
-from libcst.codemod.visitors import AddImportsVisitor
-from codemodder.codemods.change import Change
-from codemodder.codemods.base_codemod import (
-    SemgrepCodemod,
-    CodemodMetadata,
-    ReviewGuidance,
-)
-from codemodder.codemods.base_visitor import BaseTransformer
-from codemodder.codemods.utils import get_call_name
-
-replacement_import = "safe_command"
+from codemodder.codemods.base_codemod import ReviewGuidance
+from codemodder.codemods.api import SemgrepCodemod
 
 
-class ProcessSandbox(SemgrepCodemod, BaseTransformer):
-    METADATA = CodemodMetadata(
-        DESCRIPTION=(
-            "Replaces subprocess.{func} with more secure safe_command library functions."
-        ),
-        NAME="process-sandbox",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+class ProcessSandbox(SemgrepCodemod):
+    NAME = "process-sandbox"
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
+    DESCRIPTION = (
+        "Replaces subprocess.{func} with more secure safe_command library functions."
     )
-    CHANGE_DESCRIPTION = "Switch use of subprocess for security.safe_command"
-    YAML_FILES = [
-        "sandbox_process_creation.yaml",
-    ]
 
-    def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
-        SemgrepCodemod.__init__(self, file_context)
-        BaseTransformer.__init__(
-            self,
-            codemod_context,
-            self._results,
-            file_context.line_exclude,
-            file_context.line_include,
+    @classmethod
+    def rule(cls):
+        return """
+        rules:
+          - id: sandbox-process-creation
+            pattern-either:
+              - patterns:
+                - pattern: subprocess.run(...)
+                - pattern-inside: |
+                    import subprocess
+                    ...
+              - patterns:
+                - pattern: subprocess.call(...)
+                - pattern-inside: |
+                    import subprocess
+                    ...
+        """
+
+    def on_result_found(self, original_node, updated_node):
+        self.add_needed_import("security", "safe_command")
+        DependencyManager().add(["security==1.0.1"])
+        return self.update_call_target(
+            updated_node,
+            "safe_command",
+            replacement_args=[cst.Arg(original_node.func), *original_node.args],
         )
-
-    def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
-        pos_to_match = self.node_position(original_node)
-        if self.filter_by_result(
-            pos_to_match
-        ) and self.filter_by_path_includes_or_excludes(pos_to_match):
-            line_number = pos_to_match.start.line
-            self.CHANGES_IN_FILE.append(
-                Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
-            )
-            AddImportsVisitor.add_needed_import(
-                self.context, "security", "safe_command"
-            )
-            DependencyManager().add(["security==1.0.1"])
-            new_call = cst.Call(
-                func=cst.Attribute(
-                    value=cst.Name(value=replacement_import),
-                    attr=cst.Name(value=get_call_name(original_node)),
-                ),
-                args=[cst.Arg(original_node.func), *original_node.args],
-            )
-            return new_call
-        return updated_node
