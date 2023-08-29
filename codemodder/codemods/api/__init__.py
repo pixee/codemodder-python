@@ -7,7 +7,6 @@ import libcst as cst
 from libcst.codemod import (
     CodemodContext,
 )
-from libcst.codemod.visitors import RemoveImportsVisitor
 import yaml
 
 from codemodder.codemods.base_codemod import (
@@ -103,11 +102,8 @@ class SemgrepCodemod(
                 Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
             )
             if (attr := getattr(self, "on_result_found", None)) is not None:
-                new_node = attr(updated_node)  # pylint: disable=not-callable
-                # TODO: where does this actually belong?
-                RemoveImportsVisitor.remove_unused_import_by_node(
-                    self.context, original_node
-                )
+                # pylint: disable=not-callable
+                new_node = attr(original_node, updated_node)
                 return new_node
 
         return updated_node

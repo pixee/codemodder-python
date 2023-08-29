@@ -1,10 +1,13 @@
 import libcst as cst
-from libcst.codemod.visitors import AddImportsVisitor
-
+from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from codemodder.codemods.utils import get_call_name
 
 
 class Helpers:
+    def remove_unused_import(self, original_node):
+        # pylint: disable=no-member
+        RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
+
     def add_needed_import(self, import_name):
         # TODO: do we need to check if this import already exists?
         AddImportsVisitor.add_needed_import(
@@ -22,3 +25,6 @@ class Helpers:
             ),
             args=original_node.args,
         )
+
+    def update_arg_target(self, updated_node, new_arg):
+        return updated_node.with_changes(args=[cst.Arg(new_arg)])
