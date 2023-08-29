@@ -5,7 +5,7 @@ from codemodder.codemods.api import SemgrepCodemod
 
 
 class ProcessSandbox(SemgrepCodemod):
-    NAME = "process-sandbox"
+    NAME = "sandbox-process-creation"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     DESCRIPTION = (
         "Replaces subprocess.{func} with more secure safe_command library functions."
@@ -15,8 +15,7 @@ class ProcessSandbox(SemgrepCodemod):
     def rule(cls):
         return """
         rules:
-          - id: sandbox-process-creation
-            pattern-either:
+            - pattern-either:
               - patterns:
                 - pattern: subprocess.run(...)
                 - pattern-inside: |
