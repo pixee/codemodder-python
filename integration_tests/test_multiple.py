@@ -69,20 +69,20 @@ class TestMultipleCodemodsRun(CleanRepoMixin):
         )
         assert len(limit_readline["changeset"][0]["changes"]) == 1
 
-        process_sandbox = sorted_results[5]
-        assert len(process_sandbox["changeset"]) == 1
-        assert (
-            process_sandbox["changeset"][0]["path"] == "tests/samples/make_process.py"
-        )
-        assert len(process_sandbox["changeset"][0]["changes"]) == 4
-
-        unnecessary_f_str = sorted_results[6]
+        unnecessary_f_str = sorted_results[5]
         assert len(unnecessary_f_str["changeset"]) == 1
         assert (
             unnecessary_f_str["changeset"][0]["path"]
             == "tests/samples/unnecessary_f_str.py"
         )
         assert len(unnecessary_f_str["changeset"][0]["changes"]) == 1
+
+        process_sandbox = sorted_results[6]
+        assert len(process_sandbox["changeset"]) == 1
+        assert (
+            process_sandbox["changeset"][0]["path"] == "tests/samples/make_process.py"
+        )
+        assert len(process_sandbox["changeset"][0]["changes"]) == 4
 
         secure_random = sorted_results[7]
         assert len(secure_random["changeset"]) == 1
