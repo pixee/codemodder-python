@@ -9,7 +9,7 @@ class TestSemgrep:
 
         result = results[0]
 
-        assert result["ruleId"] == "codemodder.codemods.semgrep.sandbox-url-creation"
+        assert result["ruleId"].endswith("sandbox-url-creation")
         assert result["message"]["text"] == "Unbounded URL creation"
 
         location = result["locations"][0]["physicalLocation"]
@@ -22,8 +22,7 @@ class TestSemgrep:
     def _assert_secure_random_results(self, results):
         assert len(results) == 1
         result = results[0]
-        # TODO: need to normalize the rule ID somehow
-        # assert result["ruleId"] == "codemodder.codemods.semgrep.secure-random"
+        assert result["ruleId"].endswith("secure-random")
         assert result["message"]["text"] == "Semgrep found a match"
 
         location = result["locations"][0]["physicalLocation"]
