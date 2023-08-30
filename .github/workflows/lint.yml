@@ -26,6 +26,8 @@ jobs:
           python-version: '3.11'
       - name: Check out code
         uses: actions/checkout@v4
+      - name: Install Codemodder Package
+        run: pip install .
       - name: Install Dependencies
         run: pip install -r requirements/lint.txt
       - name: Black Format Check

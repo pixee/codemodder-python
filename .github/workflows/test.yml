@@ -29,6 +29,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Check out code
         uses: actions/checkout@v4
+      - name: Install Codemodder Package
+        run: pip install .
       - name: Install Dependencies
         run: pip install -r requirements/test.txt
       - name: Run pytest

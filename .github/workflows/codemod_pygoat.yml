@@ -26,8 +26,8 @@ jobs:
           python-version: '3.11'
       - name: Check out codemodder
         uses: actions/checkout@v4
-      - name: Install Dependencies
-        run: pip install -r requirements/codemodder.txt
+      - name: Install Codemodder Package
+        run: pip install .
       - name: Check out Pygoat
         uses: actions/checkout@v4
         with:
