@@ -1,28 +1,18 @@
 #!/bin/env python
-"""
-Some
-Long
-Docstring
-"""
-
-print("not an import")
-
-# b comment
-import b
-
-# comment line 1
-# comment line 2
+# comment c1
+# comment c2
 import c
 
-# a comment 1
-# a comment 2
+# comment b1
+# comment b2
+import b
+
+# comment a
 import a
 
-print("divider")
+# comment b3
+import b, d
 
-import y
-
-import z
-
-# comment
-import x
+# comment b4
+# comment b5
+import b

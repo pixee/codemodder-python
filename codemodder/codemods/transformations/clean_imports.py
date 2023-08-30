@@ -6,6 +6,7 @@ from libcst.codemod.visitors import GatherUnusedImportsVisitor
 from libcst import (
     CSTTransformer,
     CSTVisitor,
+    EmptyLine,
     FlattenSentinel,
     RemovalSentinel,
     matchers,
@@ -57,118 +58,165 @@ class OrderTopLevelImports(Codemod):
         self.src_path = src_path
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        top_imports_visitor = GatherTopLevelImports()
+        top_imports_visitor = GatherTopLevelImportBlocks()
         tree.visit(top_imports_visitor)
         # Do not change anything if not top level imports are found
-        if top_imports_visitor.top_imports:
+        if top_imports_visitor.top_imports_blocks:
             return tree.visit(
-                OrderImportsTransform(self.src_path, top_imports_visitor.top_imports)
+                OrderImportsBlocksTransform(
+                    self.src_path, top_imports_visitor.top_imports_blocks
+                )
             )
         return tree
 
 
-class OrderImportsTransform(CSTTransformer):
+class OrderImportsBlocksTransform(CSTTransformer):
     """
-    Given a list of imports, triage them in sections (__future__, standard, first party, third party and local, in this order) and orders them by name at the start of the module.  Mimics isort's default behavior.
+    Given a list of import blocks, triage them in sections (__future__, standard, first party, third party and local, in this order) and orders them by name at the start of the module.  Mimics isort's default behavior.
     """
 
-    def __init__(self, src_path, imports_to_order):
-        self.imports_to_order = imports_to_order
+    def __init__(self, src_path, import_blocks):
+        self.import_blocks: List[List[cst.SimpleStatementLine]] = import_blocks
         self.src_path = src_path
 
     def leave_Module(
         self, original_node: cst.Module, updated_node: cst.Module
     ) -> cst.Module:
-        # remove the nodes from the tree
-        result_tree = original_node.visit(RemoveNodes(self.imports_to_order))
+        result_tree = original_node
+        for block in self.import_blocks:
+            anchor = block[0]
+            ordered_block = list(self._order_block(block))
+            sentinel = cst.FlattenSentinel(ordered_block)
+            result_tree = result_tree.deep_replace(anchor, sentinel)
+        ## remove all the imports except the first of each block
+        # result_tree = original_node.visit(RemoveNodes(set(itertools.chain.from_iterable([lista[1:] for lista in self.import_blocks]))))
+        return result_tree
 
-        # binsort the import alias by module, normal imports are binned into ''
-        # aliases are represented by (ia.evaluated_name, ia.evaluated_alias) for deduplication
-        imports_dict = defaultdict(set)
-        for imp in self.imports_to_order:
-            if matchers.matches(imp, matchers.ImportFrom()):
-                all_ia_from_imp = {
-                    (ia.evaluated_name, ia.evaluated_alias) for ia in imp.names
-                }
-                imports_dict[_get_name(imp)].update(all_ia_from_imp)
-            if matchers.matches(imp, matchers.Import()):
-                for ia in imp.names:
-                    imports_dict[""].add((ia.evaluated_name, ia.evaluated_alias))
+    # isort only gathers immediate leading comments,
+    # TODO for the first import, header will contain the comments, not leading_lines
+    def _trim_leading_lines(self, stmt: cst.SimpleStatementLine) -> List[cst.EmptyLine]:
+        lista: List[cst.EmptyLine] = []
+        for empty_line in reversed(stmt.leading_lines):
+            if matchers.matches(
+                empty_line, matchers.EmptyLine(comment=matchers.Comment())
+            ):
+                lista.append(empty_line)
+            else:
+                lista.reverse()
+                return lista
+        lista.reverse
+        return lista
 
-        # create the aliases for each bin
-        imports_alias_dict = {
-            k: [
+    def _handle_regular_imports(self, import_stmts):
+        # TODO check if names stating with . are handled correctly
+        # bin them into (name,alias) for deduplication and comment merging
+        # the value of the dict contains the comment blocks from all the same imports
+        alias_dict = defaultdict(list)
+        for stmt in import_stmts:
+            imp = stmt.body[0]
+            comments = self._trim_leading_lines(stmt)
+            # only the first import in a list will inherit the comments
+            first_ia = imp.names[0]
+            alias_dict[(first_ia.evaluated_name, first_ia.evaluated_alias)].append(
+                comments
+            )
+            for ia in imp.names[:1]:
+                alias_dict.setdefault((ia.evaluated_name, ia.evaluated_alias), [])
+
+        # create the statements for each pair in alias_dict
+        new_import_stmts = []
+        for name, asname in alias_dict.keys():
+            ia = cst.ImportAlias(
+                name=cst.Name(name),
+                asname=(asname and cst.AsName(cst.Name(asname))),
+            )
+            # invert the comment blocks and flatten
+            comments = list(
+                itertools.chain.from_iterable(reversed(alias_dict[(name, asname)]))
+            )
+            print(name)
+            print(comments)
+            print(alias_dict[(name, asname)])
+            new_import_stmts.append(
+                cst.SimpleStatementLine(
+                    body=[cst.Import(names=[ia])], leading_lines=comments
+                )
+            )
+        return new_import_stmts
+
+    def _handle_from_imports(self, from_import_stmts):
+        imports_dict = defaultdict(lambda: (set, []))
+        # binsort the aliases into module name, merge comments
+        for stmt in from_import_stmts:
+            imp = stmt.body[0]
+            comments = self._trim_leading_lines(stmt)
+            all_ia_from_imp = {
+                (ia.evaluated_name, ia.evaluated_alias) for ia in imp.names
+            }
+            imports_dict[_get_name(imp)][0].update(all_ia_from_imp)
+            imports_dict[_get_name(imp)][1].append(comments)
+
+        # creates the stmt for each dictionary entry
+        new_from_import_stmts = []
+        for module_name, tupla in imports_dict.items():
+            split = re.split(r"^(\.+)", module_name)
+            actual_name = split[-1]
+
+            n_dots = 0 if len(split) == 1 else len(split[1])
+            all_ia = [
                 cst.ImportAlias(
                     name=cst.Name(name),
                     asname=(asname and cst.AsName(cst.Name(asname))),
                 )
-                for name, asname in v
+                for name, asname in tupla[1]
             ]
-            for k, v in imports_dict.items()
-        }
-
-        # create the direct module imports
-        module_imports_set = [
-            cst.Import(names=[ia]) for ia in imports_alias_dict.pop("", set())
-        ]
-
-        # create the from imports and sort them
-        from_imports_set = set()
-        for k, v in imports_alias_dict.items():
-            # remove relative dots from the start of the name
-            split = re.split(r"^(\.+)", k)
-            actual_name = split[-1]
-            n_dots = 0 if len(split) == 1 else len(split[1])
-            from_imports_set.add(
-                cst.ImportFrom(
-                    module=_node_from_name(actual_name),
-                    names=sorted(
-                        v,
-                        key=lambda import_alias: _natural_key(
-                            import_alias.evaluated_name
-                        ),
-                    ),
-                    relative=[cst.Dot()] * n_dots,
+            comments = list(itertools.chain.from_iterable(reversed(tupla[1])))
+            new_from_import_stmts.append(
+                cst.SimpleStatementLine(
+                    body=[
+                        cst.ImportFrom(
+                            module=_node_from_name(actual_name),
+                            names=all_ia,
+                            relative=[cst.Dot()] * n_dots,
+                        )
+                    ],
+                    leading_lines=comments,
                 )
             )
+        return new_from_import_stmts
+
+    def _order_block(self, imports_block):
+        # triage from imports from regular imports
+        from_imports = []
+        regular_imports = []
+        for stmt in imports_block:
+            imp = stmt.body[0]
+            if matchers.matches(imp, matchers.ImportFrom()):
+                from_imports.append(stmt)
+            if matchers.matches(imp, matchers.Import()):
+                regular_imports.append(stmt)
+
+        # create the new statements to be inserted accoding to cases
+        regular_import_stmts = self._handle_regular_imports(regular_imports)
+        from_import_stmts = self._handle_from_imports(from_imports)
+
+        print(regular_import_stmts)
+        print(from_import_stmts)
 
         # classify by sections and sort each section by module name
         imports_by_section = _triage_imports(
-            itertools.chain(module_imports_set, from_imports_set),
+            itertools.chain(regular_import_stmts, from_import_stmts),
             self.src_path,
         )
         _sort_each_section(imports_by_section)
 
-        # wrap all the imports into statements, remove empty sections
-        all_import_statement = [
-            [cst.SimpleStatementLine(body=[imp]) for imp in section]
-            for section in imports_by_section
-            if section
-        ]
-
         # add empty lines after each section
-        for section in all_import_statement[:-1]:
+        for section in imports_by_section[:-1]:
             if section:
                 section.append(cst.EmptyLine())
+        # return flat list of statement nodes
 
-        # rewrite all the imports, tree may be empty
-        if result_tree.children:
-            # Find first child that is not a comment or docstring
-            first_statement = result_tree.children[0]
-            all_import_statement.append(
-                [
-                    cst.EmptyLine(),
-                    first_statement.with_changes(leading_lines=[]),
-                ]
-            )
-            sentinel = cst.FlattenSentinel(
-                itertools.chain.from_iterable(all_import_statement)
-            )
-            result_tree = result_tree.deep_replace(first_statement, sentinel)
-            return result_tree
-        return result_tree.with_changes(
-            body=list(itertools.chain.from_iterable(all_import_statement))
-        )
+        return itertools.chain.from_iterable(imports_by_section)
 
 
 class RemoveNodes(CSTTransformer):
@@ -219,25 +267,6 @@ class GatherTopLevelImportBlocks(CSTVisitor):
         self.top_imports_blocks = blocks
 
 
-class GatherTopLevelImports(CSTVisitor):
-    """
-    Gather all the imports from the global scope at the "top level".
-    """
-
-    def __init__(self) -> None:
-        self.top_imports: Set[cst.Import | cst.ImportFrom] = set()
-
-    def leave_Module(self, original_node: cst.Module):
-        for stmt in original_node.body:
-            if matchers.matches(
-                stmt,
-                matchers.SimpleStatementLine(
-                    body=[matchers.ImportFrom() | matchers.Import()]
-                ),
-            ):
-                self.top_imports.add(stmt.body[0])
-
-
 class GatherAndRemoveImportsTransformer(ContextAwareTransformer, cst.MetadataDependent):
     """
     Removes all the imports in the global scope of a module and gather them in global_imports.
@@ -269,7 +298,7 @@ def _sort_each_section(imports_by_section):
     Given a list of lists containing imports by sections, natural sort each section in-place by its module name.
     """
     for section in imports_by_section:
-        section.sort(key=lambda imp: _natural_key(_get_name(imp)))
+        section.sort(key=lambda stmt: _natural_key(_get_name(stmt.body[0])))
 
 
 def _triage_imports(all_imports, src_path):
@@ -284,22 +313,23 @@ def _triage_imports(all_imports, src_path):
 
     config = Config(src_paths=(src_path,))
 
-    for imp in all_imports:
+    for stmt in all_imports:
+        imp = stmt.body[0]
         section = isort.place.module(_get_name(imp), config)
 
         if section == isort.sections.FUTURE:
-            future.append(imp)
+            future.append(stmt)
         elif section == isort.sections.STDLIB:
-            stdlib.append(imp)
+            stdlib.append(stmt)
         elif section == isort.sections.LOCALFOLDER:
-            local.append(imp)
+            local.append(stmt)
         elif section == isort.sections.FIRSTPARTY:
-            first_party.append(imp)
+            first_party.append(stmt)
         else:
-            third_party.append(imp)
+            third_party.append(stmt)
 
-    imports_by_section = [future, stdlib, third_party, first_party, local]
-    return imports_by_section
+    # filter empty sections
+    return list(filter(lambda x: x, [future, stdlib, third_party, first_party, local]))
 
 
 def _natural_key(s):
