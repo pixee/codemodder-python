@@ -21,4 +21,4 @@ codemodder = "codemodder.__main__:run"
 [tool.setuptools]
 
 [tool.setuptools.package-data]
-"codemodder.codemods.semgrep" = ["**/codemodder/codemods/semgrep/**.yaml"]
+"codemodder.codemods.semgrep" = ["src/codemodder/codemods/semgrep/*.yaml"]
