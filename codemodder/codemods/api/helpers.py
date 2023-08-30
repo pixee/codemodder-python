@@ -26,5 +26,7 @@ class Helpers:
             args=replacement_args if replacement_args else original_node.args,
         )
 
-    def update_arg_target(self, updated_node, new_arg):
-        return updated_node.with_changes(args=[cst.Arg(new_arg)])
+    def update_arg_target(self, updated_node, new_args):
+        return updated_node.with_changes(
+            args=[new if isinstance(new, cst.Arg) else cst.Arg(new) for new in new_args]
+        )
