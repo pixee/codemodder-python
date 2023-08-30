@@ -35,4 +35,4 @@ class LimitReadline(SemgrepCodemod):
         """
 
     def on_result_found(self, _, updated_node):
-        return self.update_arg_target(updated_node, cst.Integer(default_limit))
+        return self.update_arg_target(updated_node, [cst.Integer(default_limit)])
