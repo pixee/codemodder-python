@@ -107,3 +107,22 @@ class SemgrepCodemod(
                 return new_node
 
         return updated_node
+
+    # def leave_WithItem(self, original_node: cst.WithItem, updated_node: cst.WithItem):
+    def leave_With(self, original_node: cst.WithItem, updated_node: cst.WithItem):
+        # breakpoint()
+        pos_to_match = self.node_position(original_node)
+        breakpoint()
+        if self.filter_by_result(
+            pos_to_match
+        ) and self.filter_by_path_includes_or_excludes(pos_to_match):
+            line_number = pos_to_match.start.line
+            self.CHANGES_IN_FILE.append(
+                Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
+            )
+            if (attr := getattr(self, "on_result_found", None)) is not None:
+                # pylint: disable=not-callable
+                new_node = attr(original_node, updated_node)
+                return new_node
+
+        return updated_node

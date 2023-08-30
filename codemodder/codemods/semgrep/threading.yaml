@@ -1,0 +1,12 @@
+rules:
+  - id: harden-ruamel
+    message: Unsafe call to ruamel.yaml.YAML
+    severity: WARNING
+    languages:
+      - python
+    pattern-either:
+      - patterns:
+        - pattern-regex: with [threading.]*Lock()
+        - pattern-inside: |
+            import threading
+            ...
