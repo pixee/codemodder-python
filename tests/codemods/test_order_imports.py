@@ -127,9 +127,8 @@ from .local import Object2
 
 import os
 
-from third_party import Object
-
 from codemodder.codemods.transformations.clean_imports import CleanImports
+from third_party import Object
 
 from .local import Object2
 """
