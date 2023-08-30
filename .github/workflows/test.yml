@@ -34,7 +34,7 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements/test.txt
       - name: Run pytest
-        run: coverage run --source=codemodder/ -m pytest -v
+        run: pytest -v --cov=codemodder
       - name: Report coverage
         run: coverage report -m --fail-under=95
       - name: Upload coverage reports to Codecov
