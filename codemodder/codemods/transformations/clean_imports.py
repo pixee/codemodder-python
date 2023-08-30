@@ -6,7 +6,6 @@ from libcst.codemod.visitors import GatherUnusedImportsVisitor
 from libcst import (
     CSTTransformer,
     CSTVisitor,
-    EmptyLine,
     FlattenSentinel,
     RemovalSentinel,
     matchers,
@@ -104,11 +103,10 @@ class OrderImportsBlocksTransform(CSTTransformer):
             else:
                 lista.reverse()
                 return lista
-        lista.reverse
+        lista.reverse()
         return lista
 
     def _handle_regular_imports(self, import_stmts):
-        # TODO check if names stating with . are handled correctly
         # bin them into (name,alias) for deduplication and comment merging
         # the value of the dict contains the comment blocks from all the same imports
         alias_dict = defaultdict(list)
@@ -120,7 +118,7 @@ class OrderImportsBlocksTransform(CSTTransformer):
             alias_dict[(first_ia.evaluated_name, first_ia.evaluated_alias)].append(
                 comments
             )
-            for ia in imp.names[:1]:
+            for ia in imp.names[1:]:
                 alias_dict.setdefault((ia.evaluated_name, ia.evaluated_alias), [])
 
         # create the statements for each pair in alias_dict
@@ -134,9 +132,6 @@ class OrderImportsBlocksTransform(CSTTransformer):
             comments = list(
                 itertools.chain.from_iterable(reversed(alias_dict[(name, asname)]))
             )
-            print(name)
-            print(comments)
-            print(alias_dict[(name, asname)])
             new_import_stmts.append(
                 cst.SimpleStatementLine(
                     body=[cst.Import(names=[ia])], leading_lines=comments
@@ -199,9 +194,6 @@ class OrderImportsBlocksTransform(CSTTransformer):
         # create the new statements to be inserted accoding to cases
         regular_import_stmts = self._handle_regular_imports(regular_imports)
         from_import_stmts = self._handle_from_imports(from_imports)
-
-        print(regular_import_stmts)
-        print(from_import_stmts)
 
         # classify by sections and sort each section by module name
         imports_by_section = _triage_imports(
