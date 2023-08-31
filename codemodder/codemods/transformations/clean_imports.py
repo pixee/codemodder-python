@@ -90,6 +90,16 @@ class OrderImportsBlocksTransform(CSTTransformer):
         for block in self.import_blocks:
             anchor = block[0]
             ordered_block = list(self._order_block(block))
+
+            # gather all the leading lines from anchor until the comments
+            new_anchor_head = list(
+                anchor.leading_lines[: self._split_leading_lines(anchor)]
+            )
+            new_anchor_head.extend(ordered_block[0].leading_lines)
+            ordered_block[0] = ordered_block[0].with_changes(
+                leading_lines=new_anchor_head
+            )
+
             sentinel = cst.FlattenSentinel(ordered_block)
             replacement_nodes = replacement_nodes | {anchor: sentinel}
             # result_tree = result_tree.deep_replace(anchor, sentinel)
@@ -99,21 +109,26 @@ class OrderImportsBlocksTransform(CSTTransformer):
         result_tree = result_tree.visit(ReplaceNodes(replacement_nodes))
         return result_tree
 
+    def _split_leading_lines(self, stmt: cst.SimpleStatementLine) -> int:
+        """
+        For a given SimpleStatementLine, split the leading_lines nodes head and tail, where tail will contain the longest comment block right before the line.
+        """
+        i = len(stmt.leading_lines) - 1
+        while i >= 0:
+            empty_line = stmt.leading_lines[i]
+            if not matchers.matches(
+                empty_line, matchers.EmptyLine(comment=matchers.Comment())
+            ):
+                break
+            i = i - 1
+        return i + 1
+
     def _trim_leading_lines(self, stmt: cst.SimpleStatementLine) -> List[cst.EmptyLine]:
         """
         For a given SimpleStatementLine, gather the list of comments right above it.
         """
-        lista: List[cst.EmptyLine] = []
-        for empty_line in reversed(stmt.leading_lines):
-            if matchers.matches(
-                empty_line, matchers.EmptyLine(comment=matchers.Comment())
-            ):
-                lista.append(empty_line)
-            else:
-                lista.reverse()
-                return lista
-        lista.reverse()
-        return lista
+        i = self._split_leading_lines(stmt)
+        return list(stmt.leading_lines[i:])
 
     def _handle_regular_imports(self, import_stmts):
         # bin them into (name,alias) for deduplication and comment merging
