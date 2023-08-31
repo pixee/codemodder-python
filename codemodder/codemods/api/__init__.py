@@ -1,7 +1,6 @@
 import io
 import os
 import tempfile
-from typing import List
 
 import libcst as cst
 from libcst.codemod import (
@@ -11,11 +10,14 @@ import yaml
 
 from codemodder.codemods.base_codemod import (
     CodemodMetadata,
+    BaseCodemod as _BaseCodemod,
     SemgrepCodemod as _SemgrepCodemod,
 )
+
 from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.codemods.change import Change
 from codemodder.file_context import FileContext
+from codemodder.semgrep import rule_ids_from_yaml_files
 from .helpers import Helpers
 
 
@@ -44,7 +46,7 @@ class _CodemodSubclassWithMetadata:
         # But it is necessary to get around the fact that these fields are
         # checked by __init_subclass__ of the other parents of SemgrepCodemod
         # first.
-        if not cls.__name__ == "SemgrepCodemod":
+        if cls.__name__ not in ("BaseCodemod", "SemgrepCodemod"):
             # TODO: if we intend to continue to check class-level attributes
             # using this mechanism, we should add checks (or defaults) for
             # NAME, DESCRIPTION, and REVIEW_GUIDANCE here.
@@ -54,25 +56,41 @@ class _CodemodSubclassWithMetadata:
                 cls.NAME,  # pylint: disable=no-member
                 cls.REVIEW_GUIDANCE,  # pylint: disable=no-member
             )
-            cls.YAML_FILES = _create_temp_yaml_file(cls, cls.METADATA)
 
             # This is a little bit hacky, but it also feels like the right solution?
             cls.CHANGE_DESCRIPTION = cls.DESCRIPTION  # pylint: disable=no-member
 
-            super().__init_subclass__()
-
         return cls
+
+
+class BaseCodemod(
+    _CodemodSubclassWithMetadata,
+    _BaseCodemod,
+    BaseTransformer,
+    Helpers,
+):
+    CHANGESET_ALL_FILES: list = []
+    CHANGES_IN_FILE: list = []
+
+    def report_change(self, original_node):
+        line_number = self.lineno_for_node(original_node)
+        self.CHANGES_IN_FILE.append(
+            Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
+        )
 
 
 # NOTE: this shadows base_codemod.SemgrepCodemod but I can't think of a better name right now
 # At least it is namespaced but we might want to deconflict these things in the long term
 class SemgrepCodemod(
+    BaseCodemod,
     _CodemodSubclassWithMetadata,
     _SemgrepCodemod,
     BaseTransformer,
-    Helpers,
 ):
-    CHANGES_IN_FILE: List = []
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        cls.YAML_FILES = _create_temp_yaml_file(cls, cls.METADATA)
+        cls.RULE_IDS = rule_ids_from_yaml_files(cls.YAML_FILES)
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         _SemgrepCodemod.__init__(self, file_context)
@@ -97,10 +115,7 @@ class SemgrepCodemod(
         if self.filter_by_result(
             pos_to_match
         ) and self.filter_by_path_includes_or_excludes(pos_to_match):
-            line_number = pos_to_match.start.line
-            self.CHANGES_IN_FILE.append(
-                Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
-            )
+            self.report_change(original_node)
             if (attr := getattr(self, "on_result_found", None)) is not None:
                 # pylint: disable=not-callable
                 new_node = attr(original_node, updated_node)
