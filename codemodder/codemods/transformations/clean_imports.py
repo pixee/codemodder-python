@@ -4,7 +4,6 @@ from isort.settings import Config
 import libcst as cst
 from libcst.codemod.visitors import GatherUnusedImportsVisitor
 from libcst import (
-    CSTNode,
     CSTTransformer,
     CSTVisitor,
     RemovalSentinel,
@@ -194,6 +193,7 @@ class OrderImportsBlocksTransform(CSTTransformer):
                 )
                 for name, asname in tupla[0]
             ]
+            all_ia.sort(key=lambda ia: _natural_key(ia.evaluated_name))
             comments = list(itertools.chain.from_iterable(reversed(tupla[1])))
             new_from_import_stmts.append(
                 cst.SimpleStatementLine(
