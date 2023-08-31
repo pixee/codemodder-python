@@ -1,7 +1,28 @@
 from pathlib import Path
+from typing import Union
 
 from libcst import matchers
 import libcst as cst
+
+
+class ReplaceNodes(cst.CSTTransformer):
+    """
+    Replace nodes with their corresponding values in a given dict.
+    """
+
+    def __init__(
+        self,
+        replacements: dict[
+            cst.CSTNode,
+            Union[cst.CSTNode, cst.FlattenSentinel[cst.CSTNode], cst.RemovalSentinel],
+        ],
+    ):
+        self.replacements = replacements
+
+    def on_leave(self, original_node, updated_node):
+        if original_node in self.replacements.keys():
+            return self.replacements[original_node]
+        return updated_node
 
 
 def is_django_settings_file(file_path: Path):
