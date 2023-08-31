@@ -1,4 +1,4 @@
-from typing import List, Set, Union
+from typing import List, Union
 from isort.settings import Config
 
 import libcst as cst
@@ -6,7 +6,6 @@ from libcst.codemod.visitors import GatherUnusedImportsVisitor
 from libcst import (
     CSTTransformer,
     CSTVisitor,
-    FlattenSentinel,
     RemovalSentinel,
     matchers,
 )
@@ -69,6 +68,25 @@ class OrderTopLevelImports(Codemod):
         return tree
 
 
+class ReplaceNodes(cst.CSTTransformer):
+    """
+    Replace nodes with their corresponding values in a given dict.
+    """
+
+    def __init__(
+        self,
+        replacements: dict[
+            cst.CSTNode, Union[cst.CSTNode, cst.FlattenSentinel, cst.RemovalSentinel]
+        ],
+    ):
+        self.replacements = replacements
+
+    def on_leave(self, original_node, updated_node):
+        if original_node in self.replacements.keys():
+            return self.replacements[original_node]
+        return updated_node
+
+
 class OrderImportsBlocksTransform(CSTTransformer):
     """
     Given a list of import blocks, triage them in sections (__future__, standard, first party, third party and local, in this order) and orders them by name at the start of the module.  Mimics isort's default behavior.
@@ -82,18 +100,25 @@ class OrderImportsBlocksTransform(CSTTransformer):
         self, original_node: cst.Module, updated_node: cst.Module
     ) -> cst.Module:
         result_tree = original_node
+        replacement_nodes: dict[
+            cst.CSTNode, Union[cst.CSTNode, cst.FlattenSentinel, cst.RemovalSentinel]
+        ] = {}
         for block in self.import_blocks:
             anchor = block[0]
             ordered_block = list(self._order_block(block))
             sentinel = cst.FlattenSentinel(ordered_block)
-            result_tree = result_tree.deep_replace(anchor, sentinel)
+            replacement_nodes = replacement_nodes | {anchor: sentinel}
+            # result_tree = result_tree.deep_replace(anchor, sentinel)
         ## remove all the imports except the first of each block
-        # result_tree = original_node.visit(RemoveNodes(set(itertools.chain.from_iterable([lista[1:] for lista in self.import_blocks]))))
+        for node in [node for lista in self.import_blocks for node in lista[1:]]:
+            replacement_nodes = replacement_nodes | {node: RemovalSentinel.REMOVE}
+        result_tree = result_tree.visit(ReplaceNodes(replacement_nodes))
         return result_tree
 
-    # isort only gathers immediate leading comments,
-    # TODO for the first import, header will contain the comments, not leading_lines
     def _trim_leading_lines(self, stmt: cst.SimpleStatementLine) -> List[cst.EmptyLine]:
+        """
+        For a given SimpleStatementLine, gather the list of comments right above it.
+        """
         lista: List[cst.EmptyLine] = []
         for empty_line in reversed(stmt.leading_lines):
             if matchers.matches(
@@ -209,22 +234,6 @@ class OrderImportsBlocksTransform(CSTTransformer):
         # return flat list of statement nodes
 
         return itertools.chain.from_iterable(imports_by_section)
-
-
-class RemoveNodes(CSTTransformer):
-    """
-    Remove given nodes from the tree.
-    """
-
-    def __init__(self, nodes_to_remove: Set[cst.CSTNode]):
-        self.nodes_to_remove = nodes_to_remove
-
-    def on_leave(
-        self, original_node: cst.CSTNodeT, updated_node: cst.CSTNodeT
-    ) -> Union[cst.CSTNodeT, RemovalSentinel, FlattenSentinel[cst.CSTNodeT]]:
-        if original_node in self.nodes_to_remove:
-            return RemovalSentinel.REMOVE
-        return updated_node
 
 
 class GatherTopLevelImportBlocks(CSTVisitor):
