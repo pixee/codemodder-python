@@ -12,8 +12,7 @@ class HardenPyyaml(SemgrepCodemod):
     def rule(cls):
         return """
             rules:
-              - id: harden-pyyaml
-                pattern-either:
+                - pattern-either:
                   - patterns:
                       - pattern: yaml.load(...)
                       - pattern-inside: |
