@@ -1,4 +1,3 @@
-import libcst as cst
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import SemgrepCodemod
 
@@ -39,6 +38,5 @@ class HardenPyyaml(SemgrepCodemod):
         """
 
     def on_result_found(self, _, updated_node):
-        second_arg = cst.parse_expression("yaml.SafeLoader")
-        new_args = [*updated_node.args[:1], second_arg]
+        new_args = [*updated_node.args[:1], self.parse_expression("yaml.SafeLoader")]
         return self.update_arg_target(updated_node, new_args)

@@ -1,4 +1,5 @@
 import libcst as cst
+from libcst import matchers
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from codemodder.codemods.utils import get_call_name
 
@@ -30,3 +31,22 @@ class Helpers:
         return updated_node.with_changes(
             args=[new if isinstance(new, cst.Arg) else cst.Arg(new) for new in new_args]
         )
+
+    def parse_expression(self, expression: str):
+        return cst.parse_expression(expression)
+
+    def replace_arg(self, original_node, target_arg_name, target_arg_replacement_val):
+        """Given a node, return its args with one arg's value changed"""
+        assert hasattr(original_node, "args")
+        new_args = []
+        for arg in original_node.args:
+            if matchers.matches(arg.keyword, matchers.Name(target_arg_name)):
+                new = cst.Arg(
+                    keyword=cst.parse_expression(target_arg_name),
+                    value=cst.parse_expression(target_arg_replacement_val),
+                    equal=arg.equal,
+                )
+            else:
+                new = arg
+            new_args.append(new)
+        return new_args
