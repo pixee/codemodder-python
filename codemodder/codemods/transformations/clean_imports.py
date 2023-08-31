@@ -124,6 +124,9 @@ class OrderImportsBlocksTransform(CSTTransformer):
             comments = self._trim_leading_lines(stmt)
             # only the first import in a list will inherit the comments
             first_ia = imp.names[0]
+            alias_dict.setdefault(
+                (first_ia.evaluated_name, first_ia.evaluated_alias), []
+            )
             if comments:
                 alias_dict[(first_ia.evaluated_name, first_ia.evaluated_alias)].append(
                     comments
