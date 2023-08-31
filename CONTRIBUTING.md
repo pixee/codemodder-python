@@ -15,9 +15,11 @@ but for local development here is a good workflow.
 1. To use virtualenv, create an environment with `virtualenv pixeeenv` or `/usr/bin/env python3 -m venv pixeeenv`
 to specify a specific Python version. If using `bash` or any compatible shell, activate with `source pixeeenv/bin/activate`. Otherwise, look at [`venv`'s documentation](https://docs.python.org/3/library/venv.html) for instructions.
 
-2. `cd codemodder-python` and run `pip install -r` on all the files under `requirements/`
+1. `cd codemodder-python` and `pip install -e .` to install the package in development mode
 
-3. You should now be able to run `pylint`, `pytest`, etc.
+1. Run `pip install -r` on all the files under `requirements/` to install packages used for development and testing
+
+1. You should now be able to run `pylint`, `pytest`, etc.
 
 
 ## Docker
