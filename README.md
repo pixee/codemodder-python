@@ -16,6 +16,14 @@ future.
 ⚠️  The custom codemod API is under heavy development and is subject to change.
 The API should not be treated as stable at this time. ⚠️
 
+## Installation
+
+To install the package from source, use `pip`:
+
+```
+pip install .
+```
+
 ## Running Locally
 
 You can run the codemodder program with

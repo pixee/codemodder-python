@@ -12,6 +12,7 @@ dependencies = [
     "semgrep~=1.36.0",
     "PyYAML~=6.0.0",
     "libcst~=1.0.0",
+    "isort~=5.12.0",
     "dependency-manager @ git+https://github.com/pixee/python-dependency-manager#egg=dependency-manager",
 ]
 
