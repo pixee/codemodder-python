@@ -124,9 +124,10 @@ class OrderImportsBlocksTransform(CSTTransformer):
             comments = self._trim_leading_lines(stmt)
             # only the first import in a list will inherit the comments
             first_ia = imp.names[0]
-            alias_dict[(first_ia.evaluated_name, first_ia.evaluated_alias)].append(
-                comments
-            )
+            if comments:
+                alias_dict[(first_ia.evaluated_name, first_ia.evaluated_alias)].append(
+                    comments
+                )
             for ia in imp.names[1:]:
                 alias_dict.setdefault((ia.evaluated_name, ia.evaluated_alias), [])
 
@@ -149,7 +150,7 @@ class OrderImportsBlocksTransform(CSTTransformer):
         return new_import_stmts
 
     def _handle_from_imports(self, from_import_stmts):
-        imports_dict = defaultdict(lambda: (set, []))
+        imports_dict = defaultdict(lambda: (set(), []))
         # binsort the aliases into module name, merge comments
         for stmt in from_import_stmts:
             imp = stmt.body[0]
@@ -158,7 +159,8 @@ class OrderImportsBlocksTransform(CSTTransformer):
                 (ia.evaluated_name, ia.evaluated_alias) for ia in imp.names
             }
             imports_dict[_get_name(imp)][0].update(all_ia_from_imp)
-            imports_dict[_get_name(imp)][1].append(comments)
+            if comments:
+                imports_dict[_get_name(imp)][1].append(comments)
 
         # creates the stmt for each dictionary entry
         new_from_import_stmts = []
@@ -172,7 +174,7 @@ class OrderImportsBlocksTransform(CSTTransformer):
                     name=cst.Name(name),
                     asname=(asname and cst.AsName(cst.Name(asname))),
                 )
-                for name, asname in tupla[1]
+                for name, asname in tupla[0]
             ]
             comments = list(itertools.chain.from_iterable(reversed(tupla[1])))
             new_from_import_stmts.append(
@@ -206,10 +208,22 @@ class OrderImportsBlocksTransform(CSTTransformer):
 
         # classify by sections and sort each section by module name
         imports_by_section = _triage_imports(
-            itertools.chain(regular_import_stmts, from_import_stmts),
+            regular_import_stmts,
             self.src_path,
         )
         _sort_each_section(imports_by_section)
+
+        from_imports_by_section = _triage_imports(
+            from_import_stmts,
+            self.src_path,
+        )
+        _sort_each_section(from_imports_by_section)
+
+        # merge regular and from imports and filter empty sections
+        for i, section in enumerate(imports_by_section):
+            section.extend(from_imports_by_section[i])
+
+        imports_by_section = list(filter(lambda x: x, imports_by_section))
 
         # add empty lines after each section
         for section in imports_by_section[:-1]:
@@ -313,8 +327,7 @@ def _triage_imports(all_imports, src_path):
         else:
             third_party.append(stmt)
 
-    # filter empty sections
-    return list(filter(lambda x: x, [future, stdlib, third_party, first_party, local]))
+    return [future, stdlib, third_party, first_party, local]
 
 
 def _natural_key(s):
