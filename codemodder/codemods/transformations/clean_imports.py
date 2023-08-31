@@ -4,6 +4,7 @@ from isort.settings import Config
 import libcst as cst
 from libcst.codemod.visitors import GatherUnusedImportsVisitor
 from libcst import (
+    CSTNode,
     CSTTransformer,
     CSTVisitor,
     RemovalSentinel,
@@ -22,6 +23,7 @@ import isort.sections
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsCodemod,
 )
+from codemodder.codemods.utils import ReplaceNodes
 
 
 class CleanImports(Codemod):
@@ -68,25 +70,6 @@ class OrderTopLevelImports(Codemod):
         return tree
 
 
-class ReplaceNodes(cst.CSTTransformer):
-    """
-    Replace nodes with their corresponding values in a given dict.
-    """
-
-    def __init__(
-        self,
-        replacements: dict[
-            cst.CSTNode, Union[cst.CSTNode, cst.FlattenSentinel, cst.RemovalSentinel]
-        ],
-    ):
-        self.replacements = replacements
-
-    def on_leave(self, original_node, updated_node):
-        if original_node in self.replacements.keys():
-            return self.replacements[original_node]
-        return updated_node
-
-
 class OrderImportsBlocksTransform(CSTTransformer):
     """
     Given a list of import blocks, triage them in sections (__future__, standard, first party, third party and local, in this order) and orders them by name at the start of the module.  Mimics isort's default behavior.
@@ -101,7 +84,8 @@ class OrderImportsBlocksTransform(CSTTransformer):
     ) -> cst.Module:
         result_tree = original_node
         replacement_nodes: dict[
-            cst.CSTNode, Union[cst.CSTNode, cst.FlattenSentinel, cst.RemovalSentinel]
+            cst.CSTNode,
+            Union[cst.CSTNode, cst.FlattenSentinel[cst.CSTNode], cst.RemovalSentinel],
         ] = {}
         for block in self.import_blocks:
             anchor = block[0]

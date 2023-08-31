@@ -3,6 +3,7 @@ import libcst as cst
 from libcst import CSTNode, matchers
 from libcst.codemod import Codemod, CodemodContext
 from libcst.metadata import PositionProvider, ScopeProvider
+from codemodder.codemods.utils import ReplaceNodes
 from codemodder.file_context import FileContext
 
 from libcst.codemod.visitors import AddImportsVisitor, ImportItem
@@ -67,16 +68,6 @@ class UrlSandbox(SemgrepCodemod, Codemod):
                 )
             return new_tree
         return tree
-
-
-class ReplaceNodes(cst.CSTTransformer):
-    def __init__(self, replacements):
-        self.replacements = replacements
-
-    def on_leave(self, original_node, updated_node):
-        if original_node in self.replacements.keys():
-            return self.replacements[original_node]
-        return updated_node
 
 
 class FindRequestCallsAndImports(BaseVisitor):

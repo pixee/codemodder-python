@@ -16,3 +16,8 @@ import b, d
 # comment b4
 # comment b5
 import b
+
+a
+b
+c
+d
