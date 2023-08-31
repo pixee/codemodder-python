@@ -1,14 +1,12 @@
 #!/bin/env python
-# comment c1
-# comment c2
-import c
+from a import a2
 
 # comment b1
 # comment b2
 import b
 
 # comment a
-import a
+from a import a1
 
 # comment b3
 import b, d
@@ -17,7 +15,8 @@ import b, d
 # comment b5
 import b
 
-a
+a1
+a2
 b
 c
 d
