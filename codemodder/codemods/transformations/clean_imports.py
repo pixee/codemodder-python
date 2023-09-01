@@ -179,19 +179,43 @@ class OrderImportsBlocksTransform(CSTTransformer):
 
     def _handle_from_imports(self, from_import_stmts):
         imports_dict = defaultdict(lambda: (set(), []))
+        star_imports_dict = defaultdict()
         # binsort the aliases into module name, merge comments
         for stmt in from_import_stmts:
             imp = stmt.body[0]
             comments = self._trim_leading_lines(stmt)
-            all_ia_from_imp = {
-                (ia.evaluated_name, ia.evaluated_alias) for ia in imp.names
-            }
-            imports_dict[_get_name(imp)][0].update(all_ia_from_imp)
-            if comments:
-                imports_dict[_get_name(imp)][1].append(comments)
+            if matchers.matches(imp.names, matchers.ImportStar()):
+                star_imports_dict[_get_name(imp)] = comments
+            else:
+                all_ia_from_imp = {
+                    (ia.evaluated_name, ia.evaluated_alias) for ia in imp.names
+                }
+                imports_dict[_get_name(imp)][0].update(all_ia_from_imp)
+                if comments:
+                    imports_dict[_get_name(imp)][1].append(comments)
+
+        new_from_import_stmts = []
+
+        # creates the stmt for each star dic entry
+        for module_name, comments in star_imports_dict.items():
+            split = re.split(r"^(\.+)", module_name)
+            actual_name = split[-1]
+
+            n_dots = 0 if len(split) == 1 else len(split[1])
+            new_from_import_stmts.append(
+                cst.SimpleStatementLine(
+                    body=[
+                        cst.ImportFrom(
+                            module=_node_from_name(actual_name),
+                            names=cst.ImportStar(),
+                            relative=[cst.Dot()] * n_dots,
+                        )
+                    ],
+                    leading_lines=comments,
+                )
+            )
 
         # creates the stmt for each dictionary entry
-        new_from_import_stmts = []
         for module_name, tupla in imports_dict.items():
             split = re.split(r"^(\.+)", module_name)
             actual_name = split[-1]

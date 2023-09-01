@@ -70,3 +70,16 @@ from b import b1, b2
 
         self.run_and_assert(tmpdir, before, after)
         assert len(self.codemod.CHANGES_IN_FILE) == 1
+
+    def test_handle_star_imports(self, tmpdir):
+        before = r"""from a import x
+from a import b
+# comment *
+from a import *"""
+
+        after = r"""# comment *
+from a import *
+from a import b, x"""
+
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.codemod.CHANGES_IN_FILE) == 1
