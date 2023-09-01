@@ -11,6 +11,7 @@ from codemodder.codemods.upgrade_sslcontext_tls import UpgradeSSLContextTLS
 from codemodder.codemods.url_sandbox import UrlSandbox
 from codemodder.codemods.process_creation_sandbox import ProcessSandbox
 from codemodder.codemods.remove_unnecessary_f_str import RemoveUnnecessaryFStr
+from codemodder.codemods.tempfile_mktemp import TempfileMktemp
 
 DEFAULT_CODEMODS = {
     DjangoDebugFlagOn,
@@ -24,6 +25,7 @@ DEFAULT_CODEMODS = {
     SecureRandom,
     UpgradeSSLContextTLS,
     UrlSandbox,
+    TempfileMktemp,
 }
 ALL_CODEMODS = DEFAULT_CODEMODS
 

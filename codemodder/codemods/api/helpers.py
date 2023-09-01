@@ -15,14 +15,22 @@ class Helpers:
             self.context, module, obj  # pylint: disable=no-member
         )
 
-    def update_call_target(self, original_node, new_target, replacement_args=None):
+    def update_call_target(
+        self, original_node, new_target, new_func=None, replacement_args=None
+    ):
         # TODO: is an assertion the best way to handle this?
         # Or should we just return the original node if it's not a Call?
         assert isinstance(original_node, cst.Call)
+
+        attr = (
+            cst.parse_expression(new_func)
+            if new_func
+            else cst.Name(value=get_call_name(original_node))
+        )
         return cst.Call(
             func=cst.Attribute(
                 value=cst.parse_expression(new_target),
-                attr=cst.Name(value=get_call_name(original_node)),
+                attr=attr,
             ),
             args=replacement_args if replacement_args else original_node.args,
         )
