@@ -59,7 +59,7 @@ class OrderTopLevelImports(Codemod):
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         top_imports_visitor = GatherTopLevelImportBlocks()
         tree.visit(top_imports_visitor)
-        # Do not change anything if not top level imports are found
+        # Do not change anything if no top level imports are found
         if top_imports_visitor.top_imports_blocks:
             return tree.visit(
                 OrderImportsBlocksTransform(

@@ -53,7 +53,7 @@ class OrderImports(BaseCodemod, Codemod):
                     if changed:
                         line_number = self.node_position(
                             top_imports_visitor.top_imports_blocks[i][0]
-                        )
+                        ).start.line
                         self.CHANGES_IN_FILE.append(
                             Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
                         )
