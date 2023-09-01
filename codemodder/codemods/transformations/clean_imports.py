@@ -163,7 +163,7 @@ class OrderImportsBlocksTransform(CSTTransformer):
         new_import_stmts = []
         for name, asname in alias_dict.keys():
             ia = cst.ImportAlias(
-                name=cst.Name(name),
+                name=_node_from_name(name),
                 asname=(asname and cst.AsName(cst.Name(asname))),
             )
             # invert the comment blocks and flatten
@@ -234,7 +234,9 @@ class OrderImportsBlocksTransform(CSTTransformer):
                 cst.SimpleStatementLine(
                     body=[
                         cst.ImportFrom(
-                            module=_node_from_name(actual_name),
+                            module=_node_from_name(actual_name)
+                            if actual_name
+                            else None,
                             names=all_ia,
                             relative=[cst.Dot()] * n_dots,
                         )
@@ -418,7 +420,7 @@ def _get_name(node):
     For relative modules, dots are added at the beginning
     """
     if matchers.matches(node, matchers.ImportFrom()):
-        return "." * len(node.relative) + get_full_name_for_node(node.module)
+        return "." * len(node.relative) + (get_full_name_for_node(node.module) or "")
     if matchers.matches(node, matchers.Import()):
         return get_full_name_for_node(node.names[0].name)
     return ""
