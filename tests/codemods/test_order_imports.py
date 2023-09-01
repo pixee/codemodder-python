@@ -83,3 +83,14 @@ from a import b, x"""
 
         self.run_and_assert(tmpdir, before, after)
         assert len(self.codemod.CHANGES_IN_FILE) == 1
+
+    def test_handle_composite_and_relative_imports(self, tmpdir):
+        before = r"""from . import a
+import a.b.c.d"""
+
+        after = r"""import a.b.c.d
+
+from . import a"""
+
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.codemod.CHANGES_IN_FILE) == 1
