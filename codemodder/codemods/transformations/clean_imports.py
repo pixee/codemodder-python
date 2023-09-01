@@ -77,6 +77,7 @@ class OrderImportsBlocksTransform(CSTTransformer):
     def __init__(self, src_path, import_blocks):
         self.import_blocks: List[List[cst.SimpleStatementLine]] = import_blocks
         self.src_path = src_path
+        self.changes = [False] * len(import_blocks)
 
     def leave_Module(
         self, original_node: cst.Module, updated_node: cst.Module
@@ -86,7 +87,7 @@ class OrderImportsBlocksTransform(CSTTransformer):
             cst.CSTNode,
             Union[cst.CSTNode, cst.FlattenSentinel[cst.CSTNode], cst.RemovalSentinel],
         ] = {}
-        for block in self.import_blocks:
+        for i, block in enumerate(self.import_blocks):
             anchor = block[0]
             ordered_block = list(self._order_block(block))
 
@@ -99,10 +100,20 @@ class OrderImportsBlocksTransform(CSTTransformer):
                 leading_lines=new_anchor_head
             )
 
+            # check if anything changed
+            self.changes[i] = not any(
+                map(
+                    lambda t: t[0].deep_equals(t[1]),
+                    zip(self.import_blocks[i], ordered_block),
+                )
+            )
+
             sentinel = cst.FlattenSentinel(ordered_block)
+
             replacement_nodes = replacement_nodes | {anchor: sentinel}
             # result_tree = result_tree.deep_replace(anchor, sentinel)
-        ## remove all the imports except the first of each block
+
+        # remove all the imports except the first of each block
         for node in [node for lista in self.import_blocks for node in lista[1:]]:
             replacement_nodes = replacement_nodes | {node: RemovalSentinel.REMOVE}
         result_tree = result_tree.visit(ReplaceNodes(replacement_nodes))
@@ -244,9 +255,13 @@ class OrderImportsBlocksTransform(CSTTransformer):
         imports_by_section = list(filter(lambda x: x, imports_by_section))
 
         # add empty lines after each section
-        for section in imports_by_section[:-1]:
+        # for this, we add an empty line at the leading_lines of the first not at each section
+        for section in imports_by_section[1:]:
             if section:
-                section.append(cst.EmptyLine())
+                lead = section[0]
+                section[0] = lead.with_changes(
+                    leading_lines=[cst.EmptyLine()] + lead.leading_lines
+                )
         # return flat list of statement nodes
 
         return itertools.chain.from_iterable(imports_by_section)
