@@ -4,6 +4,7 @@ from codemodder.codemods.base_codemod import (
     CodemodMetadata,
     ReviewGuidance,
 )
+from codemodder.codemods.change import Change
 from codemodder.codemods.transformations.clean_imports import (
     GatherTopLevelImportBlocks,
     OrderImportsBlocksTransform,
@@ -16,11 +17,11 @@ import codemodder.global_state
 
 class OrderImports(BaseCodemod, Codemod):
     METADATA = CodemodMetadata(
-        DESCRIPTION=("Organize and order imports by categories"),
+        DESCRIPTION=("Formats and order imports by categories"),
         NAME="order-imports",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
     )
-    CHANGE_DESCRIPTION = "Ordered import block below this line"
+    CHANGE_DESCRIPTION = "Ordered and formatted import block below this line"
 
     METADATA_DEPENDENCIES = (PositionProvider,)
 
@@ -41,14 +42,22 @@ class OrderImports(BaseCodemod, Codemod):
             anchor_pos = self.node_position(anchor)
             if self.filter_by_path_includes_or_excludes(anchor_pos):
                 filtered_blocks.append(block)
-
-        # Do not change anything if not top level imports are found
         if filtered_blocks:
-            return tree.visit(
-                OrderImportsBlocksTransform(
-                    codemodder.global_state.DIRECTORY, filtered_blocks
-                )
+            order_transformer = OrderImportsBlocksTransform(
+                codemodder.global_state.DIRECTORY, filtered_blocks
             )
+            result_tree = tree.visit(order_transformer)
+
+            if any(order_transformer.changes):
+                for i, changed in enumerate(order_transformer.changes):
+                    if changed:
+                        line_number = self.node_position(
+                            top_imports_visitor.top_imports_blocks[i][0]
+                        )
+                        self.CHANGES_IN_FILE.append(
+                            Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
+                        )
+                return result_tree
         return tree
 
     def filter_by_path_includes_or_excludes(self, pos_to_match):
