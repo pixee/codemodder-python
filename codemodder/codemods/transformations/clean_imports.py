@@ -6,6 +6,7 @@ from libcst.codemod.visitors import GatherUnusedImportsVisitor
 from libcst import (
     CSTTransformer,
     CSTVisitor,
+    EmptyLine,
     RemovalSentinel,
     matchers,
 )
@@ -117,10 +118,21 @@ class OrderImportsBlocksTransform(CSTTransformer):
         result_tree = result_tree.visit(ReplaceNodes(replacement_nodes))
         return result_tree
 
-    def _handle_regular_imports(self, import_stmts):
-        # bin them into (name,alias) for deduplication and comment merging
-        # the value of the dict contains the comment blocks from all the same imports
-        alias_dict = defaultdict(list)
+    def _create_import_statement(self, name, alias, comments):
+        ia = cst.ImportAlias(
+            name=_node_from_name(name),
+            asname=(alias and cst.AsName(cst.Name(alias))),
+        )
+        return cst.SimpleStatementLine(
+            body=[cst.Import(names=[ia])], leading_lines=comments
+        )
+
+    def _binsort_imports_by_name_alias(
+        self, import_stmts
+    ) -> defaultdict[tuple[str, str], list[cst.EmptyLine]]:
+        alias_dict: defaultdict[tuple[str, str], list[cst.EmptyLine]] = defaultdict(
+            list
+        )
         for stmt in import_stmts:
             imp = stmt.body[0]
             comments = _trim_leading_lines(stmt)
@@ -135,34 +147,32 @@ class OrderImportsBlocksTransform(CSTTransformer):
                 )
             for ia in imp.names[1:]:
                 alias_dict.setdefault((ia.evaluated_name, ia.evaluated_alias), [])
+        return alias_dict
+
+    def _handle_regular_imports(self, import_stmts):
+        # bin them into (name,alias) for deduplication and comment merging
+        # the value of the dict contains the comment blocks from all the same imports
+        alias_dict = self._binsort_imports_by_name_alias(import_stmts)
 
         # create the statements for each pair in alias_dict
         new_import_stmts = []
-        for name, asname in alias_dict.keys():
-            ia = cst.ImportAlias(
-                name=_node_from_name(name),
-                asname=(asname and cst.AsName(cst.Name(asname))),
-            )
+        for (name, alias), comments in alias_dict.items():
             # invert the comment blocks and flatten
-            comments = list(
-                itertools.chain.from_iterable(reversed(alias_dict[(name, asname)]))
-            )
+            ordered_comments = list(itertools.chain.from_iterable(reversed(comments)))
             new_import_stmts.append(
-                cst.SimpleStatementLine(
-                    body=[cst.Import(names=[ia])], leading_lines=comments
-                )
+                self._create_import_statement(name, alias, ordered_comments)
             )
         return new_import_stmts
 
-    def _handle_from_imports(self, from_import_stmts):
+    def _binsort_from_imports_by_module(self, from_import_stmts):
         imports_dict = defaultdict(lambda: (set(), []))
-        star_imports_dict = defaultdict()
-        # binsort the aliases into module name, merge comments
+        star_imports_dict = defaultdict(list)
+        # binsort the aliases into module names, merge comments
         for stmt in from_import_stmts:
             imp = stmt.body[0]
             comments = _trim_leading_lines(stmt)
             if matchers.matches(imp.names, matchers.ImportStar()):
-                star_imports_dict[_get_name(imp)] = comments
+                star_imports_dict[_get_name(imp)] = [comments]
             else:
                 all_ia_from_imp = {
                     (ia.evaluated_name, ia.evaluated_alias) for ia in imp.names
@@ -170,55 +180,52 @@ class OrderImportsBlocksTransform(CSTTransformer):
                 imports_dict[_get_name(imp)][0].update(all_ia_from_imp)
                 if comments:
                     imports_dict[_get_name(imp)][1].append(comments)
+        return (imports_dict, star_imports_dict)
+
+    def _create_from_import_stmt(self, module_name, name_asname_set, comments):
+        all_ia = [
+            cst.ImportAlias(
+                name=cst.Name(name),
+                asname=(asname and cst.AsName(cst.Name(asname))),
+            )
+            for name, asname in name_asname_set
+        ]
+        all_ia.sort(key=lambda ia: _natural_key(ia.evaluated_name))
+        split = re.split(r"^(\.+)", module_name)
+        actual_name = split[-1]
+
+        n_dots = 0 if len(split) == 1 else len(split[1])
+        return cst.SimpleStatementLine(
+            body=[
+                cst.ImportFrom(
+                    module=_node_from_name(actual_name) if actual_name else None,
+                    names=all_ia,
+                    relative=[cst.Dot()] * n_dots,
+                )
+            ],
+            leading_lines=comments,
+        )
+
+    def _handle_from_imports(self, from_import_stmts):
+        imports_dict, star_imports_dict = self._binsort_from_imports_by_module(
+            from_import_stmts
+        )
 
         new_from_import_stmts = []
-
         # creates the stmt for each star dict entry
         for module_name, comments in star_imports_dict.items():
-            split = re.split(r"^(\.+)", module_name)
-            actual_name = split[-1]
-
-            n_dots = 0 if len(split) == 1 else len(split[1])
+            ordered_comments = list(itertools.chain.from_iterable(reversed(comments)))
+            new_stmt = cst.parse_statement(f"from {module_name} import *")
             new_from_import_stmts.append(
-                cst.SimpleStatementLine(
-                    body=[
-                        cst.ImportFrom(
-                            module=_node_from_name(actual_name),
-                            names=cst.ImportStar(),
-                            relative=[cst.Dot()] * n_dots,
-                        )
-                    ],
-                    leading_lines=comments,
-                )
+                new_stmt.with_changes(leading_lines=ordered_comments)
             )
 
         # creates the stmt for each dictionary entry
-        for module_name, tupla in imports_dict.items():
-            split = re.split(r"^(\.+)", module_name)
-            actual_name = split[-1]
-
-            n_dots = 0 if len(split) == 1 else len(split[1])
-            all_ia = [
-                cst.ImportAlias(
-                    name=cst.Name(name),
-                    asname=(asname and cst.AsName(cst.Name(asname))),
-                )
-                for name, asname in tupla[0]
-            ]
-            all_ia.sort(key=lambda ia: _natural_key(ia.evaluated_name))
-            comments = list(itertools.chain.from_iterable(reversed(tupla[1])))
+        for module_name, (name_alias_set, comments) in imports_dict.items():
+            ordered_comments = list(itertools.chain.from_iterable(reversed(comments)))
             new_from_import_stmts.append(
-                cst.SimpleStatementLine(
-                    body=[
-                        cst.ImportFrom(
-                            module=_node_from_name(actual_name)
-                            if actual_name
-                            else None,
-                            names=all_ia,
-                            relative=[cst.Dot()] * n_dots,
-                        )
-                    ],
-                    leading_lines=comments,
+                self._create_from_import_stmt(
+                    module_name, name_alias_set, ordered_comments
                 )
             )
         return new_from_import_stmts
