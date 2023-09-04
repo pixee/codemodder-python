@@ -94,3 +94,86 @@ from . import a"""
 
         self.run_and_assert(tmpdir, before, after)
         assert len(self.codemod.CHANGES_IN_FILE) == 1
+
+    def test_natural_order(self, tmpdir):
+        before = """from a import Object11
+from a import Object1
+"""
+
+        after = """from a import Object1, Object11
+"""
+
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.codemod.CHANGES_IN_FILE) == 1
+
+    def test_wont_remove_unused_future(self, tmpdir):
+        before = """from __future__ import absolute_import
+"""
+
+        after = before
+
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.codemod.CHANGES_IN_FILE) == 0
+
+    def test_organize_by_sections(self, tmpdir):
+        before = """from codemodder.codemods.transformations.clean_imports import CleanImports
+import os
+from third_party import Object
+from __future__ import absolute_import
+from .local import Object2
+"""
+
+        after = """from __future__ import absolute_import
+
+import os
+
+from third_party import Object
+
+from codemodder.codemods.transformations.clean_imports import CleanImports
+
+from .local import Object2
+"""
+
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.codemod.CHANGES_IN_FILE) == 1
+
+    def test_will_ignore_non_top_level(self, tmpdir):
+        before = """import global2
+import global1
+
+def f():
+    import b
+    import a
+
+if True:
+    import global3
+"""
+
+        after = """import global1
+import global2
+
+def f():
+    import b
+    import a
+
+if True:
+    import global3
+"""
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.codemod.CHANGES_IN_FILE) == 1
+
+    def test_it_can_change_behavior(self, tmpdir):
+        # note that c will change from b to e due to the sort
+        before = """from d import e as c
+from a import b as c
+
+c()
+"""
+
+        after = """from a import b as c
+from d import e as c
+
+c()
+"""
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.codemod.CHANGES_IN_FILE) == 1
