@@ -6,7 +6,7 @@ from libcst.codemod.visitors import GatherUnusedImportsVisitor
 from libcst import (
     CSTTransformer,
     CSTVisitor,
-    EmptyLine,
+    MaybeSentinel,
     RemovalSentinel,
     matchers,
 )
@@ -100,13 +100,12 @@ class OrderImportsBlocksTransform(CSTTransformer):
             )
 
             # check if anything changed
-            self.changes[i] = not any(
+            self.changes[i] = not all(
                 map(
                     lambda t: t[0].deep_equals(t[1]),
                     zip(self.import_blocks[i], ordered_block),
                 )
             )
-
             sentinel = cst.FlattenSentinel(ordered_block)
 
             replacement_nodes = replacement_nodes | {anchor: sentinel}
@@ -182,15 +181,24 @@ class OrderImportsBlocksTransform(CSTTransformer):
                     imports_dict[_get_name(imp)][1].append(comments)
         return (imports_dict, star_imports_dict)
 
-    def _create_from_import_stmt(self, module_name, name_asname_set, comments):
+    def _create_from_import_stmt(self, module_name, name_alias_set, comments):
+        sorted_name_alias = list(name_alias_set)
+        sorted_name_alias.sort(key=lambda t: _natural_key(t[0]))
         all_ia = [
             cst.ImportAlias(
                 name=cst.Name(name),
                 asname=(asname and cst.AsName(cst.Name(asname))),
+                comma=cst.Comma(
+                    whitespace_before=cst.SimpleWhitespace(""),
+                    whitespace_after=cst.SimpleWhitespace(" "),
+                ),
             )
-            for name, asname in name_asname_set
+            for name, asname in sorted_name_alias
         ]
-        all_ia.sort(key=lambda ia: _natural_key(ia.evaluated_name))
+        # last one should not have a comma
+        all_ia[-1] = all_ia[-1].with_changes(comma=MaybeSentinel.DEFAULT)
+
+        # figure module name, may be relative so we need to handle dots
         split = re.split(r"^(\.+)", module_name)
         actual_name = split[-1]
 
