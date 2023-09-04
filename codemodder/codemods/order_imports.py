@@ -48,16 +48,15 @@ class OrderImports(BaseCodemod, Codemod):
             )
             result_tree = tree.visit(order_transformer)
 
-            if any(order_transformer.changes):
-                for i, changed in enumerate(order_transformer.changes):
-                    if changed:
-                        line_number = self.node_position(
-                            top_imports_visitor.top_imports_blocks[i][0]
-                        ).start.line
-                        self.CHANGES_IN_FILE.append(
-                            Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
-                        )
-                return result_tree
+            for i, changed in enumerate(order_transformer.changes):
+                if changed:
+                    line_number = self.node_position(
+                        top_imports_visitor.top_imports_blocks[i][0]
+                    ).start.line
+                    self.CHANGES_IN_FILE.append(
+                        Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
+                    )
+            return result_tree
         return tree
 
     def filter_by_path_includes_or_excludes(self, pos_to_match):
