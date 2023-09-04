@@ -92,9 +92,7 @@ class OrderImportsBlocksTransform(CSTTransformer):
             ordered_block = list(self._order_block(block))
 
             # gather all the leading lines from anchor until the comments
-            new_anchor_head = list(
-                anchor.leading_lines[: self._split_leading_lines(anchor)]
-            )
+            new_anchor_head = list(anchor.leading_lines[: _split_leading_lines(anchor)])
             new_anchor_head.extend(ordered_block[0].leading_lines)
             ordered_block[0] = ordered_block[0].with_changes(
                 leading_lines=new_anchor_head
@@ -119,34 +117,13 @@ class OrderImportsBlocksTransform(CSTTransformer):
         result_tree = result_tree.visit(ReplaceNodes(replacement_nodes))
         return result_tree
 
-    def _split_leading_lines(self, stmt: cst.SimpleStatementLine) -> int:
-        """
-        For a given SimpleStatementLine, split the leading_lines nodes head and tail by index, where tail will contain the longest comment block right before the line. Returns the index where the tail starts.
-        """
-        i = len(stmt.leading_lines) - 1
-        while i >= 0:
-            empty_line = stmt.leading_lines[i]
-            if not matchers.matches(
-                empty_line, matchers.EmptyLine(comment=matchers.Comment())
-            ):
-                break
-            i = i - 1
-        return i + 1
-
-    def _trim_leading_lines(self, stmt: cst.SimpleStatementLine) -> List[cst.EmptyLine]:
-        """
-        For a given SimpleStatementLine, gather the list of comments right above it.
-        """
-        i = self._split_leading_lines(stmt)
-        return list(stmt.leading_lines[i:])
-
     def _handle_regular_imports(self, import_stmts):
         # bin them into (name,alias) for deduplication and comment merging
         # the value of the dict contains the comment blocks from all the same imports
         alias_dict = defaultdict(list)
         for stmt in import_stmts:
             imp = stmt.body[0]
-            comments = self._trim_leading_lines(stmt)
+            comments = _trim_leading_lines(stmt)
             # only the first import in a list will inherit the comments
             first_ia = imp.names[0]
             alias_dict.setdefault(
@@ -183,7 +160,7 @@ class OrderImportsBlocksTransform(CSTTransformer):
         # binsort the aliases into module name, merge comments
         for stmt in from_import_stmts:
             imp = stmt.body[0]
-            comments = self._trim_leading_lines(stmt)
+            comments = _trim_leading_lines(stmt)
             if matchers.matches(imp.names, matchers.ImportStar()):
                 star_imports_dict[_get_name(imp)] = comments
             else:
@@ -196,7 +173,7 @@ class OrderImportsBlocksTransform(CSTTransformer):
 
         new_from_import_stmts = []
 
-        # creates the stmt for each star dic entry
+        # creates the stmt for each star dict entry
         for module_name, comments in star_imports_dict.items():
             split = re.split(r"^(\.+)", module_name)
             actual_name = split[-1]
@@ -353,6 +330,29 @@ class GatherAndRemoveImportsTransformer(ContextAwareTransformer, cst.MetadataDep
             self.global_imports.append(original_node)
             return cst.RemoveFromParent()
         return original_node
+
+
+def _split_leading_lines(stmt: cst.SimpleStatementLine) -> int:
+    """
+    For a given SimpleStatementLine, split the leading_lines nodes head and tail by index, where tail will contain the longest comment block right before the line. Returns the index where the tail starts.
+    """
+    i = len(stmt.leading_lines) - 1
+    while i >= 0:
+        empty_line = stmt.leading_lines[i]
+        if not matchers.matches(
+            empty_line, matchers.EmptyLine(comment=matchers.Comment())
+        ):
+            break
+        i = i - 1
+    return i + 1
+
+
+def _trim_leading_lines(stmt: cst.SimpleStatementLine) -> List[cst.EmptyLine]:
+    """
+    For a given SimpleStatementLine, gather the list of comments right above it.
+    """
+    i = _split_leading_lines(stmt)
+    return list(stmt.leading_lines[i:])
 
 
 def _sort_each_section(imports_by_section):
