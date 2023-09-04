@@ -121,7 +121,7 @@ class OrderImportsBlocksTransform(CSTTransformer):
 
     def _split_leading_lines(self, stmt: cst.SimpleStatementLine) -> int:
         """
-        For a given SimpleStatementLine, split the leading_lines nodes head and tail, where tail will contain the longest comment block right before the line.
+        For a given SimpleStatementLine, split the leading_lines nodes head and tail by index, where tail will contain the longest comment block right before the line. Returns the index where the tail starts.
         """
         i = len(stmt.leading_lines) - 1
         while i >= 0:
@@ -262,15 +262,19 @@ class OrderImportsBlocksTransform(CSTTransformer):
         from_import_stmts = self._handle_from_imports(from_imports)
 
         # classify by sections and sort each section by module name
-        imports_by_section = _triage_imports(
-            regular_import_stmts,
-            self.src_path,
+        imports_by_section = _order_sections(
+            _triage_imports(
+                regular_import_stmts,
+                self.src_path,
+            )
         )
         _sort_each_section(imports_by_section)
 
-        from_imports_by_section = _triage_imports(
-            from_import_stmts,
-            self.src_path,
+        from_imports_by_section = _order_sections(
+            _triage_imports(
+                from_import_stmts,
+                self.src_path,
+            )
         )
         _sort_each_section(from_imports_by_section)
 
@@ -281,15 +285,15 @@ class OrderImportsBlocksTransform(CSTTransformer):
         imports_by_section = list(filter(lambda x: x, imports_by_section))
 
         # add empty lines after each section
-        # for this, we add an empty line at the leading_lines of the first not at each section
+        # for this, we add an empty line at the leading_lines of the first node at each section
         for section in imports_by_section[1:]:
             if section:
                 lead = section[0]
                 section[0] = lead.with_changes(
                     leading_lines=[cst.EmptyLine()] + lead.leading_lines
                 )
-        # return flat list of statement nodes
 
+        # return flat list of statement nodes
         return itertools.chain.from_iterable(imports_by_section)
 
 
@@ -363,30 +367,26 @@ def _triage_imports(all_imports, src_path):
     """
     Triage a list of imports into sections: future, stdlib, first party, third party and local.
     """
-    future = []
-    stdlib = []
-    first_party: List[cst.CSTNode] = []
-    third_party = []
-    local = []
-
     config = Config(src_paths=(src_path,))
 
+    sections_dict: dict[str, list[cst.SimpleStatementLine]] = defaultdict(list)
     for stmt in all_imports:
         imp = stmt.body[0]
         section = isort.place.module(_get_name(imp), config)
 
-        if section == isort.sections.FUTURE:
-            future.append(stmt)
-        elif section == isort.sections.STDLIB:
-            stdlib.append(stmt)
-        elif section == isort.sections.LOCALFOLDER:
-            local.append(stmt)
-        elif section == isort.sections.FIRSTPARTY:
-            first_party.append(stmt)
-        else:
-            third_party.append(stmt)
+        sections_dict[section].append(stmt)
+    return sections_dict
 
-    return [future, stdlib, third_party, first_party, local]
+
+def _order_sections(sections, order=isort.sections.DEFAULT):
+    """
+    Order a dictionary of import statements organized by sections into a given order. It defaults to isort's default order.
+    """
+    sections_list: list[cst.SimpleStatementLine] = []
+    for section in order:
+        sections_list.append(sections[section])
+
+    return sections_list
 
 
 def _natural_key(s):
