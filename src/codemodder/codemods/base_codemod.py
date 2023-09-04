@@ -26,7 +26,6 @@ class BaseCodemod:
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         cls.CHANGESET_ALL_FILES: list = []
-        cls.CHANGES_IN_FILE: list = []
 
         if "codemodder.codemods.base_codemod.SemgrepCodemod" in str(cls):
             # hack: SemgrepCodemod won't NotImplementedError but all other child

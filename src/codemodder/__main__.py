@@ -76,7 +76,7 @@ def run_codemods_for_file(
                 ChangeSet(
                     str(file_context.file_path),
                     diff,
-                    changes=codemod_kls.CHANGES_IN_FILE,
+                    changes=file_context.codemod_changes,
                 ).to_json()
             )
             if file_context.dry_run:

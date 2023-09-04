@@ -38,7 +38,7 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         for import_alias, importt in gather_unused_visitor.unused_imports:
             pos = self.get_metadata(PositionProvider, import_alias)
             if self.filter_by_path_includes_or_excludes(pos):
-                RemoveUnusedImports.CHANGES_IN_FILE.append(
+                self.file_context.codemod_changes.append(
                     Change(pos.start.line, self.CHANGE_DESCRIPTION).to_json()
                 )
                 filtered_unused_imports.add((import_alias, importt))

@@ -12,7 +12,7 @@ a
 c
 """
         self.run_and_assert(tmpdir, before, before)
-        assert len(self.codemod.CHANGES_IN_FILE) == 0
+        assert len(self.file_context.codemod_changes) == 0
 
     def test_change(self, tmpdir):
         before = r"""import a
@@ -20,7 +20,7 @@ c
         after = r"""
 """
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_remove_import(self, tmpdir):
         before = r"""import a
@@ -32,7 +32,7 @@ a
 """
 
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_remove_single_from_import(self, tmpdir):
         before = r"""from b import c, d
@@ -43,7 +43,7 @@ c
 c
 """
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_remove_from_import(self, tmpdir):
         before = r"""from b import c
@@ -51,7 +51,7 @@ c
 
         after = "\n"
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_remove_inner_import(self, tmpdir):
         before = r"""import a
@@ -65,7 +65,7 @@ def something():
 """
 
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_no_import_star_removal(self, tmpdir):
         before = r"""import a
@@ -78,4 +78,4 @@ a.something
         before = "from a import b,c,d   \nprint(b)\nprint(d)"
         after = "from a import b,d   \nprint(b)\nprint(d)"
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1

@@ -45,6 +45,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     output_path = "test-codetf.txt"
     num_changes = 1
     _lines = []
+    num_changed_files = 1
 
     def _assert_run_fields(self, run, output_path):
         assert run["vendor"] == "pixee"
@@ -62,8 +63,13 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert len(results) == 1
         result = results[0]
         assert result["codemod"] == self.codemod.full_name()
-        assert len(result["changeset"]) == 1
-        change = result["changeset"][0]
+        assert len(result["changeset"]) == self.num_changed_files
+
+        # A codemod may change multiple files. For now we will
+        # assert the resulting data for one file only.
+        change = [
+            result for result in result["changeset"] if result["path"] == output_path
+        ][0]
         assert change["path"] == output_path
         assert change["diff"] == self.expected_diff
 

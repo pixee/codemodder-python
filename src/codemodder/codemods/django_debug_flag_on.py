@@ -38,7 +38,9 @@ class DjangoDebugFlagOn(SemgrepCodemod, Codemod):
             )
             new_tree = debug_flag_transformer.transform_module(tree)
             if debug_flag_transformer.changes_in_file:
-                self.CHANGES_IN_FILE.extend(debug_flag_transformer.changes_in_file)
+                self.file_context.codemod_changes.extend(
+                    debug_flag_transformer.changes_in_file
+                )
                 return new_tree
         return tree
 

@@ -49,7 +49,9 @@ class UrlSandbox(SemgrepCodemod, Codemod):
         )
         tree.visit(find_requests_visitor)
         if find_requests_visitor.nodes_to_change:
-            UrlSandbox.CHANGES_IN_FILE.extend(find_requests_visitor.changes_in_file)
+            self.file_context.codemod_changes.extend(
+                find_requests_visitor.changes_in_file
+            )
             new_tree = tree.visit(ReplaceNodes(find_requests_visitor.nodes_to_change))
             DependencyManager().add(["security==1.0.1"])
             # if it finds any request.get(...), try to remove the imports

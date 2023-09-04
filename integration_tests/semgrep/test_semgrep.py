@@ -41,6 +41,7 @@ class TestSemgrep:
         assert sorted(results_by_path_and_id.keys()) == [
             "tests/samples/insecure_random.py",
             "tests/samples/make_request.py",
+            "tests/samples/unverified_request.py",
         ]
 
         url_sandbox_results = results_by_path_and_id["tests/samples/make_request.py"][

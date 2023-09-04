@@ -19,4 +19,3 @@ def reset_global_state():
     RESULTS_BY_CODEMOD.clear()
     for codemod_kls in ALL_CODEMODS:
         codemod_kls.CHANGESET_ALL_FILES = []
-        codemod_kls.CHANGES_IN_FILE = []
