@@ -48,6 +48,7 @@ class OrderImports(BaseCodemod, Codemod):
             )
             result_tree = tree.visit(order_transformer)
 
+            # seemingly redundant, this check makes it possible to return the original tree
             for i, changed in enumerate(order_transformer.changes):
                 if changed:
                     line_number = self.node_position(
