@@ -11,7 +11,7 @@ jobs:
   auto-update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
       - uses: browniebroke/pre-commit-autoupdate-action@main
       - uses: peter-evans/create-pull-request@v5
