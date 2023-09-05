@@ -18,7 +18,7 @@ class UtilsMixin:
 
     def filter_by_path_includes_or_excludes(self, pos_to_match):
         """
-        Returns False if the node, whose position in the file is pos_to_match, matches any of the lines specified in the path-includes or path-excludes flags.
+        Returns True if the node, whose position in the file is pos_to_match, matches any of the lines specified in the path-includes or path-excludes flags.
         """
         # excludes takes precedence if defined
         if self.line_exclude:
