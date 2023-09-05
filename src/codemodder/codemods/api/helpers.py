@@ -40,6 +40,10 @@ class Helpers:
             args=[new if isinstance(new, cst.Arg) else cst.Arg(new) for new in new_args]
         )
 
+    def update_assign_rhs(self, updated_node: cst.Assign, rhs: str):
+        value = cst.parse_expression(rhs)
+        return updated_node.with_changes(value=value)
+
     def parse_expression(self, expression: str):
         return cst.parse_expression(expression)
 

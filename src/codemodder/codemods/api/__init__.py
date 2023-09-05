@@ -121,3 +121,16 @@ class SemgrepCodemod(
                 return new_node
 
         return updated_node
+
+    def leave_Assign(self, original_node, updated_node):
+        pos_to_match = self.node_position(original_node)
+        if self.filter_by_result(
+            pos_to_match
+        ) and self.filter_by_path_includes_or_excludes(pos_to_match):
+            self.report_change(original_node)
+            if (attr := getattr(self, "on_result_found", None)) is not None:
+                # pylint: disable=not-callable
+                new_node = attr(original_node, updated_node)
+                return new_node
+
+        return updated_node
