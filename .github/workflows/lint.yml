@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install Dependencies
         run: pip install -r requirements/lint.txt
       - name: Black Format Check
@@ -43,7 +43,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install Dependencies
         run: |
           pip install -r requirements/complexity.txt
