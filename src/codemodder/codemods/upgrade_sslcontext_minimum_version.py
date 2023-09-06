@@ -11,23 +11,25 @@ class UpgradeSSLContextMinimumVersion(SemgrepCodemod):
     def rule(cls):
         return """
         rules:
-          - patterns:
-            - pattern: |
-                $CONTEXT.minimum_version = ssl.TLSVersion.$VERSION
-            - pattern-inside: |
-                import ssl
-                ...
-                $CONTEXT = ssl.SSLContext(...)
-                ...
-            - metavariable-pattern:
-                metavariable: $VERSION
-                patterns:
-                  - pattern-either:
-                    - pattern: SSLv2
-                    - pattern: SSLv3
-                    - pattern: TLSv1
-                    - pattern: TLSv1_1
-                    - pattern: MINIMUM_SUPPORTED
+          - mode: taint
+            pattern-sources:
+              - patterns:
+                - pattern: ssl.SSLContext(...)
+                - pattern-inside: |
+                    import ssl
+                    ...
+            pattern-sinks:
+              - patterns:
+                - pattern: $SINK.minimum_version = ssl.TLSVersion.$VERSION
+                - metavariable-pattern:
+                    metavariable: $VERSION
+                    patterns:
+                      - pattern-either:
+                        - pattern: SSLv2
+                        - pattern: SSLv3
+                        - pattern: TLSv1
+                        - pattern: TLSv1_1
+                        - pattern: MINIMUM_SUPPORTED
         """
 
     def on_result_found(self, original_node, updated_node):
