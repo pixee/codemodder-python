@@ -25,5 +25,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - name: Build & Push Base Image
+        # TODO: we really should tag with a specific version as well, but that will come later
         run: |
-          docker buildx build --push -t ${{ steps.login-ecr.outputs.registry }}/pixee/codemodder-python:base-image .
+          docker buildx build --push -t ${{ steps.login-ecr.outputs.registry }}/pixee/codemodder-python:latest .
