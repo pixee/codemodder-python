@@ -28,10 +28,10 @@ pip install .
 
 You can run the codemodder program with
 
-```python -m codemodder <directory> --output <file> ...```
+```codemodder <directory> --output <file> ...```
 
 ```bash
-python -m codemodder --help
+codemodder --help
 ```
 
 ## Contributing

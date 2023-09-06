@@ -3,4 +3,4 @@ WORKDIR /codemodder
 COPY . .
 
 RUN pip install .
-CMD python -m codemodder --help
+CMD codemodder --help

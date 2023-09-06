@@ -192,6 +192,18 @@ def run(argv, original_args) -> int:
     return 0
 
 
-if __name__ == "__main__":
+def main():
+    # TODO: I'm not sure why this needs to be parsed out separately
+    # Maybe it has something to do with the invocation as python -m codemodder.
+    # But I think we should deprecate that interface which should simplify this.
     sys_argv = sys.argv[1:]
     sys.exit(run(parse_args(sys_argv), sys_argv))
+
+
+if __name__ == "__main__":
+    import warnings
+
+    warnings.warn(
+        "This command interface is deprecated. Please call the `codemodder` script directly instead"
+    )
+    main()

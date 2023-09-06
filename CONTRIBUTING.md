@@ -25,4 +25,4 @@ to specify a specific Python version. If using `bash` or any compatible shell, a
 ## Docker
 
 You can build the docker image with `docker build -t codemodder .` and run it with `docker run`. You can also do
-`docker run codemodder python -m codemodder ....`
+`docker run codemodder ...`
