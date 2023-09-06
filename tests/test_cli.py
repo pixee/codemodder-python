@@ -2,7 +2,8 @@ import mock
 import pytest
 from codemodder.cli import parse_args
 from codemodder import __VERSION__
-from .conftest import CODEMOD_NAMES
+
+from codemodder.codemods import CODEMOD_IDS
 
 
 class TestParseArgs:
@@ -76,9 +77,10 @@ class TestParseArgs:
         with pytest.raises(SystemExit) as err:
             parse_args(cli_args)
 
-        for print_call in mock_print.call_args_list:
-            assert print_call[0][0].startswith("pixee:python/")
-            assert print_call[0][0].endswith(CODEMOD_NAMES)
+        assert len(mock_print.call_args_list) == len(CODEMOD_IDS)
+
+        printed_names = [call[0][0] for call in mock_print.call_args_list]
+        assert sorted(CODEMOD_IDS) == sorted(printed_names)
 
         assert err.value.args[0] == 0
 
@@ -119,4 +121,15 @@ class TestParseArgs:
         assert error_logger.call_args_list[0][0] == (
             "CLI error: %s",
             "ambiguous option: --codemod=url-sandbox could match --codemod-exclude, --codemod-include",
+        )
+
+    @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
+    def test_codemod_name_or_id(self, codemod):
+        parse_args(
+            [
+                "tests/samples/",
+                "--output",
+                "here.txt",
+                f"--codemod-include={codemod}",
+            ]
         )

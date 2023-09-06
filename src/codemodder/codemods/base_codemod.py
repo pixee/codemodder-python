@@ -44,9 +44,14 @@ class BaseCodemod:
         self.file_context = file_context
 
     @classmethod
-    def full_name(cls):
+    def name(cls):
         # pylint: disable=no-member
-        return f"pixee:python/{cls.METADATA.NAME}"
+        return cls.METADATA.NAME
+
+    @classmethod
+    def id(cls):
+        # pylint: disable=no-member
+        return f"pixee:python/{cls.name()}"
 
     @property
     def should_transform(self):

@@ -1,9 +1,6 @@
 import pytest
 import mock
-from codemodder.codemods import DEFAULT_CODEMODS
 from tests.shared import reset_global_state  # pylint: disable=unused-import
-
-CODEMOD_NAMES = tuple(codemod.METADATA.NAME for codemod in DEFAULT_CODEMODS)
 
 
 @pytest.fixture(autouse=True, scope="module")

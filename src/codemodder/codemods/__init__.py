@@ -33,10 +33,13 @@ DEFAULT_CODEMODS = {
 }
 ALL_CODEMODS = DEFAULT_CODEMODS
 
+CODEMOD_IDS = [codemod.id() for codemod in DEFAULT_CODEMODS]
+CODEMOD_NAMES = [codemod.name() for codemod in DEFAULT_CODEMODS]
+
 
 def match_codemods(codemod_include: list, codemod_exclude: list) -> dict:
     if not codemod_include and not codemod_exclude:
-        return {codemod.METADATA.NAME: codemod for codemod in DEFAULT_CODEMODS}
+        return {codemod.name(): codemod for codemod in DEFAULT_CODEMODS}
 
     # cli should've already prevented both include/exclude from being set.
     assert codemod_include or codemod_exclude
@@ -45,11 +48,11 @@ def match_codemods(codemod_include: list, codemod_exclude: list) -> dict:
         return {
             name: codemod
             for codemod in DEFAULT_CODEMODS
-            if (name := codemod.METADATA.NAME) not in codemod_exclude
+            if (name := codemod.name()) not in codemod_exclude
         }
 
     return {
         name: codemod
         for codemod in DEFAULT_CODEMODS
-        if (name := codemod.METADATA.NAME) in codemod_include
+        if (name := codemod.name()) in codemod_include
     }

@@ -40,7 +40,7 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
             tmp_file.write(input_code)
 
         return semgrep_run(
-            find_all_yaml_files({self.codemod.METADATA.NAME: self.codemod}), root
+            find_all_yaml_files({self.codemod.name(): self.codemod}), root
         )
 
     def run_and_assert_filepath(self, root, file_path, input_code, expected):

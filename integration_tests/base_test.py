@@ -54,7 +54,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert run["elapsed"] != ""
         assert (
             run["commandLine"]
-            == f"python -m codemodder tests/samples/ --output {output_path} --codemod-include={self.codemod.METADATA.NAME}"
+            == f"python -m codemodder tests/samples/ --output {output_path} --codemod-include={self.codemod.name()}"
         )
         assert run["directory"] == os.path.abspath("tests/samples/")
         assert run["sarifs"] == []
@@ -62,7 +62,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     def _assert_results_fields(self, results, output_path):
         assert len(results) == 1
         result = results[0]
-        assert result["codemod"] == self.codemod.full_name()
+        assert result["codemod"] == self.codemod.id()
         assert len(result["changeset"]) == self.num_changed_files
 
         # A codemod may change multiple files. For now we will
@@ -116,7 +116,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             "tests/samples/",
             "--output",
             self.output_path,
-            f"--codemod-include={self.codemod.METADATA.NAME}",
+            f"--codemod-include={self.codemod.name()}",
         ]
 
         self.check_code_before()
