@@ -1,2 +1,2 @@
-bad = f"hello"
+bad = "hello"
 good = f"{2+3}"

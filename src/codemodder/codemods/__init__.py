@@ -18,6 +18,7 @@ from codemodder.codemods.process_creation_sandbox import ProcessSandbox
 from codemodder.codemods.remove_unnecessary_f_str import RemoveUnnecessaryFStr
 from codemodder.codemods.tempfile_mktemp import TempfileMktemp
 from codemodder.codemods.requests_verify import RequestsVerify
+from codemodder.codemods.use_walrus_if import UseWalrusIf
 
 DEFAULT_CODEMODS = {
     DjangoDebugFlagOn,
@@ -36,6 +37,7 @@ DEFAULT_CODEMODS = {
     UrlSandbox,
     TempfileMktemp,
     RequestsVerify,
+    UseWalrusIf,
 }
 ALL_CODEMODS = DEFAULT_CODEMODS
 

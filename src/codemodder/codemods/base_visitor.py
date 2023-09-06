@@ -25,6 +25,12 @@ class UtilsMixin:
             return any(match_line(pos_to_match, line) for line in self.line_include)
         return True
 
+    def node_is_selected(self, node) -> bool:
+        pos_to_match = self.node_position(node)
+        return self.filter_by_result(
+            pos_to_match
+        ) and self.filter_by_path_includes_or_excludes(pos_to_match)
+
     def node_position(self, node):
         # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
         return self.get_metadata(self.METADATA_DEPENDENCIES[0], node)
