@@ -17,7 +17,7 @@ good = rf"good\d+{bar}"
 good = f"wow i don't have args but don't mess my braces {{ up }}"
 """
         self.run_and_assert(tmpdir, before, before)
-        assert len(self.codemod.CHANGES_IN_FILE) == 0
+        assert len(self.file_context.codemod_changes) == 0
 
     def test_change(self, tmpdir):
         before = r"""
@@ -31,4 +31,4 @@ bad: str = 'bad'
 bad: str = r'bad\d+'
 """
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 3
+        assert len(self.file_context.codemod_changes) == 3

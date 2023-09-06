@@ -70,11 +70,10 @@ class BaseCodemod(
     Helpers,
 ):
     CHANGESET_ALL_FILES: list = []
-    CHANGES_IN_FILE: list = []
 
     def report_change(self, original_node):
         line_number = self.lineno_for_node(original_node)
-        self.CHANGES_IN_FILE.append(
+        self.file_context.codemod_changes.append(
             Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
         )
 

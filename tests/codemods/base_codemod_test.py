@@ -1,4 +1,4 @@
-# pylint: disable=no-member,not-callable
+# pylint: disable=no-member,not-callable,attribute-defined-outside-init
 import libcst as cst
 from libcst.codemod import CodemodContext
 from pathlib import Path
@@ -12,20 +12,23 @@ from typing import ClassVar
 class BaseCodemodTest:
     codemod: ClassVar = NotImplemented
 
+    def setup_method(self):
+        self.file_context = None
+
     def run_and_assert(self, tmpdir, input_code, expected):
         tmp_file_path = tmpdir / "code.py"
         self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)
 
     def run_and_assert_filepath(self, _, file_path, input_code, expected):
         input_tree = cst.parse_module(input_code)
-        file_context = FileContext(
+        self.file_context = FileContext(
             file_path,
             False,
             [],
             [],
             [],
         )
-        command_instance = self.codemod(CodemodContext(), file_context)
+        command_instance = self.codemod(CodemodContext(), self.file_context)
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == expected
@@ -44,14 +47,14 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         input_tree = cst.parse_module(input_code)
         all_results = self.results_by_id_filepath(input_code, root, file_path)
         results = all_results[str(file_path)]
-        file_context = FileContext(
+        self.file_context = FileContext(
             file_path,
             False,
             [],
             [],
             results,
         )
-        command_instance = self.codemod(CodemodContext(), file_context)
+        command_instance = self.codemod(CodemodContext(), self.file_context)
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == expected

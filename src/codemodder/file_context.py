@@ -20,3 +20,4 @@ class FileContext:
             self.line_include = []
         if self.line_exclude is None:
             self.line_exclude = []
+        self.codemod_changes = []

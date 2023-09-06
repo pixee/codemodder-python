@@ -10,7 +10,7 @@ class TestOrderImports(BaseCodemodTest):
 from b import c
 """
         self.run_and_assert(tmpdir, before, before)
-        assert len(self.codemod.CHANGES_IN_FILE) == 0
+        assert len(self.file_context.codemod_changes) == 0
 
     def test_separate_from_imports_and_regular(self, tmpdir):
         before = r"""import y
@@ -21,7 +21,7 @@ import x"""
 import y
 from a import c"""
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_consolidate_from_imports(self, tmpdir):
         before = r"""from a import a1
@@ -30,7 +30,7 @@ from a import a2"""
 
         after = r"""from a import a1, a2, a3"""
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_order_blocks_separately(self, tmpdir):
         before = r"""import x
@@ -46,7 +46,7 @@ import b
 import y"""
 
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 2
+        assert len(self.file_context.codemod_changes) == 2
 
     def test_preserve_comments(self, tmpdir):
         before = r"""# do not move
@@ -69,7 +69,7 @@ from b import b1, b2
 """
 
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_handle_star_imports(self, tmpdir):
         before = r"""from a import x
@@ -82,7 +82,7 @@ from a import *
 from a import b, x"""
 
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_handle_composite_and_relative_imports(self, tmpdir):
         before = r"""from . import a
@@ -93,7 +93,7 @@ import a.b.c.d"""
 from . import a"""
 
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_natural_order(self, tmpdir):
         before = """from a import Object11
@@ -104,7 +104,7 @@ from a import Object1
 """
 
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_wont_remove_unused_future(self, tmpdir):
         before = """from __future__ import absolute_import
@@ -113,7 +113,7 @@ from a import Object1
         after = before
 
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 0
+        assert len(self.file_context.codemod_changes) == 0
 
     def test_organize_by_sections(self, tmpdir):
         before = """from codemodder.codemods.transformations.clean_imports import CleanImports
@@ -134,7 +134,7 @@ from .local import Object2
 """
 
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_will_ignore_non_top_level(self, tmpdir):
         before = """import global2
@@ -159,7 +159,7 @@ if True:
     import global3
 """
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_it_can_change_behavior(self, tmpdir):
         # note that c will change from b to e due to the sort
@@ -175,4 +175,4 @@ from d import e as c
 c()
 """
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.codemod.CHANGES_IN_FILE) == 1
+        assert len(self.file_context.codemod_changes) == 1

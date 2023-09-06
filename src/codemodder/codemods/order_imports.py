@@ -54,7 +54,7 @@ class OrderImports(BaseCodemod, Codemod):
                     line_number = self.node_position(
                         top_imports_visitor.top_imports_blocks[i][0]
                     ).start.line
-                    self.CHANGES_IN_FILE.append(
+                    self.file_context.codemod_changes.append(
                         Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
                     )
             return result_tree

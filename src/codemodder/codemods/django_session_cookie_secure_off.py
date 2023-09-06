@@ -37,7 +37,7 @@ class DjangoSessionCookieSecureOff(SemgrepCodemod, Codemod):
             )
             new_tree = transformer.transform_module(tree)
             if transformer.changes_in_file:
-                self.CHANGES_IN_FILE.extend(transformer.changes_in_file)
+                self.file_context.codemod_changes.extend(transformer.changes_in_file)
             return new_tree
         return tree
 
