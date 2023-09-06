@@ -70,3 +70,18 @@ context = whatever.SSLContext()
 context.minimum_version = ssl.TLSVersion.TLSv1_2
 """
         self.run_and_assert(tmpdir, input_code, expexted_output)
+
+    def test_with_dataflow(self, tmpdir):
+        input_code = """import ssl
+
+context = ssl.SSLContext()
+alias = context
+alias.minimum_version = ssl.TLSVersion.SSLv3
+"""
+        expexted_output = """import ssl
+
+context = ssl.SSLContext()
+alias = context
+alias.minimum_version = ssl.TLSVersion.TLSv1_2
+"""
+        self.run_and_assert(tmpdir, input_code, expexted_output)
