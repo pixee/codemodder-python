@@ -119,10 +119,7 @@ class SemgrepCodemod(
     # similar when they define their `on_result_found` method.
     # Right now this is just to demonstrate a particular use case.
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
-        pos_to_match = self.node_position(original_node)
-        if self.filter_by_result(
-            pos_to_match
-        ) and self.filter_by_path_includes_or_excludes(pos_to_match):
+        if self.node_is_selected(original_node):
             self.report_change(original_node)
             if (attr := getattr(self, "on_result_found", None)) is not None:
                 # pylint: disable=not-callable
