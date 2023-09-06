@@ -6,7 +6,7 @@ from codemodder import __VERSION__
 # from .conftest import CODEMOD_NAMES
 from codemodder.codemods import DEFAULT_CODEMODS
 
-CODEMOD_FULL_NAMES = tuple(codemod.full_name() for codemod in DEFAULT_CODEMODS)
+CODEMOD_FULL_NAMES = tuple(codemod.id() for codemod in DEFAULT_CODEMODS)
 
 
 class TestParseArgs:

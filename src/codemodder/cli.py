@@ -20,7 +20,7 @@ class ListAction(argparse.Action):
 
     def _print_codemods(self):
         for codemod in DEFAULT_CODEMODS:
-            print(codemod.full_name())
+            print(codemod.id())
 
     def __call__(self, parser, *args, **kwargs):
         """
@@ -57,8 +57,8 @@ class ValidatedCodmods(CsvListAction):
     """
 
     def validate_items(self, items):
-        codemod_ids = [codemod.full_name() for codemod in DEFAULT_CODEMODS]
-        codemod_names = [codemod.METADATA.NAME for codemod in DEFAULT_CODEMODS]
+        codemod_ids = [codemod.id() for codemod in DEFAULT_CODEMODS]
+        codemod_names = [codemod.name() for codemod in DEFAULT_CODEMODS]
 
         potential_names = codemod_ids + codemod_names
         unrecognized_codemods = [name for name in items if name not in potential_names]
