@@ -3,10 +3,7 @@ import pytest
 from codemodder.cli import parse_args
 from codemodder import __VERSION__
 
-# from .conftest import CODEMOD_NAMES
-from codemodder.codemods import DEFAULT_CODEMODS
-
-CODEMOD_FULL_NAMES = tuple(codemod.id() for codemod in DEFAULT_CODEMODS)
+from codemodder.codemods import CODEMOD_IDS
 
 
 class TestParseArgs:
@@ -80,10 +77,10 @@ class TestParseArgs:
         with pytest.raises(SystemExit) as err:
             parse_args(cli_args)
 
-        assert len(mock_print.call_args_list) == len(CODEMOD_FULL_NAMES)
+        assert len(mock_print.call_args_list) == len(CODEMOD_IDS)
 
         printed_names = [call[0][0] for call in mock_print.call_args_list]
-        assert sorted(CODEMOD_FULL_NAMES) == sorted(printed_names)
+        assert sorted(CODEMOD_IDS) == sorted(printed_names)
 
         assert err.value.args[0] == 0
 

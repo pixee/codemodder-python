@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from codemodder import __VERSION__
-from codemodder.codemods import DEFAULT_CODEMODS
+from codemodder.codemods import DEFAULT_CODEMODS, CODEMOD_NAMES, CODEMOD_IDS
 from codemodder.logging import logger
 
 
@@ -57,16 +57,13 @@ class ValidatedCodmods(CsvListAction):
     """
 
     def validate_items(self, items):
-        codemod_ids = [codemod.id() for codemod in DEFAULT_CODEMODS]
-        codemod_names = [codemod.name() for codemod in DEFAULT_CODEMODS]
-
-        potential_names = codemod_ids + codemod_names
+        potential_names = CODEMOD_IDS + CODEMOD_NAMES
         unrecognized_codemods = [name for name in items if name not in potential_names]
 
         if unrecognized_codemods:
             args = {
                 "values": unrecognized_codemods,
-                "choices": ", ".join(map(repr, codemod_names)),
+                "choices": ", ".join(map(repr, CODEMOD_NAMES)),
             }
             msg = "invalid choice(s): %(values)r (choose from %(choices)s)"
             raise argparse.ArgumentError(self, msg % args)

@@ -33,6 +33,9 @@ DEFAULT_CODEMODS = {
 }
 ALL_CODEMODS = DEFAULT_CODEMODS
 
+CODEMOD_IDS = [codemod.id() for codemod in DEFAULT_CODEMODS]
+CODEMOD_NAMES = [codemod.name() for codemod in DEFAULT_CODEMODS]
+
 
 def match_codemods(codemod_include: list, codemod_exclude: list) -> dict:
     if not codemod_include and not codemod_exclude:

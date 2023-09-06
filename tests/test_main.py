@@ -5,7 +5,7 @@ from codemodder.__main__ import run
 from codemodder import global_state
 from codemodder.semgrep import run as semgrep_run
 from codemodder.cli import parse_args
-from .conftest import CODEMOD_NAMES
+from codemodder.codemods import CODEMOD_NAMES
 
 
 class TestRun:
