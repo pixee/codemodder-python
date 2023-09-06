@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-codemodder = "codemodder.__main__:run"
+codemodder = "codemodder.__main__:main"
 
 [tool.setuptools]
 

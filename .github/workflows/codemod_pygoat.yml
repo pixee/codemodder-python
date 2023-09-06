@@ -34,4 +34,4 @@ jobs:
           repository: pixee/pygoat
           path: pygoat
       - name: Run Codemodder
-        run: python -m codemodder --output output.codetf pygoat
+        run: codemodder --output output.codetf pygoat

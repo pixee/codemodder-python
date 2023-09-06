@@ -29,12 +29,14 @@ class CodeTF:
 
     def generate(self, elapsed_ms, original_args, absolute_path, results_by_codemod):
         self.report["run"]["elapsed"] = str(elapsed_ms)
+        # TODO: this shouldn't be necessary, we should just use sys.argv
+        # I think this is an artifact of using python -m codemodder, which is being deprecated
         self.report["run"]["commandLine"] = self._recreate_command(original_args)
         self.report["run"]["directory"] = absolute_path
         self.report["results"] = results_by_codemod
 
     def _recreate_command(self, original_args):
-        return f"python -m codemodder {' '.join(original_args)}"
+        return f"codemodder {' '.join(original_args)}"
 
     def write_report(self, outfile):
         try:

@@ -54,7 +54,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert run["elapsed"] != ""
         assert (
             run["commandLine"]
-            == f"python -m codemodder tests/samples/ --output {output_path} --codemod-include={self.codemod.name()}"
+            == f"codemodder tests/samples/ --output {output_path} --codemod-include={self.codemod.name()}"
         )
         assert run["directory"] == os.path.abspath("tests/samples/")
         assert run["sarifs"] == []
