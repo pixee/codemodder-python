@@ -110,6 +110,20 @@ class TestRun:
         assert exit_code == 0
         mock_semgrep_run.assert_not_called()
 
+    @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
+    @mock.patch("codemodder.__main__.compile_results")
+    def test_run_codemod_name_or_id(self, mock_compile_results, codemod):
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            f"--codemod-include={codemod}",
+        ]
+
+        exit_code = run(parse_args(args), args)
+        assert exit_code == 0
+        mock_compile_results.assert_called()
+
     @mock.patch("codemodder.semgrep.results_by_path_and_rule_id")
     @mock.patch("codemodder.__main__.semgrep_run", side_effect=semgrep_run)
     @mock.patch("codemodder.semgrep.subprocess.run")
