@@ -93,3 +93,41 @@ var = "hello"
 """
 
         self.run_and_assert(tmpdir, input_code, expexted_output)
+
+    def test_multiline_formatting_verify_flag(self, tmpdir):
+        input_code = """import jwt
+
+decoded_payload = jwt.decode(
+    encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=False
+)
+var = "hello"
+"""
+        expexted_output = """import jwt
+
+decoded_payload = jwt.decode(
+    encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)
+var = "hello"
+"""
+
+        self.run_and_assert(tmpdir, input_code, expexted_output)
+
+    @pytest.mark.skip(reason="Cannot support multiline opts dict given pattern-regex")
+    def test_multiline_formatting_options(self, tmpdir):
+        input_code = """import jwt
+
+decoded_payload = jwt.decode(
+    encoded_jwt, SECRET_KEY, algorithms=["HS256"],
+    options={"verify_signature": False, "verify_exp": False}
+)
+var = "hello"
+"""
+        expexted_output = """import jwt
+
+decoded_payload = jwt.decode(
+    encoded_jwt, SECRET_KEY, algorithms=["HS256"],
+    options={"verify_signature": True, "verify_exp": True}
+)
+var = "hello"
+"""
+
+        self.run_and_assert(tmpdir, input_code, expexted_output)
