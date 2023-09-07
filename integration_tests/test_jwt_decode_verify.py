@@ -12,16 +12,24 @@ class TestJwtDecodeVerify(BaseIntegrationTest):
         code_path,
         [
             (
-                9,
-                """decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], verify=True)\n""",
+                11,
+                """decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)\n""",
             ),
             (
-                10,
-                """decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], options={"verify_signature": True})\n""",
+                12,
+                """decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": True})\n""",
+            ),
+            (
+                16,
+                """    encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)""",
+            ),
+            (
+                17,
+                "\n",
             ),
         ],
     )
-    expected_diff = "--- \n+++ \n@@ -7,6 +7,6 @@\n }\n \n encoded_jwt = jwt.encode(payload, SECRET_KEY, algorithm='HS256')\n-decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], verify=False)\n-decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], options={\"verify_signature\": False})\n+decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], verify=True)\n+decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], options={\"verify_signature\": True})\n var = \"something\""
-    expected_line_change = "10"
-    num_changes = 2
+    expected_diff = '--- \n+++ \n@@ -9,13 +9,12 @@\n encoded_jwt = jwt.encode(payload, SECRET_KEY, algorithm="HS256")\n \n # these will work without black formatting\n-decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=False)\n-decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": False})\n+decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)\n+decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": True})\n \n # these will not work with semgrep pattern-regex\n decoded_payload = jwt.decode(\n-    encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=False\n-)\n+    encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)\n decoded_payload = jwt.decode(\n     encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": False}\n )\n'
+    expected_line_change = "12"
+    num_changes = 3
     change_description = JwtDecodeVerify.CHANGE_DESCRIPTION
