@@ -53,10 +53,12 @@ def match_codemods(codemod_include: list, codemod_exclude: list) -> dict:
             name: codemod
             for codemod in DEFAULT_CODEMODS
             if (name := codemod.name()) not in codemod_exclude
+            and (_ := codemod.id()) not in codemod_exclude
         }
 
     return {
         name: codemod
         for codemod in DEFAULT_CODEMODS
         if (name := codemod.name()) in codemod_include
+        or (_ := codemod.id()) in codemod_include
     }
