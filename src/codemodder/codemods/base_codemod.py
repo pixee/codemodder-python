@@ -26,6 +26,8 @@ class BaseCodemod:
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
+        # TODO: this should not belong to codemod classes
+        # Instead it should be owned by a global context that gets passed in
         cls.CHANGESET_ALL_FILES: list = []
 
         if "codemodder.codemods.base_codemod.SemgrepCodemod" in str(cls):

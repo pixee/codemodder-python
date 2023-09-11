@@ -8,12 +8,16 @@ import subprocess
 from codemodder import __VERSION__
 
 
+SAMPLES_DIR = "tests/samples"
+
+
 class CleanRepoMixin:
     @classmethod
     def teardown_class(cls):
         """Ensure any re-written file is undone after integration test class"""
+        # TODO: we should probably use temporary directories instead
         repo = git.Git(os.getcwd())
-        repo.execute(["git", "checkout", os.getcwd() + "/tests/samples"])
+        repo.execute(["git", "checkout", os.path.join(os.getcwd(), SAMPLES_DIR)])
 
         pathlib.Path(cls.output_path).unlink(missing_ok=True)
 
@@ -54,9 +58,9 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert run["elapsed"] != ""
         assert (
             run["commandLine"]
-            == f"codemodder tests/samples/ --output {output_path} --codemod-include={self.codemod.name()}"
+            == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod.name()}"
         )
-        assert run["directory"] == os.path.abspath("tests/samples/")
+        assert run["directory"] == os.path.abspath(SAMPLES_DIR)
         assert run["sarifs"] == []
 
     def _assert_results_fields(self, results, output_path):
@@ -88,7 +92,10 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         run = codetf["run"]
         self._assert_run_fields(run, self.output_path)
         results = codetf["results"]
-        self._assert_results_fields(results, self.code_path)
+        # CodeTf2 spec requires relative paths
+        self._assert_results_fields(
+            results, os.path.relpath(self.code_path, SAMPLES_DIR)
+        )
 
     def check_code_before(self):
         with open(self.code_path, "r", encoding="utf-8") as f:
@@ -113,7 +120,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             "python",
             "-m",
             "codemodder",
-            "tests/samples/",
+            SAMPLES_DIR,
             "--output",
             self.output_path,
             f"--codemod-include={self.codemod.name()}",

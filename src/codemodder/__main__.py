@@ -74,7 +74,8 @@ def run_codemods_for_file(
 
             codemod_kls.CHANGESET_ALL_FILES.append(
                 ChangeSet(
-                    str(file_context.file_path),
+                    # TODO: we should not be using global state here
+                    str(file_context.file_path.relative_to(global_state.DIRECTORY)),
                     diff,
                     changes=file_context.codemod_changes,
                 ).to_json()

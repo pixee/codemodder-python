@@ -3,6 +3,7 @@
 
 # Source code directory codemodder will analyze.
 # Should be overridden when codemodder starts.
+# TODO: we should not be managing global state at all
 DIRECTORY = ""
 
 
