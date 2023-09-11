@@ -12,6 +12,7 @@ from codemodder.file_context import FileContext
 class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
     NAME = "remove-unnecessary-f-str"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
+    SUMMARY = "Remove unnecessary f-strings."
     DESCRIPTION = UnnecessaryFormatString.DESCRIPTION
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):

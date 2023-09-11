@@ -5,6 +5,7 @@ from codemodder.codemods.api import SemgrepCodemod
 class HardenRuamel(SemgrepCodemod):
     NAME = "harden-ruamel"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
+    SUMMARY = "Use safe YAML loading in ruamel.yaml"
     DESCRIPTION = "Ensures all unsafe calls to ruamel.yaml.YAML use `typ='safe'`."
 
     @classmethod

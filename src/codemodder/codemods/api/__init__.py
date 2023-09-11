@@ -50,6 +50,17 @@ class _CodemodSubclassWithMetadata:
             # TODO: if we intend to continue to check class-level attributes
             # using this mechanism, we should add checks (or defaults) for
             # NAME, DESCRIPTION, and REVIEW_GUIDANCE here.
+            missing_fields = []
+            for field in ["SUMMARY", "DESCRIPTION", "REVIEW_GUIDANCE"]:
+                try:
+                    assert hasattr(cls, field)
+                except AssertionError:
+                    missing_fields.append(field)
+
+            if missing_fields:
+                raise AssertionError(
+                    f"{cls.__name__} is missing the following fields: {missing_fields}"
+                )
 
             cls.METADATA = CodemodMetadata(
                 cls.DESCRIPTION,  # pylint: disable=no-member

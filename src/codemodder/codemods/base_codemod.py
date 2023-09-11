@@ -21,6 +21,7 @@ class CodemodMetadata:
 class BaseCodemod:
     # Implementation borrowed from https://stackoverflow.com/a/45250114
     METADATA: ClassVar[CodemodMetadata] = NotImplemented
+    SUMMARY: ClassVar[str] = NotImplemented
     IS_SEMGREP = False
 
     def __init_subclass__(cls, **kwargs):
@@ -32,8 +33,11 @@ class BaseCodemod:
             # classes will.
             return
 
-        if cls.METADATA is NotImplemented:
-            raise NotImplementedError("You forgot to define METADATA")
+        for attr in ["SUMMARY", "METADATA"]:
+            if getattr(cls, attr) is NotImplemented:
+                raise NotImplementedError(
+                    f"You forgot to define {attr} for {cls.__name__}"
+                )
         for k, v in asdict(cls.METADATA).items():
             if v is NotImplemented:
                 raise NotImplementedError(f"You forgot to define METADATA.{k}")

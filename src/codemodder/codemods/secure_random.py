@@ -5,6 +5,7 @@ from codemodder.codemods.api import SemgrepCodemod
 class SecureRandom(SemgrepCodemod):
     NAME = "secure-random"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
+    SUMMARY = "Use secrets.SystemRandom() instead of random"
     DESCRIPTION = "Replaces random.{func} with more secure secrets library functions."
 
     @classmethod
