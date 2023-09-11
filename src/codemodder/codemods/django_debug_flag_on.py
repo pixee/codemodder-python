@@ -19,7 +19,7 @@ class DjangoDebugFlagOn(SemgrepCodemod, Codemod):
         NAME="django-debug-flag-on",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
     )
-    CHANGE_DESCRIPTION = "Flips django's debug flag to off."
+    SUMMARY = CHANGE_DESCRIPTION = "Flips django's debug flag to off."
     YAML_FILES = [
         "django-debug-flag-on.yaml",
     ]

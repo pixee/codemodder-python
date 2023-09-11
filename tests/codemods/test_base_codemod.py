@@ -16,6 +16,7 @@ class DoNothingCodemod(SemgrepCodemod, Codemod):
         NAME="do-nothing",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
     )
+    SUMMARY = "An identity codemod for testing purposes."
     YAML_FILES = []
 
     def __init__(self, context: CodemodContext, results_by_id):

@@ -127,7 +127,8 @@ def compile_results(codemods):
             continue
         data = {
             "codemod": f"pixee:python/{name}",
-            "summary": codemod_kls.METADATA.DESCRIPTION,
+            "summary": codemod_kls.SUMMARY,
+            "description": codemod_kls.METADATA.DESCRIPTION,
             "references": [],
             "properties": {},
             "failedFiles": [],
