@@ -7,6 +7,7 @@ from codemodder.codemods.base_codemod import (
     ReviewGuidance,
 )
 from codemodder.change import Change
+from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 
 
@@ -31,8 +32,13 @@ class UpgradeSSLContextTLS(SemgrepCodemod, BaseTransformer):
     PROTOCOL_ARG_INDEX = 0
     PROTOCOL_KWARG_NAME = "protocol"
 
-    def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
-        SemgrepCodemod.__init__(self, file_context)
+    def __init__(
+        self,
+        codemod_context: CodemodContext,
+        execution_context: CodemodExecutionContext,
+        file_context: FileContext,
+    ):
+        SemgrepCodemod.__init__(self, execution_context, file_context)
         BaseTransformer.__init__(
             self,
             codemod_context,

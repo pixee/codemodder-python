@@ -26,9 +26,9 @@ class DjangoDebugFlagOn(SemgrepCodemod, Codemod):
 
     METADATA_DEPENDENCIES = (PositionProvider,)
 
-    def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
+    def __init__(self, codemod_context: CodemodContext, *args):
         Codemod.__init__(self, codemod_context)
-        SemgrepCodemod.__init__(self, file_context)
+        SemgrepCodemod.__init__(self, *args)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         # checks if the file we looking is a settings.py file from django's default directory structure

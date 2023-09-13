@@ -9,7 +9,8 @@ from codemodder.codemods.base_codemod import (
     CodemodMetadata,
     ReviewGuidance,
 )
-from codemodder.codemods.change import Change
+from codemodder.change import Change
+from codemodder.context import CodemodExecutionContext
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.file_context import FileContext
 import libcst as cst
@@ -36,9 +37,14 @@ class HTTPSConnection(BaseCodemod, Codemod):
         "urllib3.connectionpool.HTTPConnectionPool",
     }
 
-    def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
+    def __init__(
+        self,
+        codemod_context: CodemodContext,
+        execution_context: CodemodExecutionContext,
+        file_context: FileContext,
+    ):
         Codemod.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, file_context)
+        BaseCodemod.__init__(self, execution_context, file_context)
         self.line_exclude = file_context.line_exclude
         self.line_include = file_context.line_include
 

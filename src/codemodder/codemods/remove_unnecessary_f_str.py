@@ -6,7 +6,6 @@ from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatS
 import libcst.matchers as m
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import BaseCodemod
-from codemodder.file_context import FileContext
 
 
 class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
@@ -15,9 +14,9 @@ class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
     SUMMARY = "Remove unnecessary f-strings."
     DESCRIPTION = UnnecessaryFormatString.DESCRIPTION
 
-    def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
+    def __init__(self, codemod_context: CodemodContext, *codemod_args):
         UnnecessaryFormatString.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, file_context)
+        BaseCodemod.__init__(self, *codemod_args)
 
     @m.leave(m.FormattedString(parts=(m.FormattedStringText(),)))
     def _check_formatted_string(

@@ -6,6 +6,7 @@ from codemodder.codemods.base_codemod import (
     ReviewGuidance,
 )
 from codemodder.change import Change
+from codemodder.context import CodemodExecutionContext
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsTransformer,
 )
@@ -25,9 +26,15 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
 
     METADATA_DEPENDENCIES = (PositionProvider, ScopeProvider, QualifiedNameProvider)
 
-    def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
+    def __init__(
+        self,
+        codemod_context: CodemodContext,
+        execution_context: CodemodExecutionContext,
+        file_context: FileContext,
+    ):
         Codemod.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, file_context)
+        BaseCodemod.__init__(self, execution_context, file_context)
+        # TODO: these should be moved to the base codemod class (as properties)
         self.line_exclude = file_context.line_exclude
         self.line_include = file_context.line_include
 

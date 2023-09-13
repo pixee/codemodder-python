@@ -1,6 +1,5 @@
 import pytest
 import mock
-from tests.shared import reset_global_state  # pylint: disable=unused-import
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -45,7 +44,9 @@ def disable_write_dependencies():
     """
     Unit tests should not write any dependency files
     """
-    dm_write = mock.patch("codemodder.dependency_manager.DependencyManager._write")
+    dm_write = mock.patch(
+        "codemodder.dependency_manager.DependencyManagerAbstract._write"
+    )
 
     dm_write.start()
     yield

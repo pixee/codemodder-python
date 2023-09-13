@@ -1,4 +1,3 @@
-from codemodder import global_state
 from codemodder.semgrep import run as semgrep_run
 from codemodder.codemods import SecureRandom, UrlSandbox
 
@@ -32,10 +31,10 @@ class TestSemgrep:
         assert location["region"]["endLine"] == 3
         assert location["region"]["snippet"]["text"] == "random.random()"
 
-    def test_two_codemods(self):
-        global_state.set_directory("tests/samples/")
+    def test_two_codemods(self, mocker):
+        context = mocker.MagicMock(directory="tests/samples")
         results_by_path_and_id = semgrep_run(
-            {"secure-random": SecureRandom, "url-sandbox": UrlSandbox}
+            context, {"secure-random": SecureRandom, "url-sandbox": UrlSandbox}
         )
 
         assert sorted(results_by_path_and_id.keys()) == [
