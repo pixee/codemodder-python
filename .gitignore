@@ -130,3 +130,7 @@ dmypy.json
 
 # IDEs
 .idea/
+
+# CodeTF and sarif files
+*.codetf*
+*.sarif
