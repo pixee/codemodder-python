@@ -41,6 +41,9 @@ CODEMOD_IDS = [codemod.id() for codemod in DEFAULT_CODEMODS]
 CODEMOD_NAMES = [codemod.name() for codemod in DEFAULT_CODEMODS]
 
 
+# TODO: codemod registry
+
+
 def match_codemods(codemod_include: list, codemod_exclude: list) -> dict:
     if not codemod_include and not codemod_exclude:
         return {codemod.name(): codemod for codemod in DEFAULT_CODEMODS}

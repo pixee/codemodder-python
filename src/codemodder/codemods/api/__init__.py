@@ -80,8 +80,6 @@ class BaseCodemod(
     BaseTransformer,
     Helpers,
 ):
-    CHANGESET_ALL_FILES: list = []
-
     def report_change(self, original_node):
         line_number = self.lineno_for_node(original_node)
         self.file_context.codemod_changes.append(

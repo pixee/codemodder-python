@@ -10,7 +10,6 @@ class FileContext:
     """
 
     file_path: Path
-    dry_run: bool
     line_exclude: List[int]
     line_include: List[int]
     results_by_id: DefaultDict

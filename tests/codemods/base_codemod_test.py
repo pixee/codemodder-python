@@ -3,6 +3,7 @@ import libcst as cst
 from libcst.codemod import CodemodContext
 from pathlib import Path
 import os
+from collections import defaultdict
 from codemodder.file_context import FileContext
 from codemodder.semgrep import run_on_directory as semgrep_run
 from codemodder.semgrep import find_all_yaml_files
@@ -23,10 +24,9 @@ class BaseCodemodTest:
         input_tree = cst.parse_module(input_code)
         self.file_context = FileContext(
             file_path,
-            False,
             [],
             [],
-            [],
+            defaultdict(list),
         )
         command_instance = self.codemod(CodemodContext(), self.file_context)
         output_tree = command_instance.transform_module(input_tree)
@@ -49,7 +49,6 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         results = all_results[str(file_path)]
         self.file_context = FileContext(
             file_path,
-            False,
             [],
             [],
             results,
