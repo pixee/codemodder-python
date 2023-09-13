@@ -12,13 +12,10 @@ from codemodder.cli import parse_args
 from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.codemods import match_codemods
 from codemodder.context import CodemodExecutionContext, ChangeSet
-from codemodder.dependency_manager import DependencyManager
+from codemodder.dependency_manager import write_dependencies
 from codemodder.report.codetf_reporter import report_default
 from codemodder.semgrep import run as semgrep_run
 from codemodder.sarifs import parse_sarif_files
-
-# Must use from import here to point to latest state
-from codemodder import global_state  # TODO: should not use global state
 
 
 def update_code(file_path, new_code):
@@ -40,8 +37,7 @@ def run_codemods_for_file(
         wrapper = cst.MetadataWrapper(source_tree)
         codemod = codemod_kls(
             CodemodContext(wrapper=wrapper),
-            # TODO: eventually pass execution context here
-            # It will be used for things like dependency management
+            execution_context,
             file_context,
         )
         if not codemod.should_transform:
@@ -140,7 +136,6 @@ def run(argv, original_args) -> int:
         # project directory doesn't exist or can’t be read
         return 1
 
-    global_state.set_directory(Path(argv.directory))
     context = CodemodExecutionContext(Path(argv.directory), argv.dry_run)
 
     codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
@@ -155,7 +150,7 @@ def run(argv, original_args) -> int:
     sarif_results = parse_sarif_files(argv.sarif or [])
 
     # run semgrep and gather the results
-    semgrep_results = semgrep_run(codemods_to_run)
+    semgrep_results = semgrep_run(context, codemods_to_run)
 
     # merge the results
     sarif_results.update(semgrep_results)
@@ -164,7 +159,7 @@ def run(argv, original_args) -> int:
         logger.warning("No sarif results.")
 
     files_to_analyze = match_files(
-        global_state.DIRECTORY, argv.path_exclude, argv.path_include
+        context.directory, argv.path_exclude, argv.path_include
     )
     if not files_to_analyze:
         logger.warning("No files matched.")
@@ -183,7 +178,7 @@ def run(argv, original_args) -> int:
 
     results = compile_results(context, codemods_to_run)
 
-    DependencyManager().write(dry_run=context.dry_run)
+    write_dependencies(context)
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
     report_default(elapsed_ms, argv, original_args, results)

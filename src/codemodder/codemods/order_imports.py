@@ -5,6 +5,7 @@ from codemodder.codemods.base_codemod import (
     ReviewGuidance,
 )
 from codemodder.change import Change
+from codemodder.context import CodemodExecutionContext
 from codemodder.codemods.transformations.clean_imports import (
     GatherTopLevelImportBlocks,
     OrderImportsBlocksTransform,
@@ -12,7 +13,6 @@ from codemodder.codemods.transformations.clean_imports import (
 from codemodder.file_context import FileContext
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
-import codemodder.global_state
 
 
 class OrderImports(BaseCodemod, Codemod):
@@ -26,9 +26,14 @@ class OrderImports(BaseCodemod, Codemod):
 
     METADATA_DEPENDENCIES = (PositionProvider,)
 
-    def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
+    def __init__(
+        self,
+        codemod_context: CodemodContext,
+        execution_context: CodemodExecutionContext,
+        file_context: FileContext,
+    ):
         Codemod.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, file_context)
+        BaseCodemod.__init__(self, execution_context, file_context)
         self.line_exclude = file_context.line_exclude
         self.line_include = file_context.line_include
 
@@ -45,7 +50,7 @@ class OrderImports(BaseCodemod, Codemod):
                 filtered_blocks.append(block)
         if filtered_blocks:
             order_transformer = OrderImportsBlocksTransform(
-                codemodder.global_state.DIRECTORY, filtered_blocks
+                self.execution_context.directory, filtered_blocks
             )
             result_tree = tree.visit(order_transformer)
 

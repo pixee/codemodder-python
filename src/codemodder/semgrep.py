@@ -5,7 +5,7 @@ from importlib.resources import files
 from tempfile import NamedTemporaryFile
 from typing import List
 from pathlib import Path
-from codemodder import global_state
+from codemodder.context import CodemodExecutionContext
 from codemodder.sarifs import results_by_path_and_rule_id
 from codemodder.logging import logger
 
@@ -40,11 +40,11 @@ def run_on_directory(yaml_files: List[Path], directory: Path):
         return results
 
 
-def run(codemods: dict) -> dict:
+def run(execution_context: CodemodExecutionContext, codemods: dict) -> dict:
     semgrep_codemods = only_semgrep(codemods)
     if semgrep_codemods:
         return run_on_directory(
-            find_all_yaml_files(semgrep_codemods), Path(global_state.DIRECTORY)
+            find_all_yaml_files(semgrep_codemods), execution_context.directory
         )
     return {}
 

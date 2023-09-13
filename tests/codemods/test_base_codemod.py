@@ -3,6 +3,7 @@ from typing import DefaultDict
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
 import pytest
+import mock
 from codemodder.codemods.base_codemod import (
     SemgrepCodemod,
     CodemodMetadata,
@@ -19,9 +20,9 @@ class DoNothingCodemod(SemgrepCodemod, Codemod):
     SUMMARY = "An identity codemod for testing purposes."
     YAML_FILES = []
 
-    def __init__(self, context: CodemodContext, results_by_id):
+    def __init__(self, context: CodemodContext, *args):
         Codemod.__init__(self, context)
-        SemgrepCodemod.__init__(self, results_by_id)
+        SemgrepCodemod.__init__(self, *args)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         return tree
@@ -32,7 +33,9 @@ class TestEmptyResults:
 
     def run_and_assert(self, input_code, expexted_output):
         input_tree = cst.parse_module(input_code)
-        command_instance = DoNothingCodemod(CodemodContext(), self.RESULTS_BY_ID)
+        command_instance = DoNothingCodemod(
+            CodemodContext(), mock.MagicMock(), self.RESULTS_BY_ID
+        )
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == expexted_output

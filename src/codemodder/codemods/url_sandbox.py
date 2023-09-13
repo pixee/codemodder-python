@@ -7,7 +7,6 @@ from codemodder.codemods.utils import ReplaceNodes
 from codemodder.file_context import FileContext
 
 from libcst.codemod.visitors import AddImportsVisitor, ImportItem
-from codemodder.dependency_manager import DependencyManager
 from codemodder.change import Change
 from codemodder.codemods.base_codemod import (
     SemgrepCodemod,
@@ -39,9 +38,9 @@ class UrlSandbox(SemgrepCodemod, Codemod):
 
     METADATA_DEPENDENCIES = (PositionProvider, ScopeProvider)
 
-    def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
+    def __init__(self, codemod_context: CodemodContext, *args):
         Codemod.__init__(self, codemod_context)
-        SemgrepCodemod.__init__(self, file_context)
+        SemgrepCodemod.__init__(self, *args)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         # we first gather all the nodes we want to change together with their replacements
@@ -54,7 +53,7 @@ class UrlSandbox(SemgrepCodemod, Codemod):
                 find_requests_visitor.changes_in_file
             )
             new_tree = tree.visit(ReplaceNodes(find_requests_visitor.nodes_to_change))
-            DependencyManager().add(["security==1.0.1"])
+            self.execution_context.add_dependency("security==1.0.1")
             # if it finds any request.get(...), try to remove the imports
             if any(
                 (

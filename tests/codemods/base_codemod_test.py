@@ -4,6 +4,7 @@ from libcst.codemod import CodemodContext
 from pathlib import Path
 import os
 from collections import defaultdict
+from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from codemodder.semgrep import run_on_directory as semgrep_run
 from codemodder.semgrep import find_all_yaml_files
@@ -20,15 +21,20 @@ class BaseCodemodTest:
         tmp_file_path = tmpdir / "code.py"
         self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)
 
-    def run_and_assert_filepath(self, _, file_path, input_code, expected):
+    def run_and_assert_filepath(self, root, file_path, input_code, expected):
         input_tree = cst.parse_module(input_code)
+        self.execution_context = CodemodExecutionContext(directory=root, dry_run=True)
         self.file_context = FileContext(
             file_path,
             [],
             [],
             defaultdict(list),
         )
-        command_instance = self.codemod(CodemodContext(), self.file_context)
+        command_instance = self.codemod(
+            CodemodContext(),
+            self.execution_context,
+            self.file_context,
+        )
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == expected
@@ -47,13 +53,18 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         input_tree = cst.parse_module(input_code)
         all_results = self.results_by_id_filepath(input_code, root, file_path)
         results = all_results[str(file_path)]
+        self.execution_context = CodemodExecutionContext(directory=root, dry_run=True)
         self.file_context = FileContext(
             file_path,
             [],
             [],
             results,
         )
-        command_instance = self.codemod(CodemodContext(), self.file_context)
+        command_instance = self.codemod(
+            CodemodContext(),
+            self.execution_context,
+            self.file_context,
+        )
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == expected

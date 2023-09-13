@@ -3,6 +3,7 @@ from enum import Enum
 import itertools
 from typing import List, ClassVar
 
+from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from codemodder.semgrep import rule_ids_from_yaml_files
 
@@ -26,6 +27,7 @@ class BaseCodemod:
     SUMMARY: ClassVar[str] = NotImplemented
     IS_SEMGREP = False
 
+    execution_context: CodemodExecutionContext
     file_context: FileContext
 
     def __init_subclass__(cls, **kwargs):
@@ -47,7 +49,8 @@ class BaseCodemod:
             if not v:
                 raise NotImplementedError(f"METADATA.{k} should not be None or empty")
 
-    def __init__(self, file_context):
+    def __init__(self, execution_context: CodemodExecutionContext, file_context):
+        self.execution_context = execution_context
         self.file_context = file_context
 
     @classmethod

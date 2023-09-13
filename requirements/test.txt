@@ -4,5 +4,6 @@ mock==5.1.*
 pre-commit<4
 pytest==7.4.*
 pytest-cov~=4.1.0
+pytest-mock~=3.11.0
 pytest-xdist==3.*
 types-mock==5.1.*
