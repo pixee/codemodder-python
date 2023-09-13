@@ -11,29 +11,14 @@ from codemodder.logging import logger
 from codemodder.cli import parse_args
 from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.codemods import match_codemods
-from codemodder.codemods.change import Change
+from codemodder.context import CodemodExecutionContext, ChangeSet
 from codemodder.dependency_manager import DependencyManager
 from codemodder.report.codetf_reporter import report_default
 from codemodder.semgrep import run as semgrep_run
 from codemodder.sarifs import parse_sarif_files
 
 # Must use from import here to point to latest state
-from codemodder import global_state
-
-RESULTS_BY_CODEMOD = []
-from dataclasses import dataclass
-
-
-@dataclass
-class ChangeSet:
-    """A set of changes made to a file at `path`"""
-
-    path: str
-    diff: str
-    changes: list[Change]
-
-    def to_json(self):
-        return {"path": self.path, "diff": self.diff, "changes": self.changes}
+from codemodder import global_state  # TODO: should not use global state
 
 
 def update_code(file_path, new_code):
@@ -46,6 +31,7 @@ def update_code(file_path, new_code):
 
 
 def run_codemods_for_file(
+    execution_context: CodemodExecutionContext,
     file_context,
     codemods_to_run,
     source_tree,
@@ -54,6 +40,8 @@ def run_codemods_for_file(
         wrapper = cst.MetadataWrapper(source_tree)
         codemod = codemod_kls(
             CodemodContext(wrapper=wrapper),
+            # TODO: eventually pass execution context here
+            # It will be used for things like dependency management
             file_context,
         )
         if not codemod.should_transform:
@@ -61,6 +49,7 @@ def run_codemods_for_file(
 
         logger.info("Running codemod %s for %s", name, file_context.file_path)
         output_tree = codemod.transform_module(source_tree)
+        # TODO: there has got to be a more efficient way to check this?
         changed_file = not output_tree.deep_equals(source_tree)
 
         if changed_file:
@@ -72,21 +61,21 @@ def run_codemods_for_file(
             logger.debug("CHANGED %s with codemod %s", file_context.file_path, name)
             logger.debug(diff)
 
-            codemod_kls.CHANGESET_ALL_FILES.append(
-                ChangeSet(
-                    # TODO: we should not be using global state here
-                    str(file_context.file_path.relative_to(global_state.DIRECTORY)),
-                    diff,
-                    changes=file_context.codemod_changes,
-                ).to_json()
+            change_set = ChangeSet(
+                str(file_context.file_path.relative_to(execution_context.directory)),
+                diff,
+                changes=file_context.codemod_changes,
             )
-            if file_context.dry_run:
+            execution_context.add_result(name, change_set)
+
+            if execution_context.dry_run:
                 logger.info("Dry run, not changing files")
             else:
                 update_code(file_context.file_path, output_tree.code)
 
 
 def analyze_files(
+    execution_context: CodemodExecutionContext,
     files_to_analyze,
     codemods_to_run,
     sarif,
@@ -109,34 +98,39 @@ def analyze_files(
 
         file_context = FileContext(
             file_path,
-            cli_args.dry_run,
             line_exclude,
             line_include,
             sarif_for_file,
         )
 
         run_codemods_for_file(
+            execution_context,
             file_context,
             codemods_to_run,
             source_tree,
         )
 
 
-def compile_results(codemods):
+def compile_results(execution_context: CodemodExecutionContext, codemods):
+    results = []
     for name, codemod_kls in codemods.items():
-        if not codemod_kls.CHANGESET_ALL_FILES:
+        if not (changeset := execution_context.results_by_codemod.get(name)):
             continue
+
         data = {
+            # TODO: this prefix should not be hardcoded
             "codemod": f"pixee:python/{name}",
             "summary": codemod_kls.SUMMARY,
             "description": codemod_kls.METADATA.DESCRIPTION,
             "references": [],
             "properties": {},
             "failedFiles": [],
-            "changeset": codemod_kls.CHANGESET_ALL_FILES,
+            "changeset": [change.to_json() for change in changeset],
         }
 
-        RESULTS_BY_CODEMOD.append(data)
+        results.append(data)
+
+    return results
 
 
 def run(argv, original_args) -> int:
@@ -147,6 +141,7 @@ def run(argv, original_args) -> int:
         return 1
 
     global_state.set_directory(Path(argv.directory))
+    context = CodemodExecutionContext(Path(argv.directory), argv.dry_run)
 
     codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
     if not codemods_to_run:
@@ -179,18 +174,19 @@ def run(argv, original_args) -> int:
     logger.debug("Matched files:\n%s", "\n".join(full_names))
 
     analyze_files(
+        context,
         files_to_analyze,
         codemods_to_run,
         sarif_results,
         argv,
     )
 
-    compile_results(codemods_to_run)
+    results = compile_results(context, codemods_to_run)
 
-    DependencyManager().write(dry_run=argv.dry_run)
+    DependencyManager().write(dry_run=context.dry_run)
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
-    report_default(elapsed_ms, argv, original_args, RESULTS_BY_CODEMOD)
+    report_default(elapsed_ms, argv, original_args, results)
     return 0
 
 

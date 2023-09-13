@@ -2,6 +2,8 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 import itertools
 from typing import List, ClassVar
+
+from codemodder.file_context import FileContext
 from codemodder.semgrep import rule_ids_from_yaml_files
 
 
@@ -24,11 +26,10 @@ class BaseCodemod:
     SUMMARY: ClassVar[str] = NotImplemented
     IS_SEMGREP = False
 
+    file_context: FileContext
+
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        # TODO: this should not belong to codemod classes
-        # Instead it should be owned by a global context that gets passed in
-        cls.CHANGESET_ALL_FILES: list = []
 
         if "codemodder.codemods.base_codemod.SemgrepCodemod" in str(cls):
             # hack: SemgrepCodemod won't NotImplementedError but all other child
@@ -86,11 +87,11 @@ class SemgrepCodemod(BaseCodemod):
 
         cls.RULE_IDS = rule_ids_from_yaml_files(cls.YAML_FILES)
 
-    def __init__(self, file_context):
-        super().__init__(file_context)
+    def __init__(self, *args):
+        super().__init__(*args)
         self._results = list(
             itertools.chain.from_iterable(
-                map(lambda rId: file_context.results_by_id[rId], self.RULE_IDS)
+                map(lambda rId: self.file_context.results_by_id[rId], self.RULE_IDS)
             )
         )
 
