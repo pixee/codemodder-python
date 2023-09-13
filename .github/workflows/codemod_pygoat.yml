@@ -28,6 +28,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Install Codemodder Package
         run: pip install .
+      - name: Install Test Dependencies
+        run: pip install -r requirements/test.txt
       - name: Check out Pygoat
         uses: actions/checkout@v4
         with:
@@ -35,3 +37,5 @@ jobs:
           path: pygoat
       - name: Run Codemodder
         run: codemodder --output output.codetf pygoat
+      - name: Check PyGoat Findings
+        run: pytest -v ci_tests/test_webgoat_findings.py
