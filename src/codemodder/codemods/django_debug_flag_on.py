@@ -49,12 +49,9 @@ class DebugFlagTransformer(BaseTransformer):
     def __init__(
         self, codemod_context: CodemodContext, file_context: FileContext, results
     ):
-        super().__init__(
-            codemod_context,
-            results,
-            file_context.line_exclude,
-            file_context.line_include,
-        )
+        super().__init__(codemod_context, results)
+        self.line_exclude = file_context.line_exclude
+        self.line_include = file_context.line_include
         self.changes_in_file: List[Change] = []
 
     def leave_Assign(

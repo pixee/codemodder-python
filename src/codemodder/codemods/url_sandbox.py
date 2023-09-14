@@ -78,12 +78,9 @@ class FindRequestCallsAndImports(BaseVisitor):
     def __init__(
         self, codemod_context: CodemodContext, file_context: FileContext, results
     ):
-        super().__init__(
-            codemod_context,
-            results,
-            file_context.line_exclude,
-            file_context.line_include,
-        )
+        super().__init__(codemod_context, results)
+        self.line_exclude = file_context.line_exclude
+        self.line_include = file_context.line_include
         self.nodes_to_change: dict[
             cst.CSTNode, Union[cst.CSTNode, cst.FlattenSentinel, cst.RemovalSentinel]
         ] = {}

@@ -10,9 +10,9 @@ class DeleteStatementLinesCodemod(BaseTransformer):
     METADATA_DEPENDENCIES = (PositionProvider,)
 
     def __init__(self, context, results, line_exclude=None, line_include=None):
-        BaseTransformer.__init__(
-            self, context, [], line_exclude or [], line_include or []
-        )
+        BaseTransformer.__init__(self, context, results)
+        self.line_exclude = line_exclude or []
+        self.line_include = line_include or []
 
     def filter_by_result(self, pos_to_match):
         return True
