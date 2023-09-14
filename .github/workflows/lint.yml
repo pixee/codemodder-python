@@ -33,7 +33,7 @@ jobs:
       - name: Black Format Check
         run: black --check .
       - name: Run pylint
-        run: pylint codemodder/ tests/ integration_tests/ -v
+        run: make lint
 
   complexity:
     name: Code Complexity
@@ -50,10 +50,8 @@ jobs:
         run: |
           pip install -r requirements/complexity.txt
       - name: Run Radon
-        run: |
-          radon cc codemodder --min A --total-average
+        run: make radon
       - name: Run Xenon
-        run: |
-          # threshold for pipeline to fail if we go below average, module, or block complexity
-          # https://github.com/rubik/xenon
-          xenon codemodder --max-average A --max-modules C --max-absolute C
+        # threshold for pipeline to fail if we go below average, module, or block complexity
+        # https://github.com/rubik/xenon
+        run: make xenon
