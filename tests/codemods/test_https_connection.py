@@ -60,3 +60,15 @@ pool.HTTPSConnectionPool("localhost", "80")
 """
         self.run_and_assert(tmpdir, before, after)
         assert len(self.file_context.codemod_changes) == 1
+
+    def test_last_arg(self, tmpdir):
+        before = r"""import urllib3
+
+urllib3.HTTPConnectionPool(None, None, None, None, None, None, None, None, None, None)
+"""
+        after = r"""import urllib3
+
+urllib3.HTTPSConnectionPool(None, None, None, None, None, None, None, None, None, _proxy_config = None)
+"""
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.file_context.codemod_changes) == 1
