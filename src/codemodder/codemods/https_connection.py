@@ -118,7 +118,7 @@ def match_line(pos, line):
     return pos.start.line == line and pos.end.line == line
 
 
-def count_positional_args(arglist: Sequence[cst.Arg]) -> int | None:
+def count_positional_args(arglist: Sequence[cst.Arg]) -> int:
     for i, arg in enumerate(arglist):
         if arg.keyword:
             return i
