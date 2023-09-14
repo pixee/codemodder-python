@@ -23,3 +23,7 @@ codemodder = "codemodder.__main__:main"
 
 [tool.setuptools.package-data]
 "codemodder.codemods.semgrep" = ["src/codemodder/codemods/semgrep/*.yaml"]
+
+[tool.pytest.ini_options]
+# Ignore integration tests and ci tests by default
+testpaths = ["tests"]
