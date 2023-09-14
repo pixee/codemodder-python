@@ -1,7 +1,7 @@
 from pathlib import Path
 from dataclasses import dataclass
 
-from codemodder.codemods.change import Change
+from codemodder.change import Change
 
 
 @dataclass

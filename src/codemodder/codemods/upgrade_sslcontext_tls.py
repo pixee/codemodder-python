@@ -6,7 +6,7 @@ from codemodder.codemods.base_codemod import (
     CodemodMetadata,
     ReviewGuidance,
 )
-from codemodder.codemods.change import Change
+from codemodder.change import Change
 from codemodder.file_context import FileContext
 
 

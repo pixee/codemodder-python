@@ -5,7 +5,7 @@ from codemodder.codemods.base_codemod import (
     CodemodMetadata,
     ReviewGuidance,
 )
-from codemodder.codemods.change import Change
+from codemodder.change import Change
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsTransformer,
 )
