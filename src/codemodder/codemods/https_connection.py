@@ -42,8 +42,9 @@ class HTTPSConnection(BaseCodemod, Codemod):
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         visitor = ConnectionPollVisitor(self.context, self.file_context)
+        result_tree = visitor.transform_module(tree)
         self.file_context.codemod_changes.extend(visitor.changes_in_file)
-        return visitor.transform_module(tree)
+        return result_tree
 
 
 class ConnectionPollVisitor(VisitorBasedCodemodCommand, NameResolutionMixin):
