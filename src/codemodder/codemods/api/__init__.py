@@ -15,7 +15,7 @@ from codemodder.codemods.base_codemod import (
 )
 
 from codemodder.codemods.base_visitor import BaseTransformer
-from codemodder.codemods.change import Change
+from codemodder.change import Change
 from codemodder.file_context import FileContext
 from codemodder.semgrep import rule_ids_from_yaml_files
 from .helpers import Helpers

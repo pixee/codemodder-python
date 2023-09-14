@@ -8,7 +8,7 @@ from codemodder.file_context import FileContext
 
 from libcst.codemod.visitors import AddImportsVisitor, ImportItem
 from codemodder.dependency_manager import DependencyManager
-from codemodder.codemods.change import Change
+from codemodder.change import Change
 from codemodder.codemods.base_codemod import (
     SemgrepCodemod,
     CodemodMetadata,

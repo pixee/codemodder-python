@@ -2,8 +2,8 @@ from typing import List
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
 from libcst.metadata import PositionProvider
+from codemodder.change import Change
 from codemodder.codemods.base_visitor import BaseTransformer
-from codemodder.codemods.change import Change
 from codemodder.codemods.base_codemod import (
     SemgrepCodemod,
     CodemodMetadata,
