@@ -1,3 +1,4 @@
+from typing import Sequence
 from libcst import matchers
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from libcst.metadata import (
@@ -70,13 +71,20 @@ class ConnectionPollVisitor(VisitorBasedCodemodCommand, NameResolutionMixin):
                         str(line_number), HTTPSConnection.CHANGE_DESCRIPTION
                     ).to_json()
                 )
-                # TODO last argument _proxy_config needs to be converted into keyword
+                # last argument _proxy_config does not match new method
+                # we convert it to keyword
+                new_args = list(original_node.args)
+                if count_positional_args(original_node.args) == 10:
+                    new_args[9] = new_args[9].with_changes(
+                        keyword=cst.parse_expression("_proxy_config")
+                    )
                 # has a prefix, e.g. a.call() -> a.new_call()
                 if matchers.matches(original_node.func, matchers.Attribute()):
                     return updated_node.with_changes(
+                        args=new_args,
                         func=updated_node.func.with_changes(
                             attr=cst.parse_expression("HTTPSConnectionPool")
-                        )
+                        ),
                     )
                 # it is a simple name, e.g. call() -> module.new_call()
                 AddImportsVisitor.add_needed_import(self.context, "urllib3")
@@ -84,7 +92,8 @@ class ConnectionPollVisitor(VisitorBasedCodemodCommand, NameResolutionMixin):
                     self.context, original_node
                 )
                 return updated_node.with_changes(
-                    func=cst.parse_expression("urllib3.HTTPSConnectionPool")
+                    args=new_args,
+                    func=cst.parse_expression("urllib3.HTTPSConnectionPool"),
                 )
         return updated_node
 
@@ -106,3 +115,10 @@ class ConnectionPollVisitor(VisitorBasedCodemodCommand, NameResolutionMixin):
 
 def match_line(pos, line):
     return pos.start.line == line and pos.end.line == line
+
+
+def count_positional_args(arglist: Sequence[cst.Arg]) -> int | None:
+    for i, arg in enumerate(arglist):
+        if arg.keyword:
+            return i
+    return len(arglist)
