@@ -75,6 +75,14 @@ class BaseCodemod:
     def lineno_for_node(self, node):
         return self.node_position(node).start.line
 
+    @property
+    def line_exclude(self):
+        return self.file_context.line_exclude
+
+    @property
+    def line_include(self):
+        return self.file_context.line_include
+
 
 class SemgrepCodemod(BaseCodemod):
     YAML_FILES: ClassVar[List[str]] = NotImplemented

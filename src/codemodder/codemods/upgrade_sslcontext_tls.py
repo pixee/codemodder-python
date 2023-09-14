@@ -39,13 +39,7 @@ class UpgradeSSLContextTLS(SemgrepCodemod, BaseTransformer):
         file_context: FileContext,
     ):
         SemgrepCodemod.__init__(self, execution_context, file_context)
-        BaseTransformer.__init__(
-            self,
-            codemod_context,
-            self._results,
-            file_context.line_exclude,
-            file_context.line_include,
-        )
+        BaseTransformer.__init__(self, codemod_context, self._results)
 
         # TODO: apply unused import remover
 

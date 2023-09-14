@@ -6,11 +6,9 @@ from libcst.metadata import PositionProvider
 class UtilsMixin:
     METADATA_DEPENDENCIES: Tuple[Any, ...] = (PositionProvider,)
 
-    def __init__(self, context, results, line_exclude=None, line_include=None):
+    def __init__(self, context, results):
         super().__init__(context)
         self.results = results
-        self.line_exclude = line_exclude or []
-        self.line_include = line_include or []
 
     def filter_by_result(self, pos_to_match):
         all_pos = [extract_pos_from_result(result) for result in self.results]

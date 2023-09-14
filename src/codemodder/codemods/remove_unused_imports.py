@@ -6,11 +6,9 @@ from codemodder.codemods.base_codemod import (
     ReviewGuidance,
 )
 from codemodder.change import Change
-from codemodder.context import CodemodExecutionContext
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsTransformer,
 )
-from codemodder.file_context import FileContext
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
 
@@ -26,17 +24,9 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
 
     METADATA_DEPENDENCIES = (PositionProvider, ScopeProvider, QualifiedNameProvider)
 
-    def __init__(
-        self,
-        codemod_context: CodemodContext,
-        execution_context: CodemodExecutionContext,
-        file_context: FileContext,
-    ):
+    def __init__(self, codemod_context: CodemodContext, *codemod_args):
         Codemod.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, execution_context, file_context)
-        # TODO: these should be moved to the base codemod class (as properties)
-        self.line_exclude = file_context.line_exclude
-        self.line_include = file_context.line_include
+        BaseCodemod.__init__(self, *codemod_args)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         gather_unused_visitor = GatherUnusedImportsVisitor(self.context)

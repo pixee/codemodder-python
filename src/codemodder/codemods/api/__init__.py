@@ -108,13 +108,7 @@ class SemgrepCodemod(
         file_context: FileContext,
     ):
         _SemgrepCodemod.__init__(self, execution_context, file_context)
-        BaseTransformer.__init__(
-            self,
-            codemod_context,
-            self._results,
-            file_context.line_exclude,
-            file_context.line_include,
-        )
+        BaseTransformer.__init__(self, codemod_context, self._results)
 
     # TODO: there needs to be a way to generalize this so that it applies
     # more broadly than to just a specific kind of node. There's probably a
