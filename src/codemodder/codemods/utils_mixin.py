@@ -1,3 +1,4 @@
+from typing import Optional, Union
 import libcst as cst
 from libcst import MetadataDependent, matchers
 from libcst.helpers import get_full_name_for_node
@@ -42,7 +43,7 @@ class NameResolutionMixin(MetadataDependent):
 
     def _is_direct_call_from_imported_module(
         self, call: cst.Call
-    ) -> tuple[cst.Import | cst.ImportFrom, cst.ImportAlias] | None:
+    ) -> Optional[tuple[Union[cst.Import, cst.ImportFrom], cst.ImportAlias]]:
         for nodo in iterate_left_expressions(call):
             if matchers.matches(nodo, matchers.Name() | matchers.Attribute()):
                 maybe_assignment = self.find_single_assignment(nodo)
@@ -57,7 +58,8 @@ class NameResolutionMixin(MetadataDependent):
         return None
 
     def find_assignments(
-        self, node: cst.Name | cst.Attribute | cst.Call | cst.Subscript | cst.Decorator
+        self,
+        node: Union[cst.Name, cst.Attribute, cst.Call, cst.Subscript, cst.Decorator],
     ) -> set[Assignment]:
         """
         Given a MetadataWrapper and a CSTNode with a possible access to it, find all the possible assignments that it refers.
@@ -76,8 +78,9 @@ class NameResolutionMixin(MetadataDependent):
         return set()
 
     def find_single_assignment(
-        self, node: cst.Name | cst.Attribute | cst.Call | cst.Subscript | cst.Decorator
-    ) -> Assignment | None:
+        self,
+        node: Union[cst.Name, cst.Attribute, cst.Call, cst.Subscript, cst.Decorator],
+    ) -> Optional[Assignment]:
         """
         Given a MetadataWrapper and a CSTNode representing an access, find if there is a single assignment that it refers to.
         """
@@ -106,7 +109,7 @@ def get_leftmost_expression(node: cst.BaseExpression) -> cst.BaseExpression:
     return node
 
 
-def _get_name(node: cst.Import | cst.ImportFrom) -> str:
+def _get_name(node: Union[cst.Import, cst.ImportFrom]) -> str:
     """
     Get the full name of a module referenced by a Import or ImportFrom node.
     For relative modules, dots are added at the beginning
