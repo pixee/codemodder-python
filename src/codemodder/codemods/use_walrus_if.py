@@ -109,11 +109,33 @@ class UseWalrusIf(SemgrepCodemod, NameResolutionMixin):
 
     def leave_SimpleStatementLine(self, original_node, updated_node):
         """
-        This is a workaround for the fact that libcst doesn't preserve the whitespace in the parent node when all children are removed.
+        Preserves the whitespace and comments in the line when all children are removed.
 
         This feels like a bug in libCST but we'll work around it for now.
         """
         if not updated_node.body:
-            return cst.FlattenSentinel(original_node.leading_lines)
+            trailing_whitespace = (
+                (
+                    original_node.trailing_whitespace.with_changes(
+                        whitespace=cst.SimpleWhitespace(""),
+                    ),
+                )
+                if original_node.trailing_whitespace.comment
+                else ()
+            )
+            # NOTE: The effect of this is to preserve the
+            # whitespace and comments. However, the type expected by
+            # cst.Module.body is Sequence[Union[SimpleStatementLine, BaseCompoundStatement]].
+            # So technically this violates the expected return type since we
+            # are not adding a new SimpleStatementLine but instead just bare
+            # EmptyLine and Comment nodes.
+            # A more correct solution would involve transferring any whitespace
+            # and comments to the subsequent SimpleStatementLine (which
+            # contains the If statement), but this would require a lot more
+            # state management to fit within the visitor pattern. We should
+            # revisit this at some point later.
+            return cst.FlattenSentinel(
+                original_node.leading_lines + trailing_whitespace
+            )
 
         return updated_node
