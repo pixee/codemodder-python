@@ -28,7 +28,7 @@ class BaseCodemod:
     # Implementation borrowed from https://stackoverflow.com/a/45250114
     METADATA: ClassVar[CodemodMetadata] = NotImplemented
     SUMMARY: ClassVar[str] = NotImplemented
-    IS_SEMGREP = False
+    is_semgrep = False
 
     execution_context: CodemodExecutionContext
     file_context: FileContext
@@ -101,7 +101,7 @@ class BaseCodemod:
 
 class SemgrepCodemod(BaseCodemod):
     YAML_FILES: ClassVar[List[str]] = NotImplemented
-    IS_SEMGREP = True
+    is_semgrep = True
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)

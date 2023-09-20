@@ -1,4 +1,4 @@
-from codemodder.codemods.django_debug_flag_on import DjangoDebugFlagOn
+from core_codemods.django_debug_flag_on import DjangoDebugFlagOn
 from tests.codemods.base_codemod_test import BaseDjangoCodemodTest
 
 

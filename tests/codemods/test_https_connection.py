@@ -1,5 +1,5 @@
 from tests.codemods.base_codemod_test import BaseCodemodTest
-from codemodder.codemods.https_connection import HTTPSConnection
+from core_codemods.https_connection import HTTPSConnection
 
 
 class TestHTTPSConnection(BaseCodemodTest):

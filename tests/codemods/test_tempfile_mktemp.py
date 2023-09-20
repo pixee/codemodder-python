@@ -1,5 +1,5 @@
 import pytest
-from codemodder.codemods.tempfile_mktemp import TempfileMktemp
+from core_codemods.tempfile_mktemp import TempfileMktemp
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 

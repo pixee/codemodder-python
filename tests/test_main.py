@@ -2,8 +2,7 @@ import mock
 import pytest
 from codemodder.__main__ import run
 from codemodder.semgrep import run as semgrep_run
-from codemodder.cli import parse_args
-from codemodder.codemods import CODEMOD_NAMES
+from codemodder.registry import load_registered_codemods
 
 
 class TestRun:
@@ -18,7 +17,7 @@ class TestRun:
             "--path-exclude",
             "*py",
         ]
-        res = run(parse_args(args), args)
+        res = run(args)
         assert res == 0
 
         warning_log.assert_called()
@@ -35,7 +34,7 @@ class TestRun:
             "here.txt",
         ]
 
-        res = run(parse_args(args), args)
+        res = run(args)
 
         assert res == 0
         mock_parse.assert_called()
@@ -58,7 +57,7 @@ class TestRun:
             "--dry-run",
         ]
 
-        res = run(parse_args(args), args)
+        res = run(args)
         assert res == 0
 
         info_log.assert_called()
@@ -82,7 +81,7 @@ class TestRun:
         if dry_run:
             args += ["--dry-run"]
 
-        res = run(parse_args(args), args)
+        res = run(args)
         assert res == 0
 
         mock_reporting.assert_called_once()
@@ -96,7 +95,8 @@ class TestRun:
 
     @mock.patch("codemodder.__main__.semgrep_run")
     def test_no_codemods_to_run(self, mock_semgrep_run):
-        names = ",".join(CODEMOD_NAMES)
+        registry = load_registered_codemods()
+        names = ",".join(registry.names)
         args = [
             "tests/samples/",
             "--output",
@@ -104,7 +104,7 @@ class TestRun:
             f"--codemod-exclude={names}",
         ]
 
-        exit_code = run(parse_args(args), args)
+        exit_code = run(args)
         assert exit_code == 0
         mock_semgrep_run.assert_not_called()
 
@@ -118,7 +118,7 @@ class TestRun:
             f"--codemod-include={codemod}",
         ]
 
-        exit_code = run(parse_args(args), args)
+        exit_code = run(args)
         assert exit_code == 0
         mock_compile_results.assert_called()
 
@@ -134,7 +134,7 @@ class TestExitCode:
             "*request.py",
         ]
 
-        exit_code = run(parse_args(args), args)
+        exit_code = run(args)
         assert exit_code == 0
 
     def test_bad_project_dir_1(self):
@@ -145,7 +145,7 @@ class TestExitCode:
             "--codemod-include=url-sandbox",
         ]
 
-        exit_code = run(parse_args(args), args)
+        exit_code = run(args)
         assert exit_code == 1
 
     def test_conflicting_include_exclude(self):
@@ -159,7 +159,7 @@ class TestExitCode:
             "secure-random",
         ]
         with pytest.raises(SystemExit) as err:
-            run(parse_args(args), args)
+            run(args)
         assert err.value.args[0] == 3
 
     def test_bad_codemod_name(self):
@@ -171,5 +171,5 @@ class TestExitCode:
             f"--codemod-include={bad_codemod}",
         ]
         with pytest.raises(SystemExit) as err:
-            run(parse_args(args), args)
+            run(args)
         assert err.value.args[0] == 3

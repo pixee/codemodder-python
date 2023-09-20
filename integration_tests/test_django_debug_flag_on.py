@@ -1,4 +1,4 @@
-from codemodder.codemods.django_debug_flag_on import DjangoDebugFlagOn
+from core_codemods.django_debug_flag_on import DjangoDebugFlagOn
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,

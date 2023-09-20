@@ -1,4 +1,4 @@
-from codemodder.codemods.django_session_cookie_secure_off import (
+from core_codemods.django_session_cookie_secure_off import (
     DjangoSessionCookieSecureOff,
 )
 from integration_tests.base_test import (

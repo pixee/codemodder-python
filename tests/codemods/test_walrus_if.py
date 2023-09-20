@@ -1,6 +1,6 @@
 import pytest
 
-from codemodder.codemods.use_walrus_if import UseWalrusIf
+from core_codemods.use_walrus_if import UseWalrusIf
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 

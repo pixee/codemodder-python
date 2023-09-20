@@ -1,5 +1,5 @@
 import pytest
-from codemodder.codemods.django_session_cookie_secure_off import (
+from core_codemods.django_session_cookie_secure_off import (
     DjangoSessionCookieSecureOff,
 )
 from tests.codemods.base_codemod_test import BaseDjangoCodemodTest

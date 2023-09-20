@@ -1,4 +1,4 @@
-from codemodder.codemods.remove_unused_imports import RemoveUnusedImports
+from core_codemods.remove_unused_imports import RemoveUnusedImports
 from tests.codemods.base_codemod_test import BaseCodemodTest
 
 

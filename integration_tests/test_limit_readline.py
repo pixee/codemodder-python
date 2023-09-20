@@ -1,4 +1,4 @@
-from codemodder.codemods.limit_readline import LimitReadline
+from core_codemods.limit_readline import LimitReadline
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,

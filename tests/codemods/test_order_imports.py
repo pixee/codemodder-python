@@ -1,5 +1,5 @@
 from tests.codemods.base_codemod_test import BaseCodemodTest
-from codemodder.codemods.order_imports import OrderImports
+from core_codemods.order_imports import OrderImports
 
 
 class TestOrderImports(BaseCodemodTest):

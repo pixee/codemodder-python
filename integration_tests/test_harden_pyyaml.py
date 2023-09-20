@@ -1,4 +1,4 @@
-from codemodder.codemods.harden_pyyaml import HardenPyyaml
+from core_codemods.harden_pyyaml import HardenPyyaml
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,

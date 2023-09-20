@@ -1,5 +1,5 @@
 import pytest
-from codemodder.codemods.url_sandbox import UrlSandbox
+from core_codemods.url_sandbox import UrlSandbox
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 

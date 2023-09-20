@@ -1,5 +1,5 @@
 import pytest
-from codemodder.codemods.secure_random import SecureRandom
+from core_codemods.secure_random import SecureRandom
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 

@@ -1,4 +1,4 @@
-from codemodder.codemods.https_connection import HTTPSConnection
+from core_codemods.https_connection import HTTPSConnection
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,

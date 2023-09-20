@@ -1,4 +1,4 @@
-from codemodder.codemods.limit_readline import LimitReadline
+from core_codemods.limit_readline import LimitReadline
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 

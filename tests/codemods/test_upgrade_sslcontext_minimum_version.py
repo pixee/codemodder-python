@@ -1,5 +1,5 @@
 import pytest
-from codemodder.codemods.upgrade_sslcontext_minimum_version import (
+from core_codemods.upgrade_sslcontext_minimum_version import (
     UpgradeSSLContextMinimumVersion,
 )
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest

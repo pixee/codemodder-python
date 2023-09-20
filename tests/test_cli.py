@@ -1,16 +1,20 @@
 import mock
 import pytest
+
 from codemodder.cli import parse_args
 from codemodder import __VERSION__
-
-from codemodder.codemods import CODEMOD_IDS
+from codemodder.registry import load_registered_codemods
 
 
 class TestParseArgs:
+    @classmethod
+    def setup_class(cls):
+        cls.registry = load_registered_codemods()
+
     @mock.patch("codemodder.cli.logger.error")
-    def test_no_args(self, error_logger):
+    def test_no_args(self, error_logger, mocker):
         with pytest.raises(SystemExit) as err:
-            parse_args([])
+            parse_args([], mocker.MagicMock())
         assert err.value.args[0] == 3
         error_logger.assert_called()
         assert error_logger.call_args_list[0][0] == (
@@ -34,7 +38,7 @@ class TestParseArgs:
     @mock.patch("argparse.ArgumentParser.print_help")
     def test_help_is_printed(self, mock_print_help, cli_args):
         with pytest.raises(SystemExit) as err:
-            parse_args(cli_args)
+            parse_args(cli_args, self.registry)
 
         mock_print_help.assert_called()
         assert err.value.args[0] == 0
@@ -55,7 +59,7 @@ class TestParseArgs:
     @mock.patch("argparse.ArgumentParser._print_message")
     def test_version_is_printed(self, mock_print_msg, cli_args):
         with pytest.raises(SystemExit) as err:
-            parse_args(cli_args)
+            parse_args(cli_args, self.registry)
 
         assert mock_print_msg.call_args_list[0][0][0].strip() == __VERSION__
         assert err.value.args[0] == 0
@@ -75,12 +79,12 @@ class TestParseArgs:
     @mock.patch("builtins.print")
     def test_list_prints_codemod_metadata(self, mock_print, cli_args):
         with pytest.raises(SystemExit) as err:
-            parse_args(cli_args)
+            parse_args(cli_args, self.registry)
 
-        assert len(mock_print.call_args_list) == len(CODEMOD_IDS)
+        assert len(mock_print.call_args_list) == len(self.registry.codemods)
 
         printed_names = [call[0][0] for call in mock_print.call_args_list]
-        assert sorted(CODEMOD_IDS) == sorted(printed_names)
+        assert sorted(self.registry.ids) == sorted(printed_names)
 
         assert err.value.args[0] == 0
 
@@ -94,7 +98,8 @@ class TestParseArgs:
                     "here.txt",
                     "--output-format",
                     "hello",
-                ]
+                ],
+                self.registry,
             )
         assert err.value.args[0] == 3
         error_logger.assert_called()
@@ -114,7 +119,8 @@ class TestParseArgs:
                     "--codemod=url-sandbox",
                     "--path-exclude",
                     "*request.py",
-                ]
+                ],
+                self.registry,
             )
         assert err.value.args[0] == 3
         error_logger.assert_called()
@@ -131,5 +137,6 @@ class TestParseArgs:
                 "--output",
                 "here.txt",
                 f"--codemod-include={codemod}",
-            ]
+            ],
+            self.registry,
         )

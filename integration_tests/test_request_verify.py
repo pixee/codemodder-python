@@ -1,4 +1,4 @@
-from codemodder.codemods.requests_verify import RequestsVerify
+from core_codemods.requests_verify import RequestsVerify
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,

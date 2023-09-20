@@ -1,5 +1,5 @@
 import pytest
-from codemodder.codemods.requests_verify import RequestsVerify
+from core_codemods.requests_verify import RequestsVerify
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 REQUEST_FUNCS = ["get", "post", "request"]

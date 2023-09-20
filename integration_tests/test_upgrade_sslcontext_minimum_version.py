@@ -1,4 +1,4 @@
-from codemodder.codemods.upgrade_sslcontext_minimum_version import (
+from core_codemods.upgrade_sslcontext_minimum_version import (
     UpgradeSSLContextMinimumVersion,
 )
 from integration_tests.base_test import (

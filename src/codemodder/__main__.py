@@ -2,25 +2,20 @@ import datetime
 import difflib
 import os
 import sys
-from importlib.resources import files
-
 from pathlib import Path
 import libcst as cst
 from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
 
+from codemodder import registry
 from codemodder.logging import logger
 from codemodder.cli import parse_args
 from codemodder.code_directory import file_line_patterns, match_files
-from codemodder.codemods import match_codemods
 from codemodder.context import CodemodExecutionContext, ChangeSet
 from codemodder.dependency_manager import write_dependencies
 from codemodder.report.codetf_reporter import report_default
 from codemodder.semgrep import run as semgrep_run
 from codemodder.sarifs import parse_sarif_files
-
-
-CODEMODDER_DOCS_MODULE = files("codemodder.codemods.docs")
 
 
 def update_code(file_path, new_code):
@@ -112,33 +107,16 @@ def analyze_files(
         )
 
 
-# TODO: this logic should eventually belong to CodemodRegistry
-def load_codemod_description(name) -> str:
-    """
-    Load the description of the codemod from the docs module.
-    """
-    # TODO: this prefix should not be hardcoded
-    filename = f"pixee_python_{name}.md"
-    return CODEMODDER_DOCS_MODULE.joinpath(filename).read_text()
-
-
 def compile_results(execution_context: CodemodExecutionContext, codemods):
     results = []
-    for name, codemod_kls in codemods.items():
+    for name, codemod in codemods.items():
         if not (changeset := execution_context.results_by_codemod.get(name)):
             continue
 
-        try:
-            description = load_codemod_description(name)
-        except FileNotFoundError:
-            logger.warning("No docs found for codemod %s", name)
-            description = codemod_kls.METADATA.DESCRIPTION
-
         data = {
-            # TODO: this prefix should not be hardcoded
-            "codemod": f"pixee:python/{name}",
-            "summary": codemod_kls.SUMMARY,
-            "description": description,
+            "codemod": codemod.id,
+            "summary": codemod.summary,
+            "description": codemod.description,
             "references": [],
             "properties": {},
             "failedFiles": [],
@@ -150,16 +128,26 @@ def compile_results(execution_context: CodemodExecutionContext, codemods):
     return results
 
 
-def run(argv, original_args) -> int:
+def run(original_args) -> int:
     start = datetime.datetime.now()
 
+    codemod_registry = registry.load_registered_codemods()
+
+    # A little awkward, but we need the codemod registry in order to validate potential arguments
+    argv = parse_args(original_args, codemod_registry)
     if not os.path.exists(argv.directory):
         # project directory doesn't exist or can’t be read
         return 1
 
-    context = CodemodExecutionContext(Path(argv.directory), argv.dry_run)
+    context = CodemodExecutionContext(
+        Path(argv.directory),
+        argv.dry_run,
+        codemod_registry,
+    )
 
-    codemods_to_run = match_codemods(argv.codemod_include, argv.codemod_exclude)
+    codemods_to_run = codemod_registry.match_codemods(
+        argv.codemod_include, argv.codemod_exclude
+    )
     if not codemods_to_run:
         # We only currently have semgrep codemods so don't go on if no codemods matched.
         logger.warning("No codemods to run")
@@ -211,7 +199,7 @@ def main():
     # Maybe it has something to do with the invocation as python -m codemodder.
     # But I think we should deprecate that interface which should simplify this.
     sys_argv = sys.argv[1:]
-    sys.exit(run(parse_args(sys_argv), sys_argv))
+    sys.exit(run(sys_argv))
 
 
 if __name__ == "__main__":
