@@ -19,7 +19,7 @@ class ListAction(argparse.Action):
     """ """
 
     def _print_codemods(self):
-        for codemod in DEFAULT_CODEMODS:
+        for codemod in sorted(DEFAULT_CODEMODS, key=lambda x: x.id()):
             print(codemod.id())
 
     def __call__(self, parser, *args, **kwargs):
