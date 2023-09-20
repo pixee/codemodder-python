@@ -106,3 +106,14 @@ class UseWalrusIf(SemgrepCodemod, NameResolutionMixin):
                 return cst.RemoveFromParent()
 
         return original_node
+
+    def leave_SimpleStatementLine(self, original_node, updated_node):
+        """
+        This is a workaround for the fact that libcst doesn't preserve the whitespace in the parent node when all children are removed.
+
+        This feels like a bug in libCST but we'll work around it for now.
+        """
+        if not updated_node.body:
+            return cst.FlattenSentinel(original_node.leading_lines)
+
+        return updated_node

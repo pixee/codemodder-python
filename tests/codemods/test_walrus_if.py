@@ -50,10 +50,10 @@ foo = hello()
 if foo == "bar":
     whatever(foo)
 """
-        # TODO: not sure why libcst isn't preserving empty lines
         expected_output = """
 if (val := do_something()) is not None:
     do_something_else(val)
+
 if (foo := hello()) == "bar":
     whatever(foo)
 """
