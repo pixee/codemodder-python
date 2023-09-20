@@ -1,4 +1,4 @@
-from codemodder.codemods.tempfile_mktemp import TempfileMktemp
+from core_codemods.tempfile_mktemp import TempfileMktemp
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,

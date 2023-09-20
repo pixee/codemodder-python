@@ -1,4 +1,4 @@
-from codemodder.codemods.fix_mutable_params import FixMutableParams
+from core_codemods.fix_mutable_params import FixMutableParams
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,

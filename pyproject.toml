@@ -20,11 +20,14 @@ dependencies = [
 [project.scripts]
 codemodder = "codemodder.__main__:main"
 
+[project.entry-points.codemods]
+core = "core_codemods:registry"
+
 [tool.setuptools]
 
 [tool.setuptools.package-data]
-"codemodder.codemods.semgrep" = ["src/codemodder/codemods/semgrep/*.yaml"]
-"codemodder.codemods.docs" = ["src/codemodder/codemods/docs/*.md"]
+"core_codemods.semgrep" = ["src/core_codemods/semgrep/*.yaml"]
+"core_codemods.docs" = ["src/core_codemods/docs/*.md"]
 
 [tool.pytest.ini_options]
 # Ignore integration tests and ci tests by default

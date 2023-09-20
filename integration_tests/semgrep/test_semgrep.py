@@ -1,5 +1,6 @@
 from codemodder.semgrep import run as semgrep_run
-from codemodder.codemods import SecureRandom, UrlSandbox
+from codemodder.registry import CodemodCollection, CodemodRegistry
+from core_codemods import SecureRandom, UrlSandbox
 
 
 class TestSemgrep:
@@ -33,8 +34,18 @@ class TestSemgrep:
 
     def test_two_codemods(self, mocker):
         context = mocker.MagicMock(directory="tests/samples")
+
+        collection = CodemodCollection(
+            origin="pixee",
+            codemods=[SecureRandom, UrlSandbox],
+            docs_module="core_codemods.docs",
+            semgrep_config_module="core_codemods.semgrep",
+        )
+        registry = CodemodRegistry()
+        registry.add_codemod_collection(collection)
         results_by_path_and_id = semgrep_run(
-            context, {"secure-random": SecureRandom, "url-sandbox": UrlSandbox}
+            context,
+            registry.match_codemods(),
         )
 
         assert sorted(results_by_path_and_id.keys()) == [

@@ -1,5 +1,5 @@
 import pytest
-from codemodder.codemods.process_creation_sandbox import ProcessSandbox
+from core_codemods.process_creation_sandbox import ProcessSandbox
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 

@@ -2,7 +2,6 @@ import argparse
 import sys
 
 from codemodder import __VERSION__
-from codemodder.codemods import DEFAULT_CODEMODS, CODEMOD_NAMES, CODEMOD_IDS
 from codemodder.logging import logger
 
 
@@ -15,25 +14,28 @@ class ArgumentParser(argparse.ArgumentParser):
         sys.exit(3)
 
 
-class ListAction(argparse.Action):
-    """ """
+def build_list_action(codemod_registry):
+    class ListAction(argparse.Action):
+        """ """
 
-    def _print_codemods(self):
-        for codemod in sorted(DEFAULT_CODEMODS, key=lambda x: x.id()):
-            print(codemod.id())
+        def _print_codemods(self):
+            for codemod_id in sorted(codemod_registry.ids):
+                print(codemod_id)
 
-    def __call__(self, parser, *args, **kwargs):
-        """
-        Print codemod(s) metadata in the following format:
+        def __call__(self, parser, *args, **kwargs):
+            """
+            Print codemod(s) metadata in the following format:
 
-        pixee:python/secure-random
-        pixee:python/url-sandbox
-        ...
+            pixee:python/secure-random
+            pixee:python/url-sandbox
+            ...
 
-        and exit gracefully.
-        """
-        self._print_codemods()
-        parser.exit()
+            and exit gracefully.
+            """
+            self._print_codemods()
+            parser.exit()
+
+    return ListAction
 
 
 class CsvListAction(argparse.Action):
@@ -50,26 +52,34 @@ class CsvListAction(argparse.Action):
         """Basic Action does not validate the items"""
 
 
-class ValidatedCodmods(CsvListAction):
-    """
-    argparse Action to convert "codemod1,codemod2,codemod3" into a list
-    representation and validate against existing codemods
-    """
+def build_codemod_validator(codemod_registry):
+    names = codemod_registry.names
+    ids = codemod_registry.ids
 
-    def validate_items(self, items):
-        potential_names = CODEMOD_IDS + CODEMOD_NAMES
-        unrecognized_codemods = [name for name in items if name not in potential_names]
+    class ValidatedCodmods(CsvListAction):
+        """
+        argparse Action to convert "codemod1,codemod2,codemod3" into a list
+        representation and validate against existing codemods
+        """
 
-        if unrecognized_codemods:
-            args = {
-                "values": unrecognized_codemods,
-                "choices": ", ".join(map(repr, CODEMOD_NAMES)),
-            }
-            msg = "invalid choice(s): %(values)r (choose from %(choices)s)"
-            raise argparse.ArgumentError(self, msg % args)
+        def validate_items(self, items):
+            potential_names = ids + names
+            unrecognized_codemods = [
+                name for name in items if name not in potential_names
+            ]
+
+            if unrecognized_codemods:
+                args = {
+                    "values": unrecognized_codemods,
+                    "choices": ", ".join(map(repr, names)),
+                }
+                msg = "invalid choice(s): %(values)r (choose from %(choices)s)"
+                raise argparse.ArgumentError(self, msg % args)
+
+    return ValidatedCodmods
 
 
-def parse_args(argv):
+def parse_args(argv, codemod_registry):
     """
     Parse CLI arguments according to:
     https://www.notion.so/pixee/Codemodder-CLI-Arguments
@@ -85,21 +95,26 @@ def parse_args(argv):
         required=True,
     )
 
+    codemod_validator = build_codemod_validator(codemod_registry)
+
     codemod_args_group = parser.add_mutually_exclusive_group()
     codemod_args_group.add_argument(
         "--codemod-exclude",
-        action=ValidatedCodmods,
+        action=codemod_validator,
         help="Comma-separated set of codemod ID(s) to exclude",
     )
     codemod_args_group.add_argument(
         "--codemod-include",
-        action=ValidatedCodmods,
+        action=codemod_validator,
         help="Comma-separated set of codemod ID(s) to include",
     )
 
     parser.add_argument("--version", action="version", version=__VERSION__)
     parser.add_argument(
-        "--list", action=ListAction, nargs=0, help="Print codemod(s) metadata"
+        "--list",
+        action=build_list_action(codemod_registry),
+        nargs=0,
+        help="Print codemod(s) metadata",
     )
     parser.add_argument(
         "--output-format",

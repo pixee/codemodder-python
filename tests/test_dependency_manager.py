@@ -1,7 +1,6 @@
 import mock
 from pathlib import Path
 from codemodder.__main__ import run
-from codemodder.cli import parse_args
 from codemodder.semgrep import run as semgrep_run
 from codemodder.dependency_manager import write_dependencies
 
@@ -31,7 +30,7 @@ class TestDependencyManager:
             "here.txt",
             "--codemod-include=secure-random",
         ]
-        res = run(parse_args(args), args)
+        res = run(args)
         assert res == 0
         write_mock.assert_not_called()
 
@@ -44,6 +43,6 @@ class TestDependencyManager:
             "here.txt",
             "--codemod-include=url-sandbox",
         ]
-        res = run(parse_args(args), args)
+        res = run(args)
         assert res == 0
         write_mock.assert_called()

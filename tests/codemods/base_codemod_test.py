@@ -6,9 +6,12 @@ import os
 from collections import defaultdict
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
+from codemodder.registry import CodemodRegistry, CodemodCollection
 from codemodder.semgrep import run_on_directory as semgrep_run
 from codemodder.semgrep import find_all_yaml_files
 from typing import ClassVar
+
+import mock
 
 
 class BaseCodemodTest:
@@ -23,7 +26,11 @@ class BaseCodemodTest:
 
     def run_and_assert_filepath(self, root, file_path, input_code, expected):
         input_tree = cst.parse_module(input_code)
-        self.execution_context = CodemodExecutionContext(directory=root, dry_run=True)
+        self.execution_context = CodemodExecutionContext(
+            directory=root,
+            dry_run=True,
+            registry=mock.MagicMock(),
+        )
         self.file_context = FileContext(
             file_path,
             [],
@@ -41,19 +48,32 @@ class BaseCodemodTest:
 
 
 class BaseSemgrepCodemodTest(BaseCodemodTest):
+    @classmethod
+    def setup_class(cls):
+        collection = CodemodCollection(
+            origin="pixee",
+            codemods=[cls.codemod],
+            docs_module="core_codemods.docs",
+            semgrep_config_module="core_codemods.semgrep",
+        )
+        cls.registry = CodemodRegistry()
+        cls.registry.add_codemod_collection(collection)
+
     def results_by_id_filepath(self, input_code, root, file_path):
         with open(file_path, "w", encoding="utf-8") as tmp_file:
             tmp_file.write(input_code)
 
-        return semgrep_run(
-            find_all_yaml_files({self.codemod.name(): self.codemod}), root
-        )
+        return semgrep_run(find_all_yaml_files(self.registry.match_codemods()), root)
 
     def run_and_assert_filepath(self, root, file_path, input_code, expected):
         input_tree = cst.parse_module(input_code)
         all_results = self.results_by_id_filepath(input_code, root, file_path)
         results = all_results[str(file_path)]
-        self.execution_context = CodemodExecutionContext(directory=root, dry_run=True)
+        self.execution_context = CodemodExecutionContext(
+            directory=root,
+            dry_run=True,
+            registry=mock.MagicMock(),
+        )
         self.file_context = FileContext(
             file_path,
             [],

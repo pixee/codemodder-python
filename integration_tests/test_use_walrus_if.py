@@ -1,4 +1,4 @@
-from codemodder.codemods.use_walrus_if import UseWalrusIf
+from core_codemods.use_walrus_if import UseWalrusIf
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,

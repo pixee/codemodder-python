@@ -2,6 +2,7 @@ from pathlib import Path
 from dataclasses import dataclass
 
 from codemodder.change import Change
+from codemodder.registry import CodemodRegistry
 
 
 @dataclass
@@ -21,12 +22,14 @@ class CodemodExecutionContext:
     dependencies: set[str]
     directory: Path
     dry_run: bool = False
+    registry: CodemodRegistry
 
-    def __init__(self, directory, dry_run):
+    def __init__(self, directory, dry_run, registry: CodemodRegistry):
         self.directory = directory
         self.dry_run = dry_run
         self.dependencies = set()
         self.results_by_codemod = {}
+        self.registry = registry
 
     def add_result(self, codemod_name, change_set):
         self.results_by_codemod.setdefault(codemod_name, []).append(change_set)
