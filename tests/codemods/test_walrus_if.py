@@ -40,6 +40,19 @@ if val := do_something():
 """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
+    def test_walrus_if_preserve_comments(self, tmpdir):
+        input_code = """
+val = do_something() # comment
+if val is not None: # another comment
+    do_something_else(val)
+"""
+        expected_output = """
+# comment
+if (val := do_something()) is not None: # another comment
+    do_something_else(val)
+"""
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
     def test_walrus_if_multiple(self, tmpdir):
         input_code = """
 val = do_something()
