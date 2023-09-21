@@ -18,7 +18,7 @@ class UseWalrusIf(SemgrepCodemod, NameResolutionMixin):
     )
     NAME = "use-walrus-if"
     SUMMARY = (
-        "Replaces multiple expressions involving `if` operator with 'walrus' operator"
+        "Replace multiple expressions involving `if` operator with 'walrus' operator"
     )
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     DESCRIPTION = (

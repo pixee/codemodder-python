@@ -30,7 +30,7 @@ class UrlSandbox(SemgrepCodemod, Codemod):
         NAME="url-sandbox",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
     )
-    SUMMARY = "Ensures that requests are made safely."
+    SUMMARY = "Ensure that requests are made safely."
     CHANGE_DESCRIPTION = "Switch use of requests for security.safe_requests"
     YAML_FILES = [
         "sandbox_url_creation.yaml",

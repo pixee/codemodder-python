@@ -5,7 +5,7 @@ from codemodder.codemods.api import SemgrepCodemod
 class TempfileMktemp(SemgrepCodemod):
     NAME = "secure-tempfile"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Use `tempfile.mkstemp` instead of `tempfile.mktemp`."
+    SUMMARY = "Use `tempfile.mkstemp` instead of `tempfile.mktemp`"
     DESCRIPTION = "Replaces `tempfile.mktemp` with `tempfile.mkstemp`."
 
     @classmethod

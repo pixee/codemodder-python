@@ -19,7 +19,7 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         NAME="unused-imports",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
     )
-    SUMMARY = "Remove unused imports from a module."
+    SUMMARY = "Remove unused imports from a module"
     CHANGE_DESCRIPTION = "Unused import."
 
     METADATA_DEPENDENCIES = (PositionProvider, ScopeProvider, QualifiedNameProvider)
