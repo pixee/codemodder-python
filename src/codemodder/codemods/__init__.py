@@ -20,7 +20,7 @@ from codemodder.codemods.tempfile_mktemp import TempfileMktemp
 from codemodder.codemods.requests_verify import RequestsVerify
 from codemodder.codemods.use_walrus_if import UseWalrusIf
 
-DEFAULT_CODEMODS = {
+DEFAULT_CODEMODS = [
     DjangoDebugFlagOn,
     DjangoSessionCookieSecureOff,
     HardenPyyaml,
@@ -38,7 +38,7 @@ DEFAULT_CODEMODS = {
     TempfileMktemp,
     RequestsVerify,
     UseWalrusIf,
-}
+]
 ALL_CODEMODS = DEFAULT_CODEMODS
 
 CODEMOD_IDS = [codemod.id() for codemod in DEFAULT_CODEMODS]
