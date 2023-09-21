@@ -2,6 +2,8 @@ import datetime
 import difflib
 import os
 import sys
+from importlib.resources import files
+
 from pathlib import Path
 import libcst as cst
 from libcst.codemod import CodemodContext
@@ -16,6 +18,9 @@ from codemodder.dependency_manager import write_dependencies
 from codemodder.report.codetf_reporter import report_default
 from codemodder.semgrep import run as semgrep_run
 from codemodder.sarifs import parse_sarif_files
+
+
+CODEMODDER_DOCS_MODULE = files("codemodder.codemods.docs")
 
 
 def update_code(file_path, new_code):
@@ -107,17 +112,33 @@ def analyze_files(
         )
 
 
+# TODO: this logic should eventually belong to CodemodRegistry
+def load_codemod_description(name) -> str:
+    """
+    Load the description of the codemod from the docs module.
+    """
+    # TODO: this prefix should not be hardcoded
+    filename = f"pixee_python_{name}.md"
+    return CODEMODDER_DOCS_MODULE.joinpath(filename).read_text()
+
+
 def compile_results(execution_context: CodemodExecutionContext, codemods):
     results = []
     for name, codemod_kls in codemods.items():
         if not (changeset := execution_context.results_by_codemod.get(name)):
             continue
 
+        try:
+            description = load_codemod_description(name)
+        except FileNotFoundError:
+            logger.warning("No docs found for codemod %s", name)
+            description = codemod_kls.METADATA.DESCRIPTION
+
         data = {
             # TODO: this prefix should not be hardcoded
             "codemod": f"pixee:python/{name}",
             "summary": codemod_kls.SUMMARY,
-            "description": codemod_kls.METADATA.DESCRIPTION,
+            "description": description,
             "references": [],
             "properties": {},
             "failedFiles": [],
