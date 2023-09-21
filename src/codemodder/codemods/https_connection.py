@@ -26,7 +26,7 @@ class HTTPSConnection(BaseCodemod, Codemod):
         NAME="https-connection",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
     )
-    CHANGE_DESCRIPTION = "Enforced HTTPS connection"
+    CHANGE_DESCRIPTION = "Enforce HTTPS connection"
     SUMMARY = "Changes HTTPConnectionPool to HTTPSConnectionPool to enforce secure connection."
 
     METADATA_DEPENDENCIES = (PositionProvider,)
