@@ -7,7 +7,7 @@ from codemodder.codemods import DEFAULT_CODEMODS
 @pytest.fixture(params=DEFAULT_CODEMODS)
 def codemod_name(request):
     name = request.param.name()
-    if name in ["order-imports", "use-walrus-if"]:
+    if name in ["order-imports"]:
         pytest.skip("No docs yet")
     return name
 
