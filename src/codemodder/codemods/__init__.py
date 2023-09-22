@@ -4,6 +4,7 @@ from codemodder.codemods.django_debug_flag_on import DjangoDebugFlagOn
 from codemodder.codemods.django_session_cookie_secure_off import (
     DjangoSessionCookieSecureOff,
 )
+from codemodder.codemods.fix_mutable_params import FixMutableParams
 from codemodder.codemods.harden_pyyaml import HardenPyyaml
 from codemodder.codemods.harden_ruamel import HardenRuamel
 from codemodder.codemods.https_connection import HTTPSConnection
@@ -27,6 +28,7 @@ DEFAULT_CODEMODS = [
     HardenPyyaml,
     HardenRuamel,
     HTTPSConnection,
+    FixMutableParams,
     LimitReadline,
     OrderImports,
     ProcessSandbox,

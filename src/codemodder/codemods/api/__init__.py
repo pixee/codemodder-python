@@ -84,6 +84,15 @@ class BaseCodemod(
     BaseTransformer,
     Helpers,
 ):
+    def __init__(
+        self,
+        codemod_context: CodemodContext,
+        execution_context: CodemodExecutionContext,
+        file_context: FileContext,
+    ):
+        _BaseCodemod.__init__(self, execution_context, file_context)
+        BaseTransformer.__init__(self, codemod_context, [])
+
     def report_change(self, original_node):
         line_number = self.lineno_for_node(original_node)
         self.file_context.codemod_changes.append(
@@ -110,6 +119,7 @@ class SemgrepCodemod(
         execution_context: CodemodExecutionContext,
         file_context: FileContext,
     ):
+        BaseCodemod.__init__(self, codemod_context, execution_context, file_context)
         _SemgrepCodemod.__init__(self, execution_context, file_context)
         BaseTransformer.__init__(self, codemod_context, self._results)
 

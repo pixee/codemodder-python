@@ -16,7 +16,7 @@ class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
 
     def __init__(self, codemod_context: CodemodContext, *codemod_args):
         UnnecessaryFormatString.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, *codemod_args)
+        BaseCodemod.__init__(self, codemod_context, *codemod_args)
 
     @m.leave(m.FormattedString(parts=(m.FormattedStringText(),)))
     def _check_formatted_string(

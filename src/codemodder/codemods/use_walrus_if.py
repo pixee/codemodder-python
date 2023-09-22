@@ -5,13 +5,11 @@ from libcst._position import CodeRange
 from libcst import matchers as m
 from libcst.metadata import ParentNodeProvider, ScopeProvider
 
-from codemodder.change import Change
 from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.codemods.api import SemgrepCodemod
 
 
-class UseWalrusIf(SemgrepCodemod, NameResolutionMixin):
+class UseWalrusIf(SemgrepCodemod):
     METADATA_DEPENDENCIES = SemgrepCodemod.METADATA_DEPENDENCIES + (
         ParentNodeProvider,
         ScopeProvider,
@@ -54,14 +52,6 @@ class UseWalrusIf(SemgrepCodemod, NameResolutionMixin):
         self._modify_next_if = []
         self._if_stack = []
 
-    def add_change(self, position: CodeRange):
-        self.file_context.codemod_changes.append(
-            Change(
-                lineNumber=position.start.line,
-                description=self.CHANGE_DESCRIPTION,
-            ).to_json()
-        )
-
     def visit_If(self, node):
         self._if_stack.append(
             self._modify_next_if.pop() if len(self._modify_next_if) else None
@@ -77,7 +67,7 @@ class UseWalrusIf(SemgrepCodemod, NameResolutionMixin):
                 lpar=[] if is_name else [cst.LeftParen()],
                 rpar=[] if is_name else [cst.RightParen()],
             )
-            self.add_change(position)
+            self.add_change_from_position(position, self.CHANGE_DESCRIPTION)
             return (
                 updated_node.with_changes(test=named_expr)
                 if is_name
