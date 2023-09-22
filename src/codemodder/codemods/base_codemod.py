@@ -3,6 +3,9 @@ from enum import Enum
 import itertools
 from typing import List, ClassVar
 
+from libcst._position import CodeRange
+
+from codemodder.change import Change
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from codemodder.semgrep import rule_ids_from_yaml_files
@@ -71,6 +74,18 @@ class BaseCodemod:
         # pylint: disable=no-member
         # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
         return self.get_metadata(self.METADATA_DEPENDENCIES[0], node)
+
+    def add_change(self, node, description):
+        position = self.node_position(node)
+        self.add_change_from_position(position, description)
+
+    def add_change_from_position(self, position: CodeRange, description):
+        self.file_context.codemod_changes.append(
+            Change(
+                lineNumber=position.start.line,
+                description=description,
+            ).to_json()
+        )
 
     def lineno_for_node(self, node):
         return self.node_position(node).start.line
