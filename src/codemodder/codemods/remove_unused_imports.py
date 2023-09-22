@@ -1,5 +1,11 @@
+from libcst import ensure_type, matchers
 from libcst.codemod.visitors import GatherUnusedImportsVisitor
-from libcst.metadata import PositionProvider, QualifiedNameProvider, ScopeProvider
+from libcst.metadata import (
+    PositionProvider,
+    QualifiedNameProvider,
+    ScopeProvider,
+    ParentNodeProvider,
+)
 from codemodder.codemods.base_codemod import (
     BaseCodemod,
     CodemodMetadata,
@@ -11,6 +17,7 @@ from codemodder.codemods.transformations.remove_unused_imports import (
 )
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
+import re
 
 
 class RemoveUnusedImports(BaseCodemod, Codemod):
@@ -22,7 +29,12 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
     SUMMARY = "Remove unused imports from a module"
     CHANGE_DESCRIPTION = "Unused import."
 
-    METADATA_DEPENDENCIES = (PositionProvider, ScopeProvider, QualifiedNameProvider)
+    METADATA_DEPENDENCIES = (
+        PositionProvider,
+        ScopeProvider,
+        QualifiedNameProvider,
+        ParentNodeProvider,
+    )
 
     def __init__(self, codemod_context: CodemodContext, *codemod_args):
         Codemod.__init__(self, codemod_context)
@@ -36,10 +48,11 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         for import_alias, importt in gather_unused_visitor.unused_imports:
             pos = self.get_metadata(PositionProvider, import_alias)
             if self.filter_by_path_includes_or_excludes(pos):
-                self.file_context.codemod_changes.append(
-                    Change(pos.start.line, self.CHANGE_DESCRIPTION).to_json()
-                )
-                filtered_unused_imports.add((import_alias, importt))
+                if not self._has_noqa_comment(importt):
+                    self.file_context.codemod_changes.append(
+                        Change(pos.start.line, self.CHANGE_DESCRIPTION).to_json()
+                    )
+                    filtered_unused_imports.add((import_alias, importt))
         return tree.visit(RemoveUnusedImportsTransformer(filtered_unused_imports))
 
     def filter_by_path_includes_or_excludes(self, pos_to_match):
@@ -52,6 +65,38 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         if self.line_include:
             return any(match_line(pos_to_match, line) for line in self.line_include)
         return True
+
+    def _has_noqa_comment(self, node):
+        """
+        Check if the import has a #noqa comment attached to it
+        """
+        parent = self.get_metadata(ParentNodeProvider, node)
+        if parent and matchers.matches(parent, matchers.SimpleStatementLine()):
+            stmt = ensure_type(parent, cst.SimpleStatementLine)
+            pattern = re.compile(r"^#\s*noqa")
+
+            # has a trailing comment string
+            trailing_comment_string = (
+                stmt.trailing_whitespace.comment.value
+                if stmt.trailing_whitespace.comment
+                else None
+            )
+            if trailing_comment_string and pattern.match(trailing_comment_string):
+                return True
+
+            # has a comment right above it
+            if matchers.matches(
+                stmt,
+                matchers.SimpleStatementLine(
+                    leading_lines=[
+                        matchers.ZeroOrMore(),
+                        matchers.EmptyLine(comment=matchers.Comment()),
+                    ]
+                ),
+            ):
+                if pattern.match(stmt.leading_lines[-1].comment.value):
+                    return True
+        return False
 
 
 def match_line(pos, line):

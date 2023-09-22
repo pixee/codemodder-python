@@ -79,3 +79,13 @@ a.something
         after = "from a import b,d   \nprint(b)\nprint(d)"
         self.run_and_assert(tmpdir, before, after)
         assert len(self.file_context.codemod_changes) == 1
+
+    def test_dont_remove_if_noqa_before(self, tmpdir):
+        before = "import a\n#   noqa\nimport b\na()"
+        self.run_and_assert(tmpdir, before, before)
+        assert len(self.file_context.codemod_changes) == 0
+
+    def test_dont_remove_if_noqa_trailing(self, tmpdir):
+        before = "import a\nimport b # noqa\na()"
+        self.run_and_assert(tmpdir, before, before)
+        assert len(self.file_context.codemod_changes) == 0
