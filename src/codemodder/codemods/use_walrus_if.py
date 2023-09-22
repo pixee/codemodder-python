@@ -17,9 +17,7 @@ class UseWalrusIf(SemgrepCodemod, NameResolutionMixin):
         ScopeProvider,
     )
     NAME = "use-walrus-if"
-    SUMMARY = (
-        "Replace multiple expressions involving `if` operator with 'walrus' operator"
-    )
+    SUMMARY = "Use Assignment Expression in Conditional"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     DESCRIPTION = (
         "Replaces multiple expressions involving `if` operator with 'walrus' operator"
