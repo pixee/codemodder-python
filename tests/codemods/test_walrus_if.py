@@ -103,6 +103,21 @@ if (x := do_something()) is not None:
 """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
+    def test_walrus_if_used_inner(self, tmpdir):
+        """Make sure this works inside more complex code"""
+        input_code = """
+result = foo()
+if result is not None:
+    if something_else():
+        print(result)
+"""
+        expected_output = """
+if (result := foo()) is not None:
+    if something_else():
+        print(result)
+"""
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
     @pytest.mark.parametrize("space", ["", "\n"])
     def test_with_whitespace(self, tmpdir, space):
         input_code = f"""
