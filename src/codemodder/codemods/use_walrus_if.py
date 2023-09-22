@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import libcst as cst
 from libcst._position import CodeRange
@@ -47,10 +47,12 @@ class UseWalrusIf(SemgrepCodemod, NameResolutionMixin):
         """
 
     _modify_next_if: List[Tuple[CodeRange, cst.Assign]]
+    _if_stack: List[Optional[Tuple[CodeRange, cst.Assign]]]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._modify_next_if = []
+        self._if_stack = []
 
     def add_change(self, position: CodeRange):
         self.file_context.codemod_changes.append(
@@ -60,9 +62,14 @@ class UseWalrusIf(SemgrepCodemod, NameResolutionMixin):
             ).to_json()
         )
 
+    def visit_If(self, node):
+        self._if_stack.append(
+            self._modify_next_if.pop() if len(self._modify_next_if) else None
+        )
+
     def leave_If(self, original_node, updated_node):
-        if self._modify_next_if:
-            position, if_node = self._modify_next_if.pop()
+        if (result := self._if_stack.pop()) is not None:
+            position, if_node = result
             is_name = m.matches(updated_node.test, m.Name())
             named_expr = cst.NamedExpr(
                 target=if_node.targets[0].target,
