@@ -2,6 +2,9 @@
 source = codemodder
 
 [paths]
-source =
+codemodder =
     */src/codemodder
     */site-packages/codemodder
+core_codemods =
+    */src/core_codemods
+    */site-packages/core_codemods
