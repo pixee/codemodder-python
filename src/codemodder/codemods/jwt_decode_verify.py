@@ -20,11 +20,14 @@ class JwtDecodeVerify(SemgrepCodemod):
                           import jwt
                           ...
                   - patterns:
-                      - pattern-regex:  |-
-                            jwt.decode\(.*options={.*"verify_(signature|exp|nbf|iat|aud|iss)": False.*}.*\)
+                      - pattern: |
+                          jwt.decode(..., options={..., $KEY: False, ...}, ...)
+                      - metavariable-regex:
+                          metavariable: $KEY
+                          regex: \"verify_
                       - pattern-inside: |
                           import jwt
-                          ...
+                            ...
         """
 
     def _replace_opts_dict(self, opts_dict):

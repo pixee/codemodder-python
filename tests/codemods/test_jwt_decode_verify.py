@@ -78,6 +78,10 @@ var = "hello"
                 """options={"strict_aud": False, "verify_signature": False}""",
                 """options={"strict_aud": False, "verify_signature": True}""",
             ),
+            (
+                """options={"verify_iss": True, "verify_signature": True}""",
+                """options={"verify_iss": True, "verify_signature": True}""",
+            ),
         ],
     )
     def test_verify_variations(self, tmpdir, input_args, expected_args):
@@ -111,7 +115,6 @@ var = "hello"
 
         self.run_and_assert(tmpdir, input_code, expexted_output)
 
-    @pytest.mark.skip(reason="Cannot support multiline opts dict given pattern-regex")
     def test_multiline_formatting_options(self, tmpdir):
         input_code = """import jwt
 
@@ -125,8 +128,7 @@ var = "hello"
 
 decoded_payload = jwt.decode(
     encoded_jwt, SECRET_KEY, algorithms=["HS256"],
-    options={"verify_signature": True, "verify_exp": True}
-)
+    options={"verify_signature": True, "verify_exp": True})
 var = "hello"
 """
 
