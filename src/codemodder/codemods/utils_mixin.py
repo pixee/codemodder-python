@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Any, Optional, Tuple, Union
 import libcst as cst
 from libcst import MetadataDependent, matchers
 from libcst.helpers import get_full_name_for_node
@@ -6,7 +6,7 @@ from libcst.metadata import Assignment, ImportAssignment, ScopeProvider
 
 
 class NameResolutionMixin(MetadataDependent):
-    METADATA_DEPENDENCIES = (ScopeProvider,)
+    METADATA_DEPENDENCIES: Tuple[Any, ...] = (ScopeProvider,)
 
     def find_base_name(self, node):
         """

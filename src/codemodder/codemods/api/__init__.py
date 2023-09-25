@@ -54,7 +54,10 @@ class _CodemodSubclassWithMetadata:
             missing_fields = []
             for field in ["SUMMARY", "DESCRIPTION", "REVIEW_GUIDANCE"]:
                 try:
-                    assert hasattr(cls, field)
+                    assert (
+                        hasattr(cls, field)
+                        and getattr(cls, field) is not NotImplemented
+                    )
                 except AssertionError:
                     missing_fields.append(field)
 
