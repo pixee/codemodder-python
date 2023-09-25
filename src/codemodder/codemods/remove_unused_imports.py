@@ -58,7 +58,7 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
                     filtered_unused_imports.add((import_alias, importt))
         return tree.visit(RemoveUnusedImportsTransformer(filtered_unused_imports))
 
-    def filter_by_path_includes_or_excludes(self, pos_to_match):
+    def filter_by_path_includes_or_excludes(self, pos_to_match) -> bool:
         """
         Returns True if the node, whose position in the file is pos_to_match, matches any of the lines specified in the path-includes or path-excludes flags.
         """
@@ -69,7 +69,7 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
             return any(match_line(pos_to_match, line) for line in self.line_include)
         return True
 
-    def _is_disabled_by_linter(self, node):
+    def _is_disabled_by_linter(self, node: cst.CSTNode) -> bool:
         """
         Check if the import has a #noqa or # pylint: disable(-next)=unused_imports comment attached to it.
         """
@@ -127,8 +127,6 @@ def _is_pylint_disable_unused_imports(comment: str) -> bool:
 def _is_pylint_disable_next_unused_imports(comment: str) -> bool:
     parsed = parse_pragma(comment)
     for p in parsed:
-        print(p.action)
-        print(p.messages)
         if p.action == "disable-next" and (
             "unused-import" in p.messages or "W0611" in p.messages
         ):
