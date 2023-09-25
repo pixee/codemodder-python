@@ -7,6 +7,7 @@ from codemodder.codemods.api import SemgrepCodemod
 class JwtDecodeVerify(SemgrepCodemod):
     NAME = "jwt-decode-verify"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
+    SUMMARY = "Enable all verifications in `jwt.decode` call."
     DESCRIPTION = "Makes any of the multiple `verify` parameters to a `jwt.decode` call be `True`."
 
     @classmethod
