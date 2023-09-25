@@ -2,7 +2,6 @@ from collections import defaultdict
 from typing import DefaultDict
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
-import pytest
 import mock
 from codemodder.codemods.base_codemod import (
     SemgrepCodemod,
@@ -43,35 +42,3 @@ class TestEmptyResults:
     def test_empty_results(self):
         input_code = """print('Hello World')"""
         self.run_and_assert(input_code, input_code)
-
-
-class TestSemgrepCodemod:
-    # pylint: disable=unused-variable
-    def test_missing_class_attrs(self):
-        with pytest.raises(NotImplementedError):
-
-            class MissingInfoCodemod(SemgrepCodemod):
-                ...
-
-        with pytest.raises(NotImplementedError):
-
-            class MissingNameCodemod(SemgrepCodemod):
-                METADATA = CodemodMetadata(
-                    "Description", None, ReviewGuidance.MERGE_WITHOUT_REVIEW
-                )
-
-        with pytest.raises(NotImplementedError):
-
-            class MissingDescriptionCodemod(SemgrepCodemod):
-                METADATA = CodemodMetadata(
-                    "", "Name", ReviewGuidance.MERGE_WITHOUT_REVIEW
-                )
-
-        with pytest.raises(NotImplementedError):
-
-            class MissingAuthorCodemod(SemgrepCodemod):
-                METADATA = CodemodMetadata(
-                    NotImplemented,
-                    "Name",
-                    ReviewGuidance.MERGE_WITHOUT_REVIEW,
-                )

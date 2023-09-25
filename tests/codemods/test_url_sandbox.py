@@ -6,8 +6,12 @@ from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 class TestUrlSandbox(BaseSemgrepCodemodTest):
     codemod = UrlSandbox
 
-    def test_rule_ids(self):
-        assert self.codemod.RULE_IDS == ["sandbox-url-creation"]
+    def test_rule_ids(self, mocker):
+        assert self.codemod(
+            mocker.MagicMock(),
+            mocker.MagicMock(),
+            mocker.MagicMock(),
+        ).RULE_IDS == ["sandbox-url-creation"]
 
     def test_import_requests(self, tmpdir):
         input_code = """import requests
