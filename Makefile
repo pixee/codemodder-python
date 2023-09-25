@@ -12,7 +12,7 @@ webgoat-test:
 	${PYTEST} -v ci_tests/test_webgoat_findings.py
 
 lint:
-	pylint -v codemodder tests integration_tests
+	pylint -v codemodder core_codemods tests integration_tests
 
 radon:
 	radon cc codemodder --min A --total-average
