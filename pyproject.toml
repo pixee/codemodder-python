@@ -9,11 +9,12 @@ requires-python = ">=3.9.0"
 readme = "README.md"
 license = {file = "LICENSE"}
 dependencies = [
-    "semgrep~=1.41.0",
-    "PyYAML~=6.0.0",
-    "libcst~=1.0.0",
-    "isort~=5.12.0",
     "dependency-manager @ git+https://github.com/pixee/python-dependency-manager#egg=dependency-manager",
+    "isort~=5.12.0",
+    "libcst~=1.0.0",
+    "pylint~=2.17.0",
+    "PyYAML~=6.0.0",
+    "semgrep~=1.41.0",
 ]
 
 [project.scripts]

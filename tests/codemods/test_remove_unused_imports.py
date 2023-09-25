@@ -89,3 +89,15 @@ a.something
         before = "import a\nimport b # noqa\na()"
         self.run_and_assert(tmpdir, before, before)
         assert len(self.file_context.codemod_changes) == 0
+
+    def test_dont_remove_if_pylint_disable(self, tmpdir):
+        before = "import a\nimport b # pylint: disable=W0611\na()"
+        self.run_and_assert(tmpdir, before, before)
+        assert len(self.file_context.codemod_changes) == 0
+
+    def test_dont_remove_if_pylint_disable_next(self, tmpdir):
+        before = (
+            "import a\n#   pylint: disable-next=no-member, unused-import\nimport b\na()"
+        )
+        self.run_and_assert(tmpdir, before, before)
+        assert len(self.file_context.codemod_changes) == 0
