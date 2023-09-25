@@ -8,8 +8,12 @@ from tests.codemods.base_codemod_test import BaseDjangoCodemodTest
 class TestDjangoSessionSecureCookieOff(BaseDjangoCodemodTest):
     codemod = DjangoSessionCookieSecureOff
 
-    def test_rule_ids(self):
-        assert self.codemod.RULE_IDS == ["found-settings-file"]
+    def test_rule_ids(self, mocker):
+        assert self.codemod(
+            mocker.MagicMock(),
+            mocker.MagicMock(),
+            mocker.MagicMock(),
+        ).RULE_IDS == ["found-settings-file"]
 
     def test_not_settings_dot_py(self, tmpdir):
         django_root, settings_folder = self.create_dir_structure(tmpdir)
