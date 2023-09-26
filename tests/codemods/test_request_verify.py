@@ -9,7 +9,7 @@ class TestRequestsVerify(BaseSemgrepCodemodTest):
     codemod = RequestsVerify
 
     def test_rule_ids(self):
-        assert self.codemod.RULE_IDS == ["requests-verify"]
+        assert self.codemod.NAME == "requests-verify"
 
     @pytest.mark.parametrize("func", REQUEST_FUNCS)
     def test_default_verify(self, tmpdir, func):

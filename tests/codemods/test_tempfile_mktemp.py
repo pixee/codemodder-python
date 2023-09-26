@@ -7,7 +7,7 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
     codemod = TempfileMktemp
 
     def test_rule_ids(self):
-        assert self.codemod.RULE_IDS == ["secure-tempfile"]
+        assert self.codemod.NAME == "secure-tempfile"
 
     def test_import(self, tmpdir):
         input_code = """import tempfile

@@ -7,7 +7,7 @@ class TestSecureRandom(BaseSemgrepCodemodTest):
     codemod = SecureRandom
 
     def test_rule_ids(self):
-        assert self.codemod.RULE_IDS == ["secure-random"]
+        assert self.codemod.NAME == "secure-random"
 
     def test_import_random(self, tmpdir):
         input_code = """import random

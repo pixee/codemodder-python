@@ -9,7 +9,7 @@ class TestSemgrep:
 
         result = results[0]
 
-        assert result["ruleId"].endswith("sandbox-url-creation")
+        assert result["ruleId"].endswith("url-sandbox")
         assert result["message"]["text"] == "Unbounded URL creation"
 
         location = result["locations"][0]["physicalLocation"]
@@ -55,7 +55,7 @@ class TestSemgrep:
         ]
 
         url_sandbox_results = results_by_path_and_id["tests/samples/make_request.py"][
-            "sandbox-url-creation"
+            "url-sandbox"
         ]
         self._assert_url_sandbox_results(url_sandbox_results)
 
