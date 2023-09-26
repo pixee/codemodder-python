@@ -19,6 +19,7 @@ from codemodder.codemods.remove_unnecessary_f_str import RemoveUnnecessaryFStr
 from codemodder.codemods.tempfile_mktemp import TempfileMktemp
 from codemodder.codemods.requests_verify import RequestsVerify
 from codemodder.codemods.use_walrus_if import UseWalrusIf
+from codemodder.codemods.jwt_decode_verify import JwtDecodeVerify
 
 DEFAULT_CODEMODS = [
     DjangoDebugFlagOn,
@@ -38,6 +39,7 @@ DEFAULT_CODEMODS = [
     TempfileMktemp,
     RequestsVerify,
     UseWalrusIf,
+    JwtDecodeVerify,
 ]
 ALL_CODEMODS = DEFAULT_CODEMODS
 

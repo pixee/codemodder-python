@@ -11,6 +11,7 @@ repos:
     rev: 23.9.1
     hooks:
     -   id: black
+        exclude: samples/
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.5.1
   hooks:
