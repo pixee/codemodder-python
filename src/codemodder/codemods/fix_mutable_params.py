@@ -29,11 +29,28 @@ class FixMutableParams(BaseCodemod):
         # Looking for list() or dict()
         self._matches_builtin = m.Call(func=m.Name("list") | m.Name("dict"))
 
+    def _create_annotation(self, orig: cst.Param, updated: cst.Param):
+        return (
+            updated.annotation.with_changes(
+                annotation=cst.Subscript(
+                    value=cst.Name("Optional"),
+                    slice=[
+                        cst.SubscriptElement(
+                            slice=cst.Index(value=orig.annotation.annotation)
+                        )
+                    ],
+                )
+            )
+            if updated.annotation is not None
+            else None
+        )
+
     def _gather_and_update_params(
         self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
     ):
         updated_params = []
         new_var_decls = []
+        add_annotation = False
 
         # Iterate over all original/update parameters in parallel
         for orig, updated in zip(
@@ -59,11 +76,20 @@ class FixMutableParams(BaseCodemod):
                     )
                     needs_update = True
 
+            annotation = (
+                self._create_annotation(orig, updated) if needs_update else None
+            )
+            add_annotation = add_annotation or annotation is not None
             updated_params.append(
-                updated.with_changes(default=cst.Name("None")) if needs_update else orig
+                updated.with_changes(
+                    default=cst.Name("None"),
+                    annotation=annotation,
+                )
+                if needs_update
+                else updated,
             )
 
-        return updated_params, new_var_decls
+        return updated_params, new_var_decls, add_annotation
 
     def _build_body_prefix(self, new_var_decls: list[cst.Param]):
         return [
@@ -97,13 +123,17 @@ class FixMutableParams(BaseCodemod):
         updated_node: cst.FunctionDef,
     ):
         """Transforms function definitions with mutable default parameters"""
-        updated_params, new_var_decls = self._gather_and_update_params(
-            original_node, updated_node
-        )
+        (
+            updated_params,
+            new_var_decls,
+            add_annotation,
+        ) = self._gather_and_update_params(original_node, updated_node)
         # Add any new variable declarations to the top of the function body
         if body_prefix := self._build_body_prefix(new_var_decls):
             # If we're adding statements to the body, we know a change took place
             self.add_change(original_node, self.CHANGE_DESCRIPTION)
+        if add_annotation:
+            self.add_needed_import("typing", "Optional")
 
         new_body = tuple(body_prefix) + updated_node.body.body
         return updated_node.with_changes(
