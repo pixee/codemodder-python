@@ -22,10 +22,10 @@ class JwtDecodeVerify(SemgrepCodemod):
                           ...
                   - patterns:
                       - pattern: |
-                          jwt.decode(..., options={..., $KEY: False, ...}, ...)
+                          jwt.decode(..., options={..., "$KEY": False, ...}, ...)
                       - metavariable-regex:
                           metavariable: $KEY
-                          regex: \"verify_
+                          regex: verify_
                       - pattern-inside: |
                           import jwt
                             ...

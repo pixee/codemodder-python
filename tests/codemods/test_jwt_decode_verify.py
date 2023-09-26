@@ -115,20 +115,21 @@ var = "hello"
 
         self.run_and_assert(tmpdir, input_code, expexted_output)
 
-    def test_multiline_formatting_options(self, tmpdir):
-        input_code = """import jwt
+    @pytest.mark.parametrize("quote", ["'", '"'])
+    def test_multiline_formatting_options(self, tmpdir, quote):
+        input_code = f"""import jwt
 
 decoded_payload = jwt.decode(
     encoded_jwt, SECRET_KEY, algorithms=["HS256"],
-    options={"verify_signature": False, "verify_exp": False}
+    options={{{quote}verify_signature{quote}: False, {quote}verify_exp{quote}: False}}
 )
 var = "hello"
 """
-        expexted_output = """import jwt
+        expexted_output = f"""import jwt
 
 decoded_payload = jwt.decode(
     encoded_jwt, SECRET_KEY, algorithms=["HS256"],
-    options={"verify_signature": True, "verify_exp": True})
+    options={{{quote}verify_signature{quote}: True, {quote}verify_exp{quote}: True}})
 var = "hello"
 """
 
