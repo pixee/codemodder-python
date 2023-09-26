@@ -121,3 +121,75 @@ def foo(bar="hello", baz=None):
     print(baz)
 """
         self.run_and_assert(tmpdir, input_code, expected_output)
+
+    @pytest.mark.parametrize(
+        "mutable,annotation", [("[]", "List"), ("{}", "Dict"), ("set()", "Set")]
+    )
+    def test_fix_with_type_annotation(self, tmpdir, mutable, annotation):
+        input_code = f"""
+from typing import {annotation}
+
+def foo(bar: {annotation}[int] = {mutable}):
+    print(bar)
+"""
+        expected_output = f"""
+from typing import Optional, {annotation}
+
+def foo(bar: Optional[{annotation}[int]] = None):
+    bar = {mutable} if bar is None else bar
+    print(bar)
+"""
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    @pytest.mark.parametrize(
+        "mutable,annotation", [("[]", "list"), ("{}", "dict"), ("set()", "set")]
+    )
+    def test_fix_with_type_annotation_new_import(self, tmpdir, mutable, annotation):
+        input_code = f"""
+def foo(bar: {annotation}[int] = {mutable}):
+    print(bar)
+"""
+        expected_output = f"""
+from typing import Optional
+
+def foo(bar: Optional[{annotation}[int]] = None):
+    bar = {mutable} if bar is None else bar
+    print(bar)
+"""
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_fix_one_type_annotation(self, tmpdir):
+        input_code = """
+from typing import List
+
+def foo(x = [], y: List[int] = [], z = {}):
+    print(x, y, z)
+"""
+        expected_output = """
+from typing import Optional, List
+
+def foo(x = None, y: Optional[List[int]] = None, z = None):
+    x = [] if x is None else x
+    y = [] if y is None else y
+    z = {} if z is None else z
+    print(x, y, z)
+"""
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_fix_multiple_type_annotations(self, tmpdir):
+        input_code = """
+from typing import Dict, List
+
+def foo(x = [], y: List[int] = [], z: Dict[str, int] = {}):
+    print(x, y, z)
+"""
+        expected_output = """
+from typing import Optional, Dict, List
+
+def foo(x = None, y: Optional[List[int]] = None, z: Optional[Dict[str, int]] = None):
+    x = [] if x is None else x
+    y = [] if y is None else y
+    z = {} if z is None else z
+    print(x, y, z)
+"""
+        self.run_and_assert(tmpdir, input_code, expected_output)
