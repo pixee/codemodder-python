@@ -1,5 +1,5 @@
 rules:
-  - id: sandbox-url-creation
+  - id: url-sandbox
     message: Unbounded URL creation
     severity: WARNING
     languages:

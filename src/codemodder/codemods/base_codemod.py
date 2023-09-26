@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-import itertools
 from typing import List, ClassVar
 
 from libcst._position import CodeRange
@@ -8,7 +7,6 @@ from libcst._position import CodeRange
 from codemodder.change import Change
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
-from codemodder.semgrep import rule_ids_from_yaml_files
 
 
 class ReviewGuidance(Enum):
@@ -86,11 +84,11 @@ class SemgrepCodemod(BaseCodemod):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.RULE_IDS = rule_ids_from_yaml_files(self.YAML_FILES)
-        self._results = list(
-            itertools.chain.from_iterable(
-                map(lambda rId: self.file_context.results_by_id[rId], self.RULE_IDS)
+        self._results = (
+            self.file_context.results_by_id.get(
+                self.METADATA.NAME  # pylint: disable=no-member
             )
+            or []
         )
 
     @property

@@ -5,12 +5,8 @@ from tests.codemods.base_codemod_test import BaseDjangoCodemodTest
 class TestDjangoDebugFlagOn(BaseDjangoCodemodTest):
     codemod = DjangoDebugFlagOn
 
-    def test_rule_ids(self, mocker):
-        assert self.codemod(
-            mocker.MagicMock(),
-            mocker.MagicMock(),
-            mocker.MagicMock(),
-        ).RULE_IDS == ["django-debug-flag-on"]
+    def test_rule_ids(self):
+        assert self.codemod.METADATA.NAME == "django-debug-flag-on"
 
     def test_settings_dot_py(self, tmpdir):
         django_root, settings_folder = self.create_dir_structure(tmpdir)

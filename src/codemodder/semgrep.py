@@ -1,15 +1,11 @@
 import subprocess
 import itertools
-import yaml
-from importlib.resources import files
 from tempfile import NamedTemporaryFile
 from typing import List
 from pathlib import Path
 from codemodder.context import CodemodExecutionContext
 from codemodder.sarifs import results_by_path_and_rule_id
 from codemodder.logging import logger
-
-YAML_FILES_PACKAGE = "core_codemods.semgrep"
 
 
 def run_on_directory(yaml_files: List[Path], directory: Path):
@@ -61,11 +57,3 @@ def only_semgrep(codemods) -> dict:
     Returns only semgrep codemods.
     """
     return {name: codemod for name, codemod in codemods.items() if codemod.is_semgrep}
-
-
-def rule_ids_from_yaml_files(yaml_files):
-    all_yaml = []
-    for file in yaml_files:
-        with open(files(YAML_FILES_PACKAGE) / file, encoding="utf-8") as yaml_file:
-            all_yaml.append(yaml.load(yaml_file, Loader=yaml.Loader))
-    return [r["id"] for yaml_file in all_yaml for r in yaml_file["rules"]]

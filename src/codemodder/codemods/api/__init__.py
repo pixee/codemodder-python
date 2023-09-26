@@ -18,7 +18,6 @@ from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.change import Change
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
-from codemodder.semgrep import rule_ids_from_yaml_files
 from .helpers import Helpers
 
 
@@ -111,7 +110,6 @@ class SemgrepCodemod(
     def __init_subclass__(cls):
         super().__init_subclass__()
         cls.YAML_FILES = _create_temp_yaml_file(cls, cls.METADATA)
-        cls.RULE_IDS = rule_ids_from_yaml_files(cls.YAML_FILES)
 
     def __init__(
         self,

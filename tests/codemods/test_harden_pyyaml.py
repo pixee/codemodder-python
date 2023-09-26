@@ -11,7 +11,7 @@ class TestHardenPyyaml(BaseSemgrepCodemodTest):
     codemod = HardenPyyaml
 
     def test_rule_ids(self):
-        assert self.codemod.RULE_IDS == ["harden-pyyaml"]
+        assert self.codemod.NAME == "harden-pyyaml"
 
     def test_safe_loader(self, tmpdir):
         input_code = """import yaml

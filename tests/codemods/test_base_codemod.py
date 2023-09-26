@@ -1,5 +1,3 @@
-from collections import defaultdict
-from typing import DefaultDict
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
 import mock
@@ -19,8 +17,8 @@ class DoNothingCodemod(SemgrepCodemod, Codemod):
     SUMMARY = "An identity codemod for testing purposes."
     YAML_FILES = []
 
-    def __init__(self, context: CodemodContext, *args):
-        Codemod.__init__(self, context)
+    def __init__(self, codemod_context: CodemodContext, *args):
+        Codemod.__init__(self, codemod_context)
         SemgrepCodemod.__init__(self, *args)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
@@ -28,12 +26,12 @@ class DoNothingCodemod(SemgrepCodemod, Codemod):
 
 
 class TestEmptyResults:
-    RESULTS_BY_ID: DefaultDict = defaultdict()
-
     def run_and_assert(self, input_code, expexted_output):
         input_tree = cst.parse_module(input_code)
         command_instance = DoNothingCodemod(
-            CodemodContext(), mock.MagicMock(), self.RESULTS_BY_ID
+            CodemodContext(),
+            mock.MagicMock(),
+            mock.MagicMock(),
         )
         output_tree = command_instance.transform_module(input_tree)
 
