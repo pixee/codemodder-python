@@ -1,5 +1,4 @@
-import pytest
-from codemodder.codemods.enable_jinja2_autoescape import EnableJinja2Autoescape
+from core_codemods.enable_jinja2_autoescape import EnableJinja2Autoescape
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 
@@ -7,7 +6,7 @@ class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
     codemod = EnableJinja2Autoescape
 
     def test_rule_ids(self):
-        assert self.codemod.RULE_IDS == ["enable-jinja2-autoescape"]
+        assert self.codemod.NAME == "enable-jinja2-autoescape"
 
     def test_import(self, tmpdir):
         input_code = """import jinja2
