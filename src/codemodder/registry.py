@@ -1,8 +1,8 @@
 from dataclasses import dataclass, asdict
+from importlib.abc import Traversable
 from importlib.resources import files
 from importlib.metadata import entry_points
 from typing import Optional
-from types import ModuleType
 
 from codemodder.logging import logger
 
@@ -23,8 +23,8 @@ class _CodemodWrapper:
 
     origin: str
     codemod: type
-    docs_module: ModuleType
-    semgrep_config_module: ModuleType
+    docs_module: Traversable
+    semgrep_config_module: Traversable
 
     def __call__(self, *args, **kwargs):
         return self.codemod(*args, **kwargs)
