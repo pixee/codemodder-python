@@ -26,6 +26,8 @@ class UtilsMixin:
         return True
 
     def node_is_selected(self, node) -> bool:
+        if not self.results:
+            return False
         pos_to_match = self.node_position(node)
         return self.filter_by_result(
             pos_to_match
