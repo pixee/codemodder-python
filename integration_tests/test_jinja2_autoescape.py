@@ -11,11 +11,11 @@ class TestEnableJinja2Autoescape(BaseIntegrationTest):
     original_code, expected_new_code = original_and_expected_from_code_path(
         code_path,
         [
-            (1, "env = Environment(autoescape=True)\n"),
             (2, "env = Environment(autoescape=True)\n"),
+            (3, "env = Environment(autoescape=True)\n"),
         ],
     )
-    expected_diff = "--- \n+++ \n@@ -1,3 +1,3 @@\n from jinja2 import Environment\n-env = Environment()\n-env = Environment(autoescape=False)\n+env = Environment(autoescape=True)\n+env = Environment(autoescape=True)\n"
-    expected_line_change = "2"
+    expected_diff = "--- \n+++ \n@@ -1,4 +1,4 @@\n from jinja2 import Environment\n \n-env = Environment()\n-env = Environment(autoescape=False)\n+env = Environment(autoescape=True)\n+env = Environment(autoescape=True)\n"
+    expected_line_change = "3"
     num_changes = 2
     change_description = EnableJinja2Autoescape.CHANGE_DESCRIPTION
