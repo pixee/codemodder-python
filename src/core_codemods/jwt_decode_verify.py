@@ -64,7 +64,13 @@ class JwtDecodeVerify(SemgrepCodemod):
             new_args.append(new)
         return new_args
 
-    def replace_arg(self, original_node, target_arg_name, target_arg_replacement_val):
+    def replace_arg(
+        self,
+        original_node,
+        target_arg_name,
+        target_arg_replacement_val,
+        add_if_missing=False,
+    ):
         new_args = super().replace_arg(original_node, "verify", "True")
         return self.replace_options_arg(new_args)
 
