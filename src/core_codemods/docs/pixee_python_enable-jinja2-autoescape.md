@@ -8,9 +8,9 @@ Our codemod currently checks if you forgot to turn autoescape on or if you expli
   from jinja2 import Environment
 
 - env = Environment()
-- env = Environment(autoescape=False, loader=some-loader)
+- env = Environment(autoescape=False, loader=some_loader)
 + env = Environment(autoescape=True)
-+ env = Environment(autoescape=True, loader=some-loader)
++ env = Environment(autoescape=True, loader=some_loader)
   ...
 ```
 

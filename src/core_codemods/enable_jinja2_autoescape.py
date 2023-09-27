@@ -13,18 +13,11 @@ class EnableJinja2Autoescape(SemgrepCodemod):
         return """
             rules:
                 - patterns:
-                  - pattern-either:
-                    - pattern: |
-                        jinja2.Environment()
-                    - pattern: |
-                        jinja2.Environment(...)
-                    - pattern: |
-                        jinja2.Environment(..., autoescape=False, ...)
-                  - pattern-not: |
-                      jinja2.Environment(..., autoescape=True, ...)
+                  - pattern: jinja2.Environment(...)
+                  - pattern-not: jinja2.Environment(..., autoescape=True, ...)
                   - pattern-inside: |
                       import jinja2
-                        ...
+                      ...
         """
 
     def on_result_found(self, original_node, updated_node):
