@@ -15,13 +15,13 @@ class TestJwtDecodeVerify(BaseSemgrepCodemodTest):
 jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], verify=False)
 var = "hello"
 """
-        expexted_output = """import jwt
+        expected_output = """import jwt
 
 jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], verify=True)
 var = "hello"
 """
 
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_from_import(self, tmpdir):
         input_code = """from jwt import decode
@@ -29,13 +29,13 @@ var = "hello"
 decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], verify=False)
 var = "hello"
 """
-        expexted_output = """from jwt import decode
+        expected_output = """from jwt import decode
 
 decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], verify=True)
 var = "hello"
 """
 
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_import_alias(self, tmpdir):
         input_code = """import jwt as _jwtmod
@@ -43,13 +43,13 @@ var = "hello"
 _jwtmod.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], verify=False)
 var = "hello"
 """
-        expexted_output = """import jwt as _jwtmod
+        expected_output = """import jwt as _jwtmod
 
 _jwtmod.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], verify=True)
 var = "hello"
 """
 
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize(
         "input_args,expected_args",
@@ -90,13 +90,13 @@ var = "hello"
 jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], {input_args})
 var = "hello"
 """
-        expexted_output = f"""import jwt
+        expected_output = f"""import jwt
 
 jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], {expected_args})
 var = "hello"
 """
 
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_multiline_formatting_verify_flag(self, tmpdir):
         input_code = """import jwt
@@ -106,14 +106,14 @@ decoded_payload = jwt.decode(
 )
 var = "hello"
 """
-        expexted_output = """import jwt
+        expected_output = """import jwt
 
 decoded_payload = jwt.decode(
     encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)
 var = "hello"
 """
 
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize("quote", ["'", '"'])
     def test_multiline_formatting_options(self, tmpdir, quote):
@@ -125,7 +125,7 @@ decoded_payload = jwt.decode(
 )
 var = "hello"
 """
-        expexted_output = f"""import jwt
+        expected_output = f"""import jwt
 
 decoded_payload = jwt.decode(
     encoded_jwt, SECRET_KEY, algorithms=["HS256"],
@@ -133,4 +133,4 @@ decoded_payload = jwt.decode(
 var = "hello"
 """
 
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)

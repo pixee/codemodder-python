@@ -15,13 +15,13 @@ class TestSecureRandom(BaseSemgrepCodemodTest):
 random.random()
 var = "hello"
 """
-        expexted_output = """import secrets
+        expected_output = """import secrets
 
 secrets.SystemRandom().random()
 var = "hello"
 """
 
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_from_random(self, tmpdir):
         input_code = """from random import random
@@ -29,12 +29,12 @@ var = "hello"
 random()
 var = "hello"
 """
-        expexted_output = """import secrets
+        expected_output = """import secrets
 
 secrets.SystemRandom().random()
 var = "hello"
 """
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_random_alias(self, tmpdir):
         input_code = """import random as alleatory
@@ -42,15 +42,15 @@ var = "hello"
 alleatory.random()
 var = "hello"
 """
-        expexted_output = """import secrets
+        expected_output = """import secrets
 
 secrets.SystemRandom().random()
 var = "hello"
 """
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize(
-        "input_code,expexted_output",
+        "input_code,expected_output",
         [
             (
                 """import random
@@ -78,8 +78,8 @@ var = "hello"
             ),
         ],
     )
-    def test_random_randint(self, tmpdir, input_code, expexted_output):
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+    def test_random_randint(self, tmpdir, input_code, expected_output):
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_multiple_calls(self, tmpdir):
         input_code = """import random
@@ -88,16 +88,16 @@ random.random()
 random.randint()
 var = "hello"
 """
-        expexted_output = """import secrets
+        expected_output = """import secrets
 
 secrets.SystemRandom().random()
 secrets.SystemRandom().randint()
 var = "hello"
 """
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize(
-        "input_code,expexted_output",
+        "input_code,expected_output",
         [
             (
                 """import random
@@ -127,15 +127,15 @@ excel
             ),
         ],
     )
-    def test_random_other_import_untouched(self, tmpdir, input_code, expexted_output):
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+    def test_random_other_import_untouched(self, tmpdir, input_code, expected_output):
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_random_nameerror(self, tmpdir):
         input_code = """random.random()
 
 import random"""
-        expexted_output = input_code
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        expected_output = input_code
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_random_multifunctions(self, tmpdir):
         # Test that `random` import isn't removed if code uses part of the random
@@ -147,11 +147,11 @@ random.random()
 random.__all__
 """
 
-        expexted_output = """import random
+        expected_output = """import random
 import secrets
 
 secrets.SystemRandom().random()
 random.__all__
 """
 
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
