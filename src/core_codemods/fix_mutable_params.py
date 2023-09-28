@@ -7,9 +7,9 @@ from codemodder.codemods.api import BaseCodemod
 
 class FixMutableParams(BaseCodemod):
     NAME = "fix-mutable-params"
-    SUMMARY = "Replace mutable parameters with None"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    DESCRIPTION = "Replace mutable parameters with None"
+    SUMMARY = "Replace Mutable Default Parameters"
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
+    DESCRIPTION = "Replace mutable parameter with None"
 
     _BUILTIN_TO_LITERAL = {
         "list": cst.List(elements=[]),
