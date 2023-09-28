@@ -6,8 +6,8 @@ from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 class TestHardenRuamel(BaseSemgrepCodemodTest):
     codemod = HardenRuamel
 
-    def test_rule_ids(self):
-        assert self.codemod.NAME == "harden-ruamel"
+    def test_name(self):
+        assert self.codemod.name() == "harden-ruamel"
 
     @pytest.mark.parametrize("loader", ["YAML()", "YAML(typ='rt')", "YAML(typ='safe')"])
     def test_safe(self, tmpdir, loader):

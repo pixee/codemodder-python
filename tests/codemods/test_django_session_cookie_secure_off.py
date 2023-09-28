@@ -8,8 +8,8 @@ from tests.codemods.base_codemod_test import BaseDjangoCodemodTest
 class TestDjangoSessionSecureCookieOff(BaseDjangoCodemodTest):
     codemod = DjangoSessionCookieSecureOff
 
-    def test_rule_ids(self):
-        assert self.codemod.METADATA.NAME == "django-session-cookie-secure-off"
+    def test_name(self):
+        assert self.codemod.name() == "django-session-cookie-secure-off"
 
     def test_not_settings_dot_py(self, tmpdir):
         django_root, settings_folder = self.create_dir_structure(tmpdir)

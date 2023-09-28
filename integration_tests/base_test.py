@@ -1,4 +1,4 @@
-# pylint: disable=no-member
+# pylint: disable=no-member, protected-access, attribute-defined-outside-init
 import git
 import json
 import os
@@ -6,6 +6,7 @@ import pathlib
 import subprocess
 
 from codemodder import __VERSION__
+from codemodder import registry
 
 
 SAMPLES_DIR = "tests/samples"
@@ -51,6 +52,17 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     _lines = []
     num_changed_files = 1
 
+    @classmethod
+    def setup_class(cls):
+        cls.codemod_registry = registry.load_registered_codemods()
+
+    def setup_method(self):
+        self.codemod_wrapper = [
+            cmod
+            for cmod in self.codemod_registry._codemods
+            if cmod.codemod == self.codemod
+        ][0]
+
     def _assert_run_fields(self, run, output_path):
         assert run["vendor"] == "pixee"
         assert run["tool"] == "codemodder-python"
@@ -58,7 +70,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert run["elapsed"] != ""
         assert (
             run["commandLine"]
-            == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod.name()}"
+            == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_wrapper.name}"
         )
         assert run["directory"] == os.path.abspath(SAMPLES_DIR)
         assert run["sarifs"] == []
@@ -66,7 +78,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     def _assert_results_fields(self, results, output_path):
         assert len(results) == 1
         result = results[0]
-        assert result["codemod"] == self.codemod.id()
+        assert result["codemod"] == self.codemod_wrapper.id
         assert len(result["changeset"]) == self.num_changed_files
 
         # A codemod may change multiple files. For now we will
@@ -123,7 +135,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             SAMPLES_DIR,
             "--output",
             self.output_path,
-            f"--codemod-include={self.codemod.name()}",
+            f"--codemod-include={self.codemod_wrapper.name}",
         ]
 
         self.check_code_before()

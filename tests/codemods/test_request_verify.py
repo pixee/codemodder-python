@@ -8,8 +8,8 @@ REQUEST_FUNCS = ["get", "post", "request"]
 class TestRequestsVerify(BaseSemgrepCodemodTest):
     codemod = RequestsVerify
 
-    def test_rule_ids(self):
-        assert self.codemod.NAME == "requests-verify"
+    def test_name(self):
+        assert self.codemod.name() == "requests-verify"
 
     @pytest.mark.parametrize("func", REQUEST_FUNCS)
     def test_default_verify(self, tmpdir, func):

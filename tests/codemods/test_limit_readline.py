@@ -5,8 +5,8 @@ from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 class TestLimitReadline(BaseSemgrepCodemodTest):
     codemod = LimitReadline
 
-    def test_rule_ids(self):
-        assert self.codemod.NAME == "limit-readline"
+    def test_name(self):
+        assert self.codemod.name() == "limit-readline"
 
     def test_file_readline(self, tmpdir):
         input_code = """file = open('some_file.txt')

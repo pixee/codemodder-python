@@ -10,8 +10,8 @@ UNSAFE_LOADERS.remove("SafeLoader")
 class TestHardenPyyaml(BaseSemgrepCodemodTest):
     codemod = HardenPyyaml
 
-    def test_rule_ids(self):
-        assert self.codemod.NAME == "harden-pyyaml"
+    def test_name(self):
+        assert self.codemod.name() == "harden-pyyaml"
 
     def test_safe_loader(self, tmpdir):
         input_code = """import yaml

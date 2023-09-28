@@ -6,8 +6,8 @@ from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 class TestJwtDecodeVerify(BaseSemgrepCodemodTest):
     codemod = JwtDecodeVerify
 
-    def test_rule_ids(self):
-        assert self.codemod.NAME == "jwt-decode-verify"
+    def test_name(self):
+        assert self.codemod.name() == "jwt-decode-verify"
 
     def test_import(self, tmpdir):
         input_code = """import jwt
