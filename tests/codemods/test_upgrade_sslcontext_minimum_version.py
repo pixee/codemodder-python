@@ -23,12 +23,12 @@ class TestUpgradeSSLContextMininumVersion(BaseSemgrepCodemodTest):
 context = ssl.SSLContext()
 context.minimum_version = ssl.TLSVersion.{version}
 """
-        expexted_output = """import ssl
+        expected_output = """import ssl
 
 context = ssl.SSLContext()
 context.minimum_version = ssl.TLSVersion.TLSv1_2
 """
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_upgrade_minimum_version_add_import(self, tmpdir):
         input_code = """from ssl import SSLContext, TLSVersion
@@ -36,13 +36,13 @@ context.minimum_version = ssl.TLSVersion.TLSv1_2
 context = SSLContext()
 context.minimum_version = TLSVersion.TLSv1
 """
-        expexted_output = """from ssl import SSLContext
+        expected_output = """from ssl import SSLContext
 import ssl
 
 context = SSLContext()
 context.minimum_version = ssl.TLSVersion.TLSv1_2
 """
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_bad_maximum_dont_update(self, tmpdir):
         """
@@ -63,13 +63,13 @@ context.maximum_version = TLSVersion.TLSv1
 context = whatever.SSLContext()
 context.minimum_version = whatever.TLSVersion.SSLv3
 """
-        expexted_output = """import ssl as whatever
+        expected_output = """import ssl as whatever
 import ssl
 
 context = whatever.SSLContext()
 context.minimum_version = ssl.TLSVersion.TLSv1_2
 """
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_with_dataflow(self, tmpdir):
         input_code = """import ssl
@@ -78,10 +78,10 @@ context = ssl.SSLContext()
 alias = context
 alias.minimum_version = ssl.TLSVersion.SSLv3
 """
-        expexted_output = """import ssl
+        expected_output = """import ssl
 
 context = ssl.SSLContext()
 alias = context
 alias.minimum_version = ssl.TLSVersion.TLSv1_2
 """
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)

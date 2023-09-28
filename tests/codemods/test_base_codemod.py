@@ -26,7 +26,7 @@ class DoNothingCodemod(SemgrepCodemod, Codemod):
 
 
 class TestEmptyResults:
-    def run_and_assert(self, input_code, expexted_output):
+    def run_and_assert(self, input_code, expected_output):
         input_tree = cst.parse_module(input_code)
         command_instance = DoNothingCodemod(
             CodemodContext(),
@@ -35,7 +35,7 @@ class TestEmptyResults:
         )
         output_tree = command_instance.transform_module(input_tree)
 
-        assert output_tree.code == expexted_output
+        assert output_tree.code == expected_output
 
     def test_empty_results(self):
         input_code = """print('Hello World')"""

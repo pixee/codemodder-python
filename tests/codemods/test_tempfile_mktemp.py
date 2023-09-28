@@ -15,13 +15,13 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
 tempfile.mktemp()
 var = "hello"
 """
-        expexted_output = """import tempfile
+        expected_output = """import tempfile
 
 tempfile.mkstemp()
 var = "hello"
 """
 
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_import_with_arg(self, tmpdir):
         input_code = """import tempfile
@@ -29,13 +29,13 @@ var = "hello"
 tempfile.mktemp('something')
 var = "hello"
 """
-        expexted_output = """import tempfile
+        expected_output = """import tempfile
 
 tempfile.mkstemp('something')
 var = "hello"
 """
 
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_from_import(self, tmpdir):
         input_code = """from tempfile import mktemp
@@ -43,12 +43,12 @@ var = "hello"
 mktemp()
 var = "hello"
 """
-        expexted_output = """import tempfile
+        expected_output = """import tempfile
 
 tempfile.mkstemp()
 var = "hello"
 """
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.skip()
     def test_import_alias(self, tmpdir):
@@ -57,12 +57,12 @@ var = "hello"
 _tempfile.mktemp()
 var = "hello"
 """
-        expexted_output = """import tempfile as _tempfile
+        expected_output = """import tempfile as _tempfile
 
 _tempfile.mkstemp()
 var = "hello"
 """
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_random_multifunctions(self, tmpdir):
         input_code = """from tempfile import mktemp, TemporaryFile
@@ -71,7 +71,7 @@ mktemp()
 TemporaryFile()
 var = "hello"
 """
-        expexted_output = """from tempfile import TemporaryFile
+        expected_output = """from tempfile import TemporaryFile
 import tempfile
 
 tempfile.mkstemp()
@@ -79,4 +79,4 @@ TemporaryFile()
 var = "hello"
 """
 
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected_output)
