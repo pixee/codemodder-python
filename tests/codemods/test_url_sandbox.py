@@ -6,8 +6,8 @@ from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 class TestUrlSandbox(BaseSemgrepCodemodTest):
     codemod = UrlSandbox
 
-    def test_rule_ids(self):
-        assert self.codemod.METADATA.NAME == "url-sandbox"
+    def test_name(self):
+        assert self.codemod.name() == "url-sandbox"
 
     def test_import_requests(self, tmpdir):
         input_code = """import requests

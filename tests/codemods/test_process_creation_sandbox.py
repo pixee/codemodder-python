@@ -6,8 +6,8 @@ from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
     codemod = ProcessSandbox
 
-    def test_rule_ids(self):
-        assert self.codemod.NAME == "sandbox-process-creation"
+    def test_name(self):
+        assert self.codemod.name() == "sandbox-process-creation"
 
     def test_import_subprocess(self, tmpdir):
         input_code = """import subprocess

@@ -6,8 +6,8 @@ from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 class TestSecureRandom(BaseSemgrepCodemodTest):
     codemod = SecureRandom
 
-    def test_rule_ids(self):
-        assert self.codemod.NAME == "secure-random"
+    def test_name(self):
+        assert self.codemod.name() == "secure-random"
 
     def test_import_random(self, tmpdir):
         input_code = """import random
