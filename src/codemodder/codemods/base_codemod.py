@@ -40,11 +40,6 @@ class BaseCodemod:
         # pylint: disable=no-member
         return cls.METADATA.NAME
 
-    @classmethod
-    def id(cls):
-        # pylint: disable=no-member
-        return f"pixee:python/{cls.name()}"
-
     @property
     def should_transform(self):
         return True
