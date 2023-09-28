@@ -121,6 +121,15 @@ class SemgrepCodemod(
         _SemgrepCodemod.__init__(self, execution_context, file_context)
         BaseTransformer.__init__(self, codemod_context, self._results)
 
+    def _new_or_updated_node(self, original_node, updated_node):
+        if self.node_is_selected(original_node):
+            self.report_change(original_node)
+            if (attr := getattr(self, "on_result_found", None)) is not None:
+                # pylint: disable=not-callable
+                new_node = attr(original_node, updated_node)
+                return new_node
+        return updated_node
+
     # TODO: there needs to be a way to generalize this so that it applies
     # more broadly than to just a specific kind of node. There's probably a
     # decent way to do this with metaprogramming. We could either apply it
@@ -130,24 +139,7 @@ class SemgrepCodemod(
     # similar when they define their `on_result_found` method.
     # Right now this is just to demonstrate a particular use case.
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
-        if self.node_is_selected(original_node):
-            self.report_change(original_node)
-            if (attr := getattr(self, "on_result_found", None)) is not None:
-                # pylint: disable=not-callable
-                new_node = attr(original_node, updated_node)
-                return new_node
-
-        return updated_node
+        return self._new_or_updated_node(original_node, updated_node)
 
     def leave_Assign(self, original_node, updated_node):
-        pos_to_match = self.node_position(original_node)
-        if self.filter_by_result(
-            pos_to_match
-        ) and self.filter_by_path_includes_or_excludes(pos_to_match):
-            self.report_change(original_node)
-            if (attr := getattr(self, "on_result_found", None)) is not None:
-                # pylint: disable=not-callable
-                new_node = attr(original_node, updated_node)
-                return new_node
-
-        return updated_node
+        return self._new_or_updated_node(original_node, updated_node)
