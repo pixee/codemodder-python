@@ -102,8 +102,7 @@ excel
         input_code = """import subprocess
 
 subprocess.run("echo 'hi'", shell=True)
-subprocess.check_output(["ls", "-l"])
-        """
+subprocess.check_output(["ls", "-l"])"""
 
         expected = """import subprocess
 from security import safe_command

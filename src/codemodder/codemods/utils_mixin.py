@@ -65,16 +65,9 @@ class NameResolutionMixin(MetadataDependent):
         Given a MetadataWrapper and a CSTNode with a possible access to it, find all the possible assignments that it refers.
         """
         scope = self.get_metadata(ScopeProvider, node)
-        # TODO workaround for a bug in libcst
-        if matchers.matches(node, matchers.Attribute()):
-            for access in scope.accesses:
-                if access.node == node:
-                    # pylint: disable=protected-access
-                    return access._Access__assignments
-        else:
-            if node in scope.accesses:
-                # pylint: disable=protected-access
-                return next(iter(scope.accesses[node]))._Access__assignments
+        if node in scope.accesses:
+            # pylint: disable=protected-access
+            return next(iter(scope.accesses[node]))._Access__assignments
         return set()
 
     def find_single_assignment(

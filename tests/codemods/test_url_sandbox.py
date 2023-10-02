@@ -84,8 +84,7 @@ excel
         input_code = """import requests
 
 requests.get("www.google.com")
-requests.status_codes.codes.FORBIDDEN
-        """
+requests.status_codes.codes.FORBIDDEN"""
 
         expected = """import requests
 from security import safe_requests
