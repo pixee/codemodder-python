@@ -21,7 +21,7 @@ def disable_update_code():
     """
     Unit tests should not write analysis report or update any source files.
     """
-    patch_update_code = mock.patch("codemodder.__main__.update_code")
+    patch_update_code = mock.patch("codemodder.codemodder.update_code")
     patch_update_code.start()
     yield
     patch_update_code.stop()
@@ -32,7 +32,7 @@ def disable_semgrep_run():
     """
     Semgrep run is slow so we mock them or pass hardcoded results when possible.
     """
-    semgrep_run = mock.patch("codemodder.__main__.semgrep_run")
+    semgrep_run = mock.patch("codemodder.codemodder.semgrep_run")
 
     semgrep_run.start()
     yield

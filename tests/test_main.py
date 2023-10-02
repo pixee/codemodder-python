@@ -1,13 +1,13 @@
 import mock
 import pytest
-from codemodder.__main__ import run
+from codemodder.codemodder import run
 from codemodder.semgrep import run as semgrep_run
 from codemodder.registry import load_registered_codemods
 
 
 class TestRun:
     @mock.patch("libcst.parse_module")
-    @mock.patch("codemodder.__main__.logger.warning")
+    @mock.patch("codemodder.codemodder.logger.warning")
     def test_no_files_matched(self, warning_log, mock_parse):
         args = [
             "tests/samples/",
@@ -26,7 +26,7 @@ class TestRun:
         mock_parse.assert_not_called()
 
     @mock.patch("libcst.parse_module", side_effect=Exception)
-    @mock.patch("codemodder.__main__.report_default")
+    @mock.patch("codemodder.codemodder.report_default")
     def test_cst_parsing_fails(self, mock_reporting, mock_parse):
         args = [
             "tests/samples/",
@@ -46,9 +46,9 @@ class TestRun:
         _, _, _, results_by_codemod = args_to_reporting
         assert results_by_codemod == []
 
-    @mock.patch("codemodder.__main__.logger.info")
-    @mock.patch("codemodder.__main__.update_code")
-    @mock.patch("codemodder.__main__.semgrep_run", side_effect=semgrep_run)
+    @mock.patch("codemodder.codemodder.logger.info")
+    @mock.patch("codemodder.codemodder.update_code")
+    @mock.patch("codemodder.codemodder.semgrep_run", side_effect=semgrep_run)
     def test_dry_run(self, _, mock_update_code, info_log):
         args = [
             "tests/samples/",
@@ -71,7 +71,7 @@ class TestRun:
         mock_update_code.assert_not_called()
 
     @pytest.mark.parametrize("dry_run", [True, False])
-    @mock.patch("codemodder.__main__.report_default")
+    @mock.patch("codemodder.codemodder.report_default")
     def test_reporting(self, mock_reporting, dry_run):
         args = [
             "tests/samples/",
@@ -93,7 +93,7 @@ class TestRun:
         for codemod_results in results_by_codemod:
             assert len(codemod_results["changeset"]) > 0
 
-    @mock.patch("codemodder.__main__.semgrep_run")
+    @mock.patch("codemodder.codemodder.semgrep_run")
     def test_no_codemods_to_run(self, mock_semgrep_run):
         registry = load_registered_codemods()
         names = ",".join(registry.names)
@@ -109,7 +109,7 @@ class TestRun:
         mock_semgrep_run.assert_not_called()
 
     @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
-    @mock.patch("codemodder.__main__.compile_results")
+    @mock.patch("codemodder.codemodder.compile_results")
     def test_run_codemod_name_or_id(self, mock_compile_results, codemod):
         args = [
             "tests/samples/",

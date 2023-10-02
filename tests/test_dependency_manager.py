@@ -1,6 +1,6 @@
 import mock
 from pathlib import Path
-from codemodder.__main__ import run
+from codemodder.codemodder import run
 from codemodder.semgrep import run as semgrep_run
 from codemodder.dependency_manager import write_dependencies
 
@@ -20,7 +20,7 @@ class TestDependencyManager:
         assert str(dep) == "requests==2.31.0"
 
     @mock.patch("codemodder.dependency_manager.DependencyManagerAbstract._write")
-    @mock.patch("codemodder.__main__.semgrep_run", side_effect=semgrep_run)
+    @mock.patch("codemodder.codemodder.semgrep_run", side_effect=semgrep_run)
     def test_dont_write(self, _, write_mock):
         # Tests that dependency manager does not write to file if only
         # codemods that don't change dependencies run.
@@ -35,7 +35,7 @@ class TestDependencyManager:
         write_mock.assert_not_called()
 
     @mock.patch("codemodder.dependency_manager.DependencyManagerAbstract._write")
-    @mock.patch("codemodder.__main__.semgrep_run", side_effect=semgrep_run)
+    @mock.patch("codemodder.codemodder.semgrep_run", side_effect=semgrep_run)
     def test_write_expected(self, _, write_mock):
         args = [
             "tests/samples/",
