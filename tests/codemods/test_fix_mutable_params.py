@@ -193,3 +193,31 @@ def foo(x = None, y: Optional[List[int]] = None, z: Optional[Dict[str, int]] = N
     print(x, y, z)
 """
         self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_fix_respect_docstring(self, tmpdir):
+        input_code = '''
+def func(foo=[]):
+    """Here is a docstring"""
+    print(foo)
+'''
+        expected_output = '''
+def func(foo=None):
+    """Here is a docstring"""
+    foo = [] if foo is None else foo
+    print(foo)
+'''
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_fix_respect_leading_comment(self, tmpdir):
+        input_code = """
+def func(foo=[]):
+    # Here is a comment
+    print(foo)
+"""
+        expected_output = """
+def func(foo=None):
+    foo = [] if foo is None else foo
+    # Here is a comment
+    print(foo)
+"""
+        self.run_and_assert(tmpdir, input_code, expected_output)
