@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.scripts]
-codemodder = "codemodder.__main__:main"
+codemodder = "codemodder.codemodder:main"
 
 [project.entry-points.codemods]
 core = "core_codemods:registry"

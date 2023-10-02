@@ -159,6 +159,7 @@ def run(original_args) -> int:
     sarif_results = parse_sarif_files(argv.sarif or [])
 
     # run semgrep and gather the results
+    # TODO: call once per codemod rather than once for all codemods
     semgrep_results = semgrep_run(context, codemods_to_run)
 
     # merge the results
@@ -197,15 +198,5 @@ def run(original_args) -> int:
 def main():
     # TODO: I'm not sure why this needs to be parsed out separately
     # Maybe it has something to do with the invocation as python -m codemodder.
-    # But I think we should deprecate that interface which should simplify this.
     sys_argv = sys.argv[1:]
     sys.exit(run(sys_argv))
-
-
-if __name__ == "__main__":
-    import warnings
-
-    warnings.warn(
-        "This command interface is deprecated. Please call the `codemodder` script directly instead"
-    )
-    main()
