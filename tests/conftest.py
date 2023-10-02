@@ -32,7 +32,7 @@ def disable_semgrep_run():
     """
     Semgrep run is slow so we mock them or pass hardcoded results when possible.
     """
-    semgrep_run = mock.patch("codemodder.codemodder.semgrep_run")
+    semgrep_run = mock.patch("codemodder.codemods.base_codemod.semgrep_run")
 
     semgrep_run.start()
     yield

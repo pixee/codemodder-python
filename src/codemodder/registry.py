@@ -1,9 +1,9 @@
 from dataclasses import dataclass, asdict
-from importlib.abc import Traversable
 from importlib.resources import files
 from importlib.metadata import entry_points
 from typing import Optional
 
+from codemodder.executor import CodemodExecutorWrapper
 from codemodder.logging import logger
 
 
@@ -17,57 +17,8 @@ class CodemodCollection:
     codemods: list
 
 
-@dataclass
-class _CodemodWrapper:
-    """A wrapper around a codemod that provides additional metadata."""
-
-    origin: str
-    codemod: type
-    docs_module: Traversable
-    semgrep_config_module: Traversable
-
-    def __call__(self, *args, **kwargs):
-        return self.codemod(*args, **kwargs)
-
-    @property
-    def name(self):
-        return self.codemod.name()
-
-    @property
-    def id(self):
-        return f"{self.origin}:python/{self.name}"
-
-    @property
-    def YAML_FILES(self):
-        return self.codemod.YAML_FILES
-
-    @property
-    def is_semgrep(self):
-        return self.codemod.is_semgrep
-
-    @property
-    def summary(self):
-        return self.codemod.SUMMARY
-
-    def _get_description(self):
-        doc_path = self.docs_module / f"{self.origin}_python_{self.name}.md"
-        return doc_path.read_text()
-
-    @property
-    def description(self):
-        try:
-            return self._get_description()
-        except FileNotFoundError:
-            # TODO: temporary workaround
-            return self.codemod.METADATA.DESCRIPTION
-
-    @property
-    def yaml_files(self):
-        return [self.semgrep_config_module / yaml_file for yaml_file in self.YAML_FILES]
-
-
 class CodemodRegistry:
-    _codemods: list[_CodemodWrapper]
+    _codemods: list[CodemodExecutorWrapper]
 
     def __init__(self):
         self._codemods = []
@@ -82,7 +33,7 @@ class CodemodRegistry:
 
     @property
     def codemods(self):
-        return [codemod.codemod for codemod in self._codemods]
+        return self._codemods
 
     def add_codemod_collection(self, collection: CodemodCollection):
         docs_module = files(collection.docs_module)
@@ -90,9 +41,9 @@ class CodemodRegistry:
         for codemod in collection.codemods:
             self._validate_codemod(codemod)
             self._codemods.append(
-                _CodemodWrapper(
-                    collection.origin,
+                CodemodExecutorWrapper(
                     codemod,
+                    collection.origin,
                     docs_module,
                     semgrep_module,
                 )
@@ -133,6 +84,7 @@ class CodemodRegistry:
         # cli should've already prevented both include/exclude from being set.
         assert codemod_include or codemod_exclude
 
+        # TODO: preserve order of includes
         if codemod_exclude:
             return {
                 name: codemod

@@ -3,14 +3,12 @@ import subprocess
 
 class TestProgramFails:
     def test_no_project_dir_provided(self):
-        completed_process = subprocess.run(["python", "-m", "codemodder"], check=False)
+        completed_process = subprocess.run(["codemodder"], check=False)
         assert completed_process.returncode == 3
 
     def test_codemods_include_exclude_conflict(self):
         completed_process = subprocess.run(
             [
-                "python",
-                "-m",
                 "codemodder",
                 "tests/samples/",
                 "--output",

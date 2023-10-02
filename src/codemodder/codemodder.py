@@ -13,9 +13,8 @@ from codemodder.cli import parse_args
 from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.context import CodemodExecutionContext, ChangeSet
 from codemodder.dependency_manager import write_dependencies
+from codemodder.executor import CodemodExecutorWrapper
 from codemodder.report.codetf_reporter import report_default
-from codemodder.semgrep import run as semgrep_run
-from codemodder.sarifs import parse_sarif_files
 
 
 def update_code(file_path, new_code):
@@ -27,53 +26,53 @@ def update_code(file_path, new_code):
         f.write(new_code)
 
 
-def run_codemods_for_file(
+def apply_codemod_to_file(
     execution_context: CodemodExecutionContext,
     file_context,
-    codemods_to_run,
+    codemod_kls: CodemodExecutorWrapper,
     source_tree,
 ):
-    for name, codemod_kls in codemods_to_run.items():
-        wrapper = cst.MetadataWrapper(source_tree)
-        codemod = codemod_kls(
-            CodemodContext(wrapper=wrapper),
-            execution_context,
-            file_context,
+    name = codemod_kls.id
+    wrapper = cst.MetadataWrapper(source_tree)
+    codemod = codemod_kls(
+        CodemodContext(wrapper=wrapper),
+        execution_context,
+        file_context,
+    )
+    if not codemod.should_transform:
+        return
+
+    logger.info("Running codemod %s for %s", name, file_context.file_path)
+    output_tree = codemod.transform_module(source_tree)
+    # TODO: there has got to be a more efficient way to check this?
+    changed_file = not output_tree.deep_equals(source_tree)
+
+    if changed_file:
+        diff = "".join(
+            difflib.unified_diff(
+                source_tree.code.splitlines(1), output_tree.code.splitlines(1)
+            )
         )
-        if not codemod.should_transform:
-            continue
+        logger.debug("CHANGED %s with codemod %s", file_context.file_path, name)
+        logger.debug(diff)
 
-        logger.info("Running codemod %s for %s", name, file_context.file_path)
-        output_tree = codemod.transform_module(source_tree)
-        # TODO: there has got to be a more efficient way to check this?
-        changed_file = not output_tree.deep_equals(source_tree)
+        change_set = ChangeSet(
+            str(file_context.file_path.relative_to(execution_context.directory)),
+            diff,
+            changes=file_context.codemod_changes,
+        )
+        execution_context.add_result(name, change_set)
 
-        if changed_file:
-            diff = "".join(
-                difflib.unified_diff(
-                    source_tree.code.splitlines(1), output_tree.code.splitlines(1)
-                )
-            )
-            logger.debug("CHANGED %s with codemod %s", file_context.file_path, name)
-            logger.debug(diff)
-
-            change_set = ChangeSet(
-                str(file_context.file_path.relative_to(execution_context.directory)),
-                diff,
-                changes=file_context.codemod_changes,
-            )
-            execution_context.add_result(name, change_set)
-
-            if execution_context.dry_run:
-                logger.info("Dry run, not changing files")
-            else:
-                update_code(file_context.file_path, output_tree.code)
+        if execution_context.dry_run:
+            logger.info("Dry run, not changing files")
+        else:
+            update_code(file_context.file_path, output_tree.code)
 
 
 def analyze_files(
     execution_context: CodemodExecutionContext,
     files_to_analyze,
-    codemods_to_run,
+    codemod,
     sarif,
     cli_args,
 ):
@@ -90,7 +89,7 @@ def analyze_files(
 
         line_exclude = file_line_patterns(file_path, cli_args.path_exclude)
         line_include = file_line_patterns(file_path, cli_args.path_include)
-        sarif_for_file = sarif[str(file_path)]
+        sarif_for_file = sarif.get(str(file_path)) or {}
 
         file_context = FileContext(
             file_path,
@@ -99,33 +98,12 @@ def analyze_files(
             sarif_for_file,
         )
 
-        run_codemods_for_file(
+        apply_codemod_to_file(
             execution_context,
             file_context,
-            codemods_to_run,
+            codemod,
             source_tree,
         )
-
-
-def compile_results(execution_context: CodemodExecutionContext, codemods):
-    results = []
-    for name, codemod in codemods.items():
-        if not (changeset := execution_context.results_by_codemod.get(name)):
-            continue
-
-        data = {
-            "codemod": codemod.id,
-            "summary": codemod.summary,
-            "description": codemod.description,
-            "references": [],
-            "properties": {},
-            "failedFiles": [],
-            "changeset": [change.to_json() for change in changeset],
-        }
-
-        results.append(data)
-
-    return results
 
 
 def run(original_args) -> int:
@@ -144,10 +122,13 @@ def run(original_args) -> int:
 
     context = CodemodExecutionContext(
         Path(argv.directory),
+        # TODO: pass all of argv instead of just dry_run
         argv.dry_run,
         codemod_registry,
     )
 
+    # TODO: this needs to preserve the given order of codemods
+    # TODO: this should be a method of CodemodExecutionContext
     codemods_to_run = codemod_registry.match_codemods(
         argv.codemod_include, argv.codemod_exclude
     )
@@ -158,18 +139,7 @@ def run(original_args) -> int:
 
     logger.debug("Codemods to run: %s", codemods_to_run)
 
-    # parse sarifs from --sarif flags
-    sarif_results = parse_sarif_files(argv.sarif or [])
-
-    # run semgrep and gather the results
-    # TODO: call once per codemod rather than once for all codemods
-    semgrep_results = semgrep_run(context, codemods_to_run)
-
-    # merge the results
-    sarif_results.update(semgrep_results)
-
-    if not sarif_results:
-        logger.warning("No sarif results.")
+    # XXX: sarif files given on the command line are currently not used by any codemods
 
     files_to_analyze = match_files(
         context.directory, argv.path_exclude, argv.path_include
@@ -181,15 +151,18 @@ def run(original_args) -> int:
     full_names = [str(path) for path in files_to_analyze]
     logger.debug("Matched files:\n%s", "\n".join(full_names))
 
-    analyze_files(
-        context,
-        files_to_analyze,
-        codemods_to_run,
-        sarif_results,
-        argv,
-    )
+    # run codemods in sequence
+    for codemod in codemods_to_run.values():
+        results = codemod.apply(context)
+        analyze_files(
+            context,
+            files_to_analyze,
+            codemod,
+            results,
+            argv,
+        )
 
-    results = compile_results(context, codemods_to_run)
+    results = context.compile_results(codemods_to_run)
 
     write_dependencies(context)
     elapsed = datetime.datetime.now() - start
@@ -199,7 +172,5 @@ def run(original_args) -> int:
 
 
 def main():
-    # TODO: I'm not sure why this needs to be parsed out separately
-    # Maybe it has something to do with the invocation as python -m codemodder.
     sys_argv = sys.argv[1:]
     sys.exit(run(sys_argv))

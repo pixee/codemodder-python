@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import DefaultDict, List
+from typing import Dict, List
 
 
 @dataclass
@@ -12,7 +12,7 @@ class FileContext:
     file_path: Path
     line_exclude: List[int]
     line_include: List[int]
-    results_by_id: DefaultDict
+    results_by_id: Dict
 
     def __post_init__(self):
         if self.line_include is None:

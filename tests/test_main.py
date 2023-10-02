@@ -21,7 +21,7 @@ class TestRun:
         assert res == 0
 
         warning_log.assert_called()
-        assert warning_log.call_args_list[1][0][0] == "No files matched."
+        assert warning_log.call_args_list[0][0][0] == "No files matched."
 
         mock_parse.assert_not_called()
 
@@ -48,7 +48,7 @@ class TestRun:
 
     @mock.patch("codemodder.codemodder.logger.info")
     @mock.patch("codemodder.codemodder.update_code")
-    @mock.patch("codemodder.codemodder.semgrep_run", side_effect=semgrep_run)
+    @mock.patch("codemodder.codemods.base_codemod.semgrep_run", side_effect=semgrep_run)
     def test_dry_run(self, _, mock_update_code, info_log):
         args = [
             "tests/samples/",
@@ -93,7 +93,7 @@ class TestRun:
         for codemod_results in results_by_codemod:
             assert len(codemod_results["changeset"]) > 0
 
-    @mock.patch("codemodder.codemodder.semgrep_run")
+    @mock.patch("codemodder.codemods.base_codemod.semgrep_run")
     def test_no_codemods_to_run(self, mock_semgrep_run):
         registry = load_registered_codemods()
         names = ",".join(registry.names)
@@ -109,7 +109,7 @@ class TestRun:
         mock_semgrep_run.assert_not_called()
 
     @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
-    @mock.patch("codemodder.codemodder.compile_results")
+    @mock.patch("codemodder.context.CodemodExecutionContext.compile_results")
     def test_run_codemod_name_or_id(self, mock_compile_results, codemod):
         args = [
             "tests/samples/",

@@ -42,8 +42,6 @@ class TestSarifProcessing:
     def test_codeql_sarif_input(self, tmpdir):
         completed_process = subprocess.run(
             [
-                "python",
-                "-m",
                 "codemodder",
                 "tests/samples/",
                 "--sarif",

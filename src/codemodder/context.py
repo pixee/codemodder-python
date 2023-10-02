@@ -2,6 +2,7 @@ from pathlib import Path
 from dataclasses import dataclass
 
 from codemodder.change import Change
+from codemodder.executor import CodemodExecutorWrapper
 from codemodder.registry import CodemodRegistry
 
 
@@ -18,7 +19,7 @@ class ChangeSet:
 
 
 class CodemodExecutionContext:
-    results_by_codemod: dict[str, list[ChangeSet]] = {}
+    _results_by_codemod: dict[str, list[ChangeSet]] = {}
     dependencies: set[str]
     directory: Path
     dry_run: bool = False
@@ -28,11 +29,31 @@ class CodemodExecutionContext:
         self.directory = directory
         self.dry_run = dry_run
         self.dependencies = set()
-        self.results_by_codemod = {}
+        self._results_by_codemod = {}
         self.registry = registry
 
     def add_result(self, codemod_name, change_set):
-        self.results_by_codemod.setdefault(codemod_name, []).append(change_set)
+        self._results_by_codemod.setdefault(codemod_name, []).append(change_set)
 
     def add_dependency(self, dependency: str):
         self.dependencies.add(dependency)
+
+    def compile_results(self, codemods: list[CodemodExecutorWrapper]):
+        results = []
+        for codemod in codemods:
+            if not (changeset := self._results_by_codemod.get(codemod.id)):
+                continue
+
+            data = {
+                "codemod": codemod.id,
+                "summary": codemod.summary,
+                "description": codemod.description,
+                "references": [],
+                "properties": {},
+                "failedFiles": [],
+                "changeset": [change.to_json() for change in changeset],
+            }
+
+            results.append(data)
+
+        return results

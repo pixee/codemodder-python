@@ -12,6 +12,9 @@ def run_on_directory(yaml_files: List[Path], directory: Path):
     """
     Runs Semgrep and outputs a dict with the results organized by rule_id.
     """
+    if not yaml_files:
+        raise ValueError("No Semgrep rules were provided")
+
     with NamedTemporaryFile(prefix="semgrep", suffix=".sarif") as temp_sarif_file:
         command = [
             "semgrep",
@@ -31,29 +34,11 @@ def run_on_directory(yaml_files: List[Path], directory: Path):
         command.append(str(directory))
         joined_command = " ".join(command)
         logger.debug("Executing semgrep with: `%s`", joined_command)
-        subprocess.run(joined_command, shell=True, check=True)
+        # TODO: make sure to capture stderr and stdout in the event of a problem
+        subprocess.run(command, shell=False, check=True)
         results = results_by_path_and_rule_id(temp_sarif_file.name)
         return results
 
 
-def run(execution_context: CodemodExecutionContext, codemods: dict) -> dict:
-    semgrep_codemods = only_semgrep(codemods)
-    if semgrep_codemods:
-        return run_on_directory(
-            find_all_yaml_files(semgrep_codemods), execution_context.directory
-        )
-    return {}
-
-
-def find_all_yaml_files(codemods) -> list[Path]:
-    """
-    Finds all yaml files associated with the given codemods.
-    """
-    return list(itertools.chain(*[codemod.yaml_files for codemod in codemods.values()]))
-
-
-def only_semgrep(codemods) -> dict:
-    """
-    Returns only semgrep codemods.
-    """
-    return {name: codemod for name, codemod in codemods.items() if codemod.is_semgrep}
+def run(execution_context: CodemodExecutionContext, yaml_files: List[Path]) -> dict:
+    return run_on_directory(yaml_files, execution_context.directory)
