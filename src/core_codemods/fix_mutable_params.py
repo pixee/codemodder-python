@@ -117,6 +117,22 @@ class FixMutableParams(BaseCodemod):
             for var_decl in new_var_decls
         ]
 
+    def _build_new_body(self, new_var_decls, body):
+        offset = 0
+        new_body = []
+
+        # Preserve placement of docstring
+        if body and m.matches(
+            body[0],
+            m.SimpleStatementLine(body=[m.Expr(value=m.SimpleString())]),
+        ):
+            new_body.append(body[0])
+            offset = 1
+
+        new_body.extend(self._build_body_prefix(new_var_decls))
+        new_body.extend(body[offset:])
+        return new_body
+
     def leave_FunctionDef(
         self,
         original_node: cst.FunctionDef,
@@ -128,14 +144,13 @@ class FixMutableParams(BaseCodemod):
             new_var_decls,
             add_annotation,
         ) = self._gather_and_update_params(original_node, updated_node)
-        # Add any new variable declarations to the top of the function body
-        if body_prefix := self._build_body_prefix(new_var_decls):
+        new_body = self._build_new_body(new_var_decls, updated_node.body.body)
+        if new_var_decls:
             # If we're adding statements to the body, we know a change took place
             self.add_change(original_node, self.CHANGE_DESCRIPTION)
         if add_annotation:
             self.add_needed_import("typing", "Optional")
 
-        new_body = tuple(body_prefix) + updated_node.body.body
         return updated_node.with_changes(
             params=updated_node.params.with_changes(params=updated_params),
             body=updated_node.body.with_changes(body=new_body),
