@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 from typing import List, ClassVar
 
 from libcst._position import CodeRange
@@ -7,6 +8,7 @@ from libcst._position import CodeRange
 from codemodder.change import Change
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
+from codemodder.semgrep import run as semgrep_run
 
 
 class ReviewGuidance(Enum):
@@ -34,6 +36,16 @@ class BaseCodemod:
     def __init__(self, execution_context: CodemodExecutionContext, file_context):
         self.execution_context = execution_context
         self.file_context = file_context
+
+    @classmethod
+    def apply_rule(cls, context, *args, **kwargs):
+        """
+        Apply rule associated with this codemod and gather results
+
+        Does nothing by default. Subclasses may override for custom rule logic.
+        """
+        del context, args, kwargs
+        return {}
 
     @classmethod
     def name(cls):
@@ -85,6 +97,16 @@ class SemgrepCodemod(BaseCodemod):
             )
             or []
         )
+
+    @classmethod
+    def apply_rule(
+        cls, context, *args, yaml_files: List[Path], **kwargs
+    ):  # pylint: disable=arguments-differ
+        """
+        Apply semgrep to gather rule results
+        """
+        del args, kwargs
+        return semgrep_run(context, yaml_files)
 
     @property
     def should_transform(self):

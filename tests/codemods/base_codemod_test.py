@@ -8,7 +8,6 @@ from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from codemodder.registry import CodemodRegistry, CodemodCollection
 from codemodder.semgrep import run_on_directory as semgrep_run
-from codemodder.semgrep import find_all_yaml_files
 from typing import ClassVar
 
 import mock
@@ -63,7 +62,9 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         with open(file_path, "w", encoding="utf-8") as tmp_file:
             tmp_file.write(input_code)
 
-        return semgrep_run(find_all_yaml_files(self.registry.match_codemods()), root)
+        name = self.codemod.name()
+        results = self.registry.match_codemods(codemod_include=[name])
+        return semgrep_run(results[name].yaml_files, root)
 
     def run_and_assert_filepath(self, root, file_path, input_code, expected):
         input_tree = cst.parse_module(input_code)
