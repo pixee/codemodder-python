@@ -98,7 +98,7 @@ def _match_with_existing_arg(arg, args_info):
     Given an `arg` and a list of arg info, determine if
     any of the names in arg_info match the arg.
     """
-    for idx, (arg_name, replacement_val, add_if_missing) in enumerate(args_info):
+    for idx, (arg_name, replacement_val, _) in enumerate(args_info):
         if matchers.matches(arg.keyword, matchers.Name(arg_name)):
             return arg_name, replacement_val, idx
     return None, None, None
