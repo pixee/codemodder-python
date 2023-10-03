@@ -5,8 +5,8 @@ from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
     codemod = EnableJinja2Autoescape
 
-    def test_rule_ids(self):
-        assert self.codemod.NAME == "enable-jinja2-autoescape"
+    def test_name(self):
+        assert self.codemod.name() == "enable-jinja2-autoescape"
 
     def test_import(self, tmpdir):
         input_code = """import jinja2

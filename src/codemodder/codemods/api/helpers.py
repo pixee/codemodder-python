@@ -47,6 +47,29 @@ class Helpers:
     def parse_expression(self, expression: str):
         return cst.parse_expression(expression)
 
+    def replace_args(
+        self,
+        original_node,
+        args_info,
+    ):
+        new_args = []
+
+        for arg in original_node.args:
+            arg_name, replacement_val, idx = _match_with_existing_arg(arg, args_info)
+            if arg_name is not None:
+                new = self.make_new_arg(arg_name, replacement_val, arg)
+                del args_info[idx]
+            else:
+                new = arg
+            new_args.append(new)
+
+        for arg_name, replacement_val, add_if_missing in args_info:
+            if add_if_missing:
+                new = self.make_new_arg(arg_name, replacement_val)
+                new_args.append(new)
+
+        return new_args
+
     def replace_arg(
         self,
         original_node,
@@ -91,3 +114,14 @@ class Helpers:
             value=cst.parse_expression(value),
             equal=equal,
         )
+
+
+def _match_with_existing_arg(arg, args_info):
+    """
+    Given an `arg` and a list of arg info, determine if
+    any of the names in arg_info match the arg.
+    """
+    for idx, (arg_name, replacement_val, add_if_missing) in enumerate(args_info):
+        if matchers.matches(arg.keyword, matchers.Name(arg_name)):
+            return arg_name, replacement_val, idx
+    return None, None, None
