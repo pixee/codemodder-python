@@ -27,5 +27,5 @@ class HardenRuamel(SemgrepCodemod):
         """
 
     def on_result_found(self, original_node, updated_node):
-        new_args = self.replace_arg(original_node, "typ", '"safe"')
+        new_args = self.replace_args(original_node, [("typ", '"safe"', False)])
         return self.update_arg_target(updated_node, new_args)

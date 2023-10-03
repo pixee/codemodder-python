@@ -22,5 +22,5 @@ class RequestsVerify(SemgrepCodemod):
         """
 
     def on_result_found(self, original_node, updated_node):
-        new_args = self.replace_arg(original_node, "verify", "True")
+        new_args = self.replace_args(original_node, [("verify", "True", False)])
         return self.update_arg_target(updated_node, new_args)

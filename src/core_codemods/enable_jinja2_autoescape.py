@@ -21,7 +21,5 @@ class EnableJinja2Autoescape(SemgrepCodemod):
         """
 
     def on_result_found(self, original_node, updated_node):
-        new_args = self.replace_arg(
-            original_node, "autoescape", "True", add_if_missing=True
-        )
+        new_args = self.replace_args(original_node, [("autoescape", "True", True)])
         return self.update_arg_target(updated_node, new_args)

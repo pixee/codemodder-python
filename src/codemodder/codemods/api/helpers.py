@@ -47,11 +47,18 @@ class Helpers:
     def parse_expression(self, expression: str):
         return cst.parse_expression(expression)
 
-    def replace_args(
-        self,
-        original_node,
-        args_info,
-    ):
+    def replace_args(self, original_node, args_info):
+        """
+        Iterate over the args in original_node and replace each arg
+        with any matching arg in `args_info`.
+
+        :param original_node: libcst node with args attribute.
+        :param list args_info: List of tuples.
+            Ex: [("new_arg", "new_arg_value", True/False)]
+            The True/False value should indicate whether the arg should be added
+            if not present in original_node's args.
+        """
+        assert hasattr(original_node, "args")
         new_args = []
 
         for arg in original_node.args:
@@ -68,36 +75,6 @@ class Helpers:
                 new = self.make_new_arg(arg_name, replacement_val)
                 new_args.append(new)
 
-        return new_args
-
-    def replace_arg(
-        self,
-        original_node,
-        target_arg_name,
-        target_arg_replacement_val,
-        add_if_missing=False,
-    ):
-        """Given a node, return its args with one arg's value changed.
-
-        If add_if_missing is True, then if target arg is not present, add it.
-        """
-        assert hasattr(original_node, "args")
-        new_args = []
-        arg_added = False
-
-        for arg in original_node.args:
-            if matchers.matches(arg.keyword, matchers.Name(target_arg_name)):
-                new = self.make_new_arg(
-                    target_arg_name, target_arg_replacement_val, arg
-                )
-                arg_added = True
-            else:
-                new = arg
-            new_args.append(new)
-
-        if add_if_missing and not arg_added:
-            new = self.make_new_arg(target_arg_name, target_arg_replacement_val)
-            new_args.append(new)
         return new_args
 
     def make_new_arg(self, name, value, existing_arg=None):
