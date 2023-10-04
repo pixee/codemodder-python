@@ -18,36 +18,38 @@ class CodemodCollection:
 
 
 class CodemodRegistry:
-    _codemods: list[CodemodExecutorWrapper]
+    _codemods_by_name: dict[str, CodemodExecutorWrapper]
+    _codemods_by_id: dict[str, CodemodExecutorWrapper]
 
     def __init__(self):
-        self._codemods = []
+        self._codemods_by_name = {}
+        self._codemods_by_id = {}
 
     @property
     def names(self):
-        return [codemod.name for codemod in self._codemods]
+        return list(self._codemods_by_name.keys())
 
     @property
     def ids(self):
-        return [codemod.id for codemod in self._codemods]
+        return list(self._codemods_by_id.keys())
 
     @property
     def codemods(self):
-        return self._codemods
+        return list(self._codemods_by_name.values())
 
     def add_codemod_collection(self, collection: CodemodCollection):
         docs_module = files(collection.docs_module)
         semgrep_module = files(collection.semgrep_config_module)
         for codemod in collection.codemods:
             self._validate_codemod(codemod)
-            self._codemods.append(
-                CodemodExecutorWrapper(
-                    codemod,
-                    collection.origin,
-                    docs_module,
-                    semgrep_module,
-                )
+            wrapper = CodemodExecutorWrapper(
+                codemod,
+                collection.origin,
+                docs_module,
+                semgrep_module,
             )
+            self._codemods_by_name[wrapper.name] = wrapper
+            self._codemods_by_id[wrapper.id] = wrapper
 
     def _validate_codemod(self, codemod):
         for name in ["SUMMARY", "METADATA"]:
@@ -74,9 +76,9 @@ class CodemodRegistry:
         self,
         codemod_include: Optional[list] = None,
         codemod_exclude: Optional[list] = None,
-    ) -> dict:
+    ) -> list[CodemodExecutorWrapper]:
         if not codemod_include and not codemod_exclude:
-            return {codemod.name: codemod for codemod in self._codemods}
+            return self.codemods
 
         codemod_include = codemod_include or []
         codemod_exclude = codemod_exclude or []
@@ -84,21 +86,18 @@ class CodemodRegistry:
         # cli should've already prevented both include/exclude from being set.
         assert codemod_include or codemod_exclude
 
-        # TODO: preserve order of includes
         if codemod_exclude:
-            return {
-                name: codemod
-                for codemod in self._codemods
-                if (name := codemod.name) not in codemod_exclude
+            return [
+                codemod
+                for codemod in self.codemods
+                if codemod.name not in codemod_exclude
                 and codemod.id not in codemod_exclude
-            }
+            ]
 
-        return {
-            name: codemod
-            for codemod in self._codemods
-            if (name := codemod.name) in codemod_include
-            or codemod.id in codemod_include
-        }
+        return [
+            self._codemods_by_name.get(name) or self._codemods_by_id[name]
+            for name in codemod_include
+        ]
 
 
 def load_registered_codemods() -> CodemodRegistry:
