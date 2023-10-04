@@ -1,7 +1,10 @@
+from collections import namedtuple
 import libcst as cst
 from libcst import matchers
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from codemodder.codemods.utils import get_call_name
+
+NewArg = namedtuple("NewArg", ["name", "value", "add_if_missing"])
 
 
 class Helpers:
@@ -53,12 +56,12 @@ class Helpers:
         with any matching arg in `args_info`.
 
         :param original_node: libcst node with args attribute.
-        :param list args_info: List of tuples.
-            Ex: [("new_arg", "new_arg_value", True/False)]
-            The True/False value should indicate whether the arg should be added
-            if not present in original_node's args.
+        :param list args_info: List of NewArg
         """
         assert hasattr(original_node, "args")
+        assert all(
+            isinstance(arg, NewArg) for arg in args_info
+        ), "`args_info` must contain `NewArg` types."
         new_args = []
 
         for arg in original_node.args:

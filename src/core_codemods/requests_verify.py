@@ -1,5 +1,6 @@
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import SemgrepCodemod
+from codemodder.codemods.api.helpers import NewArg
 
 
 class RequestsVerify(SemgrepCodemod):
@@ -22,5 +23,7 @@ class RequestsVerify(SemgrepCodemod):
         """
 
     def on_result_found(self, original_node, updated_node):
-        new_args = self.replace_args(original_node, [("verify", "True", False)])
+        new_args = self.replace_args(
+            original_node, [NewArg(name="verify", value="True", add_if_missing=False)]
+        )
         return self.update_arg_target(updated_node, new_args)

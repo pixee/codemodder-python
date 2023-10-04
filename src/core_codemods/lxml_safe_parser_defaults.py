@@ -1,5 +1,6 @@
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import SemgrepCodemod
+from codemodder.codemods.api.helpers import NewArg
 
 
 class LxmlSafeParserDefaults(SemgrepCodemod):
@@ -34,9 +35,9 @@ class LxmlSafeParserDefaults(SemgrepCodemod):
         new_args = self.replace_args(
             original_node,
             [
-                ("resolve_entities", "False", True),
-                ("no_network", "True", False),
-                ("dtd_validation", "False", False),
+                NewArg(name="resolve_entities", value="False", add_if_missing=True),
+                NewArg(name="no_network", value="True", add_if_missing=False),
+                NewArg(name="dtd_validation", value="False", add_if_missing=False),
             ],
         )
         return self.update_arg_target(updated_node, new_args)
