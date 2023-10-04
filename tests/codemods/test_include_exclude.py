@@ -18,9 +18,17 @@ class TestMatchCodemods:
         "input_str", ["secure-random", "secure-random,url-sandbox"]
     )
     def test_include(self, input_str):
-        assert self.registry.match_codemods(input_str, None) == {
-            name: self.codemod_map[name] for name in input_str.split(",")
+        includes = input_str.split(",")
+        assert self.registry.match_codemods(includes, None) == {
+            name: self.codemod_map[name] for name in includes
         }
+
+    @pytest.mark.parametrize(
+        "input_str", ["url-sandbox,secure-random", "secure-random,url-sandbox"]
+    )
+    def test_include_preserve_order(self, input_str):
+        includes = input_str.split(",")
+        assert list(self.registry.match_codemods(includes, None).keys()) == includes
 
     @pytest.mark.parametrize(
         "input_str",
