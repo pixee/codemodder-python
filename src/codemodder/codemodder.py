@@ -136,7 +136,10 @@ def run(original_args) -> int:
     # A little awkward, but we need the codemod registry in order to validate potential arguments
     argv = parse_args(original_args, codemod_registry)
     if not os.path.exists(argv.directory):
-        # project directory doesn't exist or can’t be read
+        logger.error(
+            "Given directory '%s' doesn't exist or can’t be read",
+            argv.directory,
+        )
         return 1
 
     context = CodemodExecutionContext(
