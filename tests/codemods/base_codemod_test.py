@@ -64,7 +64,7 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
 
         name = self.codemod.name()
         results = self.registry.match_codemods(codemod_include=[name])
-        return semgrep_run(results[name].yaml_files, root)
+        return semgrep_run(results[0].yaml_files, root)
 
     def run_and_assert_filepath(self, root, file_path, input_code, expected):
         input_tree = cst.parse_module(input_code)

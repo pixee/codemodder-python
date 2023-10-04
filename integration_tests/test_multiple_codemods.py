@@ -56,5 +56,5 @@ def func(foo=None):
         ids = codemods.split(",")
         assert len(results["results"]) == 2
         # Order matters
-        # assert results["results"][0]["codemod"] == f"pixee:python/{ids[0]}"
-        # assert results["results"][1]["codemod"] == f"pixee:python/{ids[1]}"
+        assert results["results"][0]["codemod"] == f"pixee:python/{ids[0]}"
+        assert results["results"][1]["codemod"] == f"pixee:python/{ids[1]}"

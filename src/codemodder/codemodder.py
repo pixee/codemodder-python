@@ -127,7 +127,6 @@ def run(original_args) -> int:
         codemod_registry,
     )
 
-    # TODO: this needs to preserve the given order of codemods
     # TODO: this should be a method of CodemodExecutionContext
     codemods_to_run = codemod_registry.match_codemods(
         argv.codemod_include, argv.codemod_exclude
@@ -137,7 +136,7 @@ def run(original_args) -> int:
         logger.warning("No codemods to run")
         return 0
 
-    logger.debug("Codemods to run: %s", codemods_to_run)
+    logger.debug("Codemods to run: %s", [codemod.id for codemod in codemods_to_run])
 
     # XXX: sarif files given on the command line are currently not used by any codemods
 
@@ -152,7 +151,7 @@ def run(original_args) -> int:
     logger.debug("Matched files:\n%s", "\n".join(full_names))
 
     # run codemods in sequence
-    for codemod in codemods_to_run.values():
+    for codemod in codemods_to_run:
         results = codemod.apply(context)
         analyze_files(
             context,
