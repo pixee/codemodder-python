@@ -5,9 +5,9 @@ from codemodder.codemods.api.helpers import NewArg
 
 class LxmlSafeParserDefaults(SemgrepCodemod):
     NAME = "safe-lxml-parser-defaults"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Enable all security checks in `lxml.etree.XMLParser` call."
-    DESCRIPTION = "...........TODO"
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
+    SUMMARY = "Use safe defaults for lxml parsers"
+    DESCRIPTION = "Replace lxml parser parameters with safe defaults"
 
     @classmethod
     def rule(cls):

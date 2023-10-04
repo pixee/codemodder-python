@@ -7,7 +7,7 @@ each_class = pytest.mark.parametrize(
 )
 
 
-class TestJwtDecodeVerify(BaseSemgrepCodemodTest):
+class TestLxmlSafeParserDefaults(BaseSemgrepCodemodTest):
     codemod = LxmlSafeParserDefaults
 
     def test_name(self):
@@ -38,6 +38,21 @@ var = "hello"
         expexted_output = f"""from lxml.etree import {klass}
 
 parser = {klass}(resolve_entities=False)
+var = "hello"
+"""
+
+        self.run_and_assert(tmpdir, input_code, expexted_output)
+
+    @each_class
+    def test_from_import_module(self, tmpdir, klass):
+        input_code = f"""from lxml import etree
+
+parser = etree.{klass}()
+var = "hello"
+"""
+        expexted_output = f"""from lxml import etree
+
+parser = etree.{klass}(resolve_entities=False)
 var = "hello"
 """
 
