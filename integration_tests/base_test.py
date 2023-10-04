@@ -57,11 +57,16 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         cls.codemod_registry = registry.load_registered_codemods()
 
     def setup_method(self):
-        self.codemod_wrapper = [
-            cmod
-            for cmod in self.codemod_registry._codemods
-            if cmod.codemod == self.codemod
-        ][0]
+        try:
+            self.codemod_wrapper = [
+                cmod
+                for cmod in self.codemod_registry._codemods
+                if cmod.codemod == self.codemod
+            ][0]
+        except IndexError as exc:
+            raise IndexError(
+                "You must register the codemod to a CodemodCollection."
+            ) from exc
 
     def _assert_run_fields(self, run, output_path):
         assert run["vendor"] == "pixee"

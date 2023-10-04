@@ -1,5 +1,6 @@
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import SemgrepCodemod
+from codemodder.codemods.api.helpers import NewArg
 
 
 class EnableJinja2Autoescape(SemgrepCodemod):
@@ -21,7 +22,8 @@ class EnableJinja2Autoescape(SemgrepCodemod):
         """
 
     def on_result_found(self, original_node, updated_node):
-        new_args = self.replace_arg(
-            original_node, "autoescape", "True", add_if_missing=True
+        new_args = self.replace_args(
+            original_node,
+            [NewArg(name="autoescape", value="True", add_if_missing=True)],
         )
         return self.update_arg_target(updated_node, new_args)

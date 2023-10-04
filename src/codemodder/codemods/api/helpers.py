@@ -1,7 +1,10 @@
+from collections import namedtuple
 import libcst as cst
 from libcst import matchers
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from codemodder.codemods.utils import get_call_name
+
+NewArg = namedtuple("NewArg", ["name", "value", "add_if_missing"])
 
 
 class Helpers:
@@ -47,34 +50,34 @@ class Helpers:
     def parse_expression(self, expression: str):
         return cst.parse_expression(expression)
 
-    def replace_arg(
-        self,
-        original_node,
-        target_arg_name,
-        target_arg_replacement_val,
-        add_if_missing=False,
-    ):
-        """Given a node, return its args with one arg's value changed.
+    def replace_args(self, original_node, args_info):
+        """
+        Iterate over the args in original_node and replace each arg
+        with any matching arg in `args_info`.
 
-        If add_if_missing is True, then if target arg is not present, add it.
+        :param original_node: libcst node with args attribute.
+        :param list args_info: List of NewArg
         """
         assert hasattr(original_node, "args")
+        assert all(
+            isinstance(arg, NewArg) for arg in args_info
+        ), "`args_info` must contain `NewArg` types."
         new_args = []
-        arg_added = False
 
         for arg in original_node.args:
-            if matchers.matches(arg.keyword, matchers.Name(target_arg_name)):
-                new = self.make_new_arg(
-                    target_arg_name, target_arg_replacement_val, arg
-                )
-                arg_added = True
+            arg_name, replacement_val, idx = _match_with_existing_arg(arg, args_info)
+            if arg_name is not None:
+                new = self.make_new_arg(arg_name, replacement_val, arg)
+                del args_info[idx]
             else:
                 new = arg
             new_args.append(new)
 
-        if add_if_missing and not arg_added:
-            new = self.make_new_arg(target_arg_name, target_arg_replacement_val)
-            new_args.append(new)
+        for arg_name, replacement_val, add_if_missing in args_info:
+            if add_if_missing:
+                new = self.make_new_arg(arg_name, replacement_val)
+                new_args.append(new)
+
         return new_args
 
     def make_new_arg(self, name, value, existing_arg=None):
@@ -91,3 +94,14 @@ class Helpers:
             value=cst.parse_expression(value),
             equal=equal,
         )
+
+
+def _match_with_existing_arg(arg, args_info):
+    """
+    Given an `arg` and a list of arg info, determine if
+    any of the names in arg_info match the arg.
+    """
+    for idx, (arg_name, replacement_val, _) in enumerate(args_info):
+        if matchers.matches(arg.keyword, matchers.Name(arg_name)):
+            return arg_name, replacement_val, idx
+    return None, None, None

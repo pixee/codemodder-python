@@ -1,5 +1,6 @@
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import SemgrepCodemod
+from codemodder.codemods.api.helpers import NewArg
 
 
 class HardenRuamel(SemgrepCodemod):
@@ -27,5 +28,7 @@ class HardenRuamel(SemgrepCodemod):
         """
 
     def on_result_found(self, original_node, updated_node):
-        new_args = self.replace_arg(original_node, "typ", '"safe"')
+        new_args = self.replace_args(
+            original_node, [NewArg(name="typ", value='"safe"', add_if_missing=False)]
+        )
         return self.update_arg_target(updated_node, new_args)

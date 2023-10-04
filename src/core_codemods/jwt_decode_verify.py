@@ -2,6 +2,7 @@ import libcst as cst
 from libcst import matchers
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import SemgrepCodemod
+from codemodder.codemods.api.helpers import NewArg
 
 
 class JwtDecodeVerify(SemgrepCodemod):
@@ -64,18 +65,14 @@ class JwtDecodeVerify(SemgrepCodemod):
             new_args.append(new)
         return new_args
 
-    def replace_arg(
-        self,
-        original_node,
-        target_arg_name,
-        target_arg_replacement_val,
-        add_if_missing=False,
-    ):
-        new_args = super().replace_arg(original_node, "verify", "True")
+    def replace_args(self, original_node, args_info):
+        new_args = super().replace_args(original_node, args_info)
         return self.replace_options_arg(new_args)
 
     def on_result_found(self, original_node, updated_node):
-        new_args = self.replace_arg(original_node, "verify", "True")
+        new_args = self.replace_args(
+            original_node, [NewArg(name="verify", value="True", add_if_missing=False)]
+        )
         return self.update_arg_target(updated_node, new_args)
 
 
