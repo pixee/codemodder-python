@@ -15,7 +15,7 @@ dependencies = [
     "libcst @ git+https://github.com/Instagram/LibCST.git@03179b55ebe7e916f1722e18e8f0b87c01616d1f",
     "pylint~=3.0.0",
     "PyYAML~=6.0.0",
-    "semgrep~=1.42.0",
+    "semgrep~=1.43.0",
 ]
 
 [project.scripts]
