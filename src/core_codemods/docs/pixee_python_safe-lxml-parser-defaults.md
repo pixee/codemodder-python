@@ -11,7 +11,7 @@ Parameter `resolve_entities` has an unsafe default value of `True`. This codemod
 The changes look as follows:
 
 ```diff
-  import lxml
+  import lxml.etree
 
 - parser = lxml.etree.XMLParser()
 - parser = lxml.etree.XMLParser(resolve_entities=True)

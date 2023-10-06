@@ -26,7 +26,7 @@ class LxmlSafeParsing(SemgrepCodemod):
                             - pattern: parse
                             - pattern: fromstring
                     - pattern-inside: |
-                        import lxml
+                        import lxml.etree
                         ...
                   - patterns:
                     - pattern: lxml.etree.$FUNC(..., parser=None, ...)
@@ -37,13 +37,13 @@ class LxmlSafeParsing(SemgrepCodemod):
                             - pattern: parse
                             - pattern: fromstring
                     - pattern-inside: |
-                        import lxml
+                        import lxml.etree
                         ...
         """
 
     def on_result_found(self, original_node, updated_node):
         self.remove_unused_import(original_node)
-        self.add_needed_import("lxml")
+        self.add_needed_import("lxml.etree")
         safe_parser = "lxml.etree.XMLParser(resolve_entities=False)"
         new_args = self.replace_args(
             original_node,

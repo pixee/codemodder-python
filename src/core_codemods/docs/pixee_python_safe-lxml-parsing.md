@@ -6,7 +6,7 @@ attacks and external entity (XXE) attacks.
 The changes look as follows:
 
 ```diff
- import lxml
+  import lxml.etree
 - lxml.etree.parse("path_to_file")
 - lxml.etree.fromstring("xml_str")
 + lxml.etree.parse("path_to_file", parser=lxml.etree.XMLParser(resolve_entities=False))

@@ -13,12 +13,12 @@ class TestLxmlSafeParsing(BaseSemgrepCodemodTest):
 
     @each_func
     def test_import(self, tmpdir, func):
-        input_code = f"""import lxml
+        input_code = f"""import lxml.etree
 
 lxml.etree.{func}("path_to_file")
 var = "hello"
 """
-        expexted_output = f"""import lxml
+        expexted_output = f"""import lxml.etree
 
 lxml.etree.{func}("path_to_file", parser=lxml.etree.XMLParser(resolve_entities=False))
 var = "hello"
@@ -34,7 +34,7 @@ var = "hello"
 var = "hello"
 """
         expexted_output = f"""from lxml.etree import {func}
-import lxml
+import lxml.etree
 
 {func}("path_to_file", parser=lxml.etree.XMLParser(resolve_entities=False))
 var = "hello"
@@ -50,7 +50,7 @@ etree.{func}("path_to_file")
 var = "hello"
 """
         expexted_output = f"""from lxml import etree
-import lxml
+import lxml.etree
 
 etree.{func}("path_to_file", parser=lxml.etree.XMLParser(resolve_entities=False))
 var = "hello"
@@ -66,7 +66,7 @@ func("path_to_file")
 var = "hello"
 """
         expexted_output = f"""from lxml.etree import {func} as func
-import lxml
+import lxml.etree
 
 func("path_to_file", parser=lxml.etree.XMLParser(resolve_entities=False))
 var = "hello"
@@ -98,11 +98,11 @@ var = "hello"
     )
     @each_func
     def test_verify_variations(self, tmpdir, func, input_args, expected_args):
-        input_code = f"""import lxml
+        input_code = f"""import lxml.etree
 lxml.etree.{func}({input_args})
 var = "hello"
 """
-        expexted_output = f"""import lxml
+        expexted_output = f"""import lxml.etree
 lxml.etree.{func}({expected_args})
 var = "hello"
 """
