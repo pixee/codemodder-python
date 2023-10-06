@@ -5,7 +5,7 @@ from codemodder.codemods.api import SemgrepCodemod
 
 class WithThreadingLock(SemgrepCodemod):
     NAME = "bad-lock-with-statement"
-    SUMMARY = "Replace deprecated usage of threading.Lock context manager"
+    SUMMARY = "Replace deprecated usage of threading lock classes as context managers"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     DESCRIPTION = "Separates threading lock instantiation and call with `with` statement into two steps."
 
@@ -20,7 +20,12 @@ class WithThreadingLock(SemgrepCodemod):
             - metavariable-pattern:
                 metavariable: $BODY
                 patterns:
-                - pattern: threading.Lock()
+                - pattern-either:
+                    - pattern: threading.Lock()
+                    - pattern: threading.RLock()
+                    - pattern: threading.Condition()
+                    - pattern: threading.Semaphore()
+                    - pattern: threading.BoundedSemaphore()
             - pattern-inside: |
                 import threading
                 ...
