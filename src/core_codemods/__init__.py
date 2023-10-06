@@ -21,6 +21,7 @@ from .upgrade_sslcontext_minimum_version import UpgradeSSLContextMinimumVersion
 from .upgrade_sslcontext_tls import UpgradeSSLContextTLS
 from .url_sandbox import UrlSandbox
 from .use_walrus_if import UseWalrusIf
+from .with_threading_lock import WithThreadingLock
 
 registry = CodemodCollection(
     origin="pixee",
@@ -48,5 +49,6 @@ registry = CodemodCollection(
         UpgradeSSLContextTLS,
         UrlSandbox,
         UseWalrusIf,
+        WithThreadingLock,
     ],
 )
