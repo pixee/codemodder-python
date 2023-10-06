@@ -1,2 +1,2 @@
-import lxml
+import lxml.etree
 parser = lxml.etree.XMLParser()

@@ -18,7 +18,7 @@ jobs:
   linting:
     name: Pylint & Black Checks
     runs-on: ubuntu-20.04
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - name: Set Up Python
         uses: actions/setup-python@v4
