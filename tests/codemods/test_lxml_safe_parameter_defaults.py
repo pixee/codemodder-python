@@ -15,12 +15,12 @@ class TestLxmlSafeParserDefaults(BaseSemgrepCodemodTest):
 
     @each_class
     def test_import(self, tmpdir, klass):
-        input_code = f"""import lxml
+        input_code = f"""import lxml.etree
 
 parser = lxml.etree.{klass}()
 var = "hello"
 """
-        expexted_output = f"""import lxml
+        expexted_output = f"""import lxml.etree
 
 parser = lxml.etree.{klass}(resolve_entities=False)
 var = "hello"
@@ -104,11 +104,11 @@ var = "hello"
     )
     @each_class
     def test_verify_variations(self, tmpdir, klass, input_args, expected_args):
-        input_code = f"""import lxml
+        input_code = f"""import lxml.etree
 parser = lxml.etree.{klass}({input_args})
 var = "hello"
 """
-        expexted_output = f"""import lxml
+        expexted_output = f"""import lxml.etree
 parser = lxml.etree.{klass}({expected_args})
 var = "hello"
 """

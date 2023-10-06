@@ -11,6 +11,6 @@ class TestLxmlSafeParserDefaults(BaseIntegrationTest):
     original_code, expected_new_code = original_and_expected_from_code_path(
         code_path, [(1, "parser = lxml.etree.XMLParser(resolve_entities=False)\n")]
     )
-    expected_diff = "--- \n+++ \n@@ -1,2 +1,2 @@\n import lxml\n-parser = lxml.etree.XMLParser()\n+parser = lxml.etree.XMLParser(resolve_entities=False)\n"
+    expected_diff = "--- \n+++ \n@@ -1,2 +1,2 @@\n import lxml.etree\n-parser = lxml.etree.XMLParser()\n+parser = lxml.etree.XMLParser(resolve_entities=False)\n"
     expected_line_change = "2"
     change_description = LxmlSafeParserDefaults.CHANGE_DESCRIPTION

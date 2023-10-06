@@ -10,6 +10,7 @@ from .https_connection import HTTPSConnection
 from .jwt_decode_verify import JwtDecodeVerify
 from .limit_readline import LimitReadline
 from .lxml_safe_parser_defaults import LxmlSafeParserDefaults
+from .lxml_safe_parsing import LxmlSafeParsing
 from .order_imports import OrderImports
 from .process_creation_sandbox import ProcessSandbox
 from .remove_unnecessary_f_str import RemoveUnnecessaryFStr
@@ -38,6 +39,7 @@ registry = CodemodCollection(
         JwtDecodeVerify,
         LimitReadline,
         LxmlSafeParserDefaults,
+        LxmlSafeParsing,
         OrderImports,
         ProcessSandbox,
         RemoveUnnecessaryFStr,

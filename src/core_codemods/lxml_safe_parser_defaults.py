@@ -27,7 +27,7 @@ class LxmlSafeParserDefaults(SemgrepCodemod):
                           - pattern: XMLTreeBuilder
                           - pattern: XMLPullParser
                   - pattern-inside: |
-                      import lxml
+                      import lxml.etree
                       ...
         """
 
