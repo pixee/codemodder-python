@@ -1,22 +1,23 @@
 #!/bin/env python
-from a import a2
+from abc import ABCMeta
 
-# comment b1
-# comment b2
-import b
+# comment builtins1
+# comment builtins2
+import builtins
 
 # comment a
-from a import a1
+from abc import ABC
 
-# comment b3
-import b, d
+# comment builtins3
+import builtins, datetime
 
-# comment b4
-# comment b5
-import b
+# comment builtins4
+# comment builtins5
+import builtins
+import collections
 
-a1
-a2
-b
-c
-d
+ABC
+ABCMeta
+builtins
+collections
+datetime

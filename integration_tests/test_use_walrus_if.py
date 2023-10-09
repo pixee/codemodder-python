@@ -10,22 +10,22 @@ class TestUseWalrusIf(BaseIntegrationTest):
     code_path = "tests/samples/use_walrus_if.py"
     original_code, _ = original_and_expected_from_code_path(code_path, [])
     expected_new_code = """
-if (x := foo()) is not None:
+if (x := sum([1, 2])) is not None:
     print(x)
 
-if y := bar():
+if y := max([1, 2]):
     print(y)
 
-z = baz()
+z = min([1, 2])
 print(z)
 
 
 def whatever():
-    if (b := biz()) == 10:
+    if (b := int("2")) == 10:
         print(b)
 """.lstrip()
 
-    expected_diff = "--- \n+++ \n@@ -1,9 +1,7 @@\n-x = foo()\n-if x is not None:\n+if (x := foo()) is not None:\n     print(x)\n \n-y = bar()\n-if y:\n+if y := bar():\n     print(y)\n \n z = baz()\n@@ -11,6 +9,5 @@\n \n \n def whatever():\n-    b = biz()\n-    if b == 10:\n+    if (b := biz()) == 10:\n         print(b)\n"
+    expected_diff = '--- \n+++ \n@@ -1,9 +1,7 @@\n-x = sum([1, 2])\n-if x is not None:\n+if (x := sum([1, 2])) is not None:\n     print(x)\n \n-y = max([1, 2])\n-if y:\n+if y := max([1, 2]):\n     print(y)\n \n z = min([1, 2])\n@@ -11,6 +9,5 @@\n \n \n def whatever():\n-    b = int("2")\n-    if b == 10:\n+    if (b := int("2")) == 10:\n         print(b)\n'
 
     num_changes = 3
     expected_line_change = 1

@@ -1,5 +1,5 @@
-import a
-from b import c, d
+import abc
+from builtins import complex, dict
 
-a
-c
+abc
+complex

@@ -1,4 +1,4 @@
 import requests
 
-requests.get("www.google.com")
+requests.get("https://www.google.com")
 var = "hello"

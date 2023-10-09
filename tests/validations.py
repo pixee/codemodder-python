@@ -1,20 +1,30 @@
 import importlib.util
 import tempfile
 
-def validate_code(*, path=None, code=None):
+
+def execute_code(*, path=None, code=None, allowed_exceptions=None):
     """
-    Ensure that code written in `path` or in `code` str is importable.
+    Ensure that code written in `path` or in `code` str is executable.
     """
-    assert (path is None) != (code is None), "Must pass either path to code or code as a str."
+    assert (path is None) != (
+        code is None
+    ), "Must pass either path to code or code as a str."
 
     if path:
-        _try_code_import(path)
+        _run_code(path, allowed_exceptions)
         return
-    with tempfile.NamedTemporaryFile(suffix=".py", mode='w+t') as temp:
+    with tempfile.NamedTemporaryFile(suffix=".py", mode="w+t") as temp:
         temp.write(code)
-        _try_code_import(temp.name)
+        _run_code(temp.name, allowed_exceptions)
 
-def _try_code_import(path):
+
+def _run_code(path, allowed_exceptions=None):
+    """Execute the code in `path` in its own namespace."""
+    allowed_exceptions = allowed_exceptions or ()
+
     spec = importlib.util.spec_from_file_location("output_code", path)
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    try:
+        spec.loader.exec_module(module)
+    except allowed_exceptions:
+        pass
