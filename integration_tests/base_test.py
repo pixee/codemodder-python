@@ -7,7 +7,7 @@ import subprocess
 
 from codemodder import __VERSION__
 from codemodder import registry
-
+from tests.validations import validate_code
 
 SAMPLES_DIR = "tests/samples"
 
@@ -121,6 +121,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         with open(self.code_path, "r", encoding="utf-8") as f:
             new_code = f.read()
         assert new_code == self.expected_new_code
+        validate_code(path=self.code_path)
 
     def test_file_rewritten(self):
         """
