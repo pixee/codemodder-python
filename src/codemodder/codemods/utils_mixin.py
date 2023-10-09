@@ -2,7 +2,7 @@ from typing import Any, Optional, Tuple, Union
 import libcst as cst
 from libcst import MetadataDependent, matchers
 from libcst.helpers import get_full_name_for_node
-from libcst.metadata import Assignment, ImportAssignment, ScopeProvider
+from libcst.metadata import Assignment, BaseAssignment, ImportAssignment, ScopeProvider
 
 
 class NameResolutionMixin(MetadataDependent):
@@ -60,14 +60,14 @@ class NameResolutionMixin(MetadataDependent):
     def find_assignments(
         self,
         node: Union[cst.Name, cst.Attribute, cst.Call, cst.Subscript, cst.Decorator],
-    ) -> set[Assignment]:
+    ) -> set[BaseAssignment]:
         """
         Given a MetadataWrapper and a CSTNode with a possible access to it, find all the possible assignments that it refers.
         """
         scope = self.get_metadata(ScopeProvider, node)
         if node in scope.accesses:
             # pylint: disable=protected-access
-            return next(iter(scope.accesses[node]))._Access__assignments
+            return set(next(iter(scope.accesses[node])).referents)
         return set()
 
     def find_single_assignment(
