@@ -1,5 +1,5 @@
 import logging
 import sys
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger("codemodder")

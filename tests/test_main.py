@@ -7,8 +7,8 @@ from codemodder.registry import load_registered_codemods
 
 class TestRun:
     @mock.patch("libcst.parse_module")
-    @mock.patch("codemodder.codemodder.logger.warning")
-    def test_no_files_matched(self, warning_log, mock_parse):
+    @mock.patch("codemodder.codemodder.logger.error")
+    def test_no_files_matched(self, error_log, mock_parse):
         args = [
             "tests/samples/",
             "--output",
@@ -20,8 +20,8 @@ class TestRun:
         res = run(args)
         assert res == 0
 
-        warning_log.assert_called()
-        assert warning_log.call_args_list[0][0][0] == "No files matched."
+        error_log.assert_called()
+        assert error_log.call_args_list[0][0][0] == "no files matched."
 
         mock_parse.assert_not_called()
 
@@ -46,10 +46,9 @@ class TestRun:
         _, _, _, results_by_codemod = args_to_reporting
         assert results_by_codemod == []
 
-    @mock.patch("codemodder.codemodder.logger.info")
     @mock.patch("codemodder.codemodder.update_code")
     @mock.patch("codemodder.codemods.base_codemod.semgrep_run", side_effect=semgrep_run)
-    def test_dry_run(self, _, mock_update_code, info_log):
+    def test_dry_run(self, _, mock_update_code):
         args = [
             "tests/samples/",
             "--output",
@@ -59,14 +58,6 @@ class TestRun:
 
         res = run(args)
         assert res == 0
-
-        info_log.assert_called()
-
-        logged_msgs = [
-            info_log.call_args_list[x][0][0]
-            for x in range(len(info_log.call_args_list))
-        ]
-        assert "Dry run, not changing files" in logged_msgs
 
         mock_update_code.assert_not_called()
 
