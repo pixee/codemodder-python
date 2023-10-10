@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from codemodder import __VERSION__
-from codemodder.logging import logger
+from codemodder.logging import OutputFormat, logger
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -133,6 +133,13 @@ def parse_args(argv, codemod_registry):
         "--verbose",
         action=argparse.BooleanOptionalAction,
         help="print more to stdout",
+    )
+    parser.add_argument(
+        "--log-format",
+        type=OutputFormat,
+        default=OutputFormat.HUMAN,
+        choices=[str(x).split(".")[-1].lower() for x in list(OutputFormat)],
+        help="the format for the log output",
     )
     parser.add_argument(
         "--path-exclude",
