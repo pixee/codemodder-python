@@ -1,16 +1,18 @@
 # pylint: disable=no-member,not-callable,attribute-defined-outside-init
+from collections import defaultdict
+import os
+from pathlib import Path
+from textwrap import dedent
+from typing import ClassVar
+
 import libcst as cst
 from libcst.codemod import CodemodContext
-from pathlib import Path
-import os
-from collections import defaultdict
+import mock
+
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from codemodder.registry import CodemodRegistry, CodemodCollection
 from codemodder.semgrep import run as semgrep_run
-from typing import ClassVar
-
-import mock
 
 
 class BaseCodemodTest:
@@ -24,7 +26,7 @@ class BaseCodemodTest:
         self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)
 
     def run_and_assert_filepath(self, root, file_path, input_code, expected):
-        input_tree = cst.parse_module(input_code)
+        input_tree = cst.parse_module(dedent(input_code))
         self.execution_context = CodemodExecutionContext(
             directory=root,
             dry_run=True,
@@ -45,7 +47,7 @@ class BaseCodemodTest:
         )
         output_tree = command_instance.transform_module(input_tree)
 
-        assert output_tree.code == expected
+        assert output_tree.code == dedent(expected)
 
 
 class BaseSemgrepCodemodTest(BaseCodemodTest):

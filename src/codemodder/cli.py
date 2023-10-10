@@ -43,7 +43,7 @@ class CsvListAction(argparse.Action):
     argparse Action to convert "a,b,c" into ["a", "b", "c"]
     """
 
-    def __call__(self, parser, namespace, values: str, option_string=None):
+    def __call__(self, parser, namespace, values, option_string=None):
         # Conversion to dict removes duplicates while preserving order
         items = list(dict.fromkeys(values.split(",")).keys())
         self.validate_items(items)
