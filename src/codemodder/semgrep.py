@@ -32,10 +32,16 @@ def run_on_directory(yaml_files: List[Path], directory: Path):
             )
         )
         command.append(str(directory))
-        joined_command = " ".join(command)
-        logger.debug("Executing semgrep with: `%s`", joined_command)
+        logger.debug("semgrep command: `%s`", " ".join(command))
         # TODO: make sure to capture stderr and stdout in the event of a problem
-        subprocess.run(command, shell=False, check=True)
+        subprocess.run(
+            command,
+            shell=False,
+            check=True,
+            # TODO: report on verbose mode
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         results = results_by_path_and_rule_id(temp_sarif_file.name)
         return results
 

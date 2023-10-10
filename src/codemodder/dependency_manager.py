@@ -1,3 +1,6 @@
+import sys
+import io
+
 from dependency_manager import DependencyManagerAbstract
 from pathlib import Path
 
@@ -11,5 +14,12 @@ def write_dependencies(execution_context: CodemodExecutionContext):
 
     dm = DependencyManager()
     dm.add(list(execution_context.dependencies))
-    dm.write(dry_run=execution_context.dry_run)
+
+    try:
+        # Hacky solution to prevent the dependency manager from writing to stdout
+        sys.stdout = io.StringIO()
+        dm.write(dry_run=execution_context.dry_run)
+    finally:
+        sys.stdout = sys.__stdout__
+
     return dm

@@ -134,11 +134,13 @@ def parse_args(argv, codemod_registry):
     parser.add_argument(
         "--path-exclude",
         action=CsvListAction,
+        default="",
         help="Comma-separated set of UNIX glob patterns to exclude",
     )
     parser.add_argument(
         "--path-include",
         action=CsvListAction,
+        default="**/*.py",
         help="Comma-separated set of UNIX glob patterns to include",
     )
 

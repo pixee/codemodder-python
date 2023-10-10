@@ -43,8 +43,8 @@ class CodeTF:
             with open(outfile, "w", encoding="utf-8") as f:
                 json.dump(self.report, f)
         except Exception:
-            logger.exception("Failed to write report file.")
+            logger.exception("failed to write report file.")
             # Any issues with writing the output file should exit status 2.
             return 2
-        logger.info("Wrote report to %s", outfile)
+        logger.debug("wrote report to %s", outfile)
         return 0
