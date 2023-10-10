@@ -2,7 +2,6 @@ from enum import Enum
 import logging
 import sys
 
-logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger("codemodder")
 
 
@@ -19,5 +18,18 @@ def configure_logger(verbose: bool):
     """
     Configure the logger based on the verbosity level.
     """
-    # TODO: eventually process human/json here
-    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
+    log_level = logging.DEBUG if verbose else logging.INFO
+
+    # TODO: this should all be conditional on the output format
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setLevel(log_level)
+    stdout_handler.addFilter(lambda record: record.levelno <= logging.WARNING)
+
+    stderr_handler = logging.StreamHandler(sys.stderr)
+    stderr_handler.setLevel(logging.ERROR)
+
+    logging.basicConfig(
+        format="%(message)s",
+        level=log_level,
+        handlers=[stdout_handler, stderr_handler],
+    )
