@@ -8,7 +8,7 @@ from codemodder.sarifs import results_by_path_and_rule_id
 from codemodder.logging import logger
 
 
-def run_on_directory(yaml_files: List[Path], directory: Path):
+def run(execution_context: CodemodExecutionContext, yaml_files: List[Path]) -> dict:
     """
     Runs Semgrep and outputs a dict with the results organized by rule_id.
     """
@@ -31,20 +31,14 @@ def run_on_directory(yaml_files: List[Path], directory: Path):
                 map(lambda f: ["--config", str(f)], yaml_files)
             )
         )
-        command.append(str(directory))
+        command.append(str(execution_context.directory))
         logger.debug("semgrep command: `%s`", " ".join(command))
-        # TODO: make sure to capture stderr and stdout in the event of a problem
         subprocess.run(
             command,
             shell=False,
             check=True,
-            # TODO: report on verbose mode
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=None if execution_context.verbose else subprocess.PIPE,
+            stderr=None if execution_context.verbose else subprocess.PIPE,
         )
         results = results_by_path_and_rule_id(temp_sarif_file.name)
         return results
-
-
-def run(execution_context: CodemodExecutionContext, yaml_files: List[Path]) -> dict:
-    return run_on_directory(yaml_files, execution_context.directory)

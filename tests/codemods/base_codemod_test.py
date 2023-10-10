@@ -7,7 +7,7 @@ from collections import defaultdict
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from codemodder.registry import CodemodRegistry, CodemodCollection
-from codemodder.semgrep import run_on_directory as semgrep_run
+from codemodder.semgrep import run as semgrep_run
 from typing import ClassVar
 
 import mock
@@ -28,6 +28,7 @@ class BaseCodemodTest:
         self.execution_context = CodemodExecutionContext(
             directory=root,
             dry_run=True,
+            verbose=False,
             registry=mock.MagicMock(),
         )
         self.file_context = FileContext(
@@ -58,23 +59,24 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         cls.registry = CodemodRegistry()
         cls.registry.add_codemod_collection(collection)
 
-    def results_by_id_filepath(self, input_code, root, file_path):
+    def results_by_id_filepath(self, input_code, file_path):
         with open(file_path, "w", encoding="utf-8") as tmp_file:
             tmp_file.write(input_code)
 
         name = self.codemod.name()
         results = self.registry.match_codemods(codemod_include=[name])
-        return semgrep_run(results[0].yaml_files, root)
+        return semgrep_run(self.execution_context, results[0].yaml_files)
 
     def run_and_assert_filepath(self, root, file_path, input_code, expected):
-        input_tree = cst.parse_module(input_code)
-        all_results = self.results_by_id_filepath(input_code, root, file_path)
-        results = all_results[str(file_path)]
         self.execution_context = CodemodExecutionContext(
             directory=root,
             dry_run=True,
+            verbose=False,
             registry=mock.MagicMock(),
         )
+        input_tree = cst.parse_module(input_code)
+        all_results = self.results_by_id_filepath(input_code, file_path)
+        results = all_results[str(file_path)]
         self.file_context = FileContext(
             file_path,
             [],
@@ -89,10 +91,6 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         output_tree = command_instance.transform_module(input_tree)
 
         assert output_tree.code == expected
-
-    def results_by_id(self, input_code, tmpdir):
-        tmp_file_path = tmpdir / "code.py"
-        return self.results_by_id_filepath(input_code, tmpdir, tmp_file_path)
 
 
 class BaseDjangoCodemodTest(BaseSemgrepCodemodTest):

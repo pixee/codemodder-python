@@ -19,17 +19,25 @@ class ChangeSet:
         return {"path": self.path, "diff": self.diff, "changes": self.changes}
 
 
-class CodemodExecutionContext:
+class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     _results_by_codemod: dict[str, list[ChangeSet]] = {}
     _failures_by_codemod: dict[str, list[Path]] = {}
     dependencies: set[str]
     directory: Path
     dry_run: bool = False
+    verbose: bool = False
     registry: CodemodRegistry
 
-    def __init__(self, directory, dry_run, registry: CodemodRegistry):
+    def __init__(
+        self,
+        directory: Path,
+        dry_run: bool,
+        verbose: bool,
+        registry: CodemodRegistry,
+    ):
         self.directory = directory
         self.dry_run = dry_run
+        self.verbose = verbose
         self.dependencies = set()
         self._results_by_codemod = {}
         self._failures_by_codemod = {}

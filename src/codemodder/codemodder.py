@@ -10,7 +10,7 @@ from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
 
 from codemodder import registry, __VERSION__
-from codemodder.logging import logger
+from codemodder.logging import configure_logger, logger
 from codemodder.cli import parse_args
 from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.context import CodemodExecutionContext, ChangeSet
@@ -130,13 +130,15 @@ def run(original_args) -> int:
         )
         return 1
 
+    configure_logger(argv.verbose)
+
     logger.info("[startup]")
     logger.info("codemodder: python/%s", __VERSION__)
 
     context = CodemodExecutionContext(
         Path(argv.directory),
-        # TODO: pass all of argv instead of just dry_run
         argv.dry_run,
+        argv.verbose,
         codemod_registry,
     )
 
