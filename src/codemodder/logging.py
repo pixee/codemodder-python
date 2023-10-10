@@ -14,6 +14,13 @@ class OutputFormat(Enum):
     JSON = "json"
 
 
+def log_section(section_name: str):
+    """
+    Log a section header.
+    """
+    logger.info("\n[%s]", section_name)
+
+
 def configure_logger(verbose: bool):
     """
     Configure the logger based on the verbosity level.

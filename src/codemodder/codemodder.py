@@ -10,7 +10,7 @@ from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
 
 from codemodder import registry, __VERSION__
-from codemodder.logging import configure_logger, logger
+from codemodder.logging import configure_logger, logger, log_section
 from codemodder.cli import parse_args
 from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.context import CodemodExecutionContext, ChangeSet
@@ -132,7 +132,7 @@ def run(original_args) -> int:
 
     configure_logger(argv.verbose)
 
-    logger.info("[startup]")
+    log_section("startup")
     logger.info("codemodder: python/%s", __VERSION__)
 
     context = CodemodExecutionContext(
@@ -151,7 +151,7 @@ def run(original_args) -> int:
         logger.error("no codemods to run")
         return 0
 
-    logger.info("[setup]")
+    log_section("setup")
     logger.info("running:")
     for codemod in codemods_to_run:
         logger.info("  - %s", codemod.id)
@@ -170,7 +170,7 @@ def run(original_args) -> int:
     for name in full_names:
         logger.debug("  - %s", name)
 
-    logger.info("[scanning]")
+    log_section("scanning")
     # run codemods one at a time making sure to respect the given sequence
     for codemod in codemods_to_run:
         logger.info("running codemod %s", codemod.id)
@@ -190,7 +190,7 @@ def run(original_args) -> int:
     elapsed_ms = int(elapsed.total_seconds() * 1000)
     report_default(elapsed_ms, argv, original_args, results)
 
-    logger.info("[report]")
+    log_section("report")
     logger.info("scanned: %s files", len(files_to_analyze))
     all_failures = context.get_failed_files()
     logger.info(
