@@ -129,8 +129,11 @@ def parse_args(argv, codemod_registry):
         action=argparse.BooleanOptionalAction,
         help="do everything except make changes to files",
     )
-
-    parser.add_argument("--verbose", type=bool, help="print more to stdout")
+    parser.add_argument(
+        "--verbose",
+        action=argparse.BooleanOptionalAction,
+        help="print more to stdout",
+    )
     parser.add_argument(
         "--path-exclude",
         action=CsvListAction,
