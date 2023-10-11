@@ -70,6 +70,19 @@ class NameResolutionMixin(MetadataDependent):
             return set(next(iter(scope.accesses[node])).referents)
         return set()
 
+    def find_used_names(self, node):
+        """
+        Find all the used names in the scope of `node`.
+        """
+        names = []
+        scope = self.get_metadata(ScopeProvider, node)
+        nodes = [x.node for x in scope.assignments]
+        for other_nodes in nodes:
+            visitor = GatherNamesVisitor()
+            other_nodes.visit(visitor)
+            names.extend(visitor.names)
+        return names
+
     def find_single_assignment(
         self,
         node: Union[cst.Name, cst.Attribute, cst.Call, cst.Subscript, cst.Decorator],
@@ -112,3 +125,11 @@ def _get_name(node: Union[cst.Import, cst.ImportFrom]) -> str:
     if matchers.matches(node, matchers.Import()):
         return get_full_name_for_node(node.names[0].name)
     return ""
+
+
+class GatherNamesVisitor(cst.CSTVisitor):
+    def __init__(self):
+        self.names = []
+
+    def visit_Name(self, node: cst.Name) -> None:
+        self.names.append(node.value)

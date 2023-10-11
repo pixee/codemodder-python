@@ -86,3 +86,33 @@ with threading.{klass}(), foo():
     ...
 """
         self.run_and_assert(tmpdir, input_code, input_code)
+
+    @each_class
+    def test_name_resolution_var(self, tmpdir, klass):
+        input_code = f"""from threading import {klass}
+lock = 1
+with {klass}():
+    ...
+"""
+        expected = f"""from threading import {klass}
+lock = 1
+lock_ = {klass}()
+with lock_:
+    ...
+"""
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    @each_class
+    def test_name_resolution_import(self, tmpdir, klass):
+        input_code = f"""from threading import {klass}
+from something import lock
+with {klass}():
+    ...
+"""
+        expected = f"""from threading import {klass}
+from something import lock
+lock_ = {klass}()
+with lock_:
+    ...
+"""
+        self.run_and_assert(tmpdir, input_code, expected)

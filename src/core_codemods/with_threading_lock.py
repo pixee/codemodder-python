@@ -1,9 +1,10 @@
 import libcst as cst
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import SemgrepCodemod
+from codemodder.codemods.utils_mixin import NameResolutionMixin
 
 
-class WithThreadingLock(SemgrepCodemod):
+class WithThreadingLock(SemgrepCodemod, NameResolutionMixin):
     NAME = "bad-lock-with-statement"
     SUMMARY = "Separate Lock Instantiation from `with` Call"
     DESCRIPTION = (
@@ -51,8 +52,9 @@ class WithThreadingLock(SemgrepCodemod):
         if len(original_node.items) == 1 and self.node_is_selected(
             original_node.items[0]
         ):
-            # TODO: how to avoid name conflicts here?
-            name = cst.Name(value="lock")
+            current_names = self.find_used_names(original_node)
+            value = "lock" if "lock" not in current_names else "lock_"
+            name = cst.Name(value=value)
             assign = cst.SimpleStatementLine(
                 body=[
                     cst.Assign(
