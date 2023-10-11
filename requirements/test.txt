@@ -1,9 +1,13 @@
 coverage==7.3.*
 GitPython<4
+Jinja2~=3.1.2
+lxml~=4.9.3
 mock==5.1.*
 pre-commit<4
+Pyjwt~=2.8.0
 pytest==7.4.*
 pytest-cov~=4.1.0
 pytest-mock~=3.11.1
 pytest-xdist==3.*
+security~=1.2.0
 types-mock==5.1.*

@@ -25,3 +25,4 @@ class TestLxmlSafeParsing(BaseIntegrationTest):
     expected_line_change = "2"
     num_changes = 2
     change_description = LxmlSafeParsing.CHANGE_DESCRIPTION
+    allowed_exceptions = (OSError,)

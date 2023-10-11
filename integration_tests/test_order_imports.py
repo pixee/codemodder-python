@@ -11,21 +11,22 @@ class TestOrderImports(BaseIntegrationTest):
     original_code, expected_new_code = original_and_expected_from_code_path(
         code_path,
         [
-            (1, "# comment b4\n"),
-            (2, "# comment b5\n"),
-            (3, "# comment b3\n"),
-            (4, "# comment b1\n"),
-            (5, "# comment b2\n"),
-            (6, "import b\n"),
-            (7, "import d\n"),
-            (8, "# comment a\n"),
-            (9, "from a import a1, a2\n"),
-            (10, "\n"),
-            (11, "a1\n"),
-            (12, "a2\n"),
-            (13, "b\n"),
-            (14, "c\n"),
-            (15, "d"),
+            (1, "# comment builtins4\n"),
+            (2, "# comment builtins5\n"),
+            (3, "# comment builtins3\n"),
+            (4, "# comment builtins1\n"),
+            (5, "# comment builtins2\n"),
+            (6, "import builtins\n"),
+            (7, "import collections\n"),
+            (8, "import datetime\n"),
+            (9, "# comment a\n"),
+            (10, "from abc import ABC, ABCMeta\n"),
+            (11, "\n"),
+            (12, "ABC\n"),
+            (13, "ABCMeta\n"),
+            (14, "builtins\n"),
+            (15, "collections\n"),
+            (16, ""),
             (17, ""),
             (18, ""),
             (19, ""),
@@ -34,6 +35,6 @@ class TestOrderImports(BaseIntegrationTest):
         ],
     )
 
-    expected_diff = "--- \n+++ \n@@ -1,19 +1,13 @@\n #!/bin/env python\n-from a import a2\n-\n+# comment b4\n+# comment b5\n+# comment b3\n # comment b1\n # comment b2\n import b\n-\n+import d\n # comment a\n-from a import a1\n-\n-# comment b3\n-import b, d\n-\n-# comment b4\n-# comment b5\n-import b\n+from a import a1, a2\n \n a1\n a2\n"
+    expected_diff = "--- \n+++ \n@@ -1,20 +1,14 @@\n #!/bin/env python\n-from abc import ABCMeta\n-\n+# comment builtins4\n+# comment builtins5\n+# comment builtins3\n # comment builtins1\n # comment builtins2\n import builtins\n-\n+import collections\n+import datetime\n # comment a\n-from abc import ABC\n-\n-# comment builtins3\n-import builtins, datetime\n-\n-# comment builtins4\n-# comment builtins5\n-import builtins\n-import collections\n+from abc import ABC, ABCMeta\n \n ABC\n ABCMeta\n"
     expected_line_change = "2"
     change_description = OrderImports.CHANGE_DESCRIPTION

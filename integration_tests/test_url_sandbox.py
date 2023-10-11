@@ -12,11 +12,11 @@ class TestUrlSandbox(BaseIntegrationTest):
         code_path,
         [
             (0, """from security import safe_requests\n"""),
-            (2, """safe_requests.get("www.google.com")\n"""),
+            (2, """safe_requests.get("https://www.google.com")\n"""),
         ],
     )
 
-    expected_diff = '--- \n+++ \n@@ -1,4 +1,4 @@\n-import requests\n+from security import safe_requests\n \n-requests.get("www.google.com")\n+safe_requests.get("www.google.com")\n var = "hello"\n'
+    expected_diff = '--- \n+++ \n@@ -1,4 +1,4 @@\n-import requests\n+from security import safe_requests\n \n-requests.get("https://www.google.com")\n+safe_requests.get("https://www.google.com")\n var = "hello"\n'
     expected_line_change = "3"
     change_description = UrlSandbox.CHANGE_DESCRIPTION
     num_changed_files = 1

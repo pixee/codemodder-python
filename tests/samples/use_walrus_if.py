@@ -1,16 +1,16 @@
-x = foo()
+x = sum([1, 2])
 if x is not None:
     print(x)
 
-y = bar()
+y = max([1, 2])
 if y:
     print(y)
 
-z = baz()
+z = min([1, 2])
 print(z)
 
 
 def whatever():
-    b = biz()
+    b = int("2")
     if b == 10:
         print(b)
