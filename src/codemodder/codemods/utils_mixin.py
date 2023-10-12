@@ -78,7 +78,7 @@ class NameResolutionMixin(MetadataDependent):
         names = []
         scope = self.find_global_scope()
         if scope is None:
-            return []
+            return []  # pragma: no cover
 
         nodes = [x.node for x in scope.assignments]
         for other_nodes in nodes:
@@ -93,7 +93,7 @@ class NameResolutionMixin(MetadataDependent):
         for scope in scopes:
             if isinstance(scope, GlobalScope):
                 return scope
-        return None
+        return None  # pragma: no cover
 
     def find_single_assignment(
         self,
