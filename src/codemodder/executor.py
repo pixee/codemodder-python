@@ -59,6 +59,10 @@ class CodemodExecutorWrapper(CallableObjectProxy):
             return self.METADATA.DESCRIPTION
 
     @property
+    def review_guidance(self):
+        return self.METADATA.REVIEW_GUIDANCE.name.replace("_", " ").title()
+
+    @property
     def yaml_files(self):
         return [
             self.semgrep_config_module / yaml_file
