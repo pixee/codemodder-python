@@ -52,8 +52,10 @@ class WithThreadingLock(SemgrepCodemod, NameResolutionMixin):
         if len(original_node.items) == 1 and self.node_is_selected(
             original_node.items[0]
         ):
-            current_names = self.find_used_names(original_node)
-            value = "lock" if "lock" not in current_names else "lock_"
+            current_names = self.find_used_names_in_module()
+            # arbitrarily choose `lock_cm` if `lock` name is already taken
+            # in hopes that `lock_cm` is very unlikely to be used.
+            value = "lock" if "lock" not in current_names else "lock_cm"
             name = cst.Name(value=value)
             assign = cst.SimpleStatementLine(
                 body=[

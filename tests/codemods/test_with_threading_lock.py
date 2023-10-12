@@ -87,32 +87,55 @@ with threading.{klass}(), foo():
 """
         self.run_and_assert(tmpdir, input_code, input_code)
 
-    @each_class
-    def test_name_resolution_var(self, tmpdir, klass):
-        input_code = f"""from threading import {klass}
-lock = 1
-with {klass}():
-    ...
-"""
-        expected = f"""from threading import {klass}
-lock = 1
-lock_ = {klass}()
-with lock_:
-    ...
-"""
-        self.run_and_assert(tmpdir, input_code, expected)
 
-    @each_class
-    def test_name_resolution_import(self, tmpdir, klass):
-        input_code = f"""from threading import {klass}
-from something import lock
-with {klass}():
+class TestThreadingNameResolution(BaseSemgrepCodemodTest):
+    codemod = WithThreadingLock
+
+    @pytest.mark.parametrize(
+        "input_code,expected_code",
+        [
+            (
+                """from threading import Lock
+lock = 1
+with Lock():
     ...
-"""
-        expected = f"""from threading import {klass}
-from something import lock
-lock_ = {klass}()
-with lock_:
+""",
+                """from threading import Lock
+lock = 1
+lock_cm = Lock()
+with lock_cm:
     ...
-"""
-        self.run_and_assert(tmpdir, input_code, expected)
+""",
+            ),
+            (
+                """from threading import Lock
+from something import lock
+with Lock():
+    ...
+""",
+                """from threading import Lock
+from something import lock
+lock_cm = Lock()
+with lock_cm:
+    ...
+""",
+            ),
+            (
+                """import threading
+lock = 1
+def f(l):
+    with threading.Lock():
+        return [lock_ for lock_ in l]
+""",
+                """import threading
+lock = 1
+def f(l):
+    lock_cm = threading.Lock()
+    with lock_cm:
+        return [lock_ for lock_ in l]
+""",
+            ),
+        ],
+    )
+    def test_name_resolution(self, tmpdir, input_code, expected_code):
+        self.run_and_assert(tmpdir, input_code, expected_code)
