@@ -49,7 +49,7 @@ class UrlSandbox(SemgrepCodemod, Codemod):
             },
         ],
     )
-    SUMMARY = "Ensure that requests are made safely."
+    SUMMARY = "Sandbox URL Creation"
     CHANGE_DESCRIPTION = "Switch use of requests for security.safe_requests"
     YAML_FILES = [
         "sandbox_url_creation.yaml",

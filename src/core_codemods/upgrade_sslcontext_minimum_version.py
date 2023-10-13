@@ -5,7 +5,7 @@ from codemodder.codemods.api import SemgrepCodemod
 class UpgradeSSLContextMinimumVersion(SemgrepCodemod):
     NAME = "upgrade-sslcontext-minimum-version"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Upgrade minimum SSL/TLS version for SSLContext"
+    SUMMARY = "Upgrade SSLContext Minimum Version"
     DESCRIPTION = "Replaces minimum SSL/TLS version for SSLContext"
     REFERENCES = [
         {

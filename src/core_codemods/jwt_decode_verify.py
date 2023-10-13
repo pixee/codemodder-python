@@ -8,8 +8,8 @@ from codemodder.codemods.api.helpers import NewArg
 class JwtDecodeVerify(SemgrepCodemod):
     NAME = "jwt-decode-verify"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Enable all verifications in `jwt.decode` call."
-    DESCRIPTION = "Makes any of the multiple `verify` parameters to a `jwt.decode` call be `True`."
+    SUMMARY = "Verify JWT Decode"
+    DESCRIPTION = "Enable all verifications in `jwt.decode` call."
     REFERENCES = [
         {"url": "https://pyjwt.readthedocs.io/en/stable/api.html", "description": ""},
         {

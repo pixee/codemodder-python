@@ -5,7 +5,7 @@ from codemodder.codemods.api import SemgrepCodemod
 class HardenPyyaml(SemgrepCodemod):
     NAME = "harden-pyyaml"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Use SafeLoader when loading YAML"
+    SUMMARY = "Use SafeLoader in `yaml.load()` Calls"
     DESCRIPTION = "Ensures all calls to yaml.load use `SafeLoader`."
     REFERENCES = [
         {

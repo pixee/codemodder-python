@@ -6,7 +6,7 @@ from codemodder.codemods.api.helpers import NewArg
 class LxmlSafeParsing(SemgrepCodemod):
     NAME = "safe-lxml-parsing"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Use safe parsers in lxml parsing functions"
+    SUMMARY = "Use Safe Parsers in `lxml` Parsing Functions"
     DESCRIPTION = (
         "Call `lxml.etree.parse` and `lxml.etree.fromstring` with a safe parser"
     )

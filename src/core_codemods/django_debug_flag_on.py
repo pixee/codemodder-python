@@ -15,7 +15,7 @@ from codemodder.codemods.utils import is_django_settings_file
 
 class DjangoDebugFlagOn(SemgrepCodemod, Codemod):
     METADATA = CodemodMetadata(
-        DESCRIPTION=("Flips django's debug flag if on."),
+        DESCRIPTION="Flip Django Debug Flag to Off",
         NAME="django-debug-flag-on",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         REFERENCES=[
@@ -29,7 +29,7 @@ class DjangoDebugFlagOn(SemgrepCodemod, Codemod):
             },
         ],
     )
-    SUMMARY = CHANGE_DESCRIPTION = "Flip Django debug flag to off"
+    SUMMARY = CHANGE_DESCRIPTION = METADATA. DESCRIPTION
     YAML_FILES = [
         "django-debug-flag-on.yaml",
     ]

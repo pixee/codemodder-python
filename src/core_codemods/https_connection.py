@@ -22,7 +22,7 @@ from libcst.codemod import (
 
 class HTTPSConnection(BaseCodemod, Codemod):
     METADATA = CodemodMetadata(
-        DESCRIPTION=("Enforce HTTPS connection"),
+        DESCRIPTION="Enforce HTTPS Connection for urllib3",
         NAME="https-connection",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         REFERENCES=[
@@ -36,7 +36,7 @@ class HTTPSConnection(BaseCodemod, Codemod):
             },
         ],
     )
-    CHANGE_DESCRIPTION = "Enforce HTTPS connection"
+    CHANGE_DESCRIPTION = METADATA.DESCRIPTION
     SUMMARY = "Changes HTTPConnectionPool to HTTPSConnectionPool to enforce secure connection."
 
     METADATA_DEPENDENCIES = (PositionProvider,)

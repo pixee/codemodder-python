@@ -6,7 +6,7 @@ from codemodder.codemods.api.helpers import NewArg
 class RequestsVerify(SemgrepCodemod):
     NAME = "requests-verify"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Verify SSL certificates when making requests."
+    SUMMARY = "Verify SSL Certificates for Requests."
     DESCRIPTION = (
         "Makes any calls to requests.{func} with `verify=False` to `verify=True`"
     )

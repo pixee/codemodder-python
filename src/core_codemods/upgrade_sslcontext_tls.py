@@ -28,7 +28,7 @@ class UpgradeSSLContextTLS(SemgrepCodemod, BaseTransformer):
             },
         ],
     )
-    SUMMARY = "Replace known insecure TLS/SSL protocol versions in SSLContext with secure ones"
+    SUMMARY = "Upgrade TLS Version In SSLContext"
     CHANGE_DESCRIPTION = "Upgrade to use a safe version of TLS in SSLContext"
     YAML_FILES = [
         "upgrade_sslcontext_tls.yaml",

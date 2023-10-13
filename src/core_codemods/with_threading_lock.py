@@ -5,9 +5,9 @@ from codemodder.codemods.api import SemgrepCodemod
 
 class WithThreadingLock(SemgrepCodemod):
     NAME = "bad-lock-with-statement"
-    SUMMARY = "Replace deprecated usage of threading lock classes as context managers"
+    SUMMARY = "Separate Lock Instantiation from `with` Call"
+    DESCRIPTION = "Replace deprecated usage of threading lock classes as context managers."
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    DESCRIPTION = "Separates threading lock instantiation and call with `with` statement into two steps."
     REFERENCES = [
         {
             "url": "https://pylint.pycqa.org/en/latest/user_guide/messages/warning/useless-with-lock.",
