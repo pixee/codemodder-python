@@ -23,6 +23,21 @@ class CodemodMetadata:
     REVIEW_GUIDANCE: ReviewGuidance
     REFERENCES: list = field(default_factory=list)
 
+    # TODO: remove post_init update_references once we add description for each url.
+    def __post_init__(self):
+        object.__setattr__(self, "REFERENCES", self.update_references(self.REFERENCES))
+
+    @staticmethod
+    def update_references(references):
+        updated_references = []
+        for reference in references:
+            updated_reference = dict(
+                reference
+            )  # Create a copy to avoid modifying the original dict
+            updated_reference["description"] = updated_reference["url"]
+            updated_references.append(updated_reference)
+        return updated_references
+
 
 class BaseCodemod:
     # Implementation borrowed from https://stackoverflow.com/a/45250114
