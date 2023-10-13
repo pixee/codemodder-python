@@ -13,6 +13,12 @@ class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     SUMMARY = "Remove unnecessary f-strings"
     DESCRIPTION = UnnecessaryFormatString.DESCRIPTION
+    REFERENCES = [
+        {
+            "url": "https://github.com/Instagram/LibCST/blob/main/libcst/codemod/commands/unnecessary_format_string.py",
+            "description": "",
+        }
+    ]
 
     def __init__(self, codemod_context: CodemodContext, *codemod_args):
         UnnecessaryFormatString.__init__(self, codemod_context)

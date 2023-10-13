@@ -25,6 +25,16 @@ class HTTPSConnection(BaseCodemod, Codemod):
         DESCRIPTION=("Enforce HTTPS connection"),
         NAME="https-connection",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        REFERENCES=[
+            {
+                "url": "https://owasp.org/www-community/vulnerabilities/Insecure_Transport",
+                "description": "",
+            },
+            {
+                "url": "https://urllib3.readthedocs.io/en/stable/reference/urllib3.connectionpool.html#urllib3.HTTPConnectionPool",
+                "description": "",
+            },
+        ],
     )
     CHANGE_DESCRIPTION = "Enforce HTTPS connection"
     SUMMARY = "Changes HTTPConnectionPool to HTTPSConnectionPool to enforce secure connection."

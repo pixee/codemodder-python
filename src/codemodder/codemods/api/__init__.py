@@ -69,6 +69,7 @@ class _CodemodSubclassWithMetadata:
                 cls.DESCRIPTION,  # pylint: disable=no-member
                 cls.NAME,  # pylint: disable=no-member
                 cls.REVIEW_GUIDANCE,  # pylint: disable=no-member
+                cls.REFERENCES,  # pylint: disable=no-member
             )
 
             # This is a little bit hacky, but it also feels like the right solution?

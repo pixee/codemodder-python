@@ -10,6 +10,16 @@ class ProcessSandbox(SemgrepCodemod):
     DESCRIPTION = (
         "Replaces subprocess.{func} with more secure safe_command library functions."
     )
+    REFERENCES = [
+        {
+            "url": "https://github.com/pixee/python-security/blob/main/src/security/safe_command/api.py",
+            "description": "",
+        },
+        {
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html",
+            "description": "",
+        },
+    ]
 
     @classmethod
     def rule(cls):

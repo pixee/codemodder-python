@@ -10,6 +10,13 @@ class RequestsVerify(SemgrepCodemod):
     DESCRIPTION = (
         "Makes any calls to requests.{func} with `verify=False` to `verify=True`"
     )
+    REFERENCES = [
+        {"url": "https://requests.readthedocs.io/en/latest/api/", "description": ""},
+        {
+            "url": "https://owasp.org/www-community/attacks/Manipulator-in-the-middle_attack",
+            "description": "",
+        },
+    ]
 
     @classmethod
     def rule(cls):

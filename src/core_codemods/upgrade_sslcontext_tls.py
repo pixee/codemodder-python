@@ -16,6 +16,17 @@ class UpgradeSSLContextTLS(SemgrepCodemod, BaseTransformer):
         DESCRIPTION="Replaces known insecure TLS/SSL protocol versions in SSLContext with secure ones",
         NAME="upgrade-sslcontext-tls",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        REFERENCES=[
+            {
+                "url": "https://docs.python.org/3/library/ssl.html#security-considerations",
+                "description": "",
+            },
+            {"url": "https://datatracker.ietf.org/doc/rfc8996/", "description": ""},
+            {
+                "url": "https://www.digicert.com/blog/depreciating-tls-1-0-and-1-1",
+                "description": "",
+            },
+        ],
     )
     SUMMARY = "Replace known insecure TLS/SSL protocol versions in SSLContext with secure ones"
     CHANGE_DESCRIPTION = "Upgrade to use a safe version of TLS in SSLContext"

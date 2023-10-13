@@ -20,6 +20,12 @@ class UseWalrusIf(SemgrepCodemod):
     DESCRIPTION = (
         "Replaces multiple expressions involving `if` operator with 'walrus' operator"
     )
+    REFERENCES = [
+        {
+            "url": "https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions",
+            "description": "",
+        }
+    ]
 
     @classmethod
     def rule(cls):

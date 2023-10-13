@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, ClassVar
 
@@ -21,6 +21,7 @@ class CodemodMetadata:
     DESCRIPTION: str  # TODO: this field should be optional
     NAME: str
     REVIEW_GUIDANCE: ReviewGuidance
+    REFERENCES: list = field(default_factory=list)
 
 
 class BaseCodemod:

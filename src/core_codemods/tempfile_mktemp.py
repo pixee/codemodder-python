@@ -7,6 +7,12 @@ class TempfileMktemp(SemgrepCodemod):
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     SUMMARY = "Use `tempfile.mkstemp` instead of `tempfile.mktemp`"
     DESCRIPTION = "Replaces `tempfile.mktemp` with `tempfile.mkstemp`."
+    REFERENCES = [
+        {
+            "url": "https://docs.python.org/3/library/tempfile.html#tempfile.mktemp",
+            "description": "",
+        }
+    ]
 
     @classmethod
     def rule(cls):

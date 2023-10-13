@@ -58,10 +58,10 @@ METADATA = {
         importance="High",
         guidance_explained="We believe this change is safe, effective, and protects your code against very serious security attacks.",
     ),
-    "order-imports": DocMetadata(
-        importance="Low",
-        guidance_explained="We believe this codemod is safe and will not cause any issues. It is important to note that importing modules may have side-effects that alter the behavior, even if unused, but we believe those cases are rare enough to be safe.",
-    ),
+    # "order-imports": DocMetadata(
+    #     importance="Low",
+    #     guidance_explained="",
+    # ),
     "sandbox-process-creation": DocMetadata(
         importance="High",
         guidance_explained="We believe this change is safe and effective. The behavior of sandboxing `subprocess.run` and `subprocess.call` calls will only throw `SecurityException` if they see behavior involved in malicious code execution, which is extremely unlikely to happen in normal operation.",

@@ -11,6 +11,9 @@ class LimitReadline(SemgrepCodemod):
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     SUMMARY = "Limit the size of readline() calls"
     DESCRIPTION = "Adds a size limit argument to readline() calls."
+    REFERENCES = [
+        {"url": "https://cwe.mitre.org/data/definitions/400.html", "description": ""}
+    ]
 
     @classmethod
     def rule(cls):

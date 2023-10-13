@@ -61,7 +61,7 @@ class CodemodRegistry:
         for k, v in asdict(codemod.METADATA).items():
             if v is NotImplemented:
                 raise NotImplementedError(f"METADATA.{k} not defined for {codemod}")
-            if not v:
+            if k != "REFERENCES" and not v:
                 raise NotImplementedError(
                     f"METADATA.{k} should not be None or empty for {codemod}"
                 )

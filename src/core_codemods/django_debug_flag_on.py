@@ -18,6 +18,16 @@ class DjangoDebugFlagOn(SemgrepCodemod, Codemod):
         DESCRIPTION=("Flips django's debug flag if on."),
         NAME="django-debug-flag-on",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        REFERENCES=[
+            {
+                "url": "https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure",
+                "description": "",
+            },
+            {
+                "url": "https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-DEBUG",
+                "description": "",
+            },
+        ],
     )
     SUMMARY = CHANGE_DESCRIPTION = "Flip Django debug flag to off"
     YAML_FILES = [

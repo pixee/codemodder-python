@@ -18,6 +18,7 @@ class OrderImports(BaseCodemod, Codemod):
         DESCRIPTION=("Formats and order imports by categories"),
         NAME="order-imports",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        REFERENCES=[],
     )
     SUMMARY = "Order imports by categories"
     CHANGE_DESCRIPTION = "Ordered and formatted import block below this line"

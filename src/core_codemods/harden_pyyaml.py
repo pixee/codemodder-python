@@ -7,6 +7,12 @@ class HardenPyyaml(SemgrepCodemod):
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     SUMMARY = "Use SafeLoader when loading YAML"
     DESCRIPTION = "Ensures all calls to yaml.load use `SafeLoader`."
+    REFERENCES = [
+        {
+            "url": "https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data",
+            "description": "",
+        }
+    ]
 
     @classmethod
     def rule(cls):

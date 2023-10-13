@@ -18,6 +18,16 @@ class DjangoSessionCookieSecureOff(SemgrepCodemod, Codemod):
         DESCRIPTION=("Sets Django's `SESSION_COOKIE_SECURE` flag if off or missing."),
         NAME="django-session-cookie-secure-off",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_REVIEW,
+        REFERENCES=[
+            {
+                "url": "https://owasp.org/www-community/controls/SecureCookieAttribute",
+                "description": "",
+            },
+            {
+                "url": "https://docs.djangoproject.com/en/4.2/ref/settings/#session-cookie-secure",
+                "description": "",
+            },
+        ],
     )
     SUMMARY = "Secure setting for Django `SESSION_COOKIE_SECURE` flag"
     CHANGE_DESCRIPTION = METADATA.DESCRIPTION

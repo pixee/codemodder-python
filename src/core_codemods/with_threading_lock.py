@@ -8,6 +8,16 @@ class WithThreadingLock(SemgrepCodemod):
     SUMMARY = "Replace deprecated usage of threading lock classes as context managers"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     DESCRIPTION = "Separates threading lock instantiation and call with `with` statement into two steps."
+    REFERENCES = [
+        {
+            "url": "https://pylint.pycqa.org/en/latest/user_guide/messages/warning/useless-with-lock.",
+            "description": "",
+        },
+        {
+            "url": "https://docs.python.org/3/library/threading.html#using-locks-conditions-and-semaphores-in-the-with-statement",
+            "description": "",
+        },
+    ]
 
     @classmethod
     def rule(cls):

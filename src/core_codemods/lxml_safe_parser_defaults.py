@@ -8,6 +8,20 @@ class LxmlSafeParserDefaults(SemgrepCodemod):
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     SUMMARY = "Use Safe Defaults for lxml Parsers"
     DESCRIPTION = "Replace lxml parser parameters with safe defaults"
+    REFERENCES = [
+        {
+            "url": "https://lxml.de/apidoc/lxml.etree.html#lxml.etree.XMLParser",
+            "description": "",
+        },
+        {
+            "url": "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing",
+            "description": "",
+        },
+        {
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
+            "description": "",
+        },
+    ]
 
     @classmethod
     def rule(cls):

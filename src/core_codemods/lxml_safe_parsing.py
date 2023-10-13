@@ -10,6 +10,20 @@ class LxmlSafeParsing(SemgrepCodemod):
     DESCRIPTION = (
         "Call `lxml.etree.parse` and `lxml.etree.fromstring` with a safe parser"
     )
+    REFERENCES = [
+        {
+            "url": "https://lxml.de/apidoc/lxml.etree.html#lxml.etree.XMLParser",
+            "description": "",
+        },
+        {
+            "url": "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing",
+            "description": "",
+        },
+        {
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
+            "description": "",
+        },
+    ]
 
     @classmethod
     def rule(cls):
