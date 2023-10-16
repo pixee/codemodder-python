@@ -53,9 +53,14 @@ class WithThreadingLock(SemgrepCodemod, NameResolutionMixin):
             original_node.items[0]
         ):
             current_names = self.find_used_names_in_module()
-            # arbitrarily choose `lock_cm` if `lock` name is already taken
-            # in hopes that `lock_cm` is very unlikely to be used.
-            value = "lock" if "lock" not in current_names else "lock_cm"
+            name_for_node_type = _get_node_name(original_node)
+            # arbitrarily choose `name_cm` if `name` name is already taken
+            # in hopes that `name_cm` is very unlikely to be used.
+            value = (
+                name_for_node_type
+                if name_for_node_type not in current_names
+                else f"{name_for_node_type}_cm"
+            )
             name = cst.Name(value=value)
             assign = cst.SimpleStatementLine(
                 body=[
@@ -76,3 +81,12 @@ class WithThreadingLock(SemgrepCodemod, NameResolutionMixin):
             )
 
         return original_node
+
+
+def _get_node_name(original_node: cst.With):
+    func_call = original_node.items[0].item.func
+    if isinstance(func_call, cst.Name):
+        return func_call.value.lower()
+    if isinstance(func_call, cst.Attribute):
+        return func_call.attr.value.lower()
+    return ""

@@ -27,8 +27,8 @@ with threading.{klass}():
     ...
 """
         expected = f"""import threading
-lock = threading.{klass}()
-with lock:
+{klass.lower()} = threading.{klass}()
+with {klass.lower()}:
     ...
 """
         self.run_and_assert(tmpdir, input_code, expected)
@@ -40,8 +40,8 @@ with {klass}():
     ...
 """
         expected = f"""from threading import {klass}
-lock = {klass}()
-with lock:
+{klass.lower()} = {klass}()
+with {klass.lower()}:
     ...
 """
         self.run_and_assert(tmpdir, input_code, expected)
@@ -53,8 +53,8 @@ with threading.{klass}() as foo:
     ...
 """
         expected = f"""import threading
-lock = threading.{klass}()
-with lock as foo:
+{klass.lower()} = threading.{klass}()
+with {klass.lower()} as foo:
     ...
 """
         self.run_and_assert(tmpdir, input_code, expected)
@@ -69,8 +69,8 @@ with threading_lock():
     ...
 """
         expected = f"""import threading
-lock = threading.{klass}()
-with lock:
+{klass.lower()} = threading.{klass}()
+with {klass.lower()}:
     ...
 
 with threading_lock():
@@ -136,30 +136,28 @@ def f(l):
 """,
             ),
             (
-                    """import threading
+                """import threading
 with threading.Lock():
     int("1")
-    
 with threading.Lock():
     print()
 """,
-                    """import threading
+                """import threading
 lock = threading.Lock()
 with lock:
     int("1")
-    
 lock = threading.Lock()
 with lock:
     print()
 """,
             ),
             (
-                    """import threading
+                """import threading
 with threading.Lock():
     with threading.Lock():
         print()
 """,
-                    """import threading
+                """import threading
 lock = threading.Lock()
 with lock:
     lock = threading.Lock()
