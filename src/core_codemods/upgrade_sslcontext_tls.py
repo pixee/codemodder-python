@@ -13,7 +13,7 @@ from codemodder.file_context import FileContext
 
 class UpgradeSSLContextTLS(SemgrepCodemod, BaseTransformer):
     METADATA = CodemodMetadata(
-        DESCRIPTION="Replaces known insecure TLS/SSL protocol versions in SSLContext with secure ones",
+        DESCRIPTION="Replaces known insecure TLS/SSL protocol versions in SSLContext with secure ones.",
         NAME="upgrade-sslcontext-tls",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         REFERENCES=[

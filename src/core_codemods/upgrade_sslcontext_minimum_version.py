@@ -6,7 +6,7 @@ class UpgradeSSLContextMinimumVersion(SemgrepCodemod):
     NAME = "upgrade-sslcontext-minimum-version"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     SUMMARY = "Upgrade SSLContext Minimum Version"
-    DESCRIPTION = "Replaces minimum SSL/TLS version for SSLContext"
+    DESCRIPTION = "Replaces minimum SSL/TLS version for SSLContext."
     REFERENCES = [
         {
             "url": "https://docs.python.org/3/library/ssl.html#security-considerations",

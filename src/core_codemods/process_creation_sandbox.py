@@ -5,7 +5,7 @@ from codemodder.codemods.api import SemgrepCodemod
 
 class ProcessSandbox(SemgrepCodemod):
     NAME = "sandbox-process-creation"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     SUMMARY = "Sandbox Process Creation"
     DESCRIPTION = (
         "Replaces subprocess.{func} with more secure safe_command library functions."

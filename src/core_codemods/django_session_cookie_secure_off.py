@@ -15,7 +15,7 @@ from codemodder.file_context import FileContext
 
 class DjangoSessionCookieSecureOff(SemgrepCodemod, Codemod):
     METADATA = CodemodMetadata(
-        DESCRIPTION=("Sets Django's `SESSION_COOKIE_SECURE` Flag if Off or Missing."),
+        DESCRIPTION=("Sets Django's `SESSION_COOKIE_SECURE` flag if off or missing."),
         NAME="django-session-cookie-secure-off",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         REFERENCES=[

@@ -22,7 +22,7 @@ from libcst.codemod import (
 
 class HTTPSConnection(BaseCodemod, Codemod):
     METADATA = CodemodMetadata(
-        DESCRIPTION="Enforce HTTPS Connection for urllib3",
+        DESCRIPTION="Enforce HTTPS connection for `urllib3`.",
         NAME="https-connection",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         REFERENCES=[

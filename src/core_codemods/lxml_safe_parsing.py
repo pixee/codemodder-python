@@ -8,7 +8,7 @@ class LxmlSafeParsing(SemgrepCodemod):
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     SUMMARY = "Use Safe Parsers in `lxml` Parsing Functions"
     DESCRIPTION = (
-        "Call `lxml.etree.parse` and `lxml.etree.fromstring` with a safe parser"
+        "Call `lxml.etree.parse` and `lxml.etree.fromstring` with a safe parser."
     )
     REFERENCES = [
         {

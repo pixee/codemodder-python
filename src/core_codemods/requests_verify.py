@@ -8,7 +8,7 @@ class RequestsVerify(SemgrepCodemod):
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     SUMMARY = "Verify SSL Certificates for Requests."
     DESCRIPTION = (
-        "Makes any calls to requests.{func} with `verify=False` to `verify=True`"
+        "Makes any calls to requests.{func} with `verify=False` to `verify=True`."
     )
     REFERENCES = [
         {"url": "https://requests.readthedocs.io/en/latest/api/", "description": ""},

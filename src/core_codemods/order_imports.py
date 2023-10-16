@@ -15,7 +15,7 @@ from libcst.codemod import Codemod, CodemodContext
 
 class OrderImports(BaseCodemod, Codemod):
     METADATA = CodemodMetadata(
-        DESCRIPTION=("Formats and orders imports by categories"),
+        DESCRIPTION=("Formats and orders imports by categories."),
         NAME="order-imports",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         REFERENCES=[],
