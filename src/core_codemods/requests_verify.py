@@ -6,10 +6,17 @@ from codemodder.codemods.api.helpers import NewArg
 class RequestsVerify(SemgrepCodemod):
     NAME = "requests-verify"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Verify SSL certificates when making requests."
+    SUMMARY = "Verify SSL Certificates for Requests."
     DESCRIPTION = (
-        "Makes any calls to requests.{func} with `verify=False` to `verify=True`"
+        "Makes any calls to requests.{func} with `verify=False` to `verify=True`."
     )
+    REFERENCES = [
+        {"url": "https://requests.readthedocs.io/en/latest/api/", "description": ""},
+        {
+            "url": "https://owasp.org/www-community/attacks/Manipulator-in-the-middle_attack",
+            "description": "",
+        },
+    ]
 
     @classmethod
     def rule(cls):

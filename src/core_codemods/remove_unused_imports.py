@@ -28,8 +28,9 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         DESCRIPTION=("Remove unused imports from a module."),
         NAME="unused-imports",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        REFERENCES=[],
     )
-    SUMMARY = "Remove unused imports from a module"
+    SUMMARY = "Remove Unused Imports"
     CHANGE_DESCRIPTION = "Unused import."
 
     METADATA_DEPENDENCIES = (

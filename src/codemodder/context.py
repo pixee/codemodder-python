@@ -82,7 +82,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
                 "codemod": codemod.id,
                 "summary": codemod.summary,
                 "description": codemod.description,
-                "references": [],
+                "references": codemod.references,
                 "properties": {},
                 "failedFiles": [],
                 "changeset": [change.to_json() for change in changeset],

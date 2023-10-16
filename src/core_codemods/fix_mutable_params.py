@@ -9,8 +9,8 @@ class FixMutableParams(BaseCodemod):
     NAME = "fix-mutable-params"
     SUMMARY = "Replace Mutable Default Parameters"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "Replace mutable parameter with None"
-
+    DESCRIPTION = "Replace mutable parameter with `None`."
+    REFERENCES: list = []
     _BUILTIN_TO_LITERAL = {
         "list": cst.List(elements=[]),
         "dict": cst.Dict(elements=[]),

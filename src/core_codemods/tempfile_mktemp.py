@@ -5,8 +5,14 @@ from codemodder.codemods.api import SemgrepCodemod
 class TempfileMktemp(SemgrepCodemod):
     NAME = "secure-tempfile"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Use `tempfile.mkstemp` instead of `tempfile.mktemp`"
+    SUMMARY = "Upgrade and Secure Temp File Creation"
     DESCRIPTION = "Replaces `tempfile.mktemp` with `tempfile.mkstemp`."
+    REFERENCES = [
+        {
+            "url": "https://docs.python.org/3/library/tempfile.html#tempfile.mktemp",
+            "description": "",
+        }
+    ]
 
     @classmethod
     def rule(cls):

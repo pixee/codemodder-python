@@ -20,6 +20,8 @@ dependencies = [
 
 [project.scripts]
 codemodder = "codemodder.codemodder:main"
+generate-docs = 'scripts.generate_docs:main'
+
 
 [project.entry-points.codemods]
 core = "core_codemods:registry"

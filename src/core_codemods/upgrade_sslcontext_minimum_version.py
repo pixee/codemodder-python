@@ -5,8 +5,19 @@ from codemodder.codemods.api import SemgrepCodemod
 class UpgradeSSLContextMinimumVersion(SemgrepCodemod):
     NAME = "upgrade-sslcontext-minimum-version"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Upgrade minimum SSL/TLS version for SSLContext"
-    DESCRIPTION = "Replaces minimum SSL/TLS version for SSLContext"
+    SUMMARY = "Upgrade SSLContext Minimum Version"
+    DESCRIPTION = "Replaces minimum SSL/TLS version for SSLContext."
+    REFERENCES = [
+        {
+            "url": "https://docs.python.org/3/library/ssl.html#security-considerations",
+            "description": "",
+        },
+        {"url": "https://datatracker.ietf.org/doc/rfc8996/", "description": ""},
+        {
+            "url": "https://www.digicert.com/blog/depreciating-tls-1-0-and-1-1",
+            "description": "",
+        },
+    ]
 
     @classmethod
     def rule(cls):

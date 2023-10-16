@@ -6,10 +6,20 @@ from codemodder.codemods.api import SemgrepCodemod
 class ProcessSandbox(SemgrepCodemod):
     NAME = "sandbox-process-creation"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Sandbox process creation"
+    SUMMARY = "Sandbox Process Creation"
     DESCRIPTION = (
         "Replaces subprocess.{func} with more secure safe_command library functions."
     )
+    REFERENCES = [
+        {
+            "url": "https://github.com/pixee/python-security/blob/main/src/security/safe_command/api.py",
+            "description": "",
+        },
+        {
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html",
+            "description": "",
+        },
+    ]
 
     @classmethod
     def rule(cls):

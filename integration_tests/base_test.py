@@ -83,6 +83,12 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert len(results) == 1
         result = results[0]
         assert result["codemod"] == self.codemod_wrapper.id
+        assert result["references"] == self.codemod_wrapper.references
+
+        # TODO: once we add description for each url.
+        for reference in result["references"]:
+            assert reference["url"] == reference["description"]
+
         assert len(result["changeset"]) == self.num_changed_files
 
         # A codemod may change multiple files. For now we will

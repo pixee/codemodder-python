@@ -5,9 +5,16 @@ from codemodder.codemods.api.helpers import NewArg
 
 class EnableJinja2Autoescape(SemgrepCodemod):
     NAME = "enable-jinja2-autoescape"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Enable jinja2 autoescape"
-    DESCRIPTION = "Makes the `autoescape` parameter to jinja2.Environment be `True`."
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
+    SUMMARY = "Enable Jinja2 Autoescape"
+    DESCRIPTION = "Sets the `autoescape` parameter in jinja2.Environment to `True`."
+    REFERENCES = [
+        {"url": "https://owasp.org/www-community/attacks/xss/", "description": ""},
+        {
+            "url": "https://jinja.palletsprojects.com/en/3.1.x/api/#autoescaping",
+            "description": "",
+        },
+    ]
 
     @classmethod
     def rule(cls):

@@ -22,12 +22,24 @@ from libcst.codemod import (
 
 class HTTPSConnection(BaseCodemod, Codemod):
     METADATA = CodemodMetadata(
-        DESCRIPTION=("Enforce HTTPS connection"),
+        DESCRIPTION="Enforce HTTPS connection for `urllib3`.",
         NAME="https-connection",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        REFERENCES=[
+            {
+                "url": "https://owasp.org/www-community/vulnerabilities/Insecure_Transport",
+                "description": "",
+            },
+            {
+                "url": "https://urllib3.readthedocs.io/en/stable/reference/urllib3.connectionpool.html#urllib3.HTTPConnectionPool",
+                "description": "",
+            },
+        ],
     )
-    CHANGE_DESCRIPTION = "Enforce HTTPS connection"
-    SUMMARY = "Changes HTTPConnectionPool to HTTPSConnectionPool to enforce secure connection."
+    CHANGE_DESCRIPTION = METADATA.DESCRIPTION
+    SUMMARY = (
+        "Changes HTTPConnectionPool to HTTPSConnectionPool to Enforce Secure Connection"
+    )
 
     METADATA_DEPENDENCIES = (PositionProvider,)
 

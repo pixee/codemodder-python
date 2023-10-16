@@ -15,11 +15,22 @@ from codemodder.codemods.utils import is_django_settings_file
 
 class DjangoDebugFlagOn(SemgrepCodemod, Codemod):
     METADATA = CodemodMetadata(
-        DESCRIPTION=("Flips django's debug flag if on."),
+        DESCRIPTION="Flip `Django` debug flag to off.",
         NAME="django-debug-flag-on",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        REFERENCES=[
+            {
+                "url": "https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure",
+                "description": "",
+            },
+            {
+                "url": "https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-DEBUG",
+                "description": "",
+            },
+        ],
     )
-    SUMMARY = CHANGE_DESCRIPTION = "Flip Django debug flag to off"
+    SUMMARY = "Disable Django Debug Mode"
+    CHANGE_DESCRIPTION = METADATA.DESCRIPTION
     YAML_FILES = [
         "django-debug-flag-on.yaml",
     ]

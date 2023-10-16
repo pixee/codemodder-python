@@ -9,8 +9,11 @@ default_limit = "5_000_000"
 class LimitReadline(SemgrepCodemod):
     NAME = "limit-readline"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Limit the size of readline() calls"
+    SUMMARY = "Limit readline()"
     DESCRIPTION = "Adds a size limit argument to readline() calls."
+    REFERENCES = [
+        {"url": "https://cwe.mitre.org/data/definitions/400.html", "description": ""}
+    ]
 
     @classmethod
     def rule(cls):

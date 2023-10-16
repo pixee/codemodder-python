@@ -15,11 +15,17 @@ class UseWalrusIf(SemgrepCodemod):
         ScopeProvider,
     )
     NAME = "use-walrus-if"
-    SUMMARY = "Use Assignment Expression in Conditional"
+    SUMMARY = "Use Assignment Expression (Walrus) In Conditional"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     DESCRIPTION = (
-        "Replaces multiple expressions involving `if` operator with 'walrus' operator"
+        "Replaces multiple expressions involving `if` operator with 'walrus' operator."
     )
+    REFERENCES = [
+        {
+            "url": "https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions",
+            "description": "",
+        }
+    ]
 
     @classmethod
     def rule(cls):

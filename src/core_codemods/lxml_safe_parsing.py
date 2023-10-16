@@ -6,10 +6,24 @@ from codemodder.codemods.api.helpers import NewArg
 class LxmlSafeParsing(SemgrepCodemod):
     NAME = "safe-lxml-parsing"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Use safe parsers in lxml parsing functions"
+    SUMMARY = "Use Safe Parsers in `lxml` Parsing Functions"
     DESCRIPTION = (
-        "Call `lxml.etree.parse` and `lxml.etree.fromstring` with a safe parser"
+        "Call `lxml.etree.parse` and `lxml.etree.fromstring` with a safe parser."
     )
+    REFERENCES = [
+        {
+            "url": "https://lxml.de/apidoc/lxml.etree.html#lxml.etree.XMLParser",
+            "description": "",
+        },
+        {
+            "url": "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing",
+            "description": "",
+        },
+        {
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
+            "description": "",
+        },
+    ]
 
     @classmethod
     def rule(cls):

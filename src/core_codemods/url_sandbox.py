@@ -29,8 +29,27 @@ class UrlSandbox(SemgrepCodemod, Codemod):
         ),
         NAME="url-sandbox",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        REFERENCES=[
+            {
+                "url": "https://github.com/pixee/python-security/blob/main/src/security/safe_requests/api.py",
+                "description": "",
+            },
+            {"url": "https://portswigger.net/web-security/ssrf", "description": ""},
+            {
+                "url": "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html",
+                "description": "",
+            },
+            {
+                "url": "https://www.rapid7.com/blog/post/2021/11/23/owasp-top-10-deep-dive-defending-against-server-side-request-forgery/",
+                "description": "",
+            },
+            {
+                "url": "https://blog.assetnote.io/2021/01/13/blind-ssrf-chains/",
+                "description": "",
+            },
+        ],
     )
-    SUMMARY = "Ensure that requests are made safely."
+    SUMMARY = "Sandbox URL Creation"
     CHANGE_DESCRIPTION = "Switch use of requests for security.safe_requests"
     YAML_FILES = [
         "sandbox_url_creation.yaml",

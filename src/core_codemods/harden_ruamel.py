@@ -6,8 +6,14 @@ from codemodder.codemods.api.helpers import NewArg
 class HardenRuamel(SemgrepCodemod):
     NAME = "harden-ruamel"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Use safe YAML loading in ruamel.yaml"
+    SUMMARY = "Use `typ='safe'` in ruamel.yaml() Calls"
     DESCRIPTION = "Ensures all unsafe calls to ruamel.yaml.YAML use `typ='safe'`."
+    REFERENCES = [
+        {
+            "url": "https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data",
+            "description": "",
+        }
+    ]
 
     @classmethod
     def rule(cls):

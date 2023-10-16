@@ -11,8 +11,14 @@ from codemodder.codemods.api import BaseCodemod
 class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
     NAME = "remove-unnecessary-f-str"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Remove unnecessary f-strings"
+    SUMMARY = "Remove Unnecessary F-strings"
     DESCRIPTION = UnnecessaryFormatString.DESCRIPTION
+    REFERENCES = [
+        {
+            "url": "https://github.com/Instagram/LibCST/blob/main/libcst/codemod/commands/unnecessary_format_string.py",
+            "description": "",
+        }
+    ]
 
     def __init__(self, codemod_context: CodemodContext, *codemod_args):
         UnnecessaryFormatString.__init__(self, codemod_context)
