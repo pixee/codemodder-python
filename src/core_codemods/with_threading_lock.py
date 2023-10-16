@@ -45,6 +45,27 @@ class WithThreadingLock(SemgrepCodemod, NameResolutionMixin):
             - focus-metavariable: $BODY
         """
 
+    def __init__(self, *args):
+        SemgrepCodemod.__init__(self, *args)
+        NameResolutionMixin.__init__(self)
+        self.names_in_module = self.find_used_names_in_module()
+
+    def _create_new_variable(self, original_node: cst.With):
+        """
+        Create an appropriately named variable for the new
+        lock, condition, or semaphore.
+        Keep track of this addition in case that are other additions.
+        """
+        base_name = _get_node_name(original_node)
+        value = base_name
+        counter = 1
+        while value in self.names_in_module:
+            value = f"{base_name}_{counter}"
+            counter += 1
+
+        self.names_in_module.append(value)
+        return cst.Name(value=value)
+
     def leave_With(self, original_node: cst.With, updated_node: cst.With):
         # We deliberately restrict ourselves to simple cases where there's only one with clause for now.
         # Semgrep appears to be insufficiently expressive to match multiple clauses correctly.
@@ -52,16 +73,7 @@ class WithThreadingLock(SemgrepCodemod, NameResolutionMixin):
         if len(original_node.items) == 1 and self.node_is_selected(
             original_node.items[0]
         ):
-            current_names = self.find_used_names_in_module()
-            name_for_node_type = _get_node_name(original_node)
-            # arbitrarily choose `name_cm` if `name` name is already taken
-            # in hopes that `name_cm` is very unlikely to be used.
-            value = (
-                name_for_node_type
-                if name_for_node_type not in current_names
-                else f"{name_for_node_type}_cm"
-            )
-            name = cst.Name(value=value)
+            name = self._create_new_variable(original_node)
             assign = cst.SimpleStatementLine(
                 body=[
                     cst.Assign(
@@ -89,4 +101,4 @@ def _get_node_name(original_node: cst.With):
         return func_call.value.lower()
     if isinstance(func_call, cst.Attribute):
         return func_call.attr.value.lower()
-    return ""
+    return ""  # pragma: no cover

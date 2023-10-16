@@ -102,8 +102,8 @@ with Lock():
 """,
                 """from threading import Lock
 lock = 1
-lock_cm = Lock()
-with lock_cm:
+lock_1 = Lock()
+with lock_1:
     ...
 """,
             ),
@@ -115,8 +115,8 @@ with Lock():
 """,
                 """from threading import Lock
 from something import lock
-lock_cm = Lock()
-with lock_cm:
+lock_1 = Lock()
+with lock_1:
     ...
 """,
             ),
@@ -130,8 +130,8 @@ def f(l):
                 """import threading
 lock = 1
 def f(l):
-    lock_cm = threading.Lock()
-    with lock_cm:
+    lock_1 = threading.Lock()
+    with lock_1:
         return [lock_ for lock_ in l]
 """,
             ),
@@ -141,13 +141,20 @@ with threading.Lock():
     int("1")
 with threading.Lock():
     print()
+var = 1
+with threading.Lock():
+    print()
 """,
                 """import threading
 lock = threading.Lock()
 with lock:
     int("1")
-lock = threading.Lock()
-with lock:
+lock_1 = threading.Lock()
+with lock_1:
+    print()
+var = 1
+lock_2 = threading.Lock()
+with lock_2:
     print()
 """,
             ),
@@ -158,8 +165,8 @@ with threading.Lock():
         print()
 """,
                 """import threading
-lock = threading.Lock()
-with lock:
+lock_1 = threading.Lock()
+with lock_1:
     lock = threading.Lock()
     with lock:
         print()
