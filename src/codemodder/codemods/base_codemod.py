@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
 from typing import List, ClassVar
 
 from libcst._position import CodeRange
@@ -100,7 +99,7 @@ class SemgrepCodemod(BaseCodemod):
 
     @classmethod
     def apply_rule(
-        cls, context, *args, yaml_files: List[Path], **kwargs
+        cls, context, yaml_files, *args, **kwargs
     ):  # pylint: disable=arguments-differ
         """
         Apply semgrep to gather rule results
