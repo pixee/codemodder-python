@@ -32,6 +32,10 @@ class TestRun:
             "tests/samples/",
             "--output",
             "here.txt",
+            "--codemod-include",
+            "requests-verify",
+            "--path-include",
+            "*request.py",
         ]
 
         res = run(args)
@@ -39,12 +43,19 @@ class TestRun:
         assert res == 0
         mock_parse.assert_called()
 
-        # We still report for now even if parsing failed
         mock_reporting.assert_called_once()
         args_to_reporting = mock_reporting.call_args_list[0][0]
         assert len(args_to_reporting) == 4
         _, _, _, results_by_codemod = args_to_reporting
-        assert results_by_codemod == []
+        assert results_by_codemod != []
+
+        requests_report = results_by_codemod[0]
+        requests_report["changeset"] == []
+        assert len(requests_report["failedFiles"]) == 2
+        assert sorted(requests_report["failedFiles"]) == [
+            "tests/samples/make_request.py",
+            "tests/samples/unverified_request.py",
+        ]
 
     @mock.patch("codemodder.codemodder.update_code")
     @mock.patch("codemodder.codemods.base_codemod.semgrep_run", side_effect=semgrep_run)
