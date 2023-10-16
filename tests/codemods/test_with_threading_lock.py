@@ -135,6 +135,38 @@ def f(l):
         return [lock_ for lock_ in l]
 """,
             ),
+            (
+                    """import threading
+with threading.Lock():
+    int("1")
+    
+with threading.Lock():
+    print()
+""",
+                    """import threading
+lock = threading.Lock()
+with lock:
+    int("1")
+    
+lock = threading.Lock()
+with lock:
+    print()
+""",
+            ),
+            (
+                    """import threading
+with threading.Lock():
+    with threading.Lock():
+        print()
+""",
+                    """import threading
+lock = threading.Lock()
+with lock:
+    lock = threading.Lock()
+    with lock:
+        print()
+""",
+            ),
         ],
     )
     def test_name_resolution(self, tmpdir, input_code, expected_code):
