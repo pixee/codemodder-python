@@ -6,7 +6,9 @@ from codemodder.codemods.api import SemgrepCodemod
 class WithThreadingLock(SemgrepCodemod):
     NAME = "bad-lock-with-statement"
     SUMMARY = "Separate Lock Instantiation from `with` Call"
-    DESCRIPTION = "Replace deprecated usage of threading lock classes as context managers."
+    DESCRIPTION = (
+        "Replace deprecated usage of threading lock classes as context managers."
+    )
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     REFERENCES = [
         {

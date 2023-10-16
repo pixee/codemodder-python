@@ -9,10 +9,8 @@ Our change looks as follows:
 - decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=False)
 + decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)
   ...
-- decoded_payload = jwt.decode(
-    encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": False, "verify_exp": False})
-+ decoded_payload = jwt.decode(
-    encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": True, "verify_exp": True})
+- decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": False, "verify_exp": False})
++ decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": True, "verify_exp": True})
 ```
 
 Any `verify` parameter not listed relies on the secure `True` default value.

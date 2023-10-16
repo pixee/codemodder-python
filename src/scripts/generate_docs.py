@@ -44,7 +44,8 @@ METADATA = {
         guidance_explained="Support for HTTPS is widespread which, save in some legacy applications, makes this change safe.",
     ),
     "jwt-decode-verify": DocMetadata(
-        importance="SOMETHING", guidance_explained="SOMETHING"
+        importance="High",
+        guidance_explained="This codemod ensures your code uses all available validations when calling `jwt.decode`. We believe this replacement is safe and should not result in any issues.",
     ),
     "limit-readline": DocMetadata(
         importance="Medium",
@@ -58,10 +59,10 @@ METADATA = {
         importance="High",
         guidance_explained="We believe this change is safe, effective, and protects your code against very serious security attacks.",
     ),
-    # "order-imports": DocMetadata(
-    #     importance="Low",
-    #     guidance_explained="",
-    # ),
+    "order-imports": DocMetadata(
+        importance="Low",
+        guidance_explained="TODO SKIP FOR NOW",
+    ),
     "sandbox-process-creation": DocMetadata(
         importance="High",
         guidance_explained="We believe this change is safe and effective. The behavior of sandboxing `subprocess.run` and `subprocess.call` calls will only throw `SecurityException` if they see behavior involved in malicious code execution, which is extremely unlikely to happen in normal operation.",
@@ -87,7 +88,8 @@ METADATA = {
         guidance_explained="We believe this codemod is safe and will cause no unexpected errors.",
     ),
     "upgrade-sslcontext-minimum-version": DocMetadata(
-        importance="SOMETHING", guidance_explained="SOMETHING"
+        importance="High",
+        guidance_explained="This codemod updates the minimum supported version of TLS. Since this is an important security fix and since all modern servers offer TLSv1.2, we believe this change can be safely merged without review.",
     ),
     "upgrade-sslcontext-tls": DocMetadata(
         importance="High",
@@ -112,9 +114,9 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="We believe that using the walrus operator is an improvement in terms of clarity and readability. However, this change is only compatible with codebases that support Python 3.8 and later, so it requires quick validation before merging.",
     ),
-    # "bad-lock-with-statement": DocMetadata(
-    #     importance="Low", guidance_explained="TODO AFTER PR MERGE"
-    # ),
+    "bad-lock-with-statement": DocMetadata(
+        importance="Low", guidance_explained="TODO AFTER PR MERGE"
+    ),
 }
 
 
@@ -124,6 +126,11 @@ def generate_docs(codemod):
     except KeyError as exc:
         raise KeyError(f"Must add {codemod.name} to METADATA") from exc
 
+    formatted_references = [
+        f"* [{ref['description']}]({ref['url']})" for ref in codemod.references
+    ]
+    markdown_references = "\n".join(formatted_references) or "N/A"
+
     output = f"""---
 title: {codemod.summary}
 sidebar_position: 1
@@ -131,12 +138,11 @@ sidebar_position: 1
 
 ## {codemod.id}
 
-| Importance | Review Guidance      | Requires SARIF Tool |
-|------------|----------------------|---------------------|
- | {codemod_data.importance}       | {codemod.review_guidance} | {codemod_data.need_sarif}                  |
+| Importance | Review Guidance            | Requires SARIF Tool |
+|------------|----------------------------|---------------------|
+| {codemod_data.importance}       | {codemod.review_guidance} | {codemod_data.need_sarif}                  |
 
 {codemod.description}
-
 If you have feedback on this codemod, [please let us know](mailto:feedback@pixee.ai)!
 
 ## F.A.Q.
@@ -150,10 +156,8 @@ If you have feedback on this codemod, [please let us know](mailto:feedback@pixee
 N/A
 
 ## References
-* [https://lxml.de/apidoc/lxml.etree.html#lxml.etree.XMLParser](https://lxml.de/apidoc/lxml.etree.html#lxml.etree.XMLParser)
-* [https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing](https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing)
-* [https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html](https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html)
-#codemod.references
+
+{markdown_references}
 """
     return output
 

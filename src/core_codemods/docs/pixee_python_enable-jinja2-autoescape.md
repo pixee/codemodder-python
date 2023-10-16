@@ -1,6 +1,6 @@
 This codemod enables autoescaping of HTML content in `jinja2`. Unfortunately, the jinja2
 default behavior is to not autoescape when rendering templates, which makes your applications
-vulnerable to Cross-Site Scripting (XSS) attacks.
+potentially vulnerable to Cross-Site Scripting (XSS) attacks.
 
 Our codemod checks if you forgot to enable autoescape or if you explicitly disabled it. The change looks as follows:
 
@@ -13,4 +13,3 @@ Our codemod checks if you forgot to enable autoescape or if you explicitly disab
 + env = Environment(autoescape=True, loader=some_loader)
   ...
 ```
-

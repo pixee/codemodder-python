@@ -4,7 +4,7 @@ from codemodder.codemods.api import SemgrepCodemod
 
 class SecureRandom(SemgrepCodemod):
     NAME = "secure-random"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     SUMMARY = "Secure Source of Randomness"
     DESCRIPTION = "Replaces random.{func} with more secure secrets library functions."
     REFERENCES = [

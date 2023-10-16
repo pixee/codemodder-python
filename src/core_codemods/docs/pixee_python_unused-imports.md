@@ -6,5 +6,3 @@ import b
 
 b.function()
 ```
-
-If you have feedback on this codemod, [please let us know](mailto:feedback@pixee.ai)!

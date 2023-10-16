@@ -37,7 +37,9 @@ class HTTPSConnection(BaseCodemod, Codemod):
         ],
     )
     CHANGE_DESCRIPTION = METADATA.DESCRIPTION
-    SUMMARY = "Changes HTTPConnectionPool to HTTPSConnectionPool to enforce secure connection."
+    SUMMARY = (
+        "Changes HTTPConnectionPool to HTTPSConnectionPool to Enforce Secure Connection"
+    )
 
     METADATA_DEPENDENCIES = (PositionProvider,)
 

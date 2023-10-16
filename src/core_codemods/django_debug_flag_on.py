@@ -29,7 +29,7 @@ class DjangoDebugFlagOn(SemgrepCodemod, Codemod):
             },
         ],
     )
-    SUMMARY = CHANGE_DESCRIPTION = METADATA. DESCRIPTION
+    SUMMARY = CHANGE_DESCRIPTION = METADATA.DESCRIPTION
     YAML_FILES = [
         "django-debug-flag-on.yaml",
     ]
