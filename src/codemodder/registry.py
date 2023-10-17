@@ -103,7 +103,7 @@ class CodemodRegistry:
 def load_registered_codemods() -> CodemodRegistry:
     registry = CodemodRegistry()
     logger.debug("loading registered codemod collections")
-    for entry_point in entry_points()["codemods"]:
+    for entry_point in entry_points().select(group="codemods"):
         logger.debug(
             '- loading codemod collection "%s" from "%s"',
             entry_point.name,
