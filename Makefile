@@ -8,8 +8,8 @@ test:
 integration-test:
 	${PYTEST} integration_tests
 
-webgoat-test:
-	${PYTEST} -v ci_tests/test_webgoat_findings.py
+pygoat-test:
+	${PYTEST} -v ci_tests/test_pygoat_findings.py
 
 lint:
 	pylint -v codemodder core_codemods tests integration_tests

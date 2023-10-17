@@ -75,17 +75,16 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     def compile_results(self, codemods: list[CodemodExecutorWrapper]):
         results = []
         for codemod in codemods:
-            if not (changeset := self._results_by_codemod.get(codemod.id)):
-                continue
-
             data = {
                 "codemod": codemod.id,
                 "summary": codemod.summary,
                 "description": codemod.description,
                 "references": codemod.references,
                 "properties": {},
-                "failedFiles": [],
-                "changeset": [change.to_json() for change in changeset],
+                "failedFiles": [str(file) for file in self.get_failures(codemod.id)],
+                "changeset": [
+                    change.to_json() for change in self.get_results(codemod.id)
+                ],
             }
 
             results.append(data)
