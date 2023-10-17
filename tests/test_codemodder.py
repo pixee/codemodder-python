@@ -50,7 +50,7 @@ class TestRun:
         assert results_by_codemod != []
 
         requests_report = results_by_codemod[0]
-        requests_report["changeset"] == []
+        assert requests_report["changeset"] == []
         assert len(requests_report["failedFiles"]) == 2
         assert sorted(requests_report["failedFiles"]) == [
             "tests/samples/make_request.py",
@@ -90,10 +90,9 @@ class TestRun:
         args_to_reporting = mock_reporting.call_args_list[0][0]
         assert len(args_to_reporting) == 4
         _, _, _, results_by_codemod = args_to_reporting
-        # assert len(results_by_codemod) == 2
 
-        for codemod_results in results_by_codemod:
-            assert len(codemod_results["changeset"]) > 0
+        registry = load_registered_codemods()
+        assert len(results_by_codemod) == len(registry.codemods)
 
     @mock.patch("codemodder.codemods.base_codemod.semgrep_run")
     def test_no_codemods_to_run(self, mock_semgrep_run):
