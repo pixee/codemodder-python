@@ -125,14 +125,14 @@ with lock_1:
 lock = 1
 def f(l):
     with threading.Lock():
-        return [lock_ for lock_ in l]
+        return [lock_1 for lock_1 in l]
 """,
                 """import threading
 lock = 1
 def f(l):
-    lock_1 = threading.Lock()
-    with lock_1:
-        return [lock_ for lock_ in l]
+    lock_2 = threading.Lock()
+    with lock_2:
+        return [lock_1 for lock_1 in l]
 """,
             ),
             (
@@ -170,6 +170,21 @@ with lock_1:
     lock = threading.Lock()
     with lock:
         print()
+""",
+            ),
+            (
+                """import threading
+def my_func():
+    lock = "whatever"
+    with threading.Lock():
+        foo()
+""",
+                """import threading
+def my_func():
+    lock = "whatever"
+    lock_1 = threading.Lock()
+    with lock_1:
+        foo()
 """,
             ),
         ],
