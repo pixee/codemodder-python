@@ -17,17 +17,17 @@ EXPECTED_FINDINGS = [
 
 
 @pytest.fixture(scope="session")
-def webgoat_findings():
+def pygoat_findings():
     with open("output.codetf") as ff:
         results = json.load(ff)
 
-    yield set([x["codemod"] for x in results["results"]])
+    yield set([x["codemod"] for x in results["results"] if x["changeset"]])
 
 
-def test_num_webgoat_findings(webgoat_findings):
-    assert len(webgoat_findings) == len(EXPECTED_FINDINGS)
+def test_num_pygoat_findings(pygoat_findings):
+    assert len(pygoat_findings) == len(EXPECTED_FINDINGS)
 
 
 @pytest.mark.parametrize("finding", EXPECTED_FINDINGS)
-def test_webgoat_findings(webgoat_findings, finding):
-    assert finding in webgoat_findings
+def test_pygoat_findings(pygoat_findings, finding):
+    assert finding in pygoat_findings

@@ -38,4 +38,4 @@ jobs:
       - name: Run Codemodder
         run: codemodder --output output.codetf pygoat
       - name: Check PyGoat Findings
-        run: make webgoat-test
+        run: make pygoat-test
