@@ -3,6 +3,7 @@ import libcst as cst
 from libcst import MetadataDependent, matchers
 from libcst.helpers import get_full_name_for_node
 from libcst.metadata import Assignment, BaseAssignment, ImportAssignment, ScopeProvider
+from libcst.metadata.scope_provider import GlobalScope
 
 
 class NameResolutionMixin(MetadataDependent):
@@ -70,6 +71,30 @@ class NameResolutionMixin(MetadataDependent):
             return set(next(iter(scope.accesses[node])).referents)
         return set()
 
+    def find_used_names_in_module(self):
+        """
+        Find all the used names in the scope of a libcst Module.
+        """
+        names = []
+        scope = self.find_global_scope()
+        if scope is None:
+            return []  # pragma: no cover
+
+        nodes = [x.node for x in scope.assignments]
+        for other_nodes in nodes:
+            visitor = GatherNamesVisitor()
+            other_nodes.visit(visitor)
+            names.extend(visitor.names)
+        return names
+
+    def find_global_scope(self):
+        """Find the global scope for a libcst Module node."""
+        scopes = self.context.wrapper.resolve(ScopeProvider).values()
+        for scope in scopes:
+            if isinstance(scope, GlobalScope):
+                return scope
+        return None  # pragma: no cover
+
     def find_single_assignment(
         self,
         node: Union[cst.Name, cst.Attribute, cst.Call, cst.Subscript, cst.Decorator],
@@ -112,3 +137,11 @@ def _get_name(node: Union[cst.Import, cst.ImportFrom]) -> str:
     if matchers.matches(node, matchers.Import()):
         return get_full_name_for_node(node.names[0].name)
     return ""
+
+
+class GatherNamesVisitor(cst.CSTVisitor):
+    def __init__(self):
+        self.names = []
+
+    def visit_Name(self, node: cst.Name) -> None:
+        self.names.append(node.value)

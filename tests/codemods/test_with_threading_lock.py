@@ -27,8 +27,8 @@ with threading.{klass}():
     ...
 """
         expected = f"""import threading
-lock = threading.{klass}()
-with lock:
+{klass.lower()} = threading.{klass}()
+with {klass.lower()}:
     ...
 """
         self.run_and_assert(tmpdir, input_code, expected)
@@ -40,8 +40,8 @@ with {klass}():
     ...
 """
         expected = f"""from threading import {klass}
-lock = {klass}()
-with lock:
+{klass.lower()} = {klass}()
+with {klass.lower()}:
     ...
 """
         self.run_and_assert(tmpdir, input_code, expected)
@@ -53,8 +53,8 @@ with threading.{klass}() as foo:
     ...
 """
         expected = f"""import threading
-lock = threading.{klass}()
-with lock as foo:
+{klass.lower()} = threading.{klass}()
+with {klass.lower()} as foo:
     ...
 """
         self.run_and_assert(tmpdir, input_code, expected)
@@ -69,8 +69,8 @@ with threading_lock():
     ...
 """
         expected = f"""import threading
-lock = threading.{klass}()
-with lock:
+{klass.lower()} = threading.{klass}()
+with {klass.lower()}:
     ...
 
 with threading_lock():
@@ -86,3 +86,108 @@ with threading.{klass}(), foo():
     ...
 """
         self.run_and_assert(tmpdir, input_code, input_code)
+
+
+class TestThreadingNameResolution(BaseSemgrepCodemodTest):
+    codemod = WithThreadingLock
+
+    @pytest.mark.parametrize(
+        "input_code,expected_code",
+        [
+            (
+                """from threading import Lock
+lock = 1
+with Lock():
+    ...
+""",
+                """from threading import Lock
+lock = 1
+lock_1 = Lock()
+with lock_1:
+    ...
+""",
+            ),
+            (
+                """from threading import Lock
+from something import lock
+with Lock():
+    ...
+""",
+                """from threading import Lock
+from something import lock
+lock_1 = Lock()
+with lock_1:
+    ...
+""",
+            ),
+            (
+                """import threading
+lock = 1
+def f(l):
+    with threading.Lock():
+        return [lock_1 for lock_1 in l]
+""",
+                """import threading
+lock = 1
+def f(l):
+    lock_2 = threading.Lock()
+    with lock_2:
+        return [lock_1 for lock_1 in l]
+""",
+            ),
+            (
+                """import threading
+with threading.Lock():
+    int("1")
+with threading.Lock():
+    print()
+var = 1
+with threading.Lock():
+    print()
+""",
+                """import threading
+lock = threading.Lock()
+with lock:
+    int("1")
+lock_1 = threading.Lock()
+with lock_1:
+    print()
+var = 1
+lock_2 = threading.Lock()
+with lock_2:
+    print()
+""",
+            ),
+            (
+                """import threading
+with threading.Lock():
+    with threading.Lock():
+        print()
+""",
+                """import threading
+lock_1 = threading.Lock()
+with lock_1:
+    lock = threading.Lock()
+    with lock:
+        print()
+""",
+            ),
+            (
+                """import threading
+def my_func():
+    lock = "whatever"
+    with threading.Lock():
+        foo()
+""",
+                """import threading
+def my_func():
+    lock = "whatever"
+    lock_1 = threading.Lock()
+    with lock_1:
+        foo()
+""",
+            ),
+        ],
+    )
+    def test_name_resolution(self, tmpdir, input_code, expected_code):
+        self.run_and_assert(tmpdir, input_code, expected_code)

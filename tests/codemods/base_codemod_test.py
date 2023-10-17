@@ -37,8 +37,9 @@ class BaseCodemodTest:
             [],
             defaultdict(list),
         )
+        wrapper = cst.MetadataWrapper(input_tree)
         command_instance = self.codemod(
-            CodemodContext(),
+            CodemodContext(wrapper=wrapper),
             self.execution_context,
             self.file_context,
         )
@@ -83,8 +84,9 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
             [],
             results,
         )
+        wrapper = cst.MetadataWrapper(input_tree)
         command_instance = self.codemod(
-            CodemodContext(),
+            CodemodContext(wrapper=wrapper),
             self.execution_context,
             self.file_context,
         )
