@@ -1,15 +1,11 @@
 from typing import Sequence, Set
 
 import libcst as cst
-from libcst.codemod import Codemod, CodemodContext
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from libcst.metadata import PositionProvider
 
-from codemodder.codemods.base_codemod import (
-    BaseCodemod,
-    CodemodMetadata,
-    ReviewGuidance,
-)
+from codemodder.codemods.base_codemod import ReviewGuidance
+from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.imported_call_modifier import ImportedCallModifier
 
 
@@ -52,26 +48,20 @@ class HTTPSConnectionModifier(ImportedCallModifier[Set[str]]):
         return len(arglist)
 
 
-class HTTPSConnection(BaseCodemod, Codemod):
-    METADATA = CodemodMetadata(
-        DESCRIPTION="Enforce HTTPS connection for `urllib3`.",
-        NAME="https-connection",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        REFERENCES=[
-            {
-                "url": "https://owasp.org/www-community/vulnerabilities/Insecure_Transport",
-                "description": "",
-            },
-            {
-                "url": "https://urllib3.readthedocs.io/en/stable/reference/urllib3.connectionpool.html#urllib3.HTTPConnectionPool",
-                "description": "",
-            },
-        ],
-    )
-    CHANGE_DESCRIPTION = METADATA.DESCRIPTION
-    SUMMARY = (
-        "Changes HTTPConnectionPool to HTTPSConnectionPool to Enforce Secure Connection"
-    )
+class HTTPSConnection(BaseCodemod):
+    SUMMARY = "Enforce HTTPS Connection for `urllib3`"
+    NAME = "https-connection"
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
+    REFERENCES = [
+        {
+            "url": "https://owasp.org/www-community/vulnerabilities/Insecure_Transport",
+            "description": "",
+        },
+        {
+            "url": "https://urllib3.readthedocs.io/en/stable/reference/urllib3.connectionpool.html#urllib3.HTTPConnectionPool",
+            "description": "",
+        },
+    ]
 
     METADATA_DEPENDENCIES = (PositionProvider,)
 
@@ -79,10 +69,6 @@ class HTTPSConnection(BaseCodemod, Codemod):
         "urllib3.HTTPConnectionPool",
         "urllib3.connectionpool.HTTPConnectionPool",
     }
-
-    def __init__(self, codemod_context: CodemodContext, *codemod_args):
-        Codemod.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, *codemod_args)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         visitor = HTTPSConnectionModifier(
