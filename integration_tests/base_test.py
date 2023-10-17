@@ -154,6 +154,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         completed_process = subprocess.run(
             command,
             check=False,
+            shell=False,
         )
         assert completed_process.returncode == 0
 

@@ -1,35 +1,56 @@
+from typing import Optional, Sequence
+
+import fnmatch
+import itertools
 from pathlib import Path
 
+DEFAULT_INCLUDED_PATHS = ["**.py", "**/*.py"]
+DEFAULT_EXCLUDED_PATHS = [
+    "**/test/**",
+    "**/tests/**",
+    "**/conftest.py",
+    "**/build/**",
+    "**/dist/**",
+    "**/venv/**",
+    "**/.venv/**",
+    "**/.tox/**",
+    "**/.nox/**",
+    "**/.eggs/**",
+    "**/.git/**",
+    "**/.mypy_cache/**",
+    "**/.pytest_cache/**",
+    "**/.hypothesis/**",
+    "**/.coverage*",
+]
 
-DEFAULT_INCLUDE = "*.py"
 
-
-def py_file_matches(file_path, patterns):
-    """
-    file_path is suffixed with `.py` and matches at least one pattern.
-    """
-    is_py_file = file_path.match(DEFAULT_INCLUDE)
-    if not patterns:
-        return is_py_file
-    return is_py_file and any(
-        file_path.match(pattern.rsplit(":")[0]) for pattern in patterns
-    )
-
-
-def file_line_patterns(file_path, patterns):
+def file_line_patterns(file_path: str | Path, patterns: Sequence[str]):
     """
     Find the lines included or excluded for a given file_path among the patterns
     """
-    lines = []
-    for pattern in patterns or []:
-        split = pattern.rsplit(":")
-        if len(split) == 2:
-            if file_path.match(split[0]):
-                lines.append(int(split[1]))
-    return lines
+    return [
+        int(result[1])
+        for pat in patterns
+        if len(result := pat.split(":")) == 2
+        and fnmatch.fnmatch(str(file_path), result[0])
+    ]
 
 
-def match_files(parent_path, exclude_paths=None, include_paths=None):
+def filter_files(names: Sequence[str], patterns: Sequence[str], exclude: bool = False):
+    patterns = (
+        [x.split(":")[0] for x in (patterns or [])]
+        if not exclude
+        # An excluded line should not cause the entire file to be excluded
+        else [x for x in (patterns or []) if ":" not in x]
+    )
+    return itertools.chain(*[fnmatch.filter(names, pattern) for pattern in patterns])
+
+
+def match_files(
+    parent_path: str | Path,
+    exclude_paths: Optional[Sequence[str]] = None,
+    include_paths: Optional[Sequence[str]] = None,
+):
     """
     Find pattern-matching files starting at the parent_path, recursively.
 
@@ -37,29 +58,29 @@ def match_files(parent_path, exclude_paths=None, include_paths=None):
     patterns are passed in, a file must match `*.py` and at least one include patterns.
 
     :param parent_path: str name for starting directory
-    :param exclude_paths: comma-separated set of UNIX glob patterns to exclude
-    :param include_paths: comma-separated set of UNIX glob patterns to exclude
+    :param exclude_paths: list of UNIX glob patterns to exclude
+    :param include_paths: list of UNIX glob patterns to exclude
 
     :return: list of <pathlib.PosixPath> files found within (including recursively) the parent directory
     that match the criteria of both exclude and include patterns.
     """
-    exclude_paths = list(exclude_paths) if exclude_paths is not None else []
-    include_paths = list(include_paths) if include_paths is not None else []
+    all_files = [str(path) for path in Path(parent_path).rglob("*")]
+    included_files = set(
+        filter_files(
+            all_files,
+            include_paths if include_paths is not None else DEFAULT_INCLUDED_PATHS,
+        )
+    )
+    excluded_files = set(
+        filter_files(
+            all_files,
+            exclude_paths if exclude_paths is not None else DEFAULT_EXCLUDED_PATHS,
+            exclude=True,
+        )
+    )
 
-    matched_files = []
-
-    for file_path in Path(parent_path).rglob("*"):
-        if file_path.is_file():
-            # Exclude patterns take precedence over include patterns.
-            if exclude_file(file_path, exclude_paths):
-                continue
-
-            if py_file_matches(file_path, include_paths):
-                matched_files.append(file_path)
-
-    return matched_files
-
-
-def exclude_file(file_path, exclude_patterns):
-    # if a file matches any excluded pattern, return True so it is not included for analysis
-    return any(file_path.match(exclude) for exclude in exclude_patterns)
+    return [
+        path
+        for p in sorted(list(included_files - excluded_files))
+        if (path := Path(p)).is_file() and path.suffix == ".py"
+    ]
