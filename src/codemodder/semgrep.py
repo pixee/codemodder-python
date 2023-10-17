@@ -26,6 +26,20 @@ def run(execution_context: CodemodExecutionContext, yaml_files: List[Path]) -> d
             "-o",
             temp_sarif_file.name,
         ]
+
+        if execution_context.path_exclude:
+            command.extend(
+                itertools.chain.from_iterable(
+                    map(lambda f: ["--exclude", str(f)], execution_context.path_exclude)
+                )
+            )
+        if execution_context.path_include:
+            command.extend(
+                itertools.chain.from_iterable(
+                    map(lambda f: ["--include", str(f)], execution_context.path_include)
+                )
+            )
+
         command.extend(
             itertools.chain.from_iterable(
                 map(lambda f: ["--config", str(f)], yaml_files)
