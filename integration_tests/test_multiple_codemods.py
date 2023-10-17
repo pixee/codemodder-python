@@ -27,12 +27,14 @@ class TestMultipleCodemods:
             "--output",
             str(codetf_path),
             f"--codemod-include={codemods}",
-            f"--path-include={source_file_name}",
+            "--path-include",
+            f"**/{source_file_name}",
         ]
 
         completed_process = subprocess.run(
             command,
             check=False,
+            shell=False,
         )
 
         assert completed_process.returncode == 0

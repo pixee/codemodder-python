@@ -2,6 +2,7 @@ import argparse
 import sys
 
 from codemodder import __VERSION__
+from codemodder.code_directory import DEFAULT_INCLUDED_PATHS, DEFAULT_EXCLUDED_PATHS
 from codemodder.logging import OutputFormat, logger
 
 
@@ -144,13 +145,13 @@ def parse_args(argv, codemod_registry):
     parser.add_argument(
         "--path-exclude",
         action=CsvListAction,
-        default="",
+        default=DEFAULT_EXCLUDED_PATHS,
         help="Comma-separated set of UNIX glob patterns to exclude",
     )
     parser.add_argument(
         "--path-include",
         action=CsvListAction,
-        default="**/*.py",
+        default=DEFAULT_INCLUDED_PATHS,
         help="Comma-separated set of UNIX glob patterns to include",
     )
 
