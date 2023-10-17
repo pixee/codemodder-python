@@ -129,13 +129,7 @@ def run(original_args) -> int:
 
     log_section("startup")
     logger.info("codemodder: python/%s", __VERSION__)
-
-    context = CodemodExecutionContext(
-        Path(argv.directory),
-        argv.dry_run,
-        argv.verbose,
-        codemod_registry,
-    )
+    context = CodemodExecutionContext(argv, codemod_registry)
 
     # TODO: this should be a method of CodemodExecutionContext
     codemods_to_run = codemod_registry.match_codemods(

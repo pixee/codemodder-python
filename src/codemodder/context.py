@@ -1,3 +1,4 @@
+import argparse
 import logging
 from pathlib import Path
 import itertools
@@ -21,14 +22,14 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
 
     def __init__(
         self,
-        directory: Path,
-        dry_run: bool,
-        verbose: bool,
+        cli_args: argparse.Namespace,
         registry: CodemodRegistry,
     ):
-        self.directory = directory
-        self.dry_run = dry_run
-        self.verbose = verbose
+        self.directory = Path(cli_args.directory)
+        self.dry_run = cli_args.dry_run
+        self.verbose = cli_args.verbose
+        self.path_include = cli_args.path_include
+        self.path_exclude = cli_args.path_exclude
         self._results_by_codemod = {}
         self._failures_by_codemod = {}
         self.dependencies = {}

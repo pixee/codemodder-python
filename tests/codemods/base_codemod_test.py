@@ -1,10 +1,10 @@
 # pylint: disable=no-member,not-callable,attribute-defined-outside-init
+import argparse
 from collections import defaultdict
 import os
 from pathlib import Path
 from textwrap import dedent
 from typing import ClassVar
-
 import libcst as cst
 from libcst.codemod import CodemodContext
 import mock
@@ -21,18 +21,23 @@ class BaseCodemodTest:
     def setup_method(self):
         self.file_context = None
 
+    def _make_context(self, root):
+        cli_args = argparse.Namespace(
+            directory=root,
+            dry_run=True,
+            verbose=False,
+            path_include=[],
+            path_exclude=[],
+        )
+        return CodemodExecutionContext(cli_args, registry=mock.MagicMock())
+
     def run_and_assert(self, tmpdir, input_code, expected):
         tmp_file_path = tmpdir / "code.py"
         self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)
 
     def run_and_assert_filepath(self, root, file_path, input_code, expected):
         input_tree = cst.parse_module(dedent(input_code))
-        self.execution_context = CodemodExecutionContext(
-            directory=root,
-            dry_run=True,
-            verbose=False,
-            registry=mock.MagicMock(),
-        )
+        self.execution_context = self._make_context(root)
         self.file_context = FileContext(
             file_path,
             [],
@@ -74,12 +79,7 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         return semgrep_run(self.execution_context, results[0].yaml_files)
 
     def run_and_assert_filepath(self, root, file_path, input_code, expected):
-        self.execution_context = CodemodExecutionContext(
-            directory=root,
-            dry_run=True,
-            verbose=False,
-            registry=mock.MagicMock(),
-        )
+        self.execution_context = self._make_context(root)
         input_tree = cst.parse_module(input_code)
         all_results = self.results_by_id_filepath(input_code, file_path)
         results = all_results[str(file_path)]
