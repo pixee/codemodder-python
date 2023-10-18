@@ -129,7 +129,7 @@ def run(original_args) -> int:
         )
         return 1
 
-    configure_logger(argv.verbose)
+    configure_logger(argv.verbose, argv.log_format)
 
     log_section("startup")
     logger.info("codemodder: python/%s", __VERSION__)

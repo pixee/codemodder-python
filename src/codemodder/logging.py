@@ -2,6 +2,8 @@ from enum import Enum
 import logging
 import sys
 
+from pythonjsonlogger import jsonlogger
+
 logger = logging.getLogger("codemodder")
 
 
@@ -16,6 +18,16 @@ class OutputFormat(Enum):
     def __str__(self):
         """For rendering properly in argparse help."""
         return self.value.lower()
+
+
+class CodemodderJsonFormatter(jsonlogger.JsonFormatter):
+    def add_fields(self, log_record, record, message_dict):
+        super().add_fields(log_record, record, message_dict)
+        log_record["timestamp"] = log_record.pop("asctime")
+        log_record.move_to_end("timestamp", last=False)
+        log_record["level"] = record.levelname.upper()
+        log_record["file"] = record.filename
+        log_record["line"] = record.lineno
 
 
 def log_section(section_name: str):
@@ -34,22 +46,30 @@ def log_list(level: int, header: str, items: list, predicate=None):
         logger.log(level, "  - %s", predicate(item) if predicate else item)
 
 
-def configure_logger(verbose: bool):
+def configure_logger(verbose: bool, log_format: OutputFormat):
     """
     Configure the logger based on the verbosity level.
     """
     log_level = logging.DEBUG if verbose else logging.INFO
 
-    # TODO: this should all be conditional on the output format
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(log_level)
-    stdout_handler.addFilter(lambda record: record.levelno <= logging.WARNING)
+    handlers = [stdout_handler]
 
-    stderr_handler = logging.StreamHandler(sys.stderr)
-    stderr_handler.setLevel(logging.ERROR)
+    match log_format:
+        case OutputFormat.HUMAN:
+            stdout_handler.addFilter(lambda record: record.levelno <= logging.WARNING)
+            stderr_handler = logging.StreamHandler(sys.stderr)
+            stderr_handler.setLevel(logging.ERROR)
+            handlers.append(stderr_handler)
+        case OutputFormat.JSON:
+            formatter = CodemodderJsonFormatter(
+                "%(asctime) %(level) %(message) %(file) %(line)"
+            )
+            stdout_handler.setFormatter(formatter)
 
     logging.basicConfig(
         format="%(message)s",
         level=log_level,
-        handlers=[stdout_handler, stderr_handler],
+        handlers=handlers,
     )
