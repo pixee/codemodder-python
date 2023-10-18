@@ -77,6 +77,7 @@ def analyze_files(
     cli_args,
 ):
     for idx, file_path in enumerate(files_to_analyze):
+        logger.debug("scanning file %s", file_path)
         if idx and idx % 100 == 0:
             logger.info("scanned %s files...", idx)  # pragma: no cover
 
