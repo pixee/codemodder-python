@@ -10,9 +10,10 @@ from codemodder.codemods.imported_call_modifier import ImportedCallModifier
 
 
 class DefusedXmlModifier(ImportedCallModifier[Mapping[str, str]]):
-    def update_attribute(self, true_name, _, updated_node, new_args):
+    def update_attribute(self, true_name, original_node, updated_node, new_args):
         import_name = self.matching_functions[true_name]
         AddImportsVisitor.add_needed_import(self.context, import_name)
+        RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
         return updated_node.with_changes(
             args=new_args,
             func=cst.Attribute(
@@ -21,9 +22,10 @@ class DefusedXmlModifier(ImportedCallModifier[Mapping[str, str]]):
             ),
         )
 
-    def update_simple_name(self, true_name, _, updated_node, new_args):
+    def update_simple_name(self, true_name, original_node, updated_node, new_args):
         import_name = self.matching_functions[true_name]
         AddImportsVisitor.add_needed_import(self.context, import_name)
+        RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
         return updated_node.with_changes(
             args=new_args,
             func=cst.Attribute(
@@ -89,7 +91,6 @@ class UseDefusedXml(BaseCodemod):
         result_tree = visitor.transform_module(tree)
         self.file_context.codemod_changes.extend(visitor.changes_in_file)
         if visitor.changes_in_file:
-            RemoveImportsVisitor.remove_unused_import_by_node(self.context, tree)
-            # TODO: add dependency
+            self.execution_context.add_dependency("defusedxml")
 
         return result_tree
