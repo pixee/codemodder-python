@@ -13,6 +13,10 @@ class OutputFormat(Enum):
     HUMAN = "human"
     JSON = "json"
 
+    def __str__(self):
+        """For rendering properly in argparse help."""
+        return self.value.lower()
+
 
 def log_section(section_name: str):
     """
