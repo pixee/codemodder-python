@@ -1,6 +1,7 @@
 from enum import Enum
 import logging
 import sys
+from typing import Optional
 
 from pythonjsonlogger import jsonlogger
 
@@ -21,6 +22,12 @@ class OutputFormat(Enum):
 
 
 class CodemodderJsonFormatter(jsonlogger.JsonFormatter):
+    project_name: Optional[str]
+
+    def __init__(self, *args, project_name: Optional[str] = None, **kwargs):
+        self.project_name = project_name
+        super().__init__(*args, **kwargs)
+
     def add_fields(self, log_record, record, message_dict):
         super().add_fields(log_record, record, message_dict)
         log_record["timestamp"] = log_record.pop("asctime")
@@ -28,6 +35,8 @@ class CodemodderJsonFormatter(jsonlogger.JsonFormatter):
         log_record["level"] = record.levelname.upper()
         log_record["file"] = record.filename
         log_record["line"] = record.lineno
+        if self.project_name:
+            log_record["project-name"] = self.project_name
 
 
 def log_section(section_name: str):
@@ -46,7 +55,9 @@ def log_list(level: int, header: str, items: list, predicate=None):
         logger.log(level, "  - %s", predicate(item) if predicate else item)
 
 
-def configure_logger(verbose: bool, log_format: OutputFormat):
+def configure_logger(
+    verbose: bool, log_format: OutputFormat, project_name: Optional[str] = None
+):
     """
     Configure the logger based on the verbosity level.
     """
@@ -64,7 +75,8 @@ def configure_logger(verbose: bool, log_format: OutputFormat):
             handlers.append(stderr_handler)
         case OutputFormat.JSON:
             formatter = CodemodderJsonFormatter(
-                "%(asctime) %(level) %(message) %(file) %(line)"
+                "%(asctime) %(level) %(message) %(file) %(line)",
+                project_name=project_name,
             )
             stdout_handler.setFormatter(formatter)
 

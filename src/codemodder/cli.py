@@ -143,6 +143,10 @@ def parse_args(argv, codemod_registry):
         help="the format for the log output",
     )
     parser.add_argument(
+        "--project-name",
+        help="optional descriptive name for the project used in log output",
+    )
+    parser.add_argument(
         "--path-exclude",
         action=CsvListAction,
         default=DEFAULT_EXCLUDED_PATHS,
