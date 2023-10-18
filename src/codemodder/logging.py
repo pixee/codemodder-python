@@ -21,6 +21,15 @@ def log_section(section_name: str):
     logger.info("\n[%s]", section_name)
 
 
+def log_list(level: int, header: str, items: list, predicate=None):
+    """
+    Log a list of items.
+    """
+    logger.log(level, "%s:", header)
+    for item in items:
+        logger.log(level, "  - %s", predicate(item) if predicate else item)
+
+
 def configure_logger(verbose: bool):
     """
     Configure the logger based on the verbosity level.
