@@ -139,7 +139,7 @@ def parse_args(argv, codemod_registry):
         "--log-format",
         type=OutputFormat,
         default=OutputFormat.HUMAN,
-        choices=[str(x).split(".")[-1].lower() for x in list(OutputFormat)],
+        choices=[OutputFormat.HUMAN, OutputFormat.JSON],
         help="the format for the log output",
     )
     parser.add_argument(
