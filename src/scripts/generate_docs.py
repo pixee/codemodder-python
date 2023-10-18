@@ -115,7 +115,8 @@ If you want to allow those protocols, change the incoming PR to look more like t
         guidance_explained="We believe that using the walrus operator is an improvement in terms of clarity and readability. However, this change is only compatible with codebases that support Python 3.8 and later, so it requires quick validation before merging.",
     ),
     "bad-lock-with-statement": DocMetadata(
-        importance="Low", guidance_explained="TODO AFTER PR MERGE"
+        importance="Low",
+        guidance_explained="We believe this replacement is safe and should not result in any issues.",
     ),
 }
 

@@ -10,7 +10,7 @@ class WithThreadingLock(SemgrepCodemod, NameResolutionMixin):
     DESCRIPTION = (
         "Replace deprecated usage of threading lock classes as context managers."
     )
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     REFERENCES = [
         {
             "url": "https://pylint.pycqa.org/en/latest/user_guide/messages/warning/useless-with-lock.",
