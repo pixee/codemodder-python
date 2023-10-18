@@ -1,5 +1,6 @@
 import datetime
 import difflib
+import logging
 import os
 import sys
 from pathlib import Path
@@ -10,7 +11,7 @@ from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
 
 from codemodder import registry, __VERSION__
-from codemodder.logging import configure_logger, logger, log_section
+from codemodder.logging import configure_logger, logger, log_section, log_list
 from codemodder.cli import parse_args
 from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.context import CodemodExecutionContext, ChangeSet
@@ -106,9 +107,7 @@ def analyze_files(
         )
 
     if failures := execution_context.get_failures(codemod.id):
-        logger.info("failed:")
-        for name in failures:
-            logger.info("  - %s", name)
+        log_list(logging.INFO, "failed", failures)
     if changes := execution_context.get_results(codemod.id):
         logger.info("changed:")
         for change in changes:
@@ -152,11 +151,9 @@ def run(original_args) -> int:
         return 0
 
     log_section("setup")
-    logger.info("running:")
-    for codemod in codemods_to_run:
-        logger.info("  - %s", codemod.id)
-    logger.info("including paths: %s", argv.path_include)
-    logger.info("excluding paths: %s", argv.path_exclude)
+    log_list(logging.INFO, "running", codemods_to_run, predicate=lambda c: c.id)
+    log_list(logging.INFO, "including paths", argv.path_include)
+    log_list(logging.INFO, "excluding paths", argv.path_exclude)
 
     files_to_analyze = match_files(
         context.directory, argv.path_exclude, argv.path_include
@@ -167,8 +164,7 @@ def run(original_args) -> int:
 
     full_names = [str(path) for path in files_to_analyze]
     logger.debug("matched files:")
-    for name in full_names:
-        logger.debug("  - %s", name)
+    log_list(logging.DEBUG, "matched files", full_names)
 
     log_section("scanning")
     # run codemods one at a time making sure to respect the given sequence
