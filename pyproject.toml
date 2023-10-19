@@ -14,7 +14,7 @@ dependencies = [
     "libcst~=1.1.0",
     "pylint~=3.0.0",
     "PyYAML~=6.0.0",
-    "semgrep~=1.44.0",
+    "semgrep~=1.45.0",
     "wrapt~=1.15.0",
 ]
 
