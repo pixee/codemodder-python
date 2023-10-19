@@ -10,6 +10,7 @@ from libcst.codemod import CodemodContext
 import mock
 
 from codemodder.context import CodemodExecutionContext
+from codemodder.code_directory import DEFAULT_INCLUDED_PATHS, DEFAULT_EXCLUDED_PATHS
 from codemodder.file_context import FileContext
 from codemodder.registry import CodemodRegistry, CodemodCollection
 from codemodder.semgrep import run as semgrep_run
@@ -26,8 +27,8 @@ class BaseCodemodTest:
             directory=root,
             dry_run=True,
             verbose=False,
-            path_include=[],
-            path_exclude=[],
+            path_include=DEFAULT_INCLUDED_PATHS,
+            path_exclude=DEFAULT_EXCLUDED_PATHS,
         )
         return CodemodExecutionContext(cli_args, registry=mock.MagicMock())
 
