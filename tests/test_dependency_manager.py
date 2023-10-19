@@ -1,48 +1,51 @@
-import mock
 from pathlib import Path
-from codemodder.codemodder import run
-from codemodder.semgrep import run as semgrep_run
-from codemodder.dependency_manager import write_dependencies
+
+import pytest
+
+from codemodder.dependency_manager import (
+    DependencyManager,
+    Requirement,
+)
+
+
+@pytest.fixture(autouse=True, scope="module")
+def disable_write_dependencies():
+    """Override fixture from conftest.py in order to allow testing"""
 
 
 class TestDependencyManager:
     TEST_DIR = "tests/"
 
-    def test_init_once(self, mocker):
-        context = mocker.Mock(directory=self.TEST_DIR, dependencies=[])
-        dm = write_dependencies(context)
-        expected_path = Path(self.TEST_DIR)
-        assert dm.parent_directory == expected_path
-        assert dm.dependency_file == expected_path / "samples" / "requirements.txt"
-        assert len(dm.dependencies) == 4
+    def test_read_dependency_file(self, tmpdir):
+        dependency_file = Path(tmpdir) / "requirements.txt"
+        dependency_file.write_text("requests\n", encoding="utf-8")
 
-        dep = next(iter(dm.dependencies))
-        assert str(dep) == "requests==2.31.0"
+        dm = DependencyManager(Path(tmpdir))
+        assert dm.dependencies == {Requirement("requests"): None}
 
-    @mock.patch("codemodder.dependency_manager.DependencyManagerAbstract._write")
-    @mock.patch("codemodder.codemods.base_codemod.semgrep_run", side_effect=semgrep_run)
-    def test_dont_write(self, _, write_mock):
-        # Tests that dependency manager does not write to file if only
-        # codemods that don't change dependencies run.
-        args = [
-            "tests/samples/",
-            "--output",
-            "here.txt",
-            "--codemod-include=secure-random",
-        ]
-        res = run(args)
-        assert res == 0
-        write_mock.assert_not_called()
+    @pytest.mark.parametrize("dry_run", [True, False])
+    def test_add_dependency_preserve_comments(self, tmpdir, dry_run):
+        contents = "# comment\n\nrequests\n"
+        dependency_file = Path(tmpdir) / "requirements.txt"
+        dependency_file.write_text(contents, encoding="utf-8")
 
-    @mock.patch("codemodder.dependency_manager.DependencyManagerAbstract._write")
-    @mock.patch("codemodder.codemods.base_codemod.semgrep_run", side_effect=semgrep_run)
-    def test_write_expected(self, _, write_mock):
-        args = [
-            "tests/samples/",
-            "--output",
-            "here.txt",
-            "--codemod-include=url-sandbox",
-        ]
-        res = run(args)
-        assert res == 0
-        write_mock.assert_called()
+        dm = DependencyManager(Path(tmpdir))
+        dm.add(["defusedxml"])
+        changeset = dm.write(dry_run=dry_run)
+
+        assert dependency_file.read_text(encoding="utf-8") == (
+            contents if dry_run else "# comment\n\nrequests\ndefusedxml"
+        )
+
+        assert changeset is not None
+        assert changeset.path == str(dependency_file)
+        assert changeset.diff == (
+            "--- \n"
+            "+++ \n"
+            "@@ -1,3 +1,5 @@\n"
+            " # comment\n"
+            " \n"
+            " requests\n"
+            "+defusedxml+\n"
+        )
+        assert changeset.changes == []

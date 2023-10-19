@@ -1,28 +1,19 @@
+import logging
 from pathlib import Path
-from dataclasses import dataclass
 import itertools
+from textwrap import indent
 
-from codemodder.change import Change
+from codemodder.change import ChangeSet
+from codemodder.dependency_manager import DependencyManager
 from codemodder.executor import CodemodExecutorWrapper
+from codemodder.logging import logger, log_list
 from codemodder.registry import CodemodRegistry
-
-
-@dataclass
-class ChangeSet:
-    """A set of changes made to a file at `path`"""
-
-    path: str
-    diff: str
-    changes: list[Change]
-
-    def to_json(self):
-        return {"path": self.path, "diff": self.diff, "changes": self.changes}
 
 
 class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     _results_by_codemod: dict[str, list[ChangeSet]] = {}
     _failures_by_codemod: dict[str, list[Path]] = {}
-    dependencies: set[str]
+    dependencies: dict[str, set[str]] = {}
     directory: Path
     dry_run: bool = False
     verbose: bool = False
@@ -38,9 +29,9 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         self.directory = directory
         self.dry_run = dry_run
         self.verbose = verbose
-        self.dependencies = set()
         self._results_by_codemod = {}
         self._failures_by_codemod = {}
+        self.dependencies = {}
         self.registry = registry
 
     def add_result(self, codemod_name, change_set):
@@ -48,6 +39,9 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
 
     def add_failure(self, codemod_name, file_path):
         self._failures_by_codemod.setdefault(codemod_name, []).append(file_path)
+
+    def add_dependencies(self, codemod_id: str, dependencies: set[str]):
+        self.dependencies.setdefault(codemod_id, set()).update(dependencies)
 
     def get_results(self, codemod_name):
         return self._results_by_codemod.get(codemod_name, [])
@@ -69,8 +63,22 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
             )
         )
 
-    def add_dependency(self, dependency: str):
-        self.dependencies.add(dependency)
+    def process_dependencies(self, codemod_id: str):
+        dependencies = self.dependencies.get(codemod_id)
+        if not dependencies:
+            return
+
+        dm = DependencyManager(self.directory)
+        if not dm.found_dependency_file:
+            logger.info(
+                "unable to write dependencies for %s: no dependency file found",
+                codemod_id,
+            )
+            return
+
+        dm.add(list(dependencies))
+        if (changeset := dm.write(self.dry_run)) is not None:
+            self.add_result(codemod_id, changeset)
 
     def compile_results(self, codemods: list[CodemodExecutorWrapper]):
         results = []
@@ -90,3 +98,12 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
             results.append(data)
 
         return results
+
+    def log_changes(self, codemod_id: str):
+        if failures := self.get_failures(codemod_id):
+            log_list(logging.INFO, "failed", failures)
+        if changes := self.get_results(codemod_id):
+            logger.info("changed:")
+            for change in changes:
+                logger.info("  - %s", change.path)
+                logger.debug("    diff:\n%s", indent(change.diff, " " * 6))

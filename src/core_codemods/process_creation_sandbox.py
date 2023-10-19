@@ -40,7 +40,7 @@ class ProcessSandbox(SemgrepCodemod):
 
     def on_result_found(self, original_node, updated_node):
         self.add_needed_import("security", "safe_command")
-        self.execution_context.add_dependency("security==1.0.1")
+        self.add_dependency("security==1.0.1")
         return self.update_call_target(
             updated_node,
             "safe_command",

@@ -21,6 +21,7 @@ safe_requests.get("www.google.com")
 var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expected)
+        self.assert_dependency("security==1.0.1")
 
     def test_from_requests(self, tmpdir):
         input_code = """from requests import get
@@ -34,6 +35,7 @@ get("www.google.com")
 var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expected)
+        self.assert_dependency("security==1.0.1")
 
     def test_requests_nameerror(self, tmpdir):
         input_code = """requests.get("www.google.com")
@@ -76,6 +78,7 @@ excel
     )
     def test_requests_other_import_untouched(self, tmpdir, input_code, expected):
         self.run_and_assert(tmpdir, input_code, expected)
+        self.assert_dependency("security==1.0.1")
 
     def test_requests_multifunctions(self, tmpdir):
         # Test that `requests` import isn't removed if code uses part of the requests
@@ -93,6 +96,7 @@ safe_requests.get("www.google.com")
 requests.status_codes.codes.FORBIDDEN"""
 
         self.run_and_assert(tmpdir, input_code, expected)
+        self.assert_dependency("security==1.0.1")
 
     def test_custom_get(self, tmpdir):
         input_code = """from app_funcs import get
@@ -123,6 +127,7 @@ got("www.google.com")
 var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expected)
+        self.assert_dependency("security==1.0.1")
 
     def test_requests_with_alias(self, tmpdir):
         input_code = """import requests as req
@@ -136,3 +141,4 @@ safe_requests.get("www.google.com")
 var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expected)
+        self.assert_dependency("security==1.0.1")

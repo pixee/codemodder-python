@@ -21,10 +21,9 @@ class TestProcessSandbox(BaseIntegrationTest):
     expected_diff = '--- \n+++ \n@@ -1,10 +1,11 @@\n import subprocess\n+from security import safe_command\n \n-subprocess.run("echo \'hi\'", shell=True)\n-subprocess.run(["ls", "-l"])\n+safe_command.run(subprocess.run, "echo \'hi\'", shell=True)\n+safe_command.run(subprocess.run, ["ls", "-l"])\n \n-subprocess.call("echo \'hi\'", shell=True)\n-subprocess.call(["ls", "-l"])\n+safe_command.call(subprocess.call, "echo \'hi\'", shell=True)\n+safe_command.call(subprocess.call, ["ls", "-l"])\n \n subprocess.check_output(["ls", "-l"])\n \n'
     expected_line_change = "3"
     num_changes = 4
+    num_changed_files = 2
     change_description = ProcessSandbox.CHANGE_DESCRIPTION
 
     requirements_path = "tests/samples/requirements.txt"
     original_requirements = "# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"
-    expected_new_reqs = (
-        "requests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\nsecurity==1.0.1"
-    )
+    expected_new_reqs = "# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\nsecurity==1.0.1"

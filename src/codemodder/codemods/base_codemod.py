@@ -99,6 +99,9 @@ class BaseCodemod:
     def line_include(self):
         return self.file_context.line_include
 
+    def add_dependency(self, dependency: str):
+        self.file_context.add_dependency(dependency)
+
 
 class SemgrepCodemod(BaseCodemod):
     YAML_FILES: ClassVar[List[str]] = NotImplemented
