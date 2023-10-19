@@ -72,7 +72,7 @@ class UrlSandbox(SemgrepCodemod, Codemod):
                 find_requests_visitor.changes_in_file
             )
             new_tree = tree.visit(ReplaceNodes(find_requests_visitor.nodes_to_change))
-            self.execution_context.add_dependency("security==1.0.1")
+            self.add_dependency("security==1.0.1")
             # if it finds any request.get(...), try to remove the imports
             if any(
                 (

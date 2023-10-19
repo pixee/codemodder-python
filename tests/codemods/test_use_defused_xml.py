@@ -29,6 +29,7 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
+        self.assert_dependency("defusedxml")
 
     @pytest.mark.parametrize("method", ETREE_METHODS)
     @pytest.mark.parametrize("module", ["ElementTree", "cElementTree"])
@@ -46,6 +47,7 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
+        self.assert_dependency("defusedxml")
 
     def test_etree_elementtree_with_alias(self, tmpdir):
         original_code = """
@@ -61,6 +63,7 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
+        self.assert_dependency("defusedxml")
 
     def test_etree_parse_with_alias(self, tmpdir):
         original_code = """
@@ -76,6 +79,7 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
+        self.assert_dependency("defusedxml")
 
     @pytest.mark.parametrize("method", SAX_METHODS)
     def test_sax_simple_call(self, tmpdir, method):
@@ -92,6 +96,7 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
+        self.assert_dependency("defusedxml")
 
     @pytest.mark.parametrize("method", SAX_METHODS)
     def test_sax_attribute_call(self, tmpdir, method):
@@ -108,6 +113,7 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
+        self.assert_dependency("defusedxml")
 
     @pytest.mark.parametrize("method", DOM_METHODS)
     @pytest.mark.parametrize("module", ["minidom", "pulldom"])
@@ -125,3 +131,4 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
+        self.assert_dependency("defusedxml")

@@ -4,7 +4,6 @@ import logging
 import os
 import sys
 from pathlib import Path
-from textwrap import indent
 
 import libcst as cst
 from libcst.codemod import CodemodContext
@@ -13,9 +12,9 @@ from codemodder.file_context import FileContext
 from codemodder import registry, __VERSION__
 from codemodder.logging import configure_logger, logger, log_section, log_list
 from codemodder.cli import parse_args
+from codemodder.change import ChangeSet
 from codemodder.code_directory import file_line_patterns, match_files
-from codemodder.context import CodemodExecutionContext, ChangeSet
-from codemodder.dependency_manager import write_dependencies
+from codemodder.context import CodemodExecutionContext
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.report.codetf_reporter import report_default
 
@@ -76,6 +75,7 @@ def analyze_files(
     sarif,
     cli_args,
 ):
+    # TODO: parallelize this loop
     for idx, file_path in enumerate(files_to_analyze):
         logger.debug("scanning file %s", file_path)
         if idx and idx % 100 == 0:
@@ -93,6 +93,7 @@ def analyze_files(
         line_include = file_line_patterns(file_path, cli_args.path_include)
         sarif_for_file = sarif.get(str(file_path)) or {}
 
+        # NOTE: file context will become more important if/when we parallelize this loop
         file_context = FileContext(
             file_path,
             line_exclude,
@@ -107,13 +108,7 @@ def analyze_files(
             source_tree,
         )
 
-    if failures := execution_context.get_failures(codemod.id):
-        log_list(logging.INFO, "failed", failures)
-    if changes := execution_context.get_results(codemod.id):
-        logger.info("changed:")
-        for change in changes:
-            logger.info("  - %s", change.path)
-            logger.debug("    diff:\n%s", indent(change.diff, " " * 6))
+        execution_context.add_dependencies(codemod.id, file_context.dependencies)
 
 
 def run(original_args) -> int:
@@ -179,10 +174,11 @@ def run(original_args) -> int:
             results,
             argv,
         )
+        context.process_dependencies(codemod.id)
+        context.log_changes(codemod.id)
 
     results = context.compile_results(codemods_to_run)
 
-    write_dependencies(context)
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
     report_default(elapsed_ms, argv, original_args, results)

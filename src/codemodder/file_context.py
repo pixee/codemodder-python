@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List
 
@@ -13,6 +13,7 @@ class FileContext:
     line_exclude: List[int]
     line_include: List[int]
     results_by_id: Dict
+    dependencies: set[str] = field(default_factory=set)
 
     def __post_init__(self):
         if self.line_include is None:
@@ -20,3 +21,6 @@ class FileContext:
         if self.line_exclude is None:
             self.line_exclude = []
         self.codemod_changes = []
+
+    def add_dependency(self, dependency: str):
+        self.dependencies.add(dependency)

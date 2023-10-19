@@ -49,6 +49,9 @@ class BaseCodemodTest:
 
         assert output_tree.code == dedent(expected)
 
+    def assert_dependency(self, dependency: str):
+        assert self.file_context and self.file_context.dependencies == set([dependency])
+
 
 class BaseSemgrepCodemodTest(BaseCodemodTest):
     @classmethod

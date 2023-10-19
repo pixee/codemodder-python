@@ -15,3 +15,15 @@ class Change:
             "properties": self.properties,
             "packageActions": self.packageActions,
         }
+
+
+@dataclass
+class ChangeSet:
+    """A set of changes made to a file at `path`"""
+
+    path: str
+    diff: str
+    changes: list[Change]
+
+    def to_json(self):
+        return {"path": self.path, "diff": self.diff, "changes": self.changes}

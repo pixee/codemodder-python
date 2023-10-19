@@ -91,6 +91,6 @@ class UseDefusedXml(BaseCodemod):
         result_tree = visitor.transform_module(tree)
         self.file_context.codemod_changes.extend(visitor.changes_in_file)
         if visitor.changes_in_file:
-            self.execution_context.add_dependency("defusedxml")
+            self.add_dependency("defusedxml")  # TODO: which version?
 
         return result_tree
