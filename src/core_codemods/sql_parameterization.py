@@ -236,7 +236,7 @@ class ExtractParameters(ContextAwareVisitor):
         ] = []
         super().__init__(context)
 
-    def leave_Module(self, tree: cst.Module):
+    def leave_Module(self, original_node: cst.Module):
         leaves = list(reversed(self.query))
         # treat it as a stack
         modulo_2 = 1
