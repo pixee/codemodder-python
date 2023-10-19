@@ -1,4 +1,5 @@
 from codemodder.registry import CodemodCollection
+from core_codemods.sql_parameterization import SQLQueryParameterization
 
 from .django_debug_flag_on import DjangoDebugFlagOn
 from .django_session_cookie_secure_off import DjangoSessionCookieSecureOff
@@ -52,5 +53,6 @@ registry = CodemodCollection(
         UrlSandbox,
         UseWalrusIf,
         WithThreadingLock,
+        SQLQueryParameterization,
     ],
 )
