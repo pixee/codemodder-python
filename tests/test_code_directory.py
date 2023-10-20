@@ -23,7 +23,11 @@ def dir_structure(tmp_path_factory):
     (tests_dir / "test_make_request.py").touch()
     (tests_dir / "test_insecure_random.py").touch()
 
-    assert len(list(base_dir.rglob("*"))) == 9
+    sub_tests_dir = tests_dir / "tests"
+    sub_tests_dir.mkdir()
+    (sub_tests_dir / "something.py").touch()
+
+    assert len(list(base_dir.rglob("*"))) == 11
 
     return base_dir
 
@@ -35,9 +39,16 @@ class TestMatchFiles:
         file_names.sort()
         assert file_names == expected_files
 
-    def test_all_py_files_match(self, dir_structure):
+    def test_all_py_files_match_except_tests_dir(self, dir_structure):
         expected = ["empty_for_testing.py", "insecure_random.py", "make_request.py"]
         files = match_files(dir_structure)
+        self._assert_expected(files, expected)
+
+    def test_tests_not_excluded(self, dir_structure):
+        expected = ["test_insecure_random.py", "test_make_request.py"]
+        # anything in foo/tests will be analyzed but anything in
+        # foo/tests/tests will not be analyzed by default
+        files = match_files(dir_structure / "tests")
         self._assert_expected(files, expected)
 
     def test_match_excluded(self, dir_structure):
@@ -102,39 +113,27 @@ class TestMatchFiles:
         self._assert_expected(files, expected)
 
     def test_test_directory_not_excluded(self, dir_structure):
-        expected = ["test_insecure_random.py", "test_make_request.py"]
+        expected = ["something.py", "test_insecure_random.py", "test_make_request.py"]
         files = match_files(
             dir_structure, exclude_paths=["**/samples/**", "**/more_samples/**"]
         )
         self._assert_expected(files, expected)
 
-    def test_include_test_overridden_by_default_excludes(self, mocker):
-        mocker.patch(
-            "codemodder.code_directory.Path.rglob",
-            return_value=[
-                "foo/tests/test_insecure_random.py",
-                "foo/tests/test_make_request.py",
-            ],
-        )
-        mocker.patch(
-            "codemodder.code_directory.Path.is_file",
-            return_value=True,
-        )
-        files = match_files(Path("."), include_paths=["**/tests/**"])
+    def test_include_test_overridden_by_default_excludes(self, dir_structure):
+        files = match_files(dir_structure, include_paths=["**/tests/**"])
         self._assert_expected(files, [])
 
-    def test_include_test_without_default_includes(self, mocker):
-        files = ["foo/tests/test_insecure_random.py", "foo/tests/test_make_request.py"]
-        mocker.patch(
-            "codemodder.code_directory.Path.rglob",
-            return_value=files,
-        )
-        mocker.patch(
-            "codemodder.code_directory.Path.is_file",
-            return_value=True,
-        )
-        result = match_files(Path("."), exclude_paths=[])
-        assert result == [Path(x) for x in files]
+    def test_include_test_without_default_excludes(self, dir_structure):
+        expected = [
+            "empty_for_testing.py",
+            "insecure_random.py",
+            "make_request.py",
+            "something.py",
+            "test_insecure_random.py",
+            "test_make_request.py",
+        ]
+        files = match_files(dir_structure, exclude_paths=[])
+        self._assert_expected(files, expected)
 
     def test_extract_line_from_pattern(self):
         lines = file_line_patterns(Path("insecure_random.py"), ["insecure_*.py:3"])

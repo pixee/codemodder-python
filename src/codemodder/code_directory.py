@@ -36,13 +36,23 @@ def file_line_patterns(file_path: str | Path, patterns: Sequence[str]):
     ]
 
 
-def filter_files(names: Sequence[str], patterns: Sequence[str], exclude: bool = False):
+def filter_files(
+    names: Sequence[str],
+    parent_path: str,
+    patterns: Sequence[str],
+    exclude: bool = False,
+):
     patterns = (
         [x.split(":")[0] for x in (patterns or [])]
         if not exclude
         # An excluded line should not cause the entire file to be excluded
         else [x for x in (patterns or []) if ":" not in x]
     )
+
+    # Filter patterns should be relative to a parent_path, not absolute.
+    # TODO: handle case when parent path is "."
+    patterns = [f"{parent_path}{x}" for x in patterns]
+
     return itertools.chain(*[fnmatch.filter(names, pattern) for pattern in patterns])
 
 
@@ -65,15 +75,18 @@ def match_files(
     that match the criteria of both exclude and include patterns.
     """
     all_files = [str(path) for path in Path(parent_path).rglob("*")]
+
     included_files = set(
         filter_files(
             all_files,
+            str(parent_path),
             include_paths if include_paths is not None else DEFAULT_INCLUDED_PATHS,
         )
     )
     excluded_files = set(
         filter_files(
             all_files,
+            str(parent_path),
             exclude_paths if exclude_paths is not None else DEFAULT_EXCLUDED_PATHS,
             exclude=True,
         )
