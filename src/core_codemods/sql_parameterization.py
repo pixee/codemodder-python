@@ -1,5 +1,5 @@
 import re
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 import libcst as cst
 from libcst import CSTTransformer, SimpleWhitespace, matchers
 from libcst.codemod import Codemod, CodemodContext, ContextAwareVisitor
@@ -49,12 +49,13 @@ class SQLQueryParameterization(BaseCodemod, Codemod):
     )
 
     def __init__(self, context: CodemodContext, *codemod_args) -> None:
-        self.changed_nodes = {}
-        self.parameters = []
+        self.changed_nodes: dict[
+            cst.CSTNode, cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel
+        ] = {}
         Codemod.__init__(self, context)
         BaseCodemod.__init__(self, *codemod_args)
 
-    def _build_param_element(self, middle, index: int):
+    def _build_param_element(self, middle, index: int) -> cst.BaseExpression:
         # TODO maybe a parameterized string would be better here
         # f-strings need python 3.6 though
         if index == 0:
@@ -84,14 +85,19 @@ class SQLQueryParameterization(BaseCodemod, Codemod):
                 # TODO support for elements from f-strings?
                 # reminder that python has no implicit conversion while concatenating with +, might need to use str() for a particular expression
                 expr = self._build_param_element(middle, len(middle) - 1)
-                params_elements.append(cst.Element(value=expr, comma=cst.Comma(whitespace_after=SimpleWhitespace(" "))))
+                params_elements.append(
+                    cst.Element(
+                        value=expr,
+                        comma=cst.Comma(whitespace_after=SimpleWhitespace(" ")),
+                    )
+                )
                 self._fix_injection(start, middle, end)
 
             # TODO research if named parameters are widely supported
             # it could solve for the case of existing parameters
             tuple_arg = cst.Arg(cst.Tuple(elements=params_elements))
             self.changed_nodes[call] = call.with_changes(args=[*call.args, tuple_arg])
-            
+
             # made changes
             if self.changed_nodes:
                 result = result.visit(ReplaceNodes(self.changed_nodes))
@@ -184,9 +190,11 @@ class LinearizeQuery(ContextAwareVisitor, NameResolutionMixin):
     # recursive search
     def visit_Name(self, node: cst.Name) -> Optional[bool]:
         self.leaves.extend(self.recurse_Name(node))
+        return False
 
     def visit_Attribute(self, node: cst.Attribute) -> Optional[bool]:
         self.leaves.append(node)
+        return False
 
     def recurse_Name(self, node: cst.Name) -> list[cst.CSTNode]:
         assignment = self.find_single_assignment(node)
@@ -300,7 +308,7 @@ class ExtractParameters(ContextAwareVisitor):
                 # TODO
                 # treat str(encoding = 'utf-8', object=obj)
                 # ensure this is the built-in
-                if matchers.matches(arg, literal_number):
+                if matchers.matches(arg, literal_number):  # type: ignore
                     return False
             case cst.FormattedStringExpression() if matchers.matches(
                 expression, literal
@@ -414,7 +422,7 @@ class RemoveEmptyStringConcatenation(CSTTransformer):
         return self.handle_node(updated_node)
 
     def handle_node(
-        self, updated_node: Union[cst.BinaryOperation, cst.ConcatenatedString]
+        self, updated_node: cst.BinaryOperation | cst.ConcatenatedString
     ) -> cst.BaseExpression:
         match updated_node.left:
             case cst.SimpleString() if updated_node.left.raw_value == "":
