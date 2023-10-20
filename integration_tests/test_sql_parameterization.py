@@ -11,29 +11,31 @@ class TestSQLQueryParameterization(BaseIntegrationTest):
     original_code, expected_new_code = original_and_expected_from_code_path(
         code_path,
         [
-            (6, """    b = " WHERE name =?"\n"""),
-            (7, """    c = " AND phone = ?"\n""" ),
-            (8, """    r = cursor.execute(a + b + c, (name, phone, ))\n"""),
+            (7, """    b = " WHERE name =?"\n"""),
+            (8, """    c = " AND phone = ?"\n"""),
+            (9, """    r = cursor.execute(a + b + c, (name, phone, ))\n"""),
         ],
     )
 
-    expected_diff ="""\
---- 
-+++ 
-@@ -4,9 +4,9 @@
- 
- def foo(cursor: sqlite3.Cursor, name: str, phone:str):
-     a = "SELECT * FROM Users"
--    b = " WHERE name ='" + name
--    c = "' AND phone = '" + phone + "'"
--    r = cursor.execute(a + b + c)
-+    b = " WHERE name =?"
-+    c = " AND phone = ?"
-+    r = cursor.execute(a + b + c, (name, phone, ))
-     print(r.fetchone())
- 
- foo(connection.cursor(), 'Jenny', '867-5309')
-"""
-    expected_line_change = "9"
+    # fmt: off
+    expected_diff =(
+    """--- \n"""
+    """+++ \n"""
+    """@@ -5,9 +5,9 @@\n"""
+    """ \n"""
+    """ def foo(cursor: sqlite3.Cursor, name: str, phone: str):\n"""
+    """     a = "SELECT * FROM Users"\n"""
+    """-    b = " WHERE name ='" + name\n"""
+    """-    c = "' AND phone = '" + phone + "'"\n"""
+    """-    r = cursor.execute(a + b + c)\n"""
+    """+    b = " WHERE name =?"\n"""
+    """+    c = " AND phone = ?"\n"""
+    """+    r = cursor.execute(a + b + c, (name, phone, ))\n"""
+    """     print(r.fetchone())\n"""
+    """ \n"""
+    """ \n""")
+    # fmt: on
+
+    expected_line_change = "10"
     change_description = SQLQueryParameterization.CHANGE_DESCRIPTION
     num_changed_files = 1
