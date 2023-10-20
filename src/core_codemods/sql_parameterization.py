@@ -10,6 +10,7 @@ from libcst.metadata import (
     PositionProvider,
     ScopeProvider,
 )
+from codemodder.change import Change
 
 from codemodder.codemods.base_codemod import (
     BaseCodemod,
@@ -44,6 +45,7 @@ class SQLQueryParameterization(BaseCodemod, Codemod):
     METADATA_DEPENDENCIES = (
         ScopeProvider,
         ParentNodeProvider,
+        PositionProvider,
     )
 
     def __init__(self, context: CodemodContext, *codemod_args) -> None:
@@ -71,31 +73,38 @@ class SQLQueryParameterization(BaseCodemod, Codemod):
         find_queries = FindQueryCalls(self.context)
         tree.visit(find_queries)
 
+        result = tree
         for call, query in find_queries.calls.items():
             ep = ExtractParameters(self.context, query)
             tree.visit(ep)
+
+            # build tuple elements and fix injection
             params_elements: list[cst.Element] = []
             for start, middle, end in ep.injection_patterns:
-                if len(middle) == 1:
-                    element_wrap = cst.Element(
-                        value=middle[0],
-                        comma=cst.Comma(whitespace_after=SimpleWhitespace(" ")),
-                    )
-                    params_elements.append(element_wrap)
-                else:
-                    # TODO support for elements from f-strings?
-                    # reminder that python has no implicit conversion while concatenating with +, might need to use str() for a particular expression
-                    expr = self._build_param_element(middle, len(middle) - 1)
-                    params_elements.append(cst.Element(value=expr, comma=cst.Comma()))
+                # TODO support for elements from f-strings?
+                # reminder that python has no implicit conversion while concatenating with +, might need to use str() for a particular expression
+                expr = self._build_param_element(middle, len(middle) - 1)
+                params_elements.append(cst.Element(value=expr, comma=cst.Comma(whitespace_after=SimpleWhitespace(" "))))
                 self._fix_injection(start, middle, end)
+
             # TODO research if named parameters are widely supported
             # it could solve for the case of existing parameters
             tuple_arg = cst.Arg(cst.Tuple(elements=params_elements))
             self.changed_nodes[call] = call.with_changes(args=[*call.args, tuple_arg])
-        if self.changed_nodes:
-            result = tree.visit(ReplaceNodes(self.changed_nodes))
-            return result.visit(RemoveEmptyStringConcatenation())
-        return tree
+            
+            # made changes
+            if self.changed_nodes:
+                result = result.visit(ReplaceNodes(self.changed_nodes))
+                self.changed_nodes = {}
+                line_number = self.get_metadata(PositionProvider, call).start.line
+                self.file_context.codemod_changes.append(
+                    Change(
+                        str(line_number), SQLQueryParameterization.CHANGE_DESCRIPTION
+                    ).to_json()
+                )
+                result = result.visit(RemoveEmptyStringConcatenation())
+
+        return result
 
     def _fix_injection(
         self, start: cst.CSTNode, middle: list[cst.CSTNode], end: cst.CSTNode
@@ -258,7 +267,7 @@ class ExtractParameters(ContextAwareVisitor):
             # end may contain the start of anothe literal, put it back
             # should not be a single quote
             # TODO think of a better solution here
-            if self._is_not_a_single_quote(end):
+            if self._is_literal_start(end, 0) and self._is_not_a_single_quote(end):
                 modulo_2 = 0
                 leaves.append(end)
             else:
