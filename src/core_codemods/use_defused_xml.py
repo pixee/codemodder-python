@@ -65,6 +65,8 @@ class UseDefusedXml(BaseCodemod):
         },
     ]
 
+    adds_dependency = True
+
     @cached_property
     def matching_functions(self) -> dict[str, str]:
         """Build a mapping of functions to their defusedxml imports"""

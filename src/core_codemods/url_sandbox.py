@@ -57,6 +57,8 @@ class UrlSandbox(SemgrepCodemod, Codemod):
 
     METADATA_DEPENDENCIES = (PositionProvider, ScopeProvider)
 
+    adds_dependency = True
+
     def __init__(self, codemod_context: CodemodContext, *args):
         Codemod.__init__(self, codemod_context)
         SemgrepCodemod.__init__(self, *args)
