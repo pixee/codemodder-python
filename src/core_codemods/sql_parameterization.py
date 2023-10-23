@@ -68,7 +68,6 @@ class ReplaceNodes(cst.CSTTransformer):
                                 changes_dict[key] = [
                                     *getattr(updated_node, key)
                                 ] + value.sequence
-                                print(changes_dict)
                             case _:
                                 changes_dict[key] = value
                     return updated_node.with_changes(**changes_dict)
@@ -82,7 +81,16 @@ class SQLQueryParameterization(BaseCodemod, Codemod):
         DESCRIPTION=("Parameterize SQL queries."),
         NAME="sql-parameterization",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
-        REFERENCES=[],
+        REFERENCES=[
+            {
+                "url": "https://cwe.mitre.org/data/definitions/89.html",
+                "description": "",
+            },
+            {
+                "url": "https://owasp.org/www-community/attacks/SQL_Injection",
+                "description": "",
+            },
+        ],
     )
     SUMMARY = "Parameterize SQL queries."
     CHANGE_DESCRIPTION = ""
@@ -145,9 +153,10 @@ class SQLQueryParameterization(BaseCodemod, Codemod):
 
             # TODO research if named parameters are widely supported
             # it could solve for the case of existing parameters
-            tuple_arg = cst.Arg(cst.Tuple(elements=params_elements))
-            # self.changed_nodes[call] = call.with_changes(args=[*call.args, tuple_arg])
-            self.changed_nodes[call] = {"args": Append([tuple_arg])}
+            if params_elements:
+                tuple_arg = cst.Arg(cst.Tuple(elements=params_elements))
+                # self.changed_nodes[call] = call.with_changes(args=[*call.args, tuple_arg])
+                self.changed_nodes[call] = {"args": Append([tuple_arg])}
 
             # made changes
             if self.changed_nodes:
@@ -173,10 +182,12 @@ class SQLQueryParameterization(BaseCodemod, Codemod):
             self.changed_nodes[expr] = cst.parse_expression('""')
         # remove quote literal from end
         match end:
-            # TODO test with escaped strings here...
             case cst.SimpleString():
                 current_end = self.changed_nodes.get(end) or end
-                new_raw_value = current_end.raw_value[1:]
+                if current_end.raw_value.startswith("\\'"):
+                    new_raw_value = current_end.raw_value[2:]
+                else:
+                    new_raw_value = current_end.raw_value[1:]
                 new_value = (
                     current_end.prefix
                     + current_end.quote
@@ -192,7 +203,10 @@ class SQLQueryParameterization(BaseCodemod, Codemod):
         match start:
             case cst.SimpleString():
                 current_start = self.changed_nodes.get(start) or start
-                new_raw_value = current_start.raw_value[:-1] + parameter_token
+                if current_start.raw_value.endswith("\\'"):
+                    new_raw_value = current_start.raw_value[:-2] + parameter_token
+                else:
+                    new_raw_value = current_start.raw_value[:-1] + parameter_token
                 new_value = (
                     current_start.prefix
                     + current_start.quote
@@ -279,6 +293,7 @@ class LinearizeQuery(ContextAwareVisitor, NameResolutionMixin):
 
     def recurse_Attribute(self, node: cst.Attribute) -> list[cst.CSTNode]:
         # TODO attributes may have been assigned, should those be modified?
+        # research how to detect attribute assigns in libcst
         return [node]
 
     def _find_gparent(self, n: cst.CSTNode) -> Optional[cst.CSTNode]:
@@ -328,15 +343,13 @@ class ExtractParameters(ContextAwareVisitor):
                 self.injection_patterns.append((start, middle, end))
             # end may contain the start of anothe literal, put it back
             # should not be a single quote
+
             # TODO think of a better solution here
             if self._is_literal_start(end, 0) and self._is_not_a_single_quote(end):
                 modulo_2 = 0
                 leaves.append(end)
             else:
                 modulo_2 = 1
-
-            # TODO use changed nodes to detect if start has already been modified before
-            # this can happen if start = end of another expression
 
     def _is_not_a_single_quote(self, expression: cst.CSTNode) -> bool:
         match expression:
@@ -358,11 +371,11 @@ class ExtractParameters(ContextAwareVisitor):
         match expression:
             case cst.Integer() | cst.Float() | cst.Imaginary() | cst.SimpleString():
                 return False
-            case cst.Call(func=cst.Name(value="str"), args=[arg, *_]):
+            case cst.Call(func=cst.Name(value="str"), args=[cst.Arg(value=arg), *_]):
                 # TODO
                 # treat str(encoding = 'utf-8', object=obj)
                 # ensure this is the built-in
-                if matchers.matches(arg, literal_number):  # type: ignore
+                if matchers.matches(arg, literal):  # type: ignore
                     return False
             case cst.FormattedStringExpression() if matchers.matches(
                 expression, literal
