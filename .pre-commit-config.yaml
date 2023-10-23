@@ -6,6 +6,10 @@ repos:
     -   id: check-json
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+        exclude: |
+          (?x)^(
+              src/core_codemods/docs/.*
+          )$
     -   id: check-added-large-files
 -   repo: https://github.com/psf/black
     rev: 23.9.1
@@ -13,8 +17,7 @@ repos:
     -   id: black
         exclude: |
           (?x)^(
-              samples/.*|
-              core_codemods/docs/.*
+              tests/samples/.*|
           )$
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.5.1
