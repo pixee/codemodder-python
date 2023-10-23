@@ -21,6 +21,8 @@ class ProcessSandbox(SemgrepCodemod):
         },
     ]
 
+    adds_dependency = True
+
     @classmethod
     def rule(cls):
         return """

@@ -10,6 +10,19 @@ from codemodder.logging import logger, log_list
 from codemodder.registry import CodemodRegistry
 
 
+DEPENDENCY_NOTIFICATION = """```
+💡 This codemod adds a dependency to your project. \
+Currently we add the dependency to a file named `requirements.txt` if it \
+exists in your project.
+
+There are a number of other places where Python project dependencies can be \
+expressed, including `setup.py`, `pyproject.toml`, and `setup.cfg`. We are \
+working on adding support for these files, but for now you may need to update \
+these files manually before accepting this change.
+```
+"""
+
+
 class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     _results_by_codemod: dict[str, list[ChangeSet]] = {}
     _failures_by_codemod: dict[str, list[Path]] = {}
@@ -80,13 +93,20 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         if (changeset := dm.write(self.dry_run)) is not None:
             self.add_result(codemod_id, changeset)
 
+    def add_description(self, codemod: CodemodExecutorWrapper):
+        description = codemod.description
+        if codemod.adds_dependency:
+            description = f"{description}\n\n{DEPENDENCY_NOTIFICATION}"
+
+        return description
+
     def compile_results(self, codemods: list[CodemodExecutorWrapper]):
         results = []
         for codemod in codemods:
             data = {
                 "codemod": codemod.id,
                 "summary": codemod.summary,
-                "description": codemod.description,
+                "description": self.add_description(codemod),
                 "references": codemod.references,
                 "properties": {},
                 "failedFiles": [str(file) for file in self.get_failures(codemod.id)],

@@ -43,7 +43,8 @@ class BaseCodemod:
     # Implementation borrowed from https://stackoverflow.com/a/45250114
     METADATA: ClassVar[CodemodMetadata] = NotImplemented
     SUMMARY: ClassVar[str] = NotImplemented
-    is_semgrep = False
+    is_semgrep: bool = False
+    adds_dependency: bool = False
 
     execution_context: CodemodExecutionContext
     file_context: FileContext
