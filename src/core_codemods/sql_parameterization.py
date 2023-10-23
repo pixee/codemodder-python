@@ -1,7 +1,7 @@
 import re
 from typing import Any, Optional, Tuple
 import libcst as cst
-from libcst import CSTTransformer, SimpleWhitespace, matchers
+from libcst import SimpleWhitespace, matchers
 from libcst.codemod import Codemod, CodemodContext, ContextAwareVisitor
 from libcst.metadata import (
     ClassScope,
@@ -16,6 +16,9 @@ from codemodder.codemods.base_codemod import (
     BaseCodemod,
     CodemodMetadata,
     ReviewGuidance,
+)
+from codemodder.codemods.transformations.remove_empty_string_concatenation import (
+    RemoveEmptyStringConcatenation,
 )
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 
@@ -39,7 +42,7 @@ class Prepend:
 class ReplaceNodes(cst.CSTTransformer):
     """
     Replace nodes with their corresponding values in a given dict.
-    You can replace the entire node, some attributes of it via a dict(). Addionally if the attribute is a sequence, you may pass Append(l)/Prepend(l), where l is a list of nodes, to append or prepend, repectivelly a sequence.
+    You can replace the entire node or some attributes of it via a dict(). Addionally if the attribute is a sequence, you may pass Append(l)/Prepend(l), where l is a list of nodes, to append or prepend, respectivelly.
     """
 
     def __init__(
@@ -220,6 +223,10 @@ class SQLQueryParameterization(BaseCodemod, Codemod):
 
 
 class LinearizeQuery(ContextAwareVisitor, NameResolutionMixin):
+    """
+    Gather all the expressions that are concatenated to build the query.
+    """
+
     METADATA_DEPENDENCIES = (ParentNodeProvider,)
 
     def __init__(self, context) -> None:
@@ -307,6 +314,10 @@ class LinearizeQuery(ContextAwareVisitor, NameResolutionMixin):
 
 
 class ExtractParameters(ContextAwareVisitor):
+    """
+    Detects injections and gather the expressions that are injectable.
+    """
+
     METADATA_DEPENDENCIES = (
         ScopeProvider,
         ParentNodeProvider,
@@ -428,6 +439,10 @@ class ExtractParameters(ContextAwareVisitor):
 
 
 class FindQueryCalls(ContextAwareVisitor):
+    """
+    Find all the execute calls with a sql query as an argument.
+    """
+
     # right now it works by looking into some sql keywords in any pieces of the query
     # Ideally we should infer what driver we are using
     sql_keywords: list[str] = ["insert", "select", "delete", "create", "alter", "drop"]
@@ -467,42 +482,3 @@ def _get_function_name_node(call: cst.Call) -> Optional[cst.Name]:
         case cst.Attribute():
             return call.func.attr
     return None
-
-
-class RemoveEmptyStringConcatenation(CSTTransformer):
-    """
-    Removes concatenation with empty strings (e.g. "hello " + "") or "hello" ""
-    """
-
-    # TODO What about empty f-strings? they are a different type of node
-    # may not be necessary if handled correctly
-    def leave_BinaryOperation(
-        self, original_node: cst.BinaryOperation, updated_node: cst.BinaryOperation
-    ) -> cst.BaseExpression:
-        return self.handle_node(updated_node)
-
-    def leave_ConcatenatedString(
-        self,
-        original_node: cst.ConcatenatedString,
-        updated_node: cst.ConcatenatedString,
-    ) -> cst.BaseExpression:
-        return self.handle_node(updated_node)
-
-    def handle_node(
-        self, updated_node: cst.BinaryOperation | cst.ConcatenatedString
-    ) -> cst.BaseExpression:
-        match updated_node.left:
-            case cst.SimpleString() if updated_node.left.raw_value == "":
-                match updated_node.right:
-                    case cst.SimpleString() if updated_node.right.raw_value == "":
-                        return cst.SimpleString(value='""')
-                    case _:
-                        return updated_node.right
-        match updated_node.right:
-            case cst.SimpleString() if updated_node.right.raw_value == "":
-                match updated_node.left:
-                    case cst.SimpleString() if updated_node.left.raw_value == "":
-                        return cst.SimpleString(value='""')
-                    case _:
-                        return updated_node.left
-        return updated_node
