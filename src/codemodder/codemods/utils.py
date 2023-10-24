@@ -1,27 +1,65 @@
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Any
 
 from libcst import matchers
 import libcst as cst
 
 
+class SequenceExtension:
+    def __init__(self, sequence: list[cst.CSTNode]) -> None:
+        self.sequence = sequence
+
+
+class Append(SequenceExtension):
+    pass
+
+
+class Prepend(SequenceExtension):
+    pass
+
+
 class ReplaceNodes(cst.CSTTransformer):
     """
-    Replace nodes with their corresponding values in a given dict.
+    Replace nodes with their corresponding values in a given dict. The replacements dictionary should either contain a mapping from a node to another node, RemovalSentinel, or FlattenSentinel to be replaced, or a dict mapping each attribute, by name, to a new value. Additionally if the attribute is a sequence, you may pass Append(l)/Prepend(l), where l is a list of nodes, to append or prepend, respectively.
     """
 
     def __init__(
         self,
         replacements: dict[
             cst.CSTNode,
-            Union[cst.CSTNode, cst.FlattenSentinel[cst.CSTNode], cst.RemovalSentinel],
+            dict[
+                str,
+                cst.CSTNode
+                | cst.FlattenSentinel
+                | cst.RemovalSentinel
+                | dict[str, Any],
+            ],
         ],
     ):
         self.replacements = replacements
 
     def on_leave(self, original_node, updated_node):
         if original_node in self.replacements.keys():
-            return self.replacements[original_node]
+            replacement = self.replacements[original_node]
+            match replacement:
+                case dict():
+                    changes_dict = {}
+                    for key, value in replacement.items():
+                        match value:
+                            case Prepend():
+                                changes_dict[key] = value.sequence + [
+                                    *getattr(updated_node, key)
+                                ]
+
+                            case Append():
+                                changes_dict[key] = [
+                                    *getattr(updated_node, key)
+                                ] + value.sequence
+                            case _:
+                                changes_dict[key] = value
+                    return updated_node.with_changes(**changes_dict)
+                case cst.CSTNode() | cst.RemovalSentinel() | cst.FlattenSentinel():
+                    return replacement
         return updated_node
 
 
