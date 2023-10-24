@@ -1,5 +1,7 @@
 [run]
 source = codemodder
+omit =
+    */codemodder/scripts/*
 
 [paths]
 codemodder =
