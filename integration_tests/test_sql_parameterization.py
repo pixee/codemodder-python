@@ -11,9 +11,9 @@ class TestSQLQueryParameterization(BaseIntegrationTest):
     original_code, expected_new_code = original_and_expected_from_code_path(
         code_path,
         [
-            (7, """    b = " WHERE name =?"\n"""),
-            (8, """    c = " AND phone = ?"\n"""),
-            (9, """    r = cursor.execute(a + b + c, (name, phone, ))\n"""),
+            (9, """    b = " WHERE name =?"\n"""),
+            (10, """    c = " AND phone = ?"\n"""),
+            (11, """    r = cursor.execute(a + b + c, (name, phone, ))\n"""),
         ],
     )
 
@@ -21,7 +21,7 @@ class TestSQLQueryParameterization(BaseIntegrationTest):
     expected_diff =(
     """--- \n"""
     """+++ \n"""
-    """@@ -5,9 +5,9 @@\n"""
+    """@@ -7,9 +7,9 @@\n"""
     """ \n"""
     """ def foo(cursor: sqlite3.Cursor, name: str, phone: str):\n"""
     """     a = "SELECT * FROM Users"\n"""
@@ -36,6 +36,6 @@ class TestSQLQueryParameterization(BaseIntegrationTest):
     """ \n""")
     # fmt: on
 
-    expected_line_change = "10"
+    expected_line_change = "12"
     change_description = SQLQueryParameterization.CHANGE_DESCRIPTION
     num_changed_files = 1
