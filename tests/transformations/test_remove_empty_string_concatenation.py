@@ -47,6 +47,19 @@ class TestRemoveEmptyStringConcatenation(CodemodTest):
 
         self.assertCodemod(before, after)
 
+    def test_multiple(self):
+        before = """
+        "" + "whatever" +  ""
+        "hello" + "" + "world"
+        """
+
+        after = """
+        "whatever"
+        "hello" + "world"
+        """
+
+        self.assertCodemod(before, after)
+
     def test_concatenated_string_right(self):
         before = """
         "hello" ""
@@ -65,6 +78,19 @@ class TestRemoveEmptyStringConcatenation(CodemodTest):
 
         after = """
         "world"
+        """
+
+        self.assertCodemod(before, after)
+
+    def test_concatenated_string_multiple(self):
+        before = """
+        "" "whatever" ""
+        "hello" "" "world"
+        """
+
+        after = """
+        "whatever"
+        "hello" "world"
         """
 
         self.assertCodemod(before, after)

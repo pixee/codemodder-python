@@ -118,6 +118,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="We believe this replacement is safe and should not result in any issues.",
     ),
+    "sql-parameterization": DocMetadata(
+        importance="High",
+        guidance_explained="Python has a wealth of database drivers that all use the same `dbapi2` interface detailed in [PEP249](https://peps.python.org/pep-0249/). Different drivers may require different string tokens used for parameterization, and Python's dynamic typing makes it quite hard, and sometimes impossible, to detect which driver is being used just by looking at the code.",
+    ),
 }
 
 

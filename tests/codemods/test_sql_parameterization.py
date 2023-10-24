@@ -235,6 +235,7 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         assert len(self.file_context.codemod_changes) == 0
 
     def test_wont_change_class_attribute(self, tmpdir):
+        # query may be accesed from outside the module by importing A
         input_code = """\
         import sqlite3
 
@@ -250,6 +251,7 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         assert len(self.file_context.codemod_changes) == 0
 
     def test_wont_change_module_variable(self, tmpdir):
+        # query may be accesed from outside the module by importing it
         input_code = """\
         import sqlite3
 
