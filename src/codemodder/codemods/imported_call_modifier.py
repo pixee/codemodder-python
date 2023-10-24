@@ -35,7 +35,7 @@ class ImportedCallModifier(
         self.line_include = file_context.line_include
         self.matching_functions: FunctionMatchType = matching_functions
         self.change_description = change_description
-        self.changes_in_file: list[Mapping] = []
+        self.changes_in_file: list[Change] = []
 
     def updated_args(self, original_args: Sequence[cst.Arg]):
         return original_args
@@ -71,7 +71,7 @@ class ImportedCallModifier(
                 and true_name in self.matching_functions
             ):
                 self.changes_in_file.append(
-                    Change(str(line_number), self.change_description).to_json()
+                    Change(line_number, self.change_description)
                 )
 
                 new_args = self.updated_args(updated_node.args)

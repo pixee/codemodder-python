@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List
 
+from codemodder.change import Change
+
 
 @dataclass
 class FileContext:
@@ -10,17 +12,11 @@ class FileContext:
     """
 
     file_path: Path
-    line_exclude: List[int]
-    line_include: List[int]
-    results_by_id: Dict
+    line_exclude: List[int] = field(default_factory=list)
+    line_include: List[int] = field(default_factory=list)
+    results_by_id: Dict = field(default_factory=dict)
     dependencies: set[str] = field(default_factory=set)
-
-    def __post_init__(self):
-        if self.line_include is None:
-            self.line_include = []
-        if self.line_exclude is None:
-            self.line_exclude = []
-        self.codemod_changes = []
+    codemod_changes: List[Change] = field(default_factory=list)
 
     def add_dependency(self, dependency: str):
         self.dependencies.add(dependency)
