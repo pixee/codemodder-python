@@ -22,6 +22,7 @@ from .tempfile_mktemp import TempfileMktemp
 from .upgrade_sslcontext_minimum_version import UpgradeSSLContextMinimumVersion
 from .upgrade_sslcontext_tls import UpgradeSSLContextTLS
 from .url_sandbox import UrlSandbox
+from .use_defused_xml import UseDefusedXml
 from .use_walrus_if import UseWalrusIf
 from .with_threading_lock import WithThreadingLock
 
@@ -51,6 +52,7 @@ registry = CodemodCollection(
         UpgradeSSLContextMinimumVersion,
         UpgradeSSLContextTLS,
         UrlSandbox,
+        UseDefusedXml,
         UseWalrusIf,
         WithThreadingLock,
         SQLQueryParameterization,

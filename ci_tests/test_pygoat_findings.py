@@ -12,6 +12,7 @@ EXPECTED_FINDINGS = [
     "pixee:python/harden-pyyaml",
     "pixee:python/django-debug-flag-on",
     "pixee:python/url-sandbox",
+    "pixee:python/use-defusedxml",
     "pixee:python/use-walrus-if",
 ]
 
