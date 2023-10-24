@@ -1,7 +1,5 @@
 from codemodder.file_parsers.package_store import PackageStore
-from packaging.requirements import Requirement
 from pathlib import Path
-from typing import List
 import toml
 
 from .base_parser import BaseParser
@@ -28,7 +26,7 @@ class PyprojectTomlParser(BaseParser):
         # todo: handle no "project" in data
 
         return PackageStore(
-            type="pyproject_toml",
+            type=self.file_name,
             file=str(file),
             dependencies=self._parse_dependencies_from_toml(data),
             py_versions=self._parse_py_versions(data),

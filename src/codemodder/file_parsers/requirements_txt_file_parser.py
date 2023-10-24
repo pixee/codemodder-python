@@ -15,7 +15,7 @@ class RequirementsTxtParser(BaseParser):
             lines = f.readlines()
 
         return PackageStore(
-            type="requirements_txt",
+            type=self.file_name,
             file=str(file),
             dependencies=self._parse_dependencies(lines),
             # requirements.txt files do not declare py versions explicitly

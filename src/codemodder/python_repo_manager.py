@@ -1,13 +1,21 @@
 from functools import cached_property
 from pathlib import Path
-from codemodder.file_parsers import RequirementsTxtParser, PyprojectTomlParser
+from codemodder.file_parsers import (
+    RequirementsTxtParser,
+    PyprojectTomlParser,
+    SetupCfgParser,
+)
 from codemodder.file_parsers.package_store import PackageStore
 
 
 class PythonRepoManager:
     def __init__(self, parent_directory: Path):
         self.parent_directory = parent_directory
-        self._potential_stores = [RequirementsTxtParser, PyprojectTomlParser]
+        self._potential_stores = [
+            RequirementsTxtParser,
+            PyprojectTomlParser,
+            SetupCfgParser,
+        ]
 
     @cached_property
     def package_stores(self) -> list[PackageStore]:
