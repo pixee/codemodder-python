@@ -11,7 +11,7 @@ license = {file = "LICENSE"}
 dependencies = [
     "isort~=5.12.0",
     "libcst~=1.1.0",
-    "packaging~=23.0.0",
+    "packaging~=23.2",
     "pylint~=3.0.0",
     "python-json-logger~=2.0.0",
     "PyYAML~=6.0.0",
