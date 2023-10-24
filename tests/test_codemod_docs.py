@@ -1,6 +1,7 @@
 import pytest
 
 from codemodder.registry import load_registered_codemods
+from codemodder.scripts.generate_docs import METADATA
 
 
 def pytest_generate_tests(metafunc):
@@ -18,3 +19,4 @@ def test_load_codemod_docs_info(codemod):
         "Merge After Cursory Review",
         "Merge Without Review",
     )
+    assert codemod.name in METADATA
