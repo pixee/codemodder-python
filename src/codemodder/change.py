@@ -1,4 +1,30 @@
 from dataclasses import dataclass, field
+from enum import Enum
+
+
+class Action(Enum):
+    ADD = "add"
+    REMOVE = "remove"
+
+
+class Result(Enum):
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
+
+@dataclass
+class PackageAction:
+    action: Action
+    result: Result
+    package: str
+
+    def to_json(self):
+        return {
+            "action": self.action.value,
+            "result": self.result.value,
+            "package": self.package,
+        }
 
 
 @dataclass
@@ -6,7 +32,7 @@ class Change:
     lineNumber: int
     description: str
     properties: dict = field(default_factory=dict)
-    packageActions: list = field(default_factory=list)
+    packageActions: list[PackageAction] = field(default_factory=list)
 
     def to_json(self):
         return {
@@ -14,7 +40,7 @@ class Change:
             "lineNumber": str(self.lineNumber),
             "description": self.description,
             "properties": self.properties,
-            "packageActions": self.packageActions,
+            "packageActions": [pa.to_json() for pa in self.packageActions],
         }
 
 
