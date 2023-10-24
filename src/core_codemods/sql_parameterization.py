@@ -20,6 +20,7 @@ from codemodder.codemods.base_codemod import (
 from codemodder.codemods.transformations.remove_empty_string_concatenation import (
     RemoveEmptyStringConcatenation,
 )
+from codemodder.codemods.utils import get_function_name_node
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 
 parameter_token = "?"
@@ -29,20 +30,22 @@ literal_string = matchers.SimpleString()
 literal = literal_number | literal_string
 
 
-class Append:
+class SequenceExtension:
     def __init__(self, sequence: list[cst.CSTNode]) -> None:
         self.sequence = sequence
 
 
-class Prepend:
-    def __init__(self, sequence: list[cst.CSTNode]) -> None:
-        self.sequence = sequence
+class Append(SequenceExtension):
+    pass
+
+
+class Prepend(SequenceExtension):
+    pass
 
 
 class ReplaceNodes(cst.CSTTransformer):
     """
-    Replace nodes with their corresponding values in a given dict.
-    You can replace the entire node or some attributes of it via a dict(). Addionally if the attribute is a sequence, you may pass Append(l)/Prepend(l), where l is a list of nodes, to append or prepend, respectivelly.
+    Replace nodes with their corresponding values in a given dict. The replacements dictionary should either contain a mapping from a node to another node to be replaced, or a dict mapping each attribute, by name, to a new value. Additionally if the attribute is a sequence, you may pass Append(l)/Prepend(l), where l is a list of nodes, to append or prepend, respectively.
     """
 
     def __init__(
@@ -80,8 +83,9 @@ class ReplaceNodes(cst.CSTTransformer):
 
 
 class SQLQueryParameterization(BaseCodemod, Codemod):
+    SUMMARY = "Parameterize SQL queries."
     METADATA = CodemodMetadata(
-        DESCRIPTION=("Parameterize SQL queries."),
+        DESCRIPTION=SUMMARY,
         NAME="sql-parameterization",
         REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         REFERENCES=[
@@ -95,18 +99,12 @@ class SQLQueryParameterization(BaseCodemod, Codemod):
             },
         ],
     )
-    SUMMARY = "Parameterize SQL queries."
-    CHANGE_DESCRIPTION = ""
+    CHANGE_DESCRIPTION = "Parameterized SQL query execution."
 
     METADATA_DEPENDENCIES = (
         PositionProvider,
         ScopeProvider,
         ParentNodeProvider,
-    )
-    METADATA_DEPENDENCIES = (
-        ScopeProvider,
-        ParentNodeProvider,
-        PositionProvider,
     )
 
     def __init__(self, context: CodemodContext, *codemod_args) -> None:
@@ -175,9 +173,6 @@ class SQLQueryParameterization(BaseCodemod, Codemod):
 
         return result
 
-    # Replace node entirelly -> CSTNode
-    # update some attribute -> dict[str,any]
-    # apend or prepend an argument -> Append([]) / Preprend([])
     def _fix_injection(
         self, start: cst.CSTNode, middle: list[cst.CSTNode], end: cst.CSTNode
     ):
@@ -352,7 +347,7 @@ class ExtractParameters(ContextAwareVisitor):
             end = leaves.pop()
             if any(map(self._is_injectable, middle)):
                 self.injection_patterns.append((start, middle, end))
-            # end may contain the start of anothe literal, put it back
+            # end may contain the start of another literal, put it back
             # should not be a single quote
 
             # TODO think of a better solution here
@@ -458,7 +453,7 @@ class FindQueryCalls(ContextAwareVisitor):
         return False
 
     def leave_Call(self, original_node: cst.Call) -> None:
-        maybe_call_name = _get_function_name_node(original_node)
+        maybe_call_name = get_function_name_node(original_node)
         if maybe_call_name and maybe_call_name.value == "execute":
             # TODO don't parameterize if there are parameters already
             # may be temporary until I figure out if named parameter will work on most drivers
@@ -473,12 +468,3 @@ class FindQueryCalls(ContextAwareVisitor):
                                 expr.value
                             ):
                                 self.calls[original_node] = query_visitor.leaves
-
-
-def _get_function_name_node(call: cst.Call) -> Optional[cst.Name]:
-    match call.func:
-        case cst.Name():
-            return call.func
-        case cst.Attribute():
-            return call.func.attr
-    return None

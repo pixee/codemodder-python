@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 from libcst import matchers
 import libcst as cst
@@ -44,3 +44,12 @@ def get_call_name(call: cst.Call) -> str:
         return call.func.attr.value
     # It's a simple Name
     return call.func.value
+
+
+def get_function_name_node(call: cst.Call) -> Optional[cst.Name]:
+    match call.func:
+        case cst.Name():
+            return call.func
+        case cst.Attribute():
+            return call.func.attr
+    return None

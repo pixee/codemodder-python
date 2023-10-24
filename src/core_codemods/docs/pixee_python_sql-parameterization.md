@@ -13,11 +13,3 @@ cursor = connection.cursor()
 - cursor.execute("SELECT * from USERS WHERE name ='" + name + "'")
 + cursor.execute("SELECT * from USERS WHERE name =?", (name, ))
 ```
-
-If you have feedback on this codemod, [please let us know](mailto:feedback@pixee.ai)!
-
-## F.A.Q.
-
-### Why is this codemod marked as Merge With Cursory Review
-
-Python has a wealth of database drivers that all use the same interface. Different drivers may require different string tokens used for parameterization, and Python's dynamic typing makes it quite hard, and sometimes impossible, to detect which driver is being used just by looking at the code.
