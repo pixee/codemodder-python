@@ -101,7 +101,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
 
         assert len(change["changes"]) == self.num_changes
         line_change = change["changes"][0]
-        assert line_change["lineNumber"] == self.expected_line_change
+        assert line_change["lineNumber"] == str(self.expected_line_change)
         assert line_change["description"] == self.change_description
         assert line_change["packageActions"] == []
         assert line_change["properties"] == {}

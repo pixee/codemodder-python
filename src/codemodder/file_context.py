@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from codemodder.change import Change
+from codemodder.dependency import Dependency
 
 
 @dataclass
@@ -15,8 +16,8 @@ class FileContext:
     line_exclude: List[int] = field(default_factory=list)
     line_include: List[int] = field(default_factory=list)
     results_by_id: Dict = field(default_factory=dict)
-    dependencies: set[str] = field(default_factory=set)
+    dependencies: set[Dependency] = field(default_factory=set)
     codemod_changes: List[Change] = field(default_factory=list)
 
-    def add_dependency(self, dependency: str):
+    def add_dependency(self, dependency: Dependency):
         self.dependencies.add(dependency)

@@ -5,13 +5,14 @@ from typing import Optional
 import difflib
 from packaging.requirements import Requirement
 
-from codemodder.change import ChangeSet
+from codemodder.change import Change, ChangeSet
+from codemodder.dependency import Dependency
 
 
 class DependencyManager:
     parent_directory: Path
     _lines: list[str]
-    _new_requirements: list[str]
+    _new_requirements: list[Dependency]
 
     def __init__(self, parent_directory: Path):
         """One-time class initialization."""
@@ -20,13 +21,16 @@ class DependencyManager:
         self._lines = []
         self._new_requirements = []
 
-    def add(self, dependencies: list[str]):
+    @property
+    def new_requirements(self) -> list[str]:
+        return [str(x.requirement) for x in self._new_requirements]
+
+    def add(self, dependencies: list[Dependency]):
         """add any number of dependencies to the end of list of dependencies."""
-        for dep_str in dependencies:
-            dep = Requirement(dep_str)
+        for dep in dependencies:
             if dep not in self.dependencies:
-                self.dependencies.update({dep: None})
-                self._new_requirements.append(str(dep))
+                self.dependencies.update({dep.requirement: None})
+                self._new_requirements.append(dep)
 
     def write(self, dry_run: bool = False) -> Optional[ChangeSet]:
         """
@@ -35,19 +39,26 @@ class DependencyManager:
         if not (self.dependency_file and self._new_requirements):
             return None
 
-        updated = self._lines + self._new_requirements + ["\n"]
+        updated = self._lines + self.new_requirements + ["\n"]
 
         diff = "".join(difflib.unified_diff(self._lines, updated))
-        # TODO: add a change entry for each new requirement
-        # TODO: make sure to set the contextual_description=True in the properties bag
+
+        changes = [
+            Change(
+                lineNumber=len(self._lines) + i + 1,
+                description=dep.build_description(),
+                properties={"contextual_description": True},
+            )
+            for i, dep in enumerate(self._new_requirements)
+        ]
 
         if not dry_run:
             with open(self.dependency_file, "w", encoding="utf-8") as f:
                 f.writelines(self._lines)
-                f.writelines(self._new_requirements)
+                f.writelines(self.new_requirements)
 
         self.dependency_file_changed = True
-        return ChangeSet(str(self.dependency_file), diff, changes=[])
+        return ChangeSet(str(self.dependency_file), diff, changes=changes)
 
     @property
     def found_dependency_file(self) -> bool:

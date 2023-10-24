@@ -1,4 +1,5 @@
 import pytest
+from codemodder.dependency import Security
 from core_codemods.process_creation_sandbox import ProcessSandbox
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
@@ -22,7 +23,7 @@ safe_command.run(subprocess.run, "echo 'hi'", shell=True)
 var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency("security==1.0.1")
+        self.assert_dependency(Security)
 
     def test_import_alias(self, tmpdir):
         input_code = """import subprocess as sub
@@ -37,7 +38,7 @@ safe_command.run(sub.run, "echo 'hi'", shell=True)
 var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency("security==1.0.1")
+        self.assert_dependency(Security)
 
     def test_from_subprocess(self, tmpdir):
         input_code = """from subprocess import run
@@ -52,7 +53,7 @@ safe_command.run(run, "echo 'hi'", shell=True)
 var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency("security==1.0.1")
+        self.assert_dependency(Security)
 
     def test_subprocess_nameerror(self, tmpdir):
         input_code = """subprocess.run("echo 'hi'", shell=True)
@@ -97,7 +98,7 @@ excel
     )
     def test_other_import_untouched(self, tmpdir, input_code, expected):
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency("security==1.0.1")
+        self.assert_dependency(Security)
 
     def test_multifunctions(self, tmpdir):
         # Test that subprocess methods that aren't part of the codemod are not changed.
@@ -115,7 +116,7 @@ safe_command.run(subprocess.run, "echo 'hi'", shell=True)
 subprocess.check_output(["ls", "-l"])"""
 
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency("security==1.0.1")
+        self.assert_dependency(Security)
 
     def test_custom_run(self, tmpdir):
         input_code = """from app_funcs import run

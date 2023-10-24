@@ -4,6 +4,7 @@ import itertools
 from textwrap import indent
 
 from codemodder.change import ChangeSet
+from codemodder.dependency import Dependency
 from codemodder.dependency_manager import DependencyManager
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.logging import logger, log_list
@@ -26,7 +27,7 @@ these files manually before accepting this change.
 class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     _results_by_codemod: dict[str, list[ChangeSet]] = {}
     _failures_by_codemod: dict[str, list[Path]] = {}
-    dependencies: dict[str, set[str]] = {}
+    dependencies: dict[str, set[Dependency]] = {}
     directory: Path
     dry_run: bool = False
     verbose: bool = False
@@ -53,7 +54,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     def add_failure(self, codemod_name, file_path):
         self._failures_by_codemod.setdefault(codemod_name, []).append(file_path)
 
-    def add_dependencies(self, codemod_id: str, dependencies: set[str]):
+    def add_dependencies(self, codemod_id: str, dependencies: set[Dependency]):
         self.dependencies.setdefault(codemod_id, set()).update(dependencies)
 
     def get_results(self, codemod_name):
