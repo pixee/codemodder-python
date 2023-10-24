@@ -8,7 +8,8 @@ repos:
     -   id: trailing-whitespace
         exclude: |
           (?x)^(
-              src/core_codemods/docs/.*
+              src/core_codemods/docs/.*|
+              integration_tests/.*
           )$
     -   id: check-added-large-files
 -   repo: https://github.com/psf/black
