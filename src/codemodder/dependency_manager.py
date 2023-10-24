@@ -15,7 +15,6 @@ class DependencyManager:
     _new_requirements: list[Dependency]
 
     def __init__(self, parent_directory: Path):
-        """One-time class initialization."""
         self.parent_directory = parent_directory
         self.dependency_file_changed = False
         self._lines = []
