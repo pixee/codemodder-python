@@ -79,9 +79,7 @@ class SessionCookieSecureTransformer(BaseTransformer):
         pos_to_match = self.node_position(original_node)
         line_number = pos_to_match.end.line
         self.changes_in_file.append(
-            Change(
-                str(line_number), DjangoSessionCookieSecureOff.CHANGE_DESCRIPTION
-            ).to_json()
+            Change(line_number, DjangoSessionCookieSecureOff.CHANGE_DESCRIPTION)
         )
         final_line = cst.parse_statement("SESSION_COOKIE_SECURE = True")
         new_body = updated_node.body + (final_line,)
@@ -104,9 +102,7 @@ class SessionCookieSecureTransformer(BaseTransformer):
             # SESSION_COOKIE_SECURE = anything other than True
             line_number = pos_to_match.start.line
             self.changes_in_file.append(
-                Change(
-                    str(line_number), DjangoSessionCookieSecureOff.CHANGE_DESCRIPTION
-                ).to_json()
+                Change(line_number, DjangoSessionCookieSecureOff.CHANGE_DESCRIPTION)
             )
             return updated_node.with_changes(value=cst.Name("True"))
         return updated_node

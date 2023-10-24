@@ -96,7 +96,7 @@ class BaseCodemod(
     def report_change(self, original_node):
         line_number = self.lineno_for_node(original_node)
         self.file_context.codemod_changes.append(
-            Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
+            Change(line_number, self.CHANGE_DESCRIPTION)
         )
 
 

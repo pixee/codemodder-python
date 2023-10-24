@@ -71,7 +71,7 @@ class UpgradeSSLContextTLS(SemgrepCodemod, BaseTransformer):
         ) and self.filter_by_path_includes_or_excludes(pos_to_match):
             line_number = pos_to_match.start.line
             self.file_context.codemod_changes.append(
-                Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
+                Change(line_number, self.CHANGE_DESCRIPTION)
             )
 
             return updated_node.with_changes(

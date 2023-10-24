@@ -86,7 +86,7 @@ class BaseCodemod:
             Change(
                 lineNumber=position.start.line,
                 description=description,
-            ).to_json()
+            )
         )
 
     def lineno_for_node(self, node):

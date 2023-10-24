@@ -54,7 +54,7 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
             if self.filter_by_path_includes_or_excludes(pos):
                 if not self._is_disabled_by_linter(importt):
                     self.file_context.codemod_changes.append(
-                        Change(pos.start.line, self.CHANGE_DESCRIPTION).to_json()
+                        Change(pos.start.line, self.CHANGE_DESCRIPTION)
                     )
                     filtered_unused_imports.add((import_alias, importt))
         return tree.visit(RemoveUnusedImportsTransformer(filtered_unused_imports))

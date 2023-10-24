@@ -129,9 +129,7 @@ class FindRequestCallsAndImports(BaseVisitor):
                         }
                     )
                     self.changes_in_file.append(
-                        Change(
-                            str(line_number), UrlSandbox.CHANGE_DESCRIPTION
-                        ).to_json()
+                        Change(line_number, UrlSandbox.CHANGE_DESCRIPTION)
                     )
 
             # case req.get(...)
@@ -145,7 +143,7 @@ class FindRequestCallsAndImports(BaseVisitor):
                     }
                 )
                 self.changes_in_file.append(
-                    Change(str(line_number), UrlSandbox.CHANGE_DESCRIPTION).to_json()
+                    Change(line_number, UrlSandbox.CHANGE_DESCRIPTION)
                 )
 
     def _find_assignments(self, node: CSTNode):

@@ -53,7 +53,7 @@ class OrderImports(BaseCodemod, Codemod):
                         top_imports_visitor.top_imports_blocks[i][0]
                     ).start.line
                     self.file_context.codemod_changes.append(
-                        Change(str(line_number), self.CHANGE_DESCRIPTION).to_json()
+                        Change(line_number, self.CHANGE_DESCRIPTION)
                     )
             return result_tree
         return tree
