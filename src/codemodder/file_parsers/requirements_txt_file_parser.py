@@ -2,23 +2,13 @@ from codemodder.file_parsers.package_store import PackageStore
 from packaging.requirements import Requirement
 from pathlib import Path
 from typing import List
+from .base_parser import BaseParser
 
 
-class RequirementsTxtParser:
+class RequirementsTxtParser(BaseParser):
     def __init__(self, parent_directory: Path):
-        self.parent_directory = parent_directory
+        super().__init__(parent_directory)
         self.file_name = "requirements.txt"
-
-    def find_file_locations(self) -> List[Path]:
-        return list(Path(self.parent_directory).rglob(self.file_name))
-
-    def _parse_dependencies(self, lines: List[str]):
-        return [
-            Requirement(line)
-            for x in lines
-            # Skip empty lines and comments
-            if (line := x.strip()) and not line.startswith("#")
-        ]
 
     def _parse_file(self, file: Path):
         with open(file, "r", encoding="utf-8") as f:
@@ -33,14 +23,3 @@ class RequirementsTxtParser:
             # and extracting py versions from them.
             py_versions=[],
         )
-
-    def parse(self) -> list[PackageStore]:
-        """
-        Find 0 or more requirements.txt files within a project repo.
-        """
-        stores = []
-        req_files = self.find_file_locations()
-        for file in req_files:
-            store = self._parse_file(file)
-            stores.append(store)
-        return stores
