@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from codemodder.dependency import DefusedXML
+from codemodder.dependency import DefusedXML, Security
 from codemodder.dependency_manager import DependencyManager, Requirement
 
 
@@ -19,7 +19,7 @@ class TestDependencyManager:
         dependency_file.write_text("requests\n", encoding="utf-8")
 
         dm = DependencyManager(Path(tmpdir))
-        assert dm.dependencies == {Requirement("requests"): None}
+        assert dm.dependencies == {"requests": Requirement("requests")}
 
     @pytest.mark.parametrize("dry_run", [True, False])
     def test_add_dependency_preserve_comments(self, tmpdir, dry_run):
@@ -32,7 +32,7 @@ class TestDependencyManager:
         changeset = dm.write(dry_run=dry_run)
 
         assert dependency_file.read_text(encoding="utf-8") == (
-            contents if dry_run else "# comment\n\nrequests\ndefusedxml~=0.7.1"
+            contents if dry_run else "# comment\n\nrequests\ndefusedxml~=0.7.1\n"
         )
 
         assert changeset is not None
@@ -50,3 +50,42 @@ class TestDependencyManager:
         assert changeset.changes[0].lineNumber == 4
         assert changeset.changes[0].description == DefusedXML.build_description()
         assert changeset.changes[0].properties == {"contextual_description": True}
+
+    def test_add_multiple_dependencies(self, tmpdir):
+        dependency_file = Path(tmpdir) / "requirements.txt"
+        dependency_file.write_text("requests\n", encoding="utf-8")
+
+        for dep in [DefusedXML, Security]:
+            dm = DependencyManager(Path(tmpdir))
+            dm.add([dep])
+            dm.write()
+
+        assert dependency_file.read_text(encoding="utf-8") == (
+            "requests\ndefusedxml~=0.7.1\nsecurity~=1.2.0\n"
+        )
+
+    def test_add_same_dependency_only_once(self, tmpdir):
+        dependency_file = Path(tmpdir) / "requirements.txt"
+        dependency_file.write_text("requests\n", encoding="utf-8")
+
+        for dep in [Security, Security]:
+            dm = DependencyManager(Path(tmpdir))
+            dm.add([dep])
+            dm.write()
+
+        assert dependency_file.read_text(encoding="utf-8") == (
+            "requests\nsecurity~=1.2.0\n"
+        )
+
+    @pytest.mark.parametrize("version", ["1.2.0", "1.0.1"])
+    def test_dont_add_existing_dependency(self, version, tmpdir):
+        dependency_file = Path(tmpdir) / "requirements.txt"
+        dependency_file.write_text(f"requests\nsecurity~={version}\n", encoding="utf-8")
+
+        dm = DependencyManager(Path(tmpdir))
+        dm.add([Security])
+        dm.write()
+
+        assert dependency_file.read_text(encoding="utf-8") == (
+            f"requests\nsecurity~={version}\n"
+        )
