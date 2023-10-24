@@ -28,8 +28,8 @@ class DependencyManager:
     def add(self, dependencies: list[Dependency]):
         """add any number of dependencies to the end of list of dependencies."""
         for dep in dependencies:
-            if dep not in self.dependencies:
-                self.dependencies.update({dep.requirement: None})
+            if dep.requirement.name not in self.dependencies:
+                self.dependencies.update({dep.requirement.name: dep.requirement})
                 self._new_requirements.append(dep)
 
     def write(self, dry_run: bool = False) -> Optional[ChangeSet]:
@@ -58,7 +58,7 @@ class DependencyManager:
         if not dry_run:
             with open(self.dependency_file, "w", encoding="utf-8") as f:
                 f.writelines(self._lines)
-                f.writelines(self.new_requirements)
+                f.writelines([f"{line}\n" for line in self.new_requirements])
 
         self.dependency_file_changed = True
         return ChangeSet(str(self.dependency_file), diff, changes=changes)
@@ -77,7 +77,7 @@ class DependencyManager:
         return None
 
     @cached_property
-    def dependencies(self) -> dict[Requirement, None]:
+    def dependencies(self) -> dict[str, Requirement]:
         """
         Extract list of dependencies from requirements.txt file.
         Same order of requirements is maintained, no alphabetical sorting is done.
@@ -89,8 +89,10 @@ class DependencyManager:
             self._lines = f.readlines()
 
         return {
-            Requirement(line): None
+            requirement.name: requirement
             for x in self._lines
             # Skip empty lines and comments
-            if (line := x.strip()) and not line.startswith("#")
+            if (line := x.strip())
+            and not line.startswith("#")
+            and (requirement := Requirement(line))
         }
