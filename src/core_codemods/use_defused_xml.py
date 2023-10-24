@@ -7,6 +7,7 @@ from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.imported_call_modifier import ImportedCallModifier
+from codemodder.dependency import DefusedXML
 
 
 class DefusedXmlModifier(ImportedCallModifier[Mapping[str, str]]):
@@ -93,6 +94,6 @@ class UseDefusedXml(BaseCodemod):
         result_tree = visitor.transform_module(tree)
         self.file_context.codemod_changes.extend(visitor.changes_in_file)
         if visitor.changes_in_file:
-            self.add_dependency("defusedxml")  # TODO: which version?
+            self.add_dependency(DefusedXML)
 
         return result_tree

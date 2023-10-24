@@ -17,8 +17,8 @@ from codemodder.codemods.base_visitor import BaseVisitor
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsCodemod,
 )
+from codemodder.dependency import Security
 
-replacement_package = "security"
 replacement_import = "safe_requests"
 
 
@@ -74,7 +74,7 @@ class UrlSandbox(SemgrepCodemod, Codemod):
                 find_requests_visitor.changes_in_file
             )
             new_tree = tree.visit(ReplaceNodes(find_requests_visitor.nodes_to_change))
-            self.add_dependency("security==1.0.1")
+            self.add_dependency(Security)
             # if it finds any request.get(...), try to remove the imports
             if any(
                 (
@@ -84,7 +84,7 @@ class UrlSandbox(SemgrepCodemod, Codemod):
             ):
                 new_tree = AddImportsVisitor(
                     self.context,
-                    [ImportItem(replacement_package, replacement_import, None, 0)],
+                    [ImportItem(Security.name, replacement_import, None, 0)],
                 ).transform_module(new_tree)
                 new_tree = RemoveUnusedImportsCodemod(self.context).transform_module(
                     new_tree
@@ -122,7 +122,7 @@ class FindRequestCallsAndImports(BaseVisitor):
                         {
                             maybe_node: cst.ImportFrom(
                                 module=cst.parse_expression(
-                                    replacement_package + "." + replacement_import
+                                    f"{Security.name}.{replacement_import}"
                                 ),
                                 names=maybe_node.names,
                             )

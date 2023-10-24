@@ -10,6 +10,7 @@ from libcst.codemod import CodemodContext
 import mock
 
 from codemodder.context import CodemodExecutionContext
+from codemodder.dependency import Dependency
 from codemodder.file_context import FileContext
 from codemodder.registry import CodemodRegistry, CodemodCollection
 from codemodder.semgrep import run as semgrep_run
@@ -49,7 +50,7 @@ class BaseCodemodTest:
 
         assert output_tree.code == dedent(expected)
 
-    def assert_dependency(self, dependency: str):
+    def assert_dependency(self, dependency: Dependency):
         assert self.file_context and self.file_context.dependencies == set([dependency])
 
 

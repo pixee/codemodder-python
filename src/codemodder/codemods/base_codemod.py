@@ -6,6 +6,7 @@ from libcst._position import CodeRange
 
 from codemodder.change import Change
 from codemodder.context import CodemodExecutionContext
+from codemodder.dependency import Dependency
 from codemodder.file_context import FileContext
 from codemodder.semgrep import run as semgrep_run
 
@@ -100,7 +101,7 @@ class BaseCodemod:
     def line_include(self):
         return self.file_context.line_include
 
-    def add_dependency(self, dependency: str):
+    def add_dependency(self, dependency: Dependency):
         self.file_context.add_dependency(dependency)
 
 
