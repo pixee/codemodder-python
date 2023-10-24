@@ -110,6 +110,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
 +resp = safe_requests.get.get(url, allowed_protocols=("ftp",))
 ```""",
     ),
+    "use-defusedxml": DocMetadata(
+        importance="High",
+        guidance_explained="We believe this change is safe and effective and guards against serious XML vulnerabilities. You should review this code before merging to make sure the dependency has been properly added to your project.",
+    ),
     "use-walrus-if": DocMetadata(
         importance="Low",
         guidance_explained="We believe that using the walrus operator is an improvement in terms of clarity and readability. However, this change is only compatible with codebases that support Python 3.8 and later, so it requires quick validation before merging.",
