@@ -5,7 +5,7 @@ from typing import Optional
 import difflib
 from packaging.requirements import Requirement
 
-from codemodder.change import Change, ChangeSet
+from codemodder.change import Action, Change, ChangeSet, PackageAction, Result
 from codemodder.dependency import Dependency
 
 
@@ -48,6 +48,9 @@ class DependencyManager:
                 lineNumber=len(self._lines) + i + 1,
                 description=dep.build_description(),
                 properties={"contextual_description": True},
+                packageActions=[
+                    PackageAction(Action.ADD, Result.COMPLETED, str(dep.requirement))
+                ],
             )
             for i, dep in enumerate(self._new_requirements)
         ]
