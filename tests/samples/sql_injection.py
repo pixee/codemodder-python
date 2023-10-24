@@ -1,6 +1,8 @@
 import sqlite3
 
-connection = sqlite3.connect("tests/samples/my_db.db")
+connection = sqlite3.connect(":memory:")
+connection.cursor().execute("CREATE TABLE Users (name, phone)")
+connection.cursor().execute("INSERT INTO Users VALUES ('Jenny','867-5309')")
 
 
 def foo(cursor: sqlite3.Cursor, name: str, phone: str):
