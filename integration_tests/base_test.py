@@ -67,6 +67,10 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
                 "You must register the codemod to a CodemodCollection."
             ) from exc
 
+    @property
+    def relative_code_path(self):
+        return os.path.relpath(self.code_path, SAMPLES_DIR)
+
     def _assert_run_fields(self, run, output_path):
         assert run["vendor"] == "pixee"
         assert run["tool"] == "codemodder-python"
@@ -74,12 +78,12 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert run["elapsed"] != ""
         assert (
             run["commandLine"]
-            == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_wrapper.name} --path-include={self.code_path}"
+            == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_wrapper.name} --path-include={self.relative_code_path}"
         )
         assert run["directory"] == os.path.abspath(SAMPLES_DIR)
         assert run["sarifs"] == []
 
-    def _assert_results_fields(self, results, output_path):
+    def _assert_results_fields(self, results):
         assert len(results) == 1
         result = results[0]
         assert result["codemod"] == self.codemod_wrapper.id
@@ -94,9 +98,11 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         # A codemod may change multiple files. For now we will
         # assert the resulting data for one file only.
         change = [
-            result for result in result["changeset"] if result["path"] == output_path
+            result
+            for result in result["changeset"]
+            if result["path"] == self.relative_code_path
         ][0]
-        assert change["path"] == output_path
+        assert change["path"] == self.relative_code_path
         assert change["diff"] == self.expected_diff
 
         assert len(change["changes"]) == self.num_changes
@@ -114,10 +120,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         run = codetf["run"]
         self._assert_run_fields(run, self.output_path)
         results = codetf["results"]
-        # CodeTf2 spec requires relative paths
-        self._assert_results_fields(
-            results, os.path.relpath(self.code_path, SAMPLES_DIR)
-        )
+        self._assert_results_fields(results)
 
     def check_code_before(self):
         with open(self.code_path, "r", encoding="utf-8") as f:
@@ -145,7 +148,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             "--output",
             self.output_path,
             f"--codemod-include={self.codemod_wrapper.name}",
-            f"--path-include={self.code_path}",
+            f"--path-include={self.relative_code_path}",
         ]
 
         self.check_code_before()

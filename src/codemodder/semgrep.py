@@ -37,7 +37,7 @@ def run(execution_context: CodemodExecutionContext, yaml_files: List[Path]) -> d
                 )
             )
         if execution_context.path_include:
-            # I don't know why but passing the parent path to include patterns has unexpected behavior
+            # Note: parent path is not passed with --include
             command.extend(
                 itertools.chain.from_iterable(
                     map(lambda f: ["--include", str(f)], execution_context.path_include)

@@ -3,7 +3,6 @@ import difflib
 import logging
 import os
 import sys
-from textwrap import indent
 
 import libcst as cst
 from libcst.codemod import CodemodContext

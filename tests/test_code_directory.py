@@ -138,3 +138,11 @@ class TestMatchFiles:
     def test_extract_line_from_pattern(self):
         lines = file_line_patterns(Path("insecure_random.py"), ["insecure_*.py:3"])
         assert lines == [3]
+
+    def test_include_specific_file(self, dir_structure):
+        expected = ["empty_for_testing.py"]
+        files = match_files(
+            dir_structure / "samples" / "more_samples",
+            include_paths=["empty_for_testing.py"],
+        )
+        self._assert_expected(files, expected)

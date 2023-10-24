@@ -49,10 +49,13 @@ def filter_files(
         else [x for x in (patterns or []) if ":" not in x]
     )
 
-    # Filter patterns should be relative to a parent_path, not absolute.
     # TODO: handle case when parent path is "."
-    patterns = [f"{parent_path}{x}" for x in patterns]
-
+    patterns = [
+        str(Path(parent_path) / Path(pat))
+        if not pat.startswith("*")
+        else parent_path + pat
+        for pat in patterns
+    ]
     return itertools.chain(*[fnmatch.filter(names, pattern) for pattern in patterns])
 
 
