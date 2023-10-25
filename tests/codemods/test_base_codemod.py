@@ -32,7 +32,6 @@ class TestEmptyResults:
         command_instance = DoNothingCodemod(
             CodemodContext(),
             mock.MagicMock(),
-            mock.MagicMock(),
         )
         output_tree = command_instance.transform_module(input_tree)
 

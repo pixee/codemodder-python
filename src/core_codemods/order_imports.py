@@ -42,7 +42,8 @@ class OrderImports(BaseCodemod, Codemod):
                 filtered_blocks.append(block)
         if filtered_blocks:
             order_transformer = OrderImportsBlocksTransform(
-                self.execution_context.directory, filtered_blocks
+                self.file_context.base_directory,
+                filtered_blocks,
             )
             result_tree = tree.visit(order_transformer)
 

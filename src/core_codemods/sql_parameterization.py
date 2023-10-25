@@ -23,7 +23,6 @@ from codemodder.codemods.transformations.remove_empty_string_concatenation impor
 )
 from codemodder.codemods.utils import Append, ReplaceNodes, get_function_name_node
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 
 parameter_token = "?"
@@ -61,14 +60,13 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
     def __init__(
         self,
         context: CodemodContext,
-        execution_context: CodemodExecutionContext,
         file_context: FileContext,
         *codemod_args,
     ) -> None:
         self.changed_nodes: dict[
             cst.CSTNode, cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel
         ] = {}
-        BaseCodemod.__init__(self, execution_context, file_context, *codemod_args)
+        BaseCodemod.__init__(self, file_context, *codemod_args)
         UtilsMixin.__init__(self, context, {})
         Codemod.__init__(self, context)
 
