@@ -128,9 +128,7 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
                 self.changed_nodes = {}
                 line_number = self.get_metadata(PositionProvider, call).start.line
                 self.file_context.codemod_changes.append(
-                    Change(
-                        str(line_number), SQLQueryParameterization.CHANGE_DESCRIPTION
-                    ).to_json()
+                    Change(line_number, SQLQueryParameterization.CHANGE_DESCRIPTION)
                 )
                 result = result.visit(RemoveEmptyStringConcatenation())
 
