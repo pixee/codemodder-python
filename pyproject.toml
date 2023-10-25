@@ -16,6 +16,7 @@ dependencies = [
     "python-json-logger~=2.0.0",
     "PyYAML~=6.0.0",
     "semgrep~=1.46.0",
+    "toml~=0.10.2",
     "wrapt~=1.15.0",
 ]
 

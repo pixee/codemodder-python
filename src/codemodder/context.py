@@ -9,6 +9,7 @@ from codemodder.dependency_manager import DependencyManager
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.logging import logger, log_list
 from codemodder.registry import CodemodRegistry
+from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 
 
 DEPENDENCY_NOTIFICATION = """```
@@ -32,6 +33,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     dry_run: bool = False
     verbose: bool = False
     registry: CodemodRegistry
+    repo_manager: PythonRepoManager
 
     def __init__(
         self,
@@ -39,7 +41,8 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         dry_run: bool,
         verbose: bool,
         registry: CodemodRegistry,
-    ):
+        repo_manager: PythonRepoManager,
+    ):  # pylint: disable=too-many-arguments
         self.directory = directory
         self.dry_run = dry_run
         self.verbose = verbose
@@ -47,6 +50,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         self._failures_by_codemod = {}
         self.dependencies = {}
         self.registry = registry
+        self.repo_manager = repo_manager
 
     def add_result(self, codemod_name, change_set):
         self._results_by_codemod.setdefault(codemod_name, []).append(change_set)

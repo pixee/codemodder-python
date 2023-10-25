@@ -16,6 +16,7 @@ from codemodder.change import ChangeSet
 from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.context import CodemodExecutionContext
 from codemodder.executor import CodemodExecutorWrapper
+from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default
 
 
@@ -130,12 +131,16 @@ def run(original_args) -> int:
     log_section("startup")
     logger.info("codemodder: python/%s", __VERSION__)
 
+    repo_manager = PythonRepoManager(Path(argv.directory))
     context = CodemodExecutionContext(
         Path(argv.directory),
         argv.dry_run,
         argv.verbose,
         codemod_registry,
+        repo_manager,
     )
+    # todo: enable when ready
+    # repo_manager.package_stores
 
     # TODO: this should be a method of CodemodExecutionContext
     codemods_to_run = codemod_registry.match_codemods(
