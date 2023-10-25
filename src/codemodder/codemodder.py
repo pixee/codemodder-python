@@ -139,8 +139,8 @@ def run(original_args) -> int:
         codemod_registry,
         repo_manager,
     )
-    # todo: move elsewhere?
-    repo_manager.package_stores
+    # todo: enable when ready
+    # repo_manager.package_stores
 
     # TODO: this should be a method of CodemodExecutionContext
     codemods_to_run = codemod_registry.match_codemods(

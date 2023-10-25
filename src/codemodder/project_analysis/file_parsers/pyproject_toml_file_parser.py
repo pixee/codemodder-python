@@ -18,8 +18,8 @@ class PyprojectTomlParser(BaseParser):
     def _parse_py_versions(self, toml_data: dict):
         # todo: handle cases for
         # 1. no requires-python
-        # 2. various requires-python such as "">3.5.2"",  ">=3.11.1,<3.11.2"
-        return toml_data["project"]["requires-python"]
+        # 2. multiple requires-python such as "">3.5.2"",  ">=3.11.1,<3.11.2"
+        return [toml_data["project"]["requires-python"]]
 
     def _parse_file(self, file: Path):
         data = toml.load(file)

@@ -33,6 +33,7 @@ class BaseCodemodTest:
             dry_run=True,
             verbose=False,
             registry=mock.MagicMock(),
+            repo_manager=mock.MagicMock(),
         )
         self.file_context = FileContext(
             file_path,
@@ -80,6 +81,7 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
             dry_run=True,
             verbose=False,
             registry=mock.MagicMock(),
+            repo_manager=mock.MagicMock(),
         )
         input_tree = cst.parse_module(input_code)
         all_results = self.results_by_id_filepath(input_code, file_path)

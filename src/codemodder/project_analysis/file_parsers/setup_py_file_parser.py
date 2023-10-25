@@ -27,11 +27,13 @@ class SetupPyParser(BaseParser):
         return self._parse_dependencies(cst_dependencies)
 
     def _parse_py_versions(self, version_str):
-        return version_str.strip()
+        # todo: handle for multiple versions
+        return [clean_simplestring(version_str)]
 
     def _parse_file(self, file: Path):
         visitor = SetupCallVisotor()
         with open(str(file), "r", encoding="utf-8") as f:
+            # todo: handle failure in parsing
             module = cst.parse_module(f.read())
         module.visit(visitor)
 

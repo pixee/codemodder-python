@@ -21,7 +21,7 @@ class SetupCfgParser(BaseParser):
         # todo: handle cases for
         # 1. no options/ no requires-python
         # 2. various requires-python such as "">3.5.2"",  ">=3.11.1,<3.11.2"
-        return config["options"]["python_requires"]
+        return [config["options"]["python_requires"]]
 
     def _parse_file(self, file: Path):
         config = configparser.ConfigParser()

@@ -52,7 +52,7 @@ def disable_write_dependencies():
 
 
 @pytest.fixture(scope="module")
-def dir_with_pkg_managers(tmp_path_factory):
+def pkg_with_reqs_txt(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("foo")
     req_file = base_dir / "requirements.txt"
     reqs = "# comment\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"
