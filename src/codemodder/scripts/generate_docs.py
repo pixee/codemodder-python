@@ -184,6 +184,9 @@ def main():
 
     registry = load_registered_codemods()
     for codemod in registry.codemods:
+        if codemod.name == "order-imports":
+            continue
+
         doc = generate_docs(codemod)
         codemod_doc_name = f"{codemod.id.replace(':', '_').replace('/', '_')}.md"
         with open(parent_dir / codemod_doc_name, "w", encoding="utf-8") as f:
