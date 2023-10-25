@@ -33,6 +33,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     dry_run: bool = False
     verbose: bool = False
     registry: CodemodRegistry
+    repo_manager: PythonRepoManager
 
     def __init__(
         self,

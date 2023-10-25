@@ -31,7 +31,7 @@ class SetupPyParser(BaseParser):
         return [clean_simplestring(version_str)]
 
     def _parse_file(self, file: Path):
-        visitor = SetupCallVisotor()
+        visitor = SetupCallVisitor()
         with open(str(file), "r", encoding="utf-8") as f:
             # todo: handle failure in parsing
             module = cst.parse_module(f.read())
@@ -47,7 +47,7 @@ class SetupPyParser(BaseParser):
         )
 
 
-class SetupCallVisotor(cst.CSTVisitor):
+class SetupCallVisitor(cst.CSTVisitor):
     def __init__(self):
         self.python_requires = None
         self.install_requires = None

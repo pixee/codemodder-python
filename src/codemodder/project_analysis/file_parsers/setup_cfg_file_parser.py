@@ -10,7 +10,7 @@ class SetupCfgParser(BaseParser):
     def file_name(self):
         return "setup.cfg"
 
-    def _parse_dependencies_from_toml(self, config: configparser.ConfigParser):
+    def _parse_dependencies_from_cfg(self, config: configparser.ConfigParser):
         # todo: handle cases for
         # 1. no dependencies, no options dict
         # setup_requires, tests_require, extras_require
@@ -32,6 +32,6 @@ class SetupCfgParser(BaseParser):
         return PackageStore(
             type=self.file_name,
             file=str(file),
-            dependencies=self._parse_dependencies_from_toml(config),
+            dependencies=self._parse_dependencies_from_cfg(config),
             py_versions=self._parse_py_versions(config),
         )
