@@ -21,8 +21,8 @@ class PackageAction:
 
     def to_json(self):
         return {
-            "action": self.action.value,
-            "result": self.result.value,
+            "action": self.action.value.upper(),
+            "result": self.result.value.upper(),
             "package": self.package,
         }
 
