@@ -1,4 +1,4 @@
-from codemodder.file_parsers.package_store import PackageStore
+from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from packaging.requirements import Requirement
 from pathlib import Path
 from typing import List

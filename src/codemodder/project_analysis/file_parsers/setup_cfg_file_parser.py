@@ -1,4 +1,4 @@
-from codemodder.file_parsers.package_store import PackageStore
+from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from pathlib import Path
 import configparser
 
@@ -13,6 +13,7 @@ class SetupCfgParser(BaseParser):
     def _parse_dependencies_from_toml(self, config: configparser.ConfigParser):
         # todo: handle cases for
         # 1. no dependencies, no options dict
+        # setup_requires, tests_require, extras_require
         dependency_lines = config["options"]["install_requires"].split("\n")
         return self._parse_dependencies(dependency_lines)
 

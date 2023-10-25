@@ -1,11 +1,12 @@
 from functools import cached_property
 from pathlib import Path
-from codemodder.file_parsers import (
+from codemodder.project_analysis.file_parsers import (
     RequirementsTxtParser,
     PyprojectTomlParser,
     SetupCfgParser,
+    SetupPyParser,
 )
-from codemodder.file_parsers.package_store import PackageStore
+from codemodder.project_analysis.file_parsers.package_store import PackageStore
 
 
 class PythonRepoManager:
@@ -15,6 +16,7 @@ class PythonRepoManager:
             RequirementsTxtParser,
             PyprojectTomlParser,
             SetupCfgParser,
+            SetupPyParser,
         ]
 
     @cached_property

@@ -1,4 +1,4 @@
-from codemodder.python_repo_manager import PythonRepoManager
+from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 
 
 class TestPythonRepoManager:

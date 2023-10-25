@@ -1,4 +1,4 @@
-from codemodder.file_parsers import RequirementsTxtParser
+from codemodder.project_analysis.file_parsers import RequirementsTxtParser
 
 
 class TestRequirementsTxtParser:

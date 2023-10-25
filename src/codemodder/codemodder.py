@@ -16,7 +16,7 @@ from codemodder.change import ChangeSet
 from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.context import CodemodExecutionContext
 from codemodder.executor import CodemodExecutorWrapper
-from codemodder.python_repo_manager import PythonRepoManager
+from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default
 
 

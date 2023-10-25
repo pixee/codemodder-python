@@ -9,7 +9,7 @@ from codemodder.dependency_manager import DependencyManager
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.logging import logger, log_list
 from codemodder.registry import CodemodRegistry
-from codemodder.python_repo_manager import PythonRepoManager
+from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 
 
 DEPENDENCY_NOTIFICATION = """```
