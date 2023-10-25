@@ -41,7 +41,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         verbose: bool,
         registry: CodemodRegistry,
         repo_manager: PythonRepoManager,
-    ):
+    ):  # pylint: disable=too-many-arguments
         self.directory = directory
         self.dry_run = dry_run
         self.verbose = verbose

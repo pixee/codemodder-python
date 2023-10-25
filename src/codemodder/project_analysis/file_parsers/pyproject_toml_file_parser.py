@@ -6,9 +6,9 @@ from .base_parser import BaseParser
 
 
 class PyprojectTomlParser(BaseParser):
-    def __init__(self, parent_directory: Path):
-        super().__init__(parent_directory)
-        self.file_name = "pyproject.toml"
+    @property
+    def file_name(self):
+        return "pyproject.toml"
 
     def _parse_dependencies_from_toml(self, toml_data: dict):
         # todo: handle cases for

@@ -1,24 +1,31 @@
+from abc import ABC, abstractmethod
+
 from pathlib import Path
 from typing import List
 from .package_store import PackageStore
 from packaging.requirements import Requirement
 
 
-class BaseParser:
+class BaseParser(ABC):
     def __init__(self, parent_directory: Path):
         self.parent_directory = parent_directory
-        self.file_name: str = ""
 
-    def _parse_dependencies(self, lines: List[str]):
+    @property
+    @abstractmethod
+    def file_name(self):
+        ...
+
+    def _parse_dependencies(self, dependencies: List[str]):
         return [
             Requirement(line)
-            for x in lines
+            for x in dependencies
             # Skip empty lines and comments
             if (line := x.strip()) and not line.startswith("#")
         ]
 
+    @abstractmethod
     def _parse_file(self, file: Path):
-        raise NotImplementedError
+        ...
 
     def find_file_locations(self) -> List[Path]:
         return list(Path(self.parent_directory).rglob(self.file_name))

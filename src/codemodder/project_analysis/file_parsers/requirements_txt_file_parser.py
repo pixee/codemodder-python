@@ -1,14 +1,12 @@
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
-from packaging.requirements import Requirement
 from pathlib import Path
-from typing import List
 from .base_parser import BaseParser
 
 
 class RequirementsTxtParser(BaseParser):
-    def __init__(self, parent_directory: Path):
-        super().__init__(parent_directory)
-        self.file_name = "requirements.txt"
+    @property
+    def file_name(self):
+        return "requirements.txt"
 
     def _parse_file(self, file: Path):
         with open(file, "r", encoding="utf-8") as f:

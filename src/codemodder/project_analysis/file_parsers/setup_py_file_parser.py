@@ -9,14 +9,14 @@ from .utils import clean_simplestring
 
 
 class SetupPyParser(BaseParser):
-    def __init__(self, parent_directory: Path):
-        super().__init__(parent_directory)
-        self.file_name = "setup.py"
+    @property
+    def file_name(self):
+        return "setup.py"
 
-    def _parse_dependencies(self, cst_dependencies):
+    def _parse_dependencies(self, dependencies):
         return [
             Requirement(line)
-            for x in cst_dependencies
+            for x in dependencies
             # Skip empty lines and comments
             if (line := clean_simplestring(x.value)) and not line.startswith("#")
         ]

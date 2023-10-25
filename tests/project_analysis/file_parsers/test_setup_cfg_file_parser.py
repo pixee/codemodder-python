@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 import pytest
 from codemodder.project_analysis.file_parsers import SetupCfgParser
 

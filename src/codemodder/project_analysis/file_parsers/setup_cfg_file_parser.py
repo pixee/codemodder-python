@@ -6,9 +6,9 @@ from .base_parser import BaseParser
 
 
 class SetupCfgParser(BaseParser):
-    def __init__(self, parent_directory: Path):
-        super().__init__(parent_directory)
-        self.file_name = "setup.cfg"
+    @property
+    def file_name(self):
+        return "setup.cfg"
 
     def _parse_dependencies_from_toml(self, config: configparser.ConfigParser):
         # todo: handle cases for
