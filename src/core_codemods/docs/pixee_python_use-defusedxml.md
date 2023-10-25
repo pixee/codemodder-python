@@ -1,4 +1,4 @@
-You might be surprised to learn that Python's standard library XML libraries are
+You might be surprised to learn that Python's built-in XML libraries are
 [considered insecure](https://docs.python.org/3/library/xml.html#xml-vulnerabilities)
 against various kinds of attacks.
 

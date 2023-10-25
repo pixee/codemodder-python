@@ -34,7 +34,7 @@ literal = literal_number | literal_string
 
 
 class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
-    SUMMARY = "Parameterize SQL queries."
+    SUMMARY = "Parameterize SQL Queries"
     METADATA = CodemodMetadata(
         DESCRIPTION=SUMMARY,
         NAME="sql-parameterization",
