@@ -13,7 +13,7 @@ class BaseParser(ABC):
     @property
     @abstractmethod
     def file_name(self):
-        ...
+        ...  # pragma: no cover
 
     def _parse_dependencies(self, dependencies: List[str]):
         return [
@@ -25,7 +25,7 @@ class BaseParser(ABC):
 
     @abstractmethod
     def _parse_file(self, file: Path):
-        ...
+        ...  # pragma: no cover
 
     def find_file_locations(self) -> List[Path]:
         return list(Path(self.parent_directory).rglob(self.file_name))
