@@ -158,6 +158,12 @@ def parse_args(argv, codemod_registry):
         default=DEFAULT_INCLUDED_PATHS,
         help="Comma-separated set of UNIX glob patterns to include",
     )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=1,
+        help="maximum number of workers (threads) to use for processing files in parallel",
+    )
 
     # At this time we don't do anything with the sarif arg.
     parser.add_argument(

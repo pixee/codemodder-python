@@ -5,7 +5,6 @@ from typing import List, ClassVar
 from libcst._position import CodeRange
 
 from codemodder.change import Change
-from codemodder.context import CodemodExecutionContext
 from codemodder.dependency import Dependency
 from codemodder.file_context import FileContext
 from codemodder.semgrep import run as semgrep_run
@@ -46,12 +45,9 @@ class BaseCodemod:
     SUMMARY: ClassVar[str] = NotImplemented
     is_semgrep: bool = False
     adds_dependency: bool = False
-
-    execution_context: CodemodExecutionContext
     file_context: FileContext
 
-    def __init__(self, execution_context: CodemodExecutionContext, file_context):
-        self.execution_context = execution_context
+    def __init__(self, file_context: FileContext):
         self.file_context = file_context
 
     @classmethod

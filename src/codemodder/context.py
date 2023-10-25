@@ -2,11 +2,13 @@ import logging
 from pathlib import Path
 import itertools
 from textwrap import indent
+from typing import List, Iterator
 
 from codemodder.change import ChangeSet
 from codemodder.dependency import Dependency
 from codemodder.dependency_manager import DependencyManager
 from codemodder.executor import CodemodExecutorWrapper
+from codemodder.file_context import FileContext
 from codemodder.logging import logger, log_list
 from codemodder.registry import CodemodRegistry
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
@@ -52,16 +54,16 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         self.registry = registry
         self.repo_manager = repo_manager
 
-    def add_result(self, codemod_name, change_set):
-        self._results_by_codemod.setdefault(codemod_name, []).append(change_set)
+    def add_results(self, codemod_name: str, change_sets: List[ChangeSet]):
+        self._results_by_codemod.setdefault(codemod_name, []).extend(change_sets)
 
-    def add_failure(self, codemod_name, file_path):
-        self._failures_by_codemod.setdefault(codemod_name, []).append(file_path)
+    def add_failures(self, codemod_name: str, failed_files: List[Path]):
+        self._failures_by_codemod.setdefault(codemod_name, []).extend(failed_files)
 
     def add_dependencies(self, codemod_id: str, dependencies: set[Dependency]):
         self.dependencies.setdefault(codemod_id, set()).update(dependencies)
 
-    def get_results(self, codemod_name):
+    def get_results(self, codemod_name: str):
         return self._results_by_codemod.get(codemod_name, [])
 
     def get_changed_files(self):
@@ -71,7 +73,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
             for change_set in changes
         ]
 
-    def get_failures(self, codemod_name):
+    def get_failures(self, codemod_name: str):
         return self._failures_by_codemod.get(codemod_name, [])
 
     def get_failed_files(self):
@@ -96,7 +98,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
 
         dm.add(list(dependencies))
         if (changeset := dm.write(self.dry_run)) is not None:
-            self.add_result(codemod_id, changeset)
+            self.add_results(codemod_id, [changeset])
 
     def add_description(self, codemod: CodemodExecutorWrapper):
         description = codemod.description
@@ -104,6 +106,12 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
             description = f"{description}\n\n{DEPENDENCY_NOTIFICATION}"
 
         return description
+
+    def process_results(self, codemod_id: str, results: Iterator[FileContext]):
+        for file_context in results:
+            self.add_results(codemod_id, file_context.results)
+            self.add_failures(codemod_id, file_context.failures)
+            self.add_dependencies(codemod_id, file_context.dependencies)
 
     def compile_results(self, codemods: list[CodemodExecutorWrapper]):
         results = []

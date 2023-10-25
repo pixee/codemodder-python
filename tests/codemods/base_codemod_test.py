@@ -36,6 +36,7 @@ class BaseCodemodTest:
             repo_manager=mock.MagicMock(),
         )
         self.file_context = FileContext(
+            root,
             file_path,
             [],
             [],
@@ -44,7 +45,6 @@ class BaseCodemodTest:
         wrapper = cst.MetadataWrapper(input_tree)
         command_instance = self.codemod(
             CodemodContext(wrapper=wrapper),
-            self.execution_context,
             self.file_context,
         )
         output_tree = command_instance.transform_module(input_tree)
@@ -87,6 +87,7 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         all_results = self.results_by_id_filepath(input_code, file_path)
         results = all_results[str(file_path)]
         self.file_context = FileContext(
+            root,
             file_path,
             [],
             [],
@@ -95,7 +96,6 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         wrapper = cst.MetadataWrapper(input_tree)
         command_instance = self.codemod(
             CodemodContext(wrapper=wrapper),
-            self.execution_context,
             self.file_context,
         )
         output_tree = command_instance.transform_module(input_tree)

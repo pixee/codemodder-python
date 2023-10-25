@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import datetime
 import difflib
 import logging
@@ -29,18 +30,14 @@ def update_code(file_path, new_code):
 
 
 def apply_codemod_to_file(
-    execution_context: CodemodExecutionContext,
+    base_directory: Path,
     file_context,
     codemod_kls: CodemodExecutorWrapper,
     source_tree,
+    dry_run: bool = False,
 ):
-    name = codemod_kls.id
     wrapper = cst.MetadataWrapper(source_tree)
-    codemod = codemod_kls(
-        CodemodContext(wrapper=wrapper),
-        execution_context,
-        file_context,
-    )
+    codemod = codemod_kls(CodemodContext(wrapper=wrapper), file_context)
     if not codemod.should_transform:
         return False
 
@@ -57,16 +54,59 @@ def apply_codemod_to_file(
     )
 
     change_set = ChangeSet(
-        str(file_context.file_path.relative_to(execution_context.directory)),
+        str(file_context.file_path.relative_to(base_directory)),
         diff,
         changes=file_context.codemod_changes,
     )
-    execution_context.add_result(name, change_set)
+    file_context.add_result(change_set)
 
-    if not execution_context.dry_run:
+    if not dry_run:
         update_code(file_context.file_path, output_tree.code)
 
     return True
+
+
+def process_file(
+    idx: int,
+    file_path: Path,
+    base_directory: Path,
+    codemod,
+    sarif,
+    cli_args,
+):  # pylint: disable=too-many-arguments
+    logger.debug("scanning file %s", file_path)
+    if idx and idx % 100 == 0:
+        logger.info("scanned %s files...", idx)  # pragma: no cover
+
+    line_exclude = file_line_patterns(file_path, cli_args.path_exclude)
+    line_include = file_line_patterns(file_path, cli_args.path_include)
+    sarif_for_file = sarif.get(str(file_path)) or {}
+
+    file_context = FileContext(
+        base_directory,
+        file_path,
+        line_exclude,
+        line_include,
+        sarif_for_file,
+    )
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            source_tree = cst.parse_module(f.read())
+    except Exception:
+        file_context.add_failure(file_path)
+        logger.exception("error parsing file %s", file_path)
+        return file_context
+
+    apply_codemod_to_file(
+        base_directory,
+        file_context,
+        codemod,
+        source_tree,
+        cli_args.dry_run,
+    )
+
+    return file_context
 
 
 def analyze_files(
@@ -76,40 +116,24 @@ def analyze_files(
     sarif,
     cli_args,
 ):
-    # TODO: parallelize this loop
-    for idx, file_path in enumerate(files_to_analyze):
-        logger.debug("scanning file %s", file_path)
-        if idx and idx % 100 == 0:
-            logger.info("scanned %s files...", idx)  # pragma: no cover
-
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                source_tree = cst.parse_module(f.read())
-        except Exception:
-            execution_context.add_failure(codemod.id, file_path)
-            logger.exception("error parsing file %s", file_path)
-            continue
-
-        line_exclude = file_line_patterns(file_path, cli_args.path_exclude)
-        line_include = file_line_patterns(file_path, cli_args.path_include)
-        sarif_for_file = sarif.get(str(file_path)) or {}
-
-        # NOTE: file context will become more important if/when we parallelize this loop
-        file_context = FileContext(
-            file_path,
-            line_exclude,
-            line_include,
-            sarif_for_file,
+    with ThreadPoolExecutor(max_workers=cli_args.max_workers) as executor:
+        logger.debug(
+            "using executor with %s threads",
+            cli_args.max_workers,
         )
-
-        apply_codemod_to_file(
-            execution_context,
-            file_context,
-            codemod,
-            source_tree,
+        results = executor.map(
+            lambda args: process_file(
+                args[0],
+                args[1],
+                execution_context.directory,
+                codemod,
+                sarif,
+                cli_args,
+            ),
+            enumerate(files_to_analyze),
         )
-
-        execution_context.add_dependencies(codemod.id, file_context.dependencies)
+        executor.shutdown(wait=True)
+        execution_context.process_results(codemod.id, results)
 
 
 def run(original_args) -> int:

@@ -16,7 +16,6 @@ from codemodder.codemods.base_codemod import (
 
 from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.change import Change
-from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from .helpers import Helpers
 
@@ -84,13 +83,8 @@ class BaseCodemod(
     BaseTransformer,
     Helpers,
 ):
-    def __init__(
-        self,
-        codemod_context: CodemodContext,
-        execution_context: CodemodExecutionContext,
-        file_context: FileContext,
-    ):
-        _BaseCodemod.__init__(self, execution_context, file_context)
+    def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
+        _BaseCodemod.__init__(self, file_context)
         BaseTransformer.__init__(self, codemod_context, [])
 
     def report_change(self, original_node):
@@ -112,14 +106,9 @@ class SemgrepCodemod(
         super().__init_subclass__()
         cls.YAML_FILES = _create_temp_yaml_file(cls, cls.METADATA)
 
-    def __init__(
-        self,
-        codemod_context: CodemodContext,
-        execution_context: CodemodExecutionContext,
-        file_context: FileContext,
-    ):
-        BaseCodemod.__init__(self, codemod_context, execution_context, file_context)
-        _SemgrepCodemod.__init__(self, execution_context, file_context)
+    def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
+        BaseCodemod.__init__(self, codemod_context, file_context)
+        _SemgrepCodemod.__init__(self, file_context)
         BaseTransformer.__init__(self, codemod_context, self._results)
 
     def _new_or_updated_node(self, original_node, updated_node):
