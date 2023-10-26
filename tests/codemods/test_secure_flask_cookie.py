@@ -75,7 +75,11 @@ class TestSecureFlaskCookie(BaseSemgrepCodemodTest):
             ),
             (
                 "secure=True, httponly=True, samesite='Strict'",
-                "secure=True, httponly=True, samesite='Lax'",
+                "secure=True, httponly=True, samesite='Strict'",
+            ),
+            (
+                "secure=False, httponly=True, samesite='Strict'",
+                "secure=True, httponly=True, samesite='Strict'",
             ),
             (
                 "httponly=True, samesite='Lax', secure=True",

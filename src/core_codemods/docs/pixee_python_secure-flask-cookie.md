@@ -1,5 +1,5 @@
 This codemod sets the most secure parameters when Flask applications call `set_cookie` on a response object. Without these parameters, your Flask
-application cookies may be vulnerable to being intercepted and used against your system.
+application cookies may be vulnerable to being intercepted and used to gain access to sensitive data.
 
 The changes from this codemod look like this:
 
