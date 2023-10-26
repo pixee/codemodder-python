@@ -17,6 +17,7 @@ from .process_creation_sandbox import ProcessSandbox
 from .remove_unnecessary_f_str import RemoveUnnecessaryFStr
 from .remove_unused_imports import RemoveUnusedImports
 from .requests_verify import RequestsVerify
+from .secure_flask_cookie import SecureFlaskCookie
 from .secure_random import SecureRandom
 from .tempfile_mktemp import TempfileMktemp
 from .upgrade_sslcontext_minimum_version import UpgradeSSLContextMinimumVersion
@@ -47,6 +48,7 @@ registry = CodemodCollection(
         RemoveUnnecessaryFStr,
         RemoveUnusedImports,
         RequestsVerify,
+        SecureFlaskCookie,
         SecureRandom,
         TempfileMktemp,
         UpgradeSSLContextMinimumVersion,

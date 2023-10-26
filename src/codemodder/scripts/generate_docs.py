@@ -79,6 +79,10 @@ METADATA = {
         importance="High",
         guidance_explained="There may be times when setting `verify=False` is useful for testing though we discourage it. \nYou may also decide to set `verify=/path/to/ca/bundle`. This codemod will not attempt to modify the `verify` value if you do set it to a path.",
     ),
+    "secure-flask-cookie": DocMetadata(
+        importance="Medium",
+        guidance_explained="Our change provides the most secure way to create cookies in Flask. However, it's possible you have configured your Flask application configurations to use secure cookies. In these cases, using the default parameters for `set_cookie` is safe.",
+    ),
     "secure-random": DocMetadata(
         importance="High",
         guidance_explained="While most of the functions in the `random` module aren't cryptographically secure, there are still valid use cases for `random.random()` such as for simulations or games.",
