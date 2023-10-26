@@ -45,6 +45,9 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         BaseCodemod.__init__(self, *codemod_args)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        # Do nothing in __init__.py files
+        if self.file_context.file_path.name == "__init__.py":
+            return tree
         gather_unused_visitor = GatherUnusedImportsVisitor(self.context)
         tree.visit(gather_unused_visitor)
         # filter the gathered imports by line excludes/includes
