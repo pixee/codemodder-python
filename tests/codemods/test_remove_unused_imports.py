@@ -1,5 +1,6 @@
 from core_codemods.remove_unused_imports import RemoveUnusedImports
 from tests.codemods.base_codemod_test import BaseCodemodTest
+from textwrap import dedent
 
 
 class TestRemoveUnusedImports(BaseCodemodTest):
@@ -87,6 +88,17 @@ a.something
 
     def test_dont_remove_if_noqa_trailing(self, tmpdir):
         before = "import a\nimport b # noqa\na()"
+        self.run_and_assert(tmpdir, before, before)
+        assert len(self.file_context.codemod_changes) == 0
+
+    def test_dont_remove_if_noqa_trailing_multiline(self, tmpdir):
+        before = dedent(
+            """\
+        from _pytest.assertion.util import (  # noqa: F401
+            format_explanation as _format_explanation,
+        )"""
+        )
+
         self.run_and_assert(tmpdir, before, before)
         assert len(self.file_context.codemod_changes) == 0
 
