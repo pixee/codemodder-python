@@ -122,7 +122,8 @@ class SemgrepCodemod(BaseCodemod):
         Apply semgrep to gather rule results
         """
         del args, kwargs
-        return semgrep_run(context, yaml_files)
+        with context.timer.measure("semgrep"):
+            return semgrep_run(context, yaml_files)
 
     @property
     def should_transform(self):

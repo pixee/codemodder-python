@@ -4,6 +4,7 @@ from typing import Dict, List
 
 from codemodder.change import Change, ChangeSet
 from codemodder.dependency import Dependency
+from codemodder.utils.timer import Timer
 
 
 @dataclass
@@ -21,6 +22,7 @@ class FileContext:  # pylint: disable=too-many-instance-attributes
     codemod_changes: List[Change] = field(default_factory=list)
     results: List[ChangeSet] = field(default_factory=list)
     failures: List[Path] = field(default_factory=list)
+    timer: Timer = field(default_factory=Timer)
 
     def add_dependency(self, dependency: Dependency):
         self.dependencies.add(dependency)
