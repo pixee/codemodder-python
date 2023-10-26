@@ -37,7 +37,6 @@ class SecureFlaskCookie(SemgrepCodemod):
                     - pattern-inside: |
                         import flask
                         ...
-                  - pattern: open(...)
             pattern-sinks:
               - patterns:
                 - pattern: $SINK.set_cookie(...)
