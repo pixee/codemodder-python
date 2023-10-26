@@ -41,7 +41,9 @@ def apply_codemod_to_file(
     if not codemod.should_transform:
         return False
 
-    output_tree = codemod.transform_module(source_tree)
+    with file_context.timer.measure("transform"):
+        output_tree = codemod.transform_module(source_tree)
+
     # TODO: we can probably just use the presence of recorded changes instead of
     # comparing the trees to gain some efficiency
     if output_tree.deep_equals(source_tree):
@@ -61,7 +63,8 @@ def apply_codemod_to_file(
     file_context.add_result(change_set)
 
     if not dry_run:
-        update_code(file_context.file_path, output_tree.code)
+        with file_context.timer.measure("write"):
+            update_code(file_context.file_path, output_tree.code)
 
     return True
 
@@ -91,8 +94,9 @@ def process_file(
     )
 
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            source_tree = cst.parse_module(f.read())
+        with file_context.timer.measure("parse"):
+            with open(file_path, "r", encoding="utf-8") as f:
+                source_tree = cst.parse_module(f.read())
     except Exception:
         file_context.add_failure(file_path)
         logger.exception("error parsing file %s", file_path)
@@ -234,7 +238,11 @@ def run(original_args) -> int:
         len(set(all_changes)),
     )
     logger.info("report file: %s", argv.output)
-    logger.info("elapsed: %s ms", elapsed_ms)
+    logger.info("total elapsed: %s ms", elapsed_ms)
+    logger.info("semgrep:       %s ms", context.timer.get_time_ms("semgrep"))
+    logger.info("parse:         %s ms", context.timer.get_time_ms("parse"))
+    logger.info("transform:     %s ms", context.timer.get_time_ms("transform"))
+    logger.info("write:         %s ms", context.timer.get_time_ms("write"))
 
     return 0
 

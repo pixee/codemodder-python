@@ -12,6 +12,7 @@ from codemodder.file_context import FileContext
 from codemodder.logging import logger, log_list
 from codemodder.registry import CodemodRegistry
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
+from codemodder.utils.timer import Timer
 
 
 DEPENDENCY_NOTIFICATION = """```
@@ -36,6 +37,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     verbose: bool = False
     registry: CodemodRegistry
     repo_manager: PythonRepoManager
+    timer: Timer
 
     def __init__(
         self,
@@ -53,6 +55,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         self.dependencies = {}
         self.registry = registry
         self.repo_manager = repo_manager
+        self.timer = Timer()
 
     def add_results(self, codemod_name: str, change_sets: List[ChangeSet]):
         self._results_by_codemod.setdefault(codemod_name, []).extend(change_sets)
@@ -112,6 +115,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
             self.add_results(codemod_id, file_context.results)
             self.add_failures(codemod_id, file_context.failures)
             self.add_dependencies(codemod_id, file_context.dependencies)
+            self.timer.aggregate(file_context.timer)
 
     def compile_results(self, codemods: list[CodemodExecutorWrapper]):
         results = []
