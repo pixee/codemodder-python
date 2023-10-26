@@ -1,8 +1,9 @@
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import SemgrepCodemod
+from codemodder.codemods.utils_mixin import NameResolutionMixin
 
 
-class HardenPyyaml(SemgrepCodemod):
+class HardenPyyaml(SemgrepCodemod, NameResolutionMixin):
     NAME = "harden-pyyaml"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     SUMMARY = "Use SafeLoader in `yaml.load()` Calls"
@@ -44,6 +45,15 @@ class HardenPyyaml(SemgrepCodemod):
 
         """
 
-    def on_result_found(self, _, updated_node):
-        new_args = [*updated_node.args[:1], self.parse_expression("yaml.SafeLoader")]
+    def on_result_found(self, original_node, updated_node):
+        maybe_name = self.find_import_alias_in_nodes_scope_from_name(
+            "yaml", original_node
+        )
+        if not maybe_name:
+            self.add_needed_import("yaml")
+        maybe_name = maybe_name or "yaml"
+        new_args = [
+            *updated_node.args[:1],
+            self.parse_expression(f"{maybe_name}.SafeLoader"),
+        ]
         return self.update_arg_target(updated_node, new_args)

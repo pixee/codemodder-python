@@ -46,7 +46,6 @@ deserialized_data = yaml.load(data, yaml.SafeLoader)
 """
         self.run_and_assert(tmpdir, input_code, expected)
 
-    @pytest.mark.skip()
     def test_import_alias(self, tmpdir):
         input_code = """import yaml as yam
 from yaml import Loader
@@ -54,8 +53,10 @@ from yaml import Loader
 data = b'!!python/object/apply:subprocess.Popen \\n- ls'
 deserialized_data = yam.load(data, Loader=Loader)
 """
-        expected = """import yaml
+        expected = """import yaml as yam
+from yaml import Loader
+
 data = b'!!python/object/apply:subprocess.Popen \\n- ls'
-deserialized_data = yaml.load(data, yaml.SafeLoader)
+deserialized_data = yam.load(data, yam.SafeLoader)
 """
         self.run_and_assert(tmpdir, input_code, expected)

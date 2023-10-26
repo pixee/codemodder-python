@@ -2,12 +2,70 @@ from typing import Any, Optional, Tuple, Union
 import libcst as cst
 from libcst import MetadataDependent, matchers
 from libcst.helpers import get_full_name_for_node
-from libcst.metadata import Assignment, BaseAssignment, ImportAssignment, ScopeProvider
+from libcst.metadata import (
+    Assignment,
+    BaseAssignment,
+    ImportAssignment,
+    Scope,
+    ScopeProvider,
+)
 from libcst.metadata.scope_provider import GlobalScope
 
 
 class NameResolutionMixin(MetadataDependent):
     METADATA_DEPENDENCIES: Tuple[Any, ...] = (ScopeProvider,)
+
+    def _iterate_scope_ancestors(self, scope: Scope):
+        """
+        Iterate over all the ancestors of scope. Includes self.
+        """
+        yield scope
+        while not isinstance(scope, GlobalScope):
+            scope = scope.parent
+            yield scope
+
+    def find_import_alias_in_nodes_scope_from_name(self, name, node):
+        maybe_tuple = self.find_import_in_nodes_scope_from_name(name, node)
+        if maybe_tuple:
+            return self._get_assigned_name_for_import(maybe_tuple[1])
+        return None
+
+    def _get_assigned_name_for_import(self, alias: cst.ImportAlias) -> str:
+        # "" shouldn't happen in any way, sanity check
+        if alias.asname:
+            match name := alias.asname.name:
+                case cst.Name():
+                    return name.value
+                case _:
+                    return ""
+        return get_full_name_for_node(alias.name.value) or ""
+
+    def find_import_in_nodes_scope_from_name(
+        self, name: str, node: cst.CSTNode
+    ) -> Optional[Tuple[cst.ImportFrom | cst.Import, cst.ImportAlias]]:
+        """
+        Given a node, find the earliest import node and alias for the given name in its scope.
+        """
+        for scope in self._iterate_scope_ancestors(
+            self.get_metadata(ScopeProvider, node)
+        ):
+            all_import_assignments = filter(
+                lambda x: isinstance(x, ImportAssignment),
+                reversed(list(scope.assignments)),
+            )
+            unique_import_nodes = {ia.node: None for ia in all_import_assignments}
+            for imp in unique_import_nodes.keys():
+                match imp:
+                    case cst.Import():
+                        for ia in imp.names:
+                            if get_full_name_for_node(ia.name) == name:
+                                return (imp, ia)
+                    case cst.ImportFrom():
+                        if not isinstance(imp.names, cst.ImportStar):
+                            for ia in imp.names:
+                                if get_full_name_for_node(ia.name) == name:
+                                    return (imp, ia)
+        return None
 
     def find_base_name(self, node):
         """
