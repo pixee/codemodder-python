@@ -68,6 +68,16 @@ class UpgradeSSLContextTLS(SemgrepCodemod, BaseTransformer):
                 Change(line_number, self.CHANGE_DESCRIPTION)
             )
 
+            if not updated_node.args:
+                return updated_node.with_changes(
+                    args=[
+                        self.make_new_arg(
+                            self.PROTOCOL_KWARG_NAME,
+                            f"ssl.{self.SAFE_TLS_PROTOCOL_VERSION}",
+                        )
+                    ]
+                )
+
             return updated_node.with_changes(
                 args=[
                     self.update_arg(arg)
@@ -79,3 +89,19 @@ class UpgradeSSLContextTLS(SemgrepCodemod, BaseTransformer):
             )
 
         return updated_node
+
+    # dedupe with api
+    def make_new_arg(self, name, value, existing_arg=None):
+        equal = (
+            existing_arg.equal
+            if existing_arg
+            else cst.AssignEqual(
+                whitespace_before=cst.SimpleWhitespace(""),
+                whitespace_after=cst.SimpleWhitespace(""),
+            )
+        )
+        return cst.Arg(
+            keyword=cst.parse_expression(name),
+            value=cst.parse_expression(value),
+            equal=equal,
+        )
