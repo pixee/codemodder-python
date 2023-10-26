@@ -120,3 +120,15 @@ a.something
         tmp_file_path = Path(tmpdir / "__init__.py")
         self.run_and_assert_filepath(tmpdir, tmp_file_path, before, before)
         assert len(self.file_context.codemod_changes) == 0
+
+    def test_no_pyling_pragma_in_comment_trailing(self, tmpdir):
+        before = "import a # bogus: no-pragma"
+        after = ""
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.file_context.codemod_changes) == 1
+
+    def test_no_pyling_pragma_in_comment_before(self, tmpdir):
+        before = "#header\nprint('hello')\n# bogus: no-pragma\nimport a "
+        after = "#header\nprint('hello')"
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.file_context.codemod_changes) == 1
