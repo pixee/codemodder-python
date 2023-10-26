@@ -1,4 +1,4 @@
-from libcst import ensure_type, matchers
+from libcst import CSTVisitor, ensure_type, matchers
 from libcst.codemod.visitors import GatherUnusedImportsVisitor
 from libcst.metadata import (
     PositionProvider,
@@ -20,7 +20,7 @@ from libcst.codemod import Codemod, CodemodContext
 import re
 from pylint.utils.pragma_parser import parse_pragma
 
-NOQA_PATTERN = re.compile(r"^#\s*noqa")
+NOQA_PATTERN = re.compile(r"^#\s*noqa", re.IGNORECASE)
 
 
 class RemoveUnusedImports(BaseCodemod, Codemod):
@@ -78,18 +78,23 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         if parent and matchers.matches(parent, matchers.SimpleStatementLine()):
             stmt = ensure_type(parent, cst.SimpleStatementLine)
 
-            # has a trailing comment string
-            trailing_comment_string = (
-                stmt.trailing_whitespace.comment.value
-                if stmt.trailing_whitespace.comment
-                else None
-            )
-            if trailing_comment_string and NOQA_PATTERN.match(trailing_comment_string):
-                return True
-            if trailing_comment_string and _is_pylint_disable_unused_imports(
-                trailing_comment_string
-            ):
-                return True
+            # has a trailing comment string anywhere in the node
+            comments_visitor = GatherCommentNodes()
+            stmt.body[0].visit(comments_visitor)
+            # has a trailing comment string anywhere in the node
+            if stmt.trailing_whitespace.comment:
+                comments_visitor.comments.append(stmt.trailing_whitespace.comment)
+
+            for comment in comments_visitor.comments:
+                trailing_comment_string = comment.value
+                if trailing_comment_string and NOQA_PATTERN.match(
+                    trailing_comment_string
+                ):
+                    return True
+                if trailing_comment_string and _is_pylint_disable_unused_imports(
+                    trailing_comment_string
+                ):
+                    return True
 
             # has a comment right above it
             if matchers.matches(
@@ -111,25 +116,42 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         return False
 
 
+class GatherCommentNodes(CSTVisitor):
+    def __init__(self) -> None:
+        self.comments: list[cst.Comment] = []
+        super().__init__()
+
+    def leave_Comment(self, original_node: cst.Comment) -> None:
+        self.comments.append(original_node)
+
+
 def match_line(pos, line):
     return pos.start.line == line and pos.end.line == line
 
 
 def _is_pylint_disable_unused_imports(comment: str) -> bool:
-    parsed = parse_pragma(comment)
-    for p in parsed:
-        if p.action == "disable" and (
-            "unused-import" in p.messages or "W0611" in p.messages
-        ):
-            return True
+    # If pragma parse fails, ignore
+    try:
+        parsed = parse_pragma(comment)
+        for p in parsed:
+            if p.action == "disable" and (
+                "unused-import" in p.messages or "W0611" in p.messages
+            ):
+                return True
+    except Exception:
+        pass
     return False
 
 
 def _is_pylint_disable_next_unused_imports(comment: str) -> bool:
-    parsed = parse_pragma(comment)
-    for p in parsed:
-        if p.action == "disable-next" and (
-            "unused-import" in p.messages or "W0611" in p.messages
-        ):
-            return True
+    # If pragma parse fails, ignore
+    try:
+        parsed = parse_pragma(comment)
+        for p in parsed:
+            if p.action == "disable-next" and (
+                "unused-import" in p.messages or "W0611" in p.messages
+            ):
+                return True
+    except Exception:
+        pass
     return False
