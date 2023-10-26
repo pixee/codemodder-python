@@ -196,6 +196,13 @@ def run(original_args) -> int:
     for codemod in codemods_to_run:
         logger.info("running codemod %s", codemod.id)
         results = codemod.apply(context)
+        if codemod.is_semgrep and not results:
+            logger.debug(
+                "no results from semgrep for %s, skipping analysis",
+                codemod.id,
+            )
+            continue
+
         analyze_files(
             context,
             files_to_analyze,
