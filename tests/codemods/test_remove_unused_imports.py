@@ -1,3 +1,4 @@
+from pathlib import Path
 from core_codemods.remove_unused_imports import RemoveUnusedImports
 from tests.codemods.base_codemod_test import BaseCodemodTest
 from textwrap import dedent
@@ -112,4 +113,10 @@ a.something
             "import a\n#   pylint: disable-next=no-member, unused-import\nimport b\na()"
         )
         self.run_and_assert(tmpdir, before, before)
+        assert len(self.file_context.codemod_changes) == 0
+
+    def test_ignore_init_files(self, tmpdir):
+        before = "import a"
+        tmp_file_path = Path(tmpdir / "__init__.py")
+        self.run_and_assert_filepath(tmpdir, tmp_file_path, before, before)
         assert len(self.file_context.codemod_changes) == 0
