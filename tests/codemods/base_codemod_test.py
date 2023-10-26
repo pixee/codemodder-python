@@ -23,7 +23,7 @@ class BaseCodemodTest:
         self.file_context = None
 
     def run_and_assert(self, tmpdir, input_code, expected):
-        tmp_file_path = tmpdir / "code.py"
+        tmp_file_path = Path(tmpdir / "code.py")
         self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)
 
     def run_and_assert_filepath(self, root, file_path, input_code, expected):
