@@ -1,7 +1,6 @@
 from collections import defaultdict
 import json
-from pathlib import Path
-from typing import List, Union
+from typing import Union
 
 
 def extract_rule_id(result, sarif_run) -> Union[str, None]:
@@ -43,15 +42,3 @@ def results_by_path_and_rule_id(sarif_file):
                     rule_id_dict.setdefault(rule_id, []).append(r)
             path_and_ruleid_dict[path].update(rule_id_dict)
     return path_and_ruleid_dict
-
-
-def parse_sarif_files(sarifs: List[Path]) -> defaultdict[str, defaultdict[str, List]]:
-    """
-    Parse sarif files organize their results into a dict of dicts organized by path and id.
-    """
-    path_id_dict: defaultdict[str, defaultdict[str, List]] = defaultdict(
-        lambda: defaultdict(list)
-    )
-    for path in sarifs:
-        path_id_dict.update(results_by_path_and_rule_id(Path(path)))
-    return path_id_dict
