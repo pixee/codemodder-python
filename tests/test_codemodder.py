@@ -1,6 +1,6 @@
 import mock
 import pytest
-from codemodder.codemodder import run
+from codemodder.codemodder import run, find_semgrep_results
 from codemodder.semgrep import run as semgrep_run
 from codemodder.registry import load_registered_codemods
 
@@ -174,3 +174,18 @@ class TestExitCode:
         with pytest.raises(SystemExit) as err:
             run(args)
         assert err.value.args[0] == 3
+
+    def test_find_semgrep_results(self, mocker):
+        run_semgrep = mocker.patch("codemodder.codemodder.run_semgrep")
+        codemods = load_registered_codemods()
+        find_semgrep_results(mocker.MagicMock(), codemods.codemods)
+        assert run_semgrep.call_count == 1
+
+    def test_find_semgrep_results_no_yaml(self, mocker):
+        run_semgrep = mocker.patch("codemodder.codemodder.run_semgrep")
+        codemods = load_registered_codemods().match_codemods(
+            codemod_include=["use-defusedxml"]
+        )
+        result = find_semgrep_results(mocker.MagicMock(), codemods)
+        assert result == set()
+        assert run_semgrep.call_count == 0

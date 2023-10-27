@@ -36,9 +36,14 @@ def find_semgrep_results(
     codemods: list[CodemodExecutorWrapper],
 ) -> set[str]:
     """Run semgrep once with all configuration files from all codemods and return a set of applicable rule IDs"""
-    yaml_files = itertools.chain.from_iterable(
-        [codemod.yaml_files for codemod in codemods if codemod.yaml_files]
+    yaml_files = list(
+        itertools.chain.from_iterable(
+            [codemod.yaml_files for codemod in codemods if codemod.yaml_files]
+        )
     )
+    if not yaml_files:
+        return set()
+
     results = run_semgrep(context, yaml_files)
     return {rule_id for file_changes in results.values() for rule_id in file_changes}
 
