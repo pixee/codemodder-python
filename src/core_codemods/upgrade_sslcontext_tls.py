@@ -27,8 +27,6 @@ class UpgradeSSLContextTLS(SemgrepCodemod):
     # this. Eventually, when the platform supports parameters, we want to
     # revisit this to provide PROTOCOL_TLS_SERVER as an alternative fix.
     SAFE_TLS_PROTOCOL_VERSION = "ssl.PROTOCOL_TLS_CLIENT"
-    # PROTOCOL_ARG_INDEX = 0
-    # PROTOCOL_KWARG_NAME = "protocol"
 
     @classmethod
     def rule(cls):
