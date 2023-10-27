@@ -89,8 +89,9 @@ context = whatever.SSLContext(protocol=whatever.{protocol})
 var = "hello"
 """
         expected_output = """import ssl as whatever
+import ssl
 
-context = whatever.SSLContext(protocol=whatever.PROTOCOL_TLS_CLIENT)
+context = whatever.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
 var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expected_output)
@@ -113,4 +114,24 @@ ssl.SSLContext(ssl.PROTOCOL_SSLv2 if condition else ssl.PROTOCOL_TLS_CLIENT)
 
         expected_output = input_code
 
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_import_no_protocol(self, tmpdir):
+        input_code = """import ssl
+context = ssl.SSLContext()
+"""
+        expected_output = """import ssl
+context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
+"""
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_from_import_no_protocol(self, tmpdir):
+        input_code = """from ssl import SSLContext
+SSLContext()
+"""
+        expected_output = """from ssl import SSLContext
+import ssl
+
+SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
+"""
         self.run_and_assert(tmpdir, input_code, expected_output)

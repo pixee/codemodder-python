@@ -67,7 +67,7 @@ class Helpers:
         for arg in original_node.args:
             arg_name, replacement_val, idx = _match_with_existing_arg(arg, args_info)
             if arg_name is not None:
-                new = self.make_new_arg(arg_name, replacement_val, arg)
+                new = self.make_new_arg(replacement_val, arg_name, arg)
                 del args_info[idx]
             else:
                 new = arg
@@ -75,12 +75,19 @@ class Helpers:
 
         for arg_name, replacement_val, add_if_missing in args_info:
             if add_if_missing:
-                new = self.make_new_arg(arg_name, replacement_val)
+                new = self.make_new_arg(replacement_val, arg_name)
                 new_args.append(new)
 
         return new_args
 
-    def make_new_arg(self, name, value, existing_arg=None):
+    def make_new_arg(self, value, name=None, existing_arg=None):
+        if name is None:
+            # Make a positional argument
+            return cst.Arg(
+                value=cst.parse_expression(value),
+            )
+
+        # make a keyword argument
         equal = (
             existing_arg.equal
             if existing_arg
