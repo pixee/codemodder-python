@@ -31,7 +31,7 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements/lint.txt
       - name: Black Format Check
-        run: black --check . --exclude samples/
+        run: black --check .
       - name: Run pylint
         run: make lint
 

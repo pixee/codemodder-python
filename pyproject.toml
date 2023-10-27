@@ -40,3 +40,11 @@ version_file = "src/codemodder/_version.py"
 [tool.pytest.ini_options]
 # Ignore integration tests and ci tests by default
 testpaths = ["tests"]
+
+[tool.black]
+extend-exclude = '''
+/(
+  tests/samples |
+  src/codemodder/_version.py
+)/
+'''
