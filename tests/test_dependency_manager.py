@@ -36,7 +36,7 @@ class TestDependencyManager:
         )
 
         assert changeset is not None
-        assert changeset.path == str(dependency_file)
+        assert changeset.path == dependency_file.name
         assert changeset.diff == (
             "--- \n"
             "+++ \n"
