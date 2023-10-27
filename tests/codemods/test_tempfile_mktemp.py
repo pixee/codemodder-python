@@ -1,4 +1,4 @@
-import pytest
+import pytest  # pylint: disable=unused-import
 from core_codemods.tempfile_mktemp import TempfileMktemp
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
@@ -50,7 +50,6 @@ var = "hello"
 """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
-    @pytest.mark.skip()
     def test_import_alias(self, tmpdir):
         input_code = """import tempfile as _tempfile
 
