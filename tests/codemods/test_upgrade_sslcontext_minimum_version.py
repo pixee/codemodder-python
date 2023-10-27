@@ -13,7 +13,7 @@ INSECURE_VERSIONS = [
 ]
 
 
-class TestUpgradeSSLContextMininumVersion(BaseSemgrepCodemodTest):
+class TestUpgradeSSLContextMinimumVersion(BaseSemgrepCodemodTest):
     codemod = UpgradeSSLContextMinimumVersion
 
     @pytest.mark.parametrize("version", INSECURE_VERSIONS)
@@ -64,10 +64,9 @@ context = whatever.SSLContext()
 context.minimum_version = whatever.TLSVersion.SSLv3
 """
         expected_output = """import ssl as whatever
-import ssl
 
 context = whatever.SSLContext()
-context.minimum_version = ssl.TLSVersion.TLSv1_2
+context.minimum_version = whatever.TLSVersion.TLSv1_2
 """
         self.run_and_assert(tmpdir, input_code, expected_output)
 

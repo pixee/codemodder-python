@@ -6,7 +6,6 @@ from libcst.metadata import (
     Assignment,
     BaseAssignment,
     ImportAssignment,
-    Scope,
     ScopeProvider,
 )
 from libcst.metadata.scope_provider import GlobalScope
@@ -14,58 +13,6 @@ from libcst.metadata.scope_provider import GlobalScope
 
 class NameResolutionMixin(MetadataDependent):
     METADATA_DEPENDENCIES: Tuple[Any, ...] = (ScopeProvider,)
-
-    def _iterate_scope_ancestors(self, scope: Scope):
-        """
-        Iterate over all the ancestors of scope. Includes self.
-        """
-        yield scope
-        while not isinstance(scope, GlobalScope):
-            scope = scope.parent
-            yield scope
-
-    def find_import_alias_in_nodes_scope_from_name(self, name, node):
-        maybe_tuple = self.find_import_in_nodes_scope_from_name(name, node)
-        if maybe_tuple:
-            return self._get_assigned_name_for_import(maybe_tuple[1])
-        return None
-
-    def _get_assigned_name_for_import(self, alias: cst.ImportAlias) -> str:
-        # "" shouldn't happen in any way, sanity check
-        if alias.asname:
-            match name := alias.asname.name:
-                case cst.Name():
-                    return name.value
-                case _:
-                    return ""
-        return get_full_name_for_node(alias.name.value) or ""
-
-    def find_import_in_nodes_scope_from_name(
-        self, name: str, node: cst.CSTNode
-    ) -> Optional[Tuple[cst.ImportFrom | cst.Import, cst.ImportAlias]]:
-        """
-        Given a node, find the earliest import node and alias for the given name in its scope.
-        """
-        for scope in self._iterate_scope_ancestors(
-            self.get_metadata(ScopeProvider, node)
-        ):
-            all_import_assignments = filter(
-                lambda x: isinstance(x, ImportAssignment),
-                reversed(list(scope.assignments)),
-            )
-            unique_import_nodes = {ia.node: None for ia in all_import_assignments}
-            for imp in unique_import_nodes.keys():
-                match imp:
-                    case cst.Import():
-                        for ia in imp.names:
-                            if get_full_name_for_node(ia.name) == name:
-                                return (imp, ia)
-                    case cst.ImportFrom():
-                        if not isinstance(imp.names, cst.ImportStar):
-                            for ia in imp.names:
-                                if get_full_name_for_node(ia.name) == name:
-                                    return (imp, ia)
-        return None
 
     def find_base_name(self, node):
         """
@@ -115,6 +62,44 @@ class NameResolutionMixin(MetadataDependent):
                         ):
                             return (import_node, alias)
         return None
+
+    def get_imported_prefix(
+        self, node
+    ) -> Optional[tuple[Union[cst.Import, cst.ImportFrom], cst.ImportAlias]]:
+        """
+        Given a node representing an access, finds if any part of its prefix is imported.
+        Returns a import and import alias pair.
+        """
+        for nodo in iterate_left_expressions(node):
+            match nodo:
+                case cst.Name() | cst.Attribute():
+                    maybe_assignment = self.find_single_assignment(nodo)
+                    if maybe_assignment and isinstance(
+                        maybe_assignment, ImportAssignment
+                    ):
+                        import_node = maybe_assignment.node
+                        for alias in import_node.names:
+                            if maybe_assignment.name in (
+                                alias.evaluated_alias,
+                                alias.evaluated_name,
+                            ):
+                                return (import_node, alias)
+        return None
+
+    def get_aliased_prefix_name(self, node: cst.CSTNode, name: str):
+        """
+        Returns the alias of name if name is imported and used as a prefix for this node.
+        """
+        maybe_import = self.get_imported_prefix(node)
+        maybe_name = None
+        if maybe_import:
+            imp, ia = maybe_import
+            match imp:
+                case cst.Import():
+                    imp_name = get_full_name_for_node(ia.name)
+                    if imp_name == name and ia.asname:
+                        maybe_name = ia.asname.name.value
+        return maybe_name
 
     def find_assignments(
         self,
@@ -168,10 +153,13 @@ class NameResolutionMixin(MetadataDependent):
 
 def iterate_left_expressions(node: cst.BaseExpression):
     yield node
-    if matchers.matches(node, matchers.Attribute()):
-        yield from iterate_left_expressions(node.value)
-    if matchers.matches(node, matchers.Call()):
-        yield from iterate_left_expressions(node.func)
+    match node:
+        case cst.Attribute():
+            yield from iterate_left_expressions(node.value)
+        case cst.Call():
+            yield from iterate_left_expressions(node.func)
+        case cst.Subscript():
+            yield from iterate_left_expressions(node.value)
 
 
 def get_leftmost_expression(node: cst.BaseExpression) -> cst.BaseExpression:

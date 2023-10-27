@@ -15,6 +15,8 @@ class HardenPyyaml(SemgrepCodemod, NameResolutionMixin):
         }
     ]
 
+    _module_name = "yaml"
+
     @classmethod
     def rule(cls):
         return """
@@ -46,12 +48,10 @@ class HardenPyyaml(SemgrepCodemod, NameResolutionMixin):
         """
 
     def on_result_found(self, original_node, updated_node):
-        maybe_name = self.find_import_alias_in_nodes_scope_from_name(
-            "yaml", original_node
-        )
-        if not maybe_name:
-            self.add_needed_import("yaml")
-        maybe_name = maybe_name or "yaml"
+        maybe_name = self.get_aliased_prefix_name(original_node, self._module_name)
+        maybe_name = maybe_name or self._module_name
+        if maybe_name and maybe_name == self._module_name:
+            self.add_needed_import(self._module_name)
         new_args = [
             *updated_node.args[:1],
             self.parse_expression(f"{maybe_name}.SafeLoader"),
