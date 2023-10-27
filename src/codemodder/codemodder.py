@@ -11,7 +11,7 @@ import libcst as cst
 from libcst.codemod import CodemodContext
 from codemodder.file_context import FileContext
 
-from codemodder import registry, __VERSION__
+from codemodder import registry, __version__
 from codemodder.logging import configure_logger, logger, log_section, log_list
 from codemodder.cli import parse_args
 from codemodder.change import ChangeSet
@@ -176,7 +176,7 @@ def run(original_args) -> int:
     configure_logger(argv.verbose, argv.log_format, argv.project_name)
 
     log_section("startup")
-    logger.info("codemodder: python/%s", __VERSION__)
+    logger.info("codemodder: python/%s", __version__)
 
     repo_manager = PythonRepoManager(Path(argv.directory))
     context = CodemodExecutionContext(

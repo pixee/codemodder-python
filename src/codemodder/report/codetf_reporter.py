@@ -1,6 +1,6 @@
 import json
 from os.path import abspath
-from codemodder import __VERSION__
+from codemodder import __version__
 from codemodder.logging import logger
 
 
@@ -9,7 +9,7 @@ def base_report():
         "run": {
             "vendor": "pixee",
             "tool": "codemodder-python",
-            "version": __VERSION__,
+            "version": __version__,
             "sarifs": [],
         },
         "results": [],

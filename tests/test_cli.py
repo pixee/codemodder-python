@@ -2,7 +2,7 @@ import mock
 import pytest
 
 from codemodder.cli import parse_args
-from codemodder import __VERSION__
+from codemodder import __version__
 from codemodder.registry import load_registered_codemods
 
 
@@ -61,7 +61,7 @@ class TestParseArgs:
         with pytest.raises(SystemExit) as err:
             parse_args(cli_args, self.registry)
 
-        assert mock_print_msg.call_args_list[0][0][0].strip() == __VERSION__
+        assert mock_print_msg.call_args_list[0][0][0].strip() == __version__
         assert err.value.args[0] == 0
 
     @pytest.mark.parametrize(

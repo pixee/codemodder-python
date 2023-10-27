@@ -5,7 +5,7 @@ import os
 import pathlib
 import subprocess
 
-from codemodder import __VERSION__
+from codemodder import __version__
 from codemodder import registry
 from tests.validations import execute_code
 
@@ -70,7 +70,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     def _assert_run_fields(self, run, output_path):
         assert run["vendor"] == "pixee"
         assert run["tool"] == "codemodder-python"
-        assert run["version"] == __VERSION__
+        assert run["version"] == __version__
         assert run["elapsed"] != ""
         assert (
             run["commandLine"]

@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from codemodder import __VERSION__
+from codemodder import __version__
 from codemodder.code_directory import DEFAULT_INCLUDED_PATHS, DEFAULT_EXCLUDED_PATHS
 from codemodder.logging import OutputFormat, logger
 
@@ -111,7 +111,7 @@ def parse_args(argv, codemod_registry):
         help="Comma-separated set of codemod ID(s) to include",
     )
 
-    parser.add_argument("--version", action="version", version=__VERSION__)
+    parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument(
         "--list",
         action=build_list_action(codemod_registry),
