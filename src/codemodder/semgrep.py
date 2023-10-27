@@ -1,14 +1,14 @@
 import subprocess
 import itertools
 from tempfile import NamedTemporaryFile
-from typing import List
+from typing import Iterable
 from pathlib import Path
 from codemodder.context import CodemodExecutionContext
 from codemodder.sarifs import results_by_path_and_rule_id
 from codemodder.logging import logger
 
 
-def run(execution_context: CodemodExecutionContext, yaml_files: List[Path]) -> dict:
+def run(execution_context: CodemodExecutionContext, yaml_files: Iterable[Path]) -> dict:
     """
     Runs Semgrep and outputs a dict with the results organized by rule_id.
     """

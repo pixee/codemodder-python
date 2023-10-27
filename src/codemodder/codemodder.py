@@ -1,6 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 import datetime
 import difflib
+import itertools
 import logging
 import os
 import sys
@@ -19,6 +20,7 @@ from codemodder.context import CodemodExecutionContext
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default
+from codemodder.semgrep import run as run_semgrep
 
 
 def update_code(file_path, new_code):
@@ -27,6 +29,18 @@ def update_code(file_path, new_code):
     """
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(new_code)
+
+
+def find_semgrep_results(
+    context: CodemodExecutionContext,
+    codemods: list[CodemodExecutorWrapper],
+) -> set[str]:
+    """Run semgrep once with all configuration files from all codemods and return a set of applicable rule IDs"""
+    yaml_files = itertools.chain.from_iterable(
+        [codemod.yaml_files for codemod in codemods if codemod.yaml_files]
+    )
+    results = run_semgrep(context, yaml_files)
+    return {rule_id for file_changes in results.values() for rule_id in file_changes}
 
 
 def apply_codemod_to_file(
@@ -184,7 +198,7 @@ def run(original_args) -> int:
     log_list(logging.INFO, "including paths", argv.path_include)
     log_list(logging.INFO, "excluding paths", argv.path_exclude)
 
-    files_to_analyze = match_files(
+    files_to_analyze: list[Path] = match_files(
         context.directory, argv.path_exclude, argv.path_include
     )
     if not files_to_analyze:
@@ -195,18 +209,22 @@ def run(original_args) -> int:
     logger.debug("matched files:")
     log_list(logging.DEBUG, "matched files", full_names)
 
+    semgrep_results: set[str] = find_semgrep_results(context, codemods_to_run)
+
     log_section("scanning")
     # run codemods one at a time making sure to respect the given sequence
     for codemod in codemods_to_run:
-        logger.info("running codemod %s", codemod.id)
-        results = codemod.apply(context)
-        if codemod.is_semgrep and not results:
+        # Unfortunately the IDs from semgrep are not fully specified
+        # TODO: eventually we need to be able to use fully specified IDs here
+        if codemod.is_semgrep and codemod.name not in semgrep_results:
             logger.debug(
                 "no results from semgrep for %s, skipping analysis",
                 codemod.id,
             )
             continue
 
+        logger.info("running codemod %s", codemod.id)
+        results = codemod.apply(context)
         analyze_files(
             context,
             files_to_analyze,
