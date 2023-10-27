@@ -60,7 +60,11 @@ class DependencyManager:
                 f.writelines([f"{line}\n" for line in self.new_requirements])
 
         self.dependency_file_changed = True
-        return ChangeSet(str(self.dependency_file), diff, changes=changes)
+        return ChangeSet(
+            str(self.dependency_file.relative_to(self.parent_directory)),
+            diff,
+            changes=changes,
+        )
 
     @property
     def found_dependency_file(self) -> bool:
