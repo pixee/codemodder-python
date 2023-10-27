@@ -2,6 +2,7 @@
 source = codemodder
 omit =
     */codemodder/scripts/*
+    */codemodder/_version.py
 
 [paths]
 codemodder =

@@ -1,2 +1,4 @@
-# TODO: use tag-based versioning
-__VERSION__ = "0.57.0"
+try:
+    from ._version import __version__
+except ImportError:  # pragma: no cover
+    __version__ = "unknown"
