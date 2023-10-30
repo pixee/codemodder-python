@@ -33,6 +33,26 @@ class TestUseDefusedXml(BaseCodemodTest):
         self.assert_dependency(DefusedXML)
 
     @pytest.mark.parametrize("method", ETREE_METHODS)
+    def test_etree_module_alias(self, tmpdir, method):
+        original_code = f"""
+            import xml.etree.ElementTree as alias
+            import xml.etree.cElementTree as calias
+
+            et = alias.{method}('some.xml')
+            cet = calias.{method}('some.xml')
+        """
+
+        new_code = f"""
+            import defusedxml.ElementTree
+
+            et = defusedxml.ElementTree.{method}('some.xml')
+            cet = defusedxml.ElementTree.{method}('some.xml')
+        """
+
+        self.run_and_assert(tmpdir, original_code, new_code)
+        self.assert_dependency(DefusedXML)
+
+    @pytest.mark.parametrize("method", ETREE_METHODS)
     @pytest.mark.parametrize("module", ["ElementTree", "cElementTree"])
     def test_etree_attribute_call(self, tmpdir, module, method):
         original_code = f"""

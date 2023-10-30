@@ -51,14 +51,13 @@ serializer = ruamel.yaml.YAML(typ="safe")
 """
         self.run_and_assert(tmpdir, input_code, expected)
 
-    @pytest.mark.skip()
     @pytest.mark.parametrize("loader", ["YAML(typ='base')", "YAML(typ='unsafe')"])
     def test_import_alias(self, tmpdir, loader):
         input_code = f"""from ruamel import yaml as yam
 serializer = yam.{loader}
 """
 
-        expected = """import ruamel
+        expected = """from ruamel import yaml as yam
 serializer = yam.YAML(typ="safe")
 """
 
