@@ -25,6 +25,18 @@ urllib3.HTTPSConnectionPool("localhost", "80")
         self.run_and_assert(tmpdir, before, after)
         assert len(self.file_context.codemod_changes) == 1
 
+    def test_module_alias(self, tmpdir):
+        before = r"""import urllib3 as module
+
+module.HTTPConnectionPool("localhost", "80")
+"""
+        after = r"""import urllib3 as module
+
+module.HTTPSConnectionPool("localhost", "80")
+"""
+        self.run_and_assert(tmpdir, before, after)
+        assert len(self.file_context.codemod_changes) == 1
+
     def test_alias(self, tmpdir):
         before = r"""from urllib3 import HTTPConnectionPool as something
 

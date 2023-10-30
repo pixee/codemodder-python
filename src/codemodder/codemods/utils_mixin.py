@@ -86,19 +86,18 @@ class NameResolutionMixin(MetadataDependent):
                                 return (import_node, alias)
         return None
 
-    def get_aliased_prefix_name(self, node: cst.CSTNode, name: str):
+    def get_aliased_prefix_name(self, node: cst.CSTNode, name: str) -> Optional[str]:
         """
         Returns the alias of name if name is imported and used as a prefix for this node.
         """
         maybe_import = self.get_imported_prefix(node)
         maybe_name = None
-        if maybe_import:
-            imp, ia = maybe_import
-            match imp:
-                case cst.Import():
-                    imp_name = get_full_name_for_node(ia.name)
-                    if imp_name == name and ia.asname:
-                        maybe_name = ia.asname.name.value
+        if maybe_import and matchers.matches(maybe_import[0], matchers.Import()):
+            _, ia = maybe_import
+            imp_name = get_full_name_for_node(ia.name)
+            if imp_name == name and ia.asname:
+                # AsName is always a Name for ImportAlias
+                maybe_name = ia.asname.name.value
         return maybe_name
 
     def find_assignments(
