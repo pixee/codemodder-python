@@ -57,6 +57,9 @@ class DependencyManager:
         if not dry_run:
             with open(self.dependency_file, "w", encoding="utf-8") as f:
                 f.writelines(self._lines)
+                if not self._lines[-1].endswith("\n"):
+                    f.write("\n")
+
                 f.writelines([f"{line}\n" for line in self.new_requirements])
 
         self.dependency_file_changed = True
