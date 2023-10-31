@@ -89,3 +89,15 @@ class TestDependencyManager:
         assert dependency_file.read_text(encoding="utf-8") == (
             f"requests\nsecurity~={version}\n"
         )
+
+    def test_dependency_file_no_terminating_newline(self, tmpdir):
+        dependency_file = Path(tmpdir) / "requirements.txt"
+        dependency_file.write_text("requests\nwhatever", encoding="utf-8")
+
+        dm = DependencyManager(Path(tmpdir))
+        dm.add([Security])
+        dm.write()
+
+        assert dependency_file.read_text(encoding="utf-8") == (
+            "requests\nwhatever\nsecurity~=1.2.0\n"
+        )
