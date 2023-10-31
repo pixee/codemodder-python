@@ -44,7 +44,7 @@ class DjangoSessionCookieSecureOff(SemgrepCodemod, Codemod):
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         if is_django_settings_file(self.file_context.file_path):
             transformer = SessionCookieSecureTransformer(
-                self.context, self.file_context, self._results
+                self.context, self.file_context, self.file_context.findings
             )
             new_tree = transformer.transform_module(tree)
             if transformer.changes_in_file:

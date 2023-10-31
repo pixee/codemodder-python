@@ -45,7 +45,7 @@ class DjangoDebugFlagOn(SemgrepCodemod, Codemod):
         # checks if the file we looking is a settings.py file from django's default directory structure
         if is_django_settings_file(self.file_context.file_path):
             debug_flag_transformer = DebugFlagTransformer(
-                self.context, self.file_context, self._results
+                self.context, self.file_context, self.file_context.findings
             )
             new_tree = debug_flag_transformer.transform_module(tree)
             if debug_flag_transformer.changes_in_file:

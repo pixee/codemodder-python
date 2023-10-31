@@ -1,5 +1,5 @@
 from codemodder.sarifs import extract_rule_id
-from codemodder.sarifs import results_by_path_and_rule_id
+from codemodder.sarifs import SarifResultSet
 from pathlib import Path
 import subprocess
 import json
@@ -28,16 +28,15 @@ class TestSarifProcessing:
         rule_id = extract_rule_id(result, sarif_run)
         assert rule_id == "secure-random"
 
-    def test_results_by_path_and_rule_id(self):
+    def test_results_by_rule_id(self):
         sarif_file = Path("tests") / "samples" / "semgrep.sarif"
 
-        results = results_by_path_and_rule_id(sarif_file)
-        expected_path = "tests/samples/insecure_random.py"
-        assert list(results.keys()) == [expected_path]
-
+        results = SarifResultSet.from_sarif(sarif_file)
         expected_rule = "secure-random"
-        rule_in_path = next(iter(results[expected_path].keys()))
-        assert expected_rule == rule_in_path
+        assert list(results.keys()) == [expected_rule]
+
+        expected_path = Path("tests/samples/insecure_random.py")
+        assert expected_path == results[expected_rule][0].locations[0].file
 
     def test_codeql_sarif_input(self, tmpdir):
         completed_process = subprocess.run(

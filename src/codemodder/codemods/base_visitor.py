@@ -2,17 +2,21 @@ from typing import Any, Tuple
 from libcst.codemod import ContextAwareVisitor, VisitorBasedCodemodCommand
 from libcst.metadata import PositionProvider
 
+from codemodder.result import Result
+
 
 class UtilsMixin:
-    METADATA_DEPENDENCIES: Tuple[Any, ...] = (PositionProvider,)
+    results: list[Result]
 
-    def __init__(self, context, results):
-        super().__init__(context)
+    def __init__(self, results: list[Result]):
         self.results = results
 
     def filter_by_result(self, pos_to_match):
-        all_pos = [extract_pos_from_result(result) for result in self.results]
-        return any(match_pos(pos_to_match, position) for position in all_pos)
+        return any(
+            location.match(pos_to_match)
+            for result in self.results
+            for location in result.locations
+        )
 
     def filter_by_path_includes_or_excludes(self, pos_to_match):
         """
@@ -28,6 +32,7 @@ class UtilsMixin:
     def node_is_selected(self, node) -> bool:
         if not self.results:
             return False
+
         pos_to_match = self.node_position(node)
         return self.filter_by_result(
             pos_to_match
@@ -41,34 +46,21 @@ class UtilsMixin:
         return self.node_position(node).start.line
 
 
-class BaseTransformer(UtilsMixin, VisitorBasedCodemodCommand):
-    ...
+class BaseTransformer(VisitorBasedCodemodCommand, UtilsMixin):
+    METADATA_DEPENDENCIES: Tuple[Any, ...] = (PositionProvider,)
+
+    def __init__(self, context, results: list[Result]):
+        super().__init__(context)
+        UtilsMixin.__init__(self, results)
 
 
-class BaseVisitor(UtilsMixin, ContextAwareVisitor):
-    ...
+class BaseVisitor(ContextAwareVisitor, UtilsMixin):
+    METADATA_DEPENDENCIES: Tuple[Any, ...] = (PositionProvider,)
+
+    def __init__(self, context, results: list[Result]):
+        super().__init__(context)
+        UtilsMixin.__init__(self, results)
 
 
 def match_line(pos, line):
     return pos.start.line == line and pos.end.line == line
-
-
-def extract_pos_from_result(result):
-    region = result["locations"][0]["physicalLocation"]["region"]
-    # TODO it may be the case some of these attributes do not exist
-    return (
-        region.get("startLine"),
-        region["startColumn"],
-        region.get("endLine") or region.get("startLine"),
-        region["endColumn"],
-    )
-
-
-def match_pos(pos, x):
-    # needs some leeway because the semgrep and libcst won't exactly match
-    return (
-        pos.start.line == x[0]
-        and (pos.start.column in (x[1] - 1, x[1]))
-        and pos.end.line == x[2]
-        and (pos.end.column in (x[3] - 1, x[3]))
-    )

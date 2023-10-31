@@ -66,7 +66,9 @@ class UrlSandbox(SemgrepCodemod, Codemod):
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         # we first gather all the nodes we want to change together with their replacements
         find_requests_visitor = FindRequestCallsAndImports(
-            self.context, self.file_context, self._results
+            self.context,
+            self.file_context,
+            self.file_context.findings,
         )
         tree.visit(find_requests_visitor)
         if find_requests_visitor.nodes_to_change:

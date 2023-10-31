@@ -67,7 +67,7 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
             cst.CSTNode, cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel
         ] = {}
         BaseCodemod.__init__(self, file_context, *codemod_args)
-        UtilsMixin.__init__(self, context, {})
+        UtilsMixin.__init__(self, [])
         Codemod.__init__(self, context)
 
     def _build_param_element(self, middle, index: int) -> cst.BaseExpression:

@@ -7,6 +7,7 @@ from libcst._position import CodeRange
 from codemodder.change import Change
 from codemodder.dependency import Dependency
 from codemodder.file_context import FileContext
+from codemodder.result import ResultSet
 from codemodder.semgrep import run as semgrep_run
 
 
@@ -51,14 +52,14 @@ class BaseCodemod:
         self.file_context = file_context
 
     @classmethod
-    def apply_rule(cls, context, *args, **kwargs):
+    def apply_rule(cls, context, *args, **kwargs) -> ResultSet:
         """
         Apply rule associated with this codemod and gather results
 
         Does nothing by default. Subclasses may override for custom rule logic.
         """
         del context, args, kwargs
-        return {}
+        return ResultSet()
 
     @classmethod
     def name(cls):
@@ -105,28 +106,16 @@ class SemgrepCodemod(BaseCodemod):
     YAML_FILES: ClassVar[List[str]] = NotImplemented
     is_semgrep = True
 
-    def __init__(self, *args):
-        super().__init__(*args)
-        self._results = (
-            self.file_context.results_by_id.get(
-                self.METADATA.NAME  # pylint: disable=no-member
-            )
-            or []
-        )
-
     @classmethod
-    def apply_rule(
-        cls, context, yaml_files, *args, **kwargs
-    ):  # pylint: disable=arguments-differ
+    def apply_rule(cls, context, *args, **kwargs) -> ResultSet:
         """
         Apply semgrep to gather rule results
         """
-        del args, kwargs
+        yaml_files = kwargs.get("yaml_files") or args[0]
         with context.timer.measure("semgrep"):
             return semgrep_run(context, yaml_files)
 
     @property
     def should_transform(self):
-        """Semgrep codemods should attempt transform only if there are
-        semgrep results"""
-        return bool(self._results)
+        """Semgrep codemods should attempt transform only if there are semgrep results"""
+        return bool(self.file_context.findings)

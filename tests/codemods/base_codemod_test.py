@@ -1,5 +1,4 @@
 # pylint: disable=no-member,not-callable,attribute-defined-outside-init
-from collections import defaultdict
 import os
 from pathlib import Path
 from textwrap import dedent
@@ -40,7 +39,7 @@ class BaseCodemodTest:
             file_path,
             [],
             [],
-            defaultdict(list),
+            [],
         )
         wrapper = cst.MetadataWrapper(input_tree)
         command_instance = self.codemod(
@@ -85,7 +84,12 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         )
         input_tree = cst.parse_module(input_code)
         all_results = self.results_by_id_filepath(input_code, file_path)
-        results = all_results[str(file_path)]
+        results = [
+            result
+            for entry in all_results.values()
+            for result in entry
+            if result.rule_id == self.codemod.name()
+        ]
         self.file_context = FileContext(
             root,
             file_path,
