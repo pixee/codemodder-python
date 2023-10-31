@@ -4,11 +4,14 @@ from tempfile import NamedTemporaryFile
 from typing import Iterable
 from pathlib import Path
 from codemodder.context import CodemodExecutionContext
-from codemodder.sarifs import results_by_path_and_rule_id
+from codemodder.sarifs import SarifResultSet
 from codemodder.logging import logger
 
 
-def run(execution_context: CodemodExecutionContext, yaml_files: Iterable[Path]) -> dict:
+def run(
+    execution_context: CodemodExecutionContext,
+    yaml_files: Iterable[Path],
+) -> SarifResultSet:
     """
     Runs Semgrep and outputs a dict with the results organized by rule_id.
     """
@@ -40,5 +43,5 @@ def run(execution_context: CodemodExecutionContext, yaml_files: Iterable[Path]) 
             stdout=None if execution_context.verbose else subprocess.PIPE,
             stderr=None if execution_context.verbose else subprocess.PIPE,
         )
-        results = results_by_path_and_rule_id(temp_sarif_file.name)
+        results = SarifResultSet.from_sarif(temp_sarif_file.name)
         return results

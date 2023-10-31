@@ -109,7 +109,7 @@ class SemgrepCodemod(
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         BaseCodemod.__init__(self, codemod_context, file_context)
         _SemgrepCodemod.__init__(self, file_context)
-        BaseTransformer.__init__(self, codemod_context, self._results)
+        BaseTransformer.__init__(self, codemod_context, file_context.findings)
 
     def _new_or_updated_node(self, original_node, updated_node):
         if self.node_is_selected(original_node):

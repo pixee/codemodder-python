@@ -20,6 +20,7 @@ from codemodder.context import CodemodExecutionContext
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default
+from codemodder.result import ResultSet
 from codemodder.semgrep import run as run_semgrep
 
 
@@ -45,7 +46,7 @@ def find_semgrep_results(
         return set()
 
     results = run_semgrep(context, yaml_files)
-    return {rule_id for file_changes in results.values() for rule_id in file_changes}
+    return set(results.keys())
 
 
 def create_diff(original_tree: cst.Module, new_tree: cst.Module) -> str:
@@ -103,7 +104,7 @@ def process_file(
     file_path: Path,
     base_directory: Path,
     codemod,
-    sarif,
+    results: ResultSet,
     cli_args,
 ):  # pylint: disable=too-many-arguments
     logger.debug("scanning file %s", file_path)
@@ -112,14 +113,17 @@ def process_file(
 
     line_exclude = file_line_patterns(file_path, cli_args.path_exclude)
     line_include = file_line_patterns(file_path, cli_args.path_include)
-    sarif_for_file = sarif.get(str(file_path)) or {}
+    findings_for_rule = results.results_for_rule_and_file(
+        codemod.name,  # TODO: should be full ID
+        file_path,
+    )
 
     file_context = FileContext(
         base_directory,
         file_path,
         line_exclude,
         line_include,
-        sarif_for_file,
+        findings_for_rule,
     )
 
     try:
@@ -146,7 +150,7 @@ def analyze_files(
     execution_context: CodemodExecutionContext,
     files_to_analyze,
     codemod,
-    sarif,
+    results: ResultSet,
     cli_args,
 ):
     with ThreadPoolExecutor(max_workers=cli_args.max_workers) as executor:
@@ -154,19 +158,19 @@ def analyze_files(
             "using executor with %s threads",
             cli_args.max_workers,
         )
-        results = executor.map(
+        analysis_results = executor.map(
             lambda args: process_file(
                 args[0],
                 args[1],
                 execution_context.directory,
                 codemod,
-                sarif,
+                results,
                 cli_args,
             ),
             enumerate(files_to_analyze),
         )
         executor.shutdown(wait=True)
-        execution_context.process_results(codemod.id, results)
+        execution_context.process_results(codemod.id, analysis_results)
 
 
 def run(original_args) -> int:

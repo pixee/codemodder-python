@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 
 from codemodder.change import Change, ChangeSet
 from codemodder.dependency import Dependency
+from codemodder.result import Result
 from codemodder.utils.timer import Timer
 
 
@@ -17,7 +18,7 @@ class FileContext:  # pylint: disable=too-many-instance-attributes
     file_path: Path
     line_exclude: List[int] = field(default_factory=list)
     line_include: List[int] = field(default_factory=list)
-    results_by_id: Dict = field(default_factory=dict)
+    findings: List[Result] = field(default_factory=list)
     dependencies: set[Dependency] = field(default_factory=set)
     codemod_changes: List[Change] = field(default_factory=list)
     results: List[ChangeSet] = field(default_factory=list)
