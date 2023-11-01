@@ -28,7 +28,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
       - name: Build & Push Base Image
         run: >
-          docker buildx build --push \
-          -t ${{ steps.login-ecr.outputs.registry }}/pixee/codemodder-python:latest \
-          -t ${{ steps.login-ecr.outputs.registry }}/pixee/codemodder-python:${{ github.ref_name }} \
+          docker buildx build --push
+          -t ${{ steps.login-ecr.outputs.registry }}/pixee/codemodder-python:latest
+          -t ${{ steps.login-ecr.outputs.registry }}/pixee/codemodder-python:${{ github.ref_name }}
           .
