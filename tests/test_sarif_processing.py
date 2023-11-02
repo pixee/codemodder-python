@@ -36,7 +36,12 @@ class TestSarifProcessing:
         assert list(results.keys()) == [expected_rule]
 
         expected_path = Path("tests/samples/insecure_random.py")
-        assert expected_path == results[expected_rule][0].locations[0].file
+        assert list(results[expected_rule].keys()) == [expected_path]
+
+        assert results[expected_rule][expected_path][0].rule_id == expected_rule
+        assert (
+            results[expected_rule][expected_path][0].locations[0].file == expected_path
+        )
 
     def test_codeql_sarif_input(self, tmpdir):
         completed_process = subprocess.run(

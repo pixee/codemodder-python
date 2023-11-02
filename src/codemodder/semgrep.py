@@ -1,7 +1,7 @@
 import subprocess
 import itertools
 from tempfile import NamedTemporaryFile
-from typing import Iterable
+from typing import Iterable, Optional
 from pathlib import Path
 from codemodder.context import CodemodExecutionContext
 from codemodder.sarifs import SarifResultSet
@@ -11,6 +11,7 @@ from codemodder.logging import logger
 def run(
     execution_context: CodemodExecutionContext,
     yaml_files: Iterable[Path],
+    files_to_analyze: Optional[Iterable[Path]] = None,
 ) -> SarifResultSet:
     """
     Runs Semgrep and outputs a dict with the results organized by rule_id.
@@ -34,7 +35,7 @@ def run(
                 map(lambda f: ["--config", str(f)], yaml_files)
             )
         )
-        command.append(str(execution_context.directory))
+        command.extend(map(str, files_to_analyze or [execution_context.directory]))
         logger.debug("semgrep command: `%s`", " ".join(command))
         subprocess.run(
             command,
