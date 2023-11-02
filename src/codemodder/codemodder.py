@@ -35,7 +35,7 @@ def update_code(file_path, new_code):
 def find_semgrep_results(
     context: CodemodExecutionContext,
     codemods: list[CodemodExecutorWrapper],
-) -> set[str]:
+) -> ResultSet:
     """Run semgrep once with all configuration files from all codemods and return a set of applicable rule IDs"""
     yaml_files = list(
         itertools.chain.from_iterable(
@@ -43,10 +43,9 @@ def find_semgrep_results(
         )
     )
     if not yaml_files:
-        return set()
+        return ResultSet()
 
-    results = run_semgrep(context, yaml_files)
-    return set(results.keys())
+    return run_semgrep(context, yaml_files)
 
 
 def create_diff(original_tree: cst.Module, new_tree: cst.Module) -> str:
@@ -173,6 +172,29 @@ def analyze_files(
         execution_context.process_results(codemod.id, analysis_results)
 
 
+def log_report(context, argv, elapsed_ms, files_to_analyze):
+    log_section("report")
+    logger.info("scanned: %s files", len(files_to_analyze))
+    all_failures = context.get_failed_files()
+    logger.info(
+        "failed: %s files (%s unique)",
+        len(all_failures),
+        len(set(all_failures)),
+    )
+    all_changes = context.get_changed_files()
+    logger.info(
+        "changed: %s files (%s unique)",
+        len(all_changes),
+        len(set(all_changes)),
+    )
+    logger.info("report file: %s", argv.output)
+    logger.info("total elapsed: %s ms", elapsed_ms)
+    logger.info("  semgrep:     %s ms", context.timer.get_time_ms("semgrep"))
+    logger.info("  parse:       %s ms", context.timer.get_time_ms("parse"))
+    logger.info("  transform:   %s ms", context.timer.get_time_ms("transform"))
+    logger.info("  write:       %s ms", context.timer.get_time_ms("write"))
+
+
 def run(original_args) -> int:
     start = datetime.datetime.now()
 
@@ -225,17 +247,17 @@ def run(original_args) -> int:
         return 0
 
     full_names = [str(path) for path in files_to_analyze]
-    logger.debug("matched files:")
     log_list(logging.DEBUG, "matched files", full_names)
 
-    semgrep_results: set[str] = find_semgrep_results(context, codemods_to_run)
+    semgrep_results: ResultSet = find_semgrep_results(context, codemods_to_run)
+    semgrep_finding_ids = semgrep_results.all_rule_ids()
 
     log_section("scanning")
     # run codemods one at a time making sure to respect the given sequence
     for codemod in codemods_to_run:
         # Unfortunately the IDs from semgrep are not fully specified
         # TODO: eventually we need to be able to use fully specified IDs here
-        if codemod.is_semgrep and codemod.name not in semgrep_results:
+        if codemod.is_semgrep and codemod.name not in semgrep_finding_ids:
             logger.debug(
                 "no results from semgrep for %s, skipping analysis",
                 codemod.id,
@@ -243,7 +265,9 @@ def run(original_args) -> int:
             continue
 
         logger.info("running codemod %s", codemod.id)
-        results = codemod.apply(context)
+        semgrep_files = semgrep_results.files_for_rule(codemod.name)
+        # Non-semgrep codemods ignore the semgrep results
+        results = codemod.apply(context, semgrep_files)
         analyze_files(
             context,
             files_to_analyze,
@@ -260,27 +284,7 @@ def run(original_args) -> int:
     elapsed_ms = int(elapsed.total_seconds() * 1000)
     report_default(elapsed_ms, argv, original_args, results)
 
-    log_section("report")
-    logger.info("scanned: %s files", len(files_to_analyze))
-    all_failures = context.get_failed_files()
-    logger.info(
-        "failed: %s files (%s unique)",
-        len(all_failures),
-        len(set(all_failures)),
-    )
-    all_changes = context.get_changed_files()
-    logger.info(
-        "changed: %s files (%s unique)",
-        len(all_changes),
-        len(set(all_changes)),
-    )
-    logger.info("report file: %s", argv.output)
-    logger.info("total elapsed: %s ms", elapsed_ms)
-    logger.info("semgrep:       %s ms", context.timer.get_time_ms("semgrep"))
-    logger.info("parse:         %s ms", context.timer.get_time_ms("parse"))
-    logger.info("transform:     %s ms", context.timer.get_time_ms("transform"))
-    logger.info("write:         %s ms", context.timer.get_time_ms("write"))
-
+    log_report(context, argv, elapsed_ms, files_to_analyze)
     return 0
 
 

@@ -84,12 +84,7 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         )
         input_tree = cst.parse_module(input_code)
         all_results = self.results_by_id_filepath(input_code, file_path)
-        results = [
-            result
-            for entry in all_results.values()
-            for result in entry
-            if result.rule_id == self.codemod.name()
-        ]
+        results = all_results.results_for_rule_and_file(self.codemod.name(), file_path)
         self.file_context = FileContext(
             root,
             file_path,

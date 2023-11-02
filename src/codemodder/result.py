@@ -34,13 +34,16 @@ class Result(ABCDataclass):
     locations: list[Location]
 
 
-class ResultSet(dict[str, list[Result]]):
+class ResultSet(dict[str, dict[Path, list[Result]]]):
     def add_result(self, result: Result):
-        self.setdefault(result.rule_id, []).append(result)
+        for loc in result.locations:
+            self.setdefault(result.rule_id, {}).setdefault(loc.file, []).append(result)
 
     def results_for_rule_and_file(self, rule_id: str, file: Path) -> list[Result]:
-        return [
-            result
-            for result in self.get(rule_id, [])
-            if result.locations[0].file == file
-        ]
+        return self.get(rule_id, {}).get(file, [])
+
+    def files_for_rule(self, rule_id: str) -> list[Path]:
+        return list(self.get(rule_id, {}).keys())
+
+    def all_rule_ids(self) -> list[str]:
+        return list(self.keys())

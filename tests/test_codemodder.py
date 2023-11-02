@@ -6,6 +6,7 @@ import libcst as cst
 from codemodder.codemodder import create_diff, run, find_semgrep_results
 from codemodder.semgrep import run as semgrep_run
 from codemodder.registry import load_registered_codemods
+from codemodder.result import ResultSet
 
 
 class TestRun:
@@ -190,7 +191,7 @@ class TestExitCode:
             codemod_include=["use-defusedxml"]
         )
         result = find_semgrep_results(mocker.MagicMock(), codemods)
-        assert result == set()
+        assert result == ResultSet()
         assert run_semgrep.call_count == 0
 
     def test_diff_newline_edge_case(self):
