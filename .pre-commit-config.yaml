@@ -9,7 +9,8 @@ repos:
         exclude: |
           (?x)^(
               src/core_codemods/docs/.*|
-              integration_tests/.*
+              integration_tests/.*|
+              tests/test_codemodder.py
           )$
     -   id: check-added-large-files
 -   repo: https://github.com/psf/black
