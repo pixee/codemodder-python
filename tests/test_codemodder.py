@@ -1,6 +1,9 @@
 import mock
 import pytest
-from codemodder.codemodder import run, find_semgrep_results
+
+import libcst as cst
+
+from codemodder.codemodder import create_diff, run, find_semgrep_results
 from codemodder.semgrep import run as semgrep_run
 from codemodder.registry import load_registered_codemods
 
@@ -189,3 +192,30 @@ class TestExitCode:
         result = find_semgrep_results(mocker.MagicMock(), codemods)
         assert result == set()
         assert run_semgrep.call_count == 0
+
+    def test_diff_newline_edge_case(self):
+        source = """
+SECRET_COOKIE_KEY = "PYGOAT"
+CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000","http://0.0.0.0:8000","http://172.16.189.10"]"""  # no newline here
+
+        result = """
+SECRET_COOKIE_KEY = "PYGOAT"
+CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000","http://0.0.0.0:8000","http://172.16.189.10"]
+SESSION_COOKIE_SECURE = True"""
+
+        source_tree = cst.parse_module(source)
+        result_tree = cst.parse_module(result)
+
+        diff = create_diff(source_tree, result_tree)
+        assert (
+            diff
+            == """\
+--- 
++++ 
+@@ -1,3 +1,4 @@
+ 
+ SECRET_COOKIE_KEY = "PYGOAT"
+-CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000","http://0.0.0.0:8000","http://172.16.189.10"]
++CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000","http://0.0.0.0:8000","http://172.16.189.10"]
++SESSION_COOKIE_SECURE = True"""
+        )
