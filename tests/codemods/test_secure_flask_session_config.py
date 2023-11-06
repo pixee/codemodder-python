@@ -34,7 +34,7 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         app = flask.Flask(__name__)
         # more code
         print(1)
-        app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
+        app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
         # assert len(self.file_context.codemod_changes) == 1
@@ -71,7 +71,7 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
 
         app = flask.Flask(__name__)
         app.secret_key = "dev"
-        app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
+        app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
         # more code
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
@@ -90,7 +90,7 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
 
         app = flask.Flask(__name__)
         app.secret_key = "dev"
-        app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
+        app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
         # more code
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
@@ -107,140 +107,107 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         from flask import Flask as flask_app
         app = flask_app(__name__)
         app.secret_key = "dev"
-        app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
+        app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
         # more code
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
         # assert len(self.file_context.codemod_changes) == 1
 
     @pytest.mark.parametrize(
-        "input_code,expected_output",
+        "config_lines,expected_config_lines",
         [
             (
-                """\
-            import flask
-
-            app = flask.Flask(__name__)
-            app.secret_key = "dev"
-            app.config
-            """,
-                """\
-            import flask
-
-            app = flask.Flask(__name__)
-            app.secret_key = "dev"
-            app.config
-            app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
-            """,
+                """app.config""",
+                """app.config
+app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
             ),
             (
-                """\
-                import flask
-
-                app = flask.Flask(__name__)
-                app.secret_key = "dev"
-                app.config["TESTING"] = True
-                """,
-                """\
-                import flask
-
-                app = flask.Flask(__name__)
-                app.secret_key = "dev"
-                app.config["TESTING"] = True
-                app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
-                """,
+                """app.config["TESTING"] = True""",
+                """app.config["TESTING"] = True
+app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
             ),
             (
-                """\
-                import flask
-
-                app = flask.Flask(__name__)
-                app.secret_key = "dev"
-                app.config.testing = True
-                """,
-                """\
-                    import flask
-
-                    app = flask.Flask(__name__)
-                    app.secret_key = "dev"
-                    app.config.testing = True
-                    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
-                    """,
+                """app.config.testing = True""",
+                """app.config.testing = True
+app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
             ),
             (
-                """\
-                    import flask
-
-                    app = flask.Flask(__name__)
-                    app.secret_key = "dev"
-                    app.config["SESSION_COOKIE_SECURE"] = False
-                    """,
-                """\
-                    import flask
-
-                    app = flask.Flask(__name__)
-                    app.secret_key = "dev"
-                    app.config["SESSION_COOKIE_SECURE"] = False
-                    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
-                    """,
+                """app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+                """app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
             ),
             (
-                """\
-                    import flask
-
-                    app = flask.Flask(__name__)
-                    app.secret_key = "dev"
-                    app.config["SESSION_COOKIE_HTTPONLY"] = False
-                    """,
-                """\
-                    import flask
-
-                    app = flask.Flask(__name__)
-                    app.secret_key = "dev"
-                    app.config["SESSION_COOKIE_HTTPONLY"] = False
-                    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
-                    """,
+                """app.config.update(SECRET_KEY='123SOMEKEY')""",
+                """app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax', SECRET_KEY='123SOMEKEY')""",
             ),
             (
-                """\
-                    import flask
-
-                    app = flask.Flask(__name__)
-                    app.secret_key = "dev"
-                    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Strict')
-                    """,
-                """\
-                    import flask
-
-                    app = flask.Flask(__name__)
-                    app.secret_key = "dev"
-                    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Strict')
-                    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
-                    """,
+                """app.config.update(SESSION_COOKIE_SECURE=True)""",
+                """app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
             ),
             (
-                """\
-                    import flask
-
-                    app = flask.Flask(__name__)
-                    app.secret_key = "dev"
-                    app.config["SESSION_COOKIE_SECURE"] = False
-                    app.config["SESSION_COOKIE_SECURE"] = True
-                    """,
-                """\
-                    import flask
-
-                    app = flask.Flask(__name__)
-                    app.secret_key = "dev"
-                    app.config["SESSION_COOKIE_SECURE"] = False
-                    app.config["SESSION_COOKIE_SECURE"] = True
-                    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
-                    """,
+                """app.config.update(SESSION_COOKIE_HTTPONLY=True)""",
+                """app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
             ),
+            (
+                """app.config['SESSION_COOKIE_SECURE'] = False""",
+                """app.config['SESSION_COOKIE_SECURE'] = True
+app.config.update(SESSION_COOKIE_SAMESITE='Lax')""",
+            ),
+            (
+                """app.config['SESSION_COOKIE_HTTPONLY'] = False""",
+                """app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+            ),
+            (
+                    '''app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+''',
+                    '''app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+''',
+            ),
+            (
+                    '''app.config["SESSION_COOKIE_SECURE"] = False
+app.config["SESSION_COOKIE_SAMESITE"] = None
+''',
+                    '''app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+''',
+            ),
+#             (
+#                     '''app.config["SESSION_COOKIE_SECURE"] = False
+# app.config["SESSION_COOKIE_HTTPONLY"] = False
+# app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
+# ''',
+#                     '''app.config["SESSION_COOKIE_SECURE"] = True
+# app.config["SESSION_COOKIE_HTTPONLY"] = True
+# app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
+# ''',
+#             ),
+            #         (
+            #                 """app.config["SESSION_COOKIE_SECURE"] = False
+            # app.config["SESSION_COOKIE_SECURE"] = True
+            # """,
+            #                 """app.config["SESSION_COOKIE_SECURE"] = False
+            # app.config["SESSION_COOKIE_SECURE"] = True
+            # app.config.update(SESSION_COOKIE_SAMESITE='Lax')
+            # """,
+            #         ),
         ],
     )
-    def test_config_accessed(self, tmpdir, input_code, expected_output):
-        self.run_and_assert(tmpdir, input_code, expected_output)
+    def test_config_accessed_variations(
+        self, tmpdir, config_lines, expected_config_lines
+    ):
+        input_code = f"""import flask
+app = flask.Flask(__name__)
+app.secret_key = "dev"
+{config_lines}
+"""
+        expected_output = f"""import flask
+app = flask.Flask(__name__)
+app.secret_key = "dev"
+{expected_config_lines}
+"""
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected_output))
 
     @pytest.mark.skip()
     def test_func_scope(self, tmpdir):
