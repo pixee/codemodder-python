@@ -51,6 +51,26 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
+    def test_simple_with_quotes_in_middle(self, tmpdir):
+        input_code = """\
+        import sqlite3
+
+        name = input()
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute(r"SELECT * from USERS WHERE name ='user_" + name + r"_system'")
+        """
+        expected = """\
+        import sqlite3
+
+        name = input()
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute(r"SELECT * from USERS WHERE name =?", (r"user_" + name + r"_system", ))
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
     def test_can_deal_with_multiple_variables(self, tmpdir):
         input_code = """\
         import sqlite3
