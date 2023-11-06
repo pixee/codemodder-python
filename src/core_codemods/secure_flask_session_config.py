@@ -38,66 +38,47 @@ class SecureFlaskSessionConfig(BaseCodemod):
         if not flask_visitor.flask_app_name:
             return tree
 
-        if len(flask_visitor.config_access) == 0:
+        if len(config_access := flask_visitor.config_access) == 0:
             return self.insert_config_line_endof_mod(
                 tree, flask_visitor.flask_app_name, self.SECURE_SESSION_CONFIGS
             )
 
-        # Handle single config.update line, reuse it
-        if len(flask_visitor.config_access) == 1 and isinstance(
-            single_config := flask_visitor.config_access[0], cst.Call
-        ):
-            defined_configs = self._get_configs(single_config)
-
-            configs_to_write = {**self.SECURE_SESSION_CONFIGS.copy(), **defined_configs}
-
-            for key, val in configs_to_write.items():
-                if (
-                    key in self.SECURE_SESSION_CONFIGS
-                    and val in self.SECURE_SESSION_CONFIGS[key]
-                ):
-                    del configs_to_write[key]
-
-            return self.reuse_config_line(
-                tree, flask_visitor.flask_app_name, configs_to_write
-            )
-
-        # Handle single config['access'] line, add update line excluding configs already set
-        if len(flask_visitor.config_access) == 1 and isinstance(
-            single_config := flask_visitor.config_access[0], cst.Assign
-        ):
-            defined_config = self._get_config_from_slice(single_config)
-            defined_key = list(defined_config.keys())[0]
-            configs_to_write = self.SECURE_SESSION_CONFIGS.copy()
-
-            for key, val in configs_to_write.items():
-                if key in defined_config and val in self.SECURE_SESSION_CONFIGS[key]:
-                    del configs_to_write[key]
-
-            # any of the secure sesh in defined config, we want to reuse the line
-            # but flip it if necessary
-            if defined_key in self.SECURE_SESSION_CONFIGS:
-                del configs_to_write[defined_key]
-                return self.reuse_config_subscript_line(
-                    tree, flask_visitor.flask_app_name, configs_to_write, defined_key
-                )
-            return self.insert_config_line_endof_mod(
-                tree, flask_visitor.flask_app_name, configs_to_write
-            )
-
-
-        defined_configs = self.get_defined_configs(flask_visitor.config_access)
-        breakpoint()
         configs_to_write = self.SECURE_SESSION_CONFIGS.copy()
-        for key, vals in defined_configs.items():
-            defined_val = vals[-1]
-            if key in self.SECURE_SESSION_CONFIGS and defined_val in self.SECURE_SESSION_CONFIGS[key]:
-                del configs_to_write[key]
 
-        result = self.insert_config_line_endof_mod(
+        for config_line in config_access:
+            match config_line:
+                case cst.Call():
+                    # app.config.update(...)
+                    # defined_configs = self._get_configs(config_line)
+                    for arg in config_line.args:
+                        key = arg.keyword.value
+                        val = [true_value(arg.value)]
+                        if key in self.SECURE_SESSION_CONFIGS and val not in self.SECURE_SESSION_CONFIGS[key]:
+                            del configs_to_write[key]
+                            secure_val = self.SECURE_SESSION_CONFIGS[key][0]
+                            arg.with_changes(value=cst.parse_expression(f"{secure_val}"))
+
+                case cst.Assign():
+                    # app.config['...']
+                    defined_config = self._get_config_from_slice(config_line)
+
+                    (key, vals), = defined_config.items()
+
+                    defined_val = true_value(vals[-1])
+                    if key in self.SECURE_SESSION_CONFIGS and defined_val not in self.SECURE_SESSION_CONFIGS[key]:
+                        del configs_to_write[key]
+                        secure_val = self.SECURE_SESSION_CONFIGS[key][0]
+                        config_line.with_changes(value=cst.parse_expression(f"{secure_val}"))
+
+        if isinstance(config_update := config_access[-1], cst.Call):
+            # If the last config access is of form `app.config.update...`
+            # reuse that line.
+            self.reuse_config_line(config_update, configs_to_write)
+            return tree
+        # todo: if there is an .update line, add values directly there
+        return self.insert_config_line_endof_mod(
             tree, flask_visitor.flask_app_name, configs_to_write
         )
-        return result
 
     def get_defined_configs(self, config_access):
         all_defined_configs = {}
@@ -126,10 +107,10 @@ class SecureFlaskSessionConfig(BaseCodemod):
         return defined_configs
 
     def reuse_config_line(
-        self, original_node: cst.Module, app_name: str, configs: dict
-    ) -> cst.Module:
+        self, config_line: cst.Call,  configs: dict
+    ) -> None:
         if not configs:
-            return original_node
+            return
         # TODO: record change
         # line_number is the end of the module where we will insert the new flag.
         # pos_to_match = self.node_position(original_node)
@@ -140,15 +121,22 @@ class SecureFlaskSessionConfig(BaseCodemod):
         # self.file_context.codemod_changes.append(
         #     Change(line_number, self.CHANGE_DESCRIPTION)
         # )
-        config_string = ", ".join(
-            f"{key}='{value[0]}'" if isinstance(value[0], str) else f"{key}={value[0]}"
-            for key, value in configs.items()
-            if value and value[0] is not None
+        # config_string = ", ".join(
+        #     f"{key}='{value[0]}'" if isinstance(value[0], str) else f"{key}={value[0]}"
+        #     for key, value in configs.items()
+        #     if value and value[0] is not None
+        # )
+        # final_line = cst.parse_statement(f"{app_name}.config.update({config_string})")
+        # new_body = original_node.body[:-1] + (final_line,)
+        from codemodder.codemods.api.helpers import NewArg
+
+        to_add = [NewArg(name=key, value=str(vals[0]), add_if_missing=True) for key, vals in configs.items() if vals[0] is not None]
+
+        new_args = self.replace_args(
+            config_line, to_add
         )
-        # secure_configs = """SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax'"""
-        final_line = cst.parse_statement(f"{app_name}.config.update({config_string})")
-        new_body = original_node.body[:-1] + (final_line,)
-        return original_node.with_changes(body=new_body)
+        # self.update_arg_target(config_line, new_args)
+        config_line.with_changes(args=new_args)
 
     def reuse_config_subscript_line(
         self, original_node: cst.Module, app_name: str, configs: dict, defined_key: str
