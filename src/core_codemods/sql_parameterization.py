@@ -1,8 +1,15 @@
 import re
 from typing import Optional, Tuple
+import itertools
 import libcst as cst
-from libcst import SimpleWhitespace, matchers
-from libcst.codemod import Codemod, CodemodContext, ContextAwareVisitor
+from libcst import FormattedString, SimpleWhitespace, ensure_type, matchers
+from libcst.codemod import (
+    Codemod,
+    CodemodContext,
+    ContextAwareTransformer,
+    ContextAwareVisitor,
+)
+from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatString
 from libcst.metadata import (
     ClassScope,
     GlobalScope,
@@ -137,7 +144,10 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
                 self.file_context.codemod_changes.append(
                     Change(line_number, SQLQueryParameterization.CHANGE_DESCRIPTION)
                 )
+                # Normalization and cleanup
                 result = result.visit(RemoveEmptyStringConcatenation())
+                result = NormalizeFStrings(self.context).transform_module(result)
+                result = UnnecessaryFormatString(self.context).transform_module(result)
 
         return result
 
@@ -148,28 +158,25 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
             self.changed_nodes[expr] = cst.parse_expression('""')
 
         prepend = append = None
+
         # remove quote literal from start
-        match start:
+        current_start = self.changed_nodes.get(start) or start
+        prepend_raw_value = None
+
+        t = _extract_prefix_raw_value(self, current_start)
+        prefix, raw_value = t if t else ("", "")
+
+        # gather string after the quote
+        if "r" in prefix:
+            quote_span = list(raw_quote_pattern.finditer(raw_value))[-1]
+        else:
+            quote_span = list(quote_pattern.finditer(raw_value))[-1]
+        new_raw_value = raw_value[: quote_span.start()] + parameter_token
+        prepend_raw_value = raw_value[quote_span.end() :]
+
+        match current_start:
             case cst.SimpleString():
-                current_start = self.changed_nodes.get(start) or start
-
-                # find
-                if "r" in start.prefix.lower():
-                    quote_span = list(
-                        raw_quote_pattern.finditer(current_start.raw_value)
-                    )[-1]
-                else:
-                    quote_span = list(quote_pattern.finditer(current_start.raw_value))[
-                        -1
-                    ]
-
-                # gather string after the quote
                 # uses the same quote and prefixes to guarantee it will be correctly interpreted
-                new_raw_value = (
-                    current_start.raw_value[: quote_span.start()] + parameter_token
-                )
-
-                prepend_raw_value = current_start.raw_value[quote_span.end() :]
                 if prepend_raw_value:
                     prepend = cst.SimpleString(
                         value=current_start.prefix
@@ -184,28 +191,36 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
                     + new_raw_value
                     + current_start.quote
                 )
-
                 self.changed_nodes[start] = current_start.with_changes(value=new_value)
+
             case cst.FormattedStringText():
-                # TODO formatted string case
-                pass
+                if prepend_raw_value:
+                    prepend = cst.SimpleString(
+                        value=("r" if "r" in prefix else "")
+                        + "'"
+                        + prepend_raw_value
+                        + "'"
+                    )
+
+                new_value = new_raw_value
+                self.changed_nodes[start] = current_start.with_changes(value=new_value)
 
         # remove quote literal from end
+        current_end = self.changed_nodes.get(end) or end
+        append_raw_value = None
+
+        t = _extract_prefix_raw_value(self, current_end)
+        prefix, raw_value = t if t else ("", "")
+        if "r" in prefix:
+            quote_span = list(raw_quote_pattern.finditer(raw_value))[0]
+        else:
+            quote_span = list(quote_pattern.finditer(raw_value))[0]
+
+        new_raw_value = raw_value[quote_span.end() :]
+        append_raw_value = raw_value[: quote_span.start()]
         match end:
             case cst.SimpleString():
-                current_end = self.changed_nodes.get(end) or end
-
-                if "r" in start.prefix.lower():
-                    quote_span = list(
-                        raw_quote_pattern.finditer(current_end.raw_value)
-                    )[0]
-                else:
-                    quote_span = list(quote_pattern.finditer(current_end.raw_value))[0]
-
-                new_raw_value = current_end.raw_value[quote_span.end() :]
-
                 # gather string up to quote to parameter
-                append_raw_value = current_end.raw_value[: quote_span.start()]
                 if append_raw_value:
                     append = cst.SimpleString(
                         value=current_end.prefix
@@ -222,8 +237,16 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
                 )
                 self.changed_nodes[end] = current_end.with_changes(value=new_value)
             case cst.FormattedStringText():
-                # TODO formatted string case
-                pass
+                if append_raw_value:
+                    append = cst.SimpleString(
+                        value=("r" if "r" in prefix else "")
+                        + "'"
+                        + append_raw_value
+                        + "'"
+                    )
+
+                new_value = new_raw_value
+                self.changed_nodes[end] = current_end.with_changes(value=new_value)
         return (prepend, append)
 
 
@@ -365,15 +388,15 @@ class ExtractParameters(ContextAwareVisitor):
                 modulo_2 = 1
 
     def _is_not_a_single_quote(self, expression: cst.CSTNode) -> bool:
-        match expression:
-            case cst.SimpleString():
-                prefix = expression.prefix.lower()
-                if "b" in prefix:
-                    return False
-                if "r" in prefix:
-                    return raw_quote_pattern.fullmatch(expression.raw_value) is None
-                return quote_pattern.fullmatch(expression.raw_value) is None
-        return True
+        t = _extract_prefix_raw_value(self, expression)
+        if not t:
+            return True
+        prefix, raw_value = t
+        if "b" in prefix:
+            return False
+        if "r" in prefix:
+            return raw_quote_pattern.fullmatch(raw_value) is None
+        return quote_pattern.fullmatch(raw_value) is None
 
     def _is_injectable(self, expression: cst.CSTNode) -> bool:
         # TODO exceptions
@@ -399,40 +422,53 @@ class ExtractParameters(ContextAwareVisitor):
         return True
 
     def _is_literal_start(self, node: cst.CSTNode, modulo_2: int) -> bool:
-        match node:
-            case cst.SimpleString():
-                prefix = node.prefix.lower()
-                if "b" in prefix:
-                    return False
-                if "r" in prefix:
-                    matches = list(raw_quote_pattern.finditer(node.raw_value))
-                else:
-                    matches = list(quote_pattern.finditer(node.raw_value))
-                # avoid cases like: "where name = 'foo\\\'s name'"
-                # don't count \\' as these are escaped in string literals
-                return (matches != None) and len(matches) % 2 == modulo_2
-            case cst.FormattedStringText():
-                # TODO may be in the middle i.e. f"name='home_{exp}'"
-                # be careful of f"name='literal'", it needs one but not two
-                return False
-        return False
+        t = _extract_prefix_raw_value(self, node)
+        if not t:
+            return False
+        prefix, raw_value = t
+        if "b" in prefix:
+            return False
+        if "r" in prefix:
+            matches = list(raw_quote_pattern.finditer(raw_value))
+        else:
+            matches = list(quote_pattern.finditer(raw_value))
+        # avoid cases like: "where name = 'foo\\\'s name'"
+        # don't count \\' as these are escaped in string literals
+        return (matches != None) and len(matches) % 2 == modulo_2
 
     def _is_literal_end(self, node: cst.CSTNode) -> bool:
-        print(node)
-        match node:
-            case cst.SimpleString():
-                if "b" in node.prefix:
-                    return False
-                if "r" in node.prefix:
-                    matches = list(raw_quote_pattern.finditer(node.raw_value))
-                else:
-                    matches = list(quote_pattern.finditer(node.raw_value))
-                return bool(matches)
-            case cst.FormattedStringText():
-                # TODO may be in the middle i.e. f"'{exp}_home'"
-                # be careful of f"name='literal'", it needs one but not two
-                return False
-        return False
+        t = _extract_prefix_raw_value(self, node)
+        if not t:
+            return False
+        prefix, raw_value = t
+        if "b" in prefix:
+            return False
+        if "r" in prefix:
+            matches = list(raw_quote_pattern.finditer(raw_value))
+        else:
+            matches = list(quote_pattern.finditer(raw_value))
+        return bool(matches)
+
+
+class NormalizeFStrings(ContextAwareTransformer):
+    """
+    Finds all the f-strings whose parts are only composed of FormattedStringText and concats all of them in a single part.
+    """
+
+    def leave_FormattedString(
+        self, original_node: cst.FormattedString, updated_node: cst.FormattedString
+    ) -> cst.BaseExpression:
+        all_parts = list(
+            itertools.takewhile(
+                lambda x: isinstance(x, cst.FormattedStringText), original_node.parts
+            )
+        )
+        if len(all_parts) != len(updated_node.parts):
+            return updated_node
+        new_part = cst.FormattedStringText(
+            value="".join(map(lambda x: x.value, all_parts))
+        )
+        return updated_node.with_changes(parts=[new_part])
 
 
 class FindQueryCalls(ContextAwareVisitor):
@@ -470,3 +506,18 @@ class FindQueryCalls(ContextAwareVisitor):
                                 expr.value
                             ):
                                 self.calls[original_node] = query_visitor.leaves
+
+
+def _extract_prefix_raw_value(self, node) -> Optional[Tuple[str, str]]:
+    match node:
+        case cst.SimpleString():
+            return node.prefix.lower(), node.raw_value
+        case cst.FormattedStringText():
+            try:
+                parent = self.get_metadata(ParentNodeProvider, node)
+                parent = ensure_type(parent, FormattedString)
+            except:
+                return None
+            return parent.start.lower(), node.value
+        case _:
+            return None
