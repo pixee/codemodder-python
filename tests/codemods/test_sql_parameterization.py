@@ -158,10 +158,7 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
-    # negative tests below
-
     def test_formatted_string_simple(self, tmpdir):
-        # TODO change when we add support for it
         input_code = """\
         import sqlite3
 
@@ -170,8 +167,18 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         cursor = connection.cursor()
         cursor.execute(f"SELECT * from USERS WHERE name='{name}'")
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
+        expected = """\
+        import sqlite3
+
+        name = input()
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * from USERS WHERE name=?", (name, ))
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
+    # negative tests below
 
     def test_no_sql_keyword(self, tmpdir):
         input_code = """\

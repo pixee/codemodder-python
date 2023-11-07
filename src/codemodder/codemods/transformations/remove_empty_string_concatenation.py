@@ -1,11 +1,28 @@
+from typing import Union
 import libcst as cst
-from libcst import CSTTransformer
+from libcst import CSTTransformer, RemovalSentinel, SimpleString
 
 
 class RemoveEmptyStringConcatenation(CSTTransformer):
     """
     Removes concatenation with empty strings (e.g. "hello " + "") or "hello" ""
     """
+
+    def leave_FormattedStringExpression(
+        self,
+        original_node: cst.FormattedStringExpression,
+        updated_node: cst.FormattedStringExpression,
+    ) -> Union[
+        cst.BaseFormattedStringContent,
+        cst.FlattenSentinel[cst.BaseFormattedStringContent],
+        RemovalSentinel,
+    ]:
+        expr = original_node.expression
+        match expr:
+            case SimpleString():  # type: ignore
+                if expr.raw_value == "":
+                    return RemovalSentinel.REMOVE
+        return updated_node
 
     def leave_BinaryOperation(
         self, original_node: cst.BinaryOperation, updated_node: cst.BinaryOperation
