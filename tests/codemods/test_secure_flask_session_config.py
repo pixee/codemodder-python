@@ -19,6 +19,7 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         response.set_cookie("name", "value")
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        assert len(self.file_context.codemod_changes) == 0
 
     def test_app_not_accessed(self, tmpdir):
         input_code = """\
@@ -37,7 +38,7 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
-        # assert len(self.file_context.codemod_changes) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_app_defined_separate_module(self, tmpdir):
         # TODO: test this as an integration test with two real modules
@@ -57,6 +58,7 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         print(1)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        assert len(self.file_context.codemod_changes) == 0
 
     def test_app_accessed_config_not_called(self, tmpdir):
         input_code = """\
@@ -75,7 +77,7 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         # more code
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
-        # assert len(self.file_context.codemod_changes) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_from_import(self, tmpdir):
         input_code = """\
@@ -94,7 +96,7 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         # more code
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
-        # assert len(self.file_context.codemod_changes) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_import_alias(self, tmpdir):
         input_code = f"""\
@@ -111,7 +113,7 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         # more code
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
-        # assert len(self.file_context.codemod_changes) == 1
+        assert len(self.file_context.codemod_changes) == 1
 
     @pytest.mark.parametrize(
         "config_lines,expected_config_lines",
@@ -136,16 +138,31 @@ app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
                 """app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
             ),
             (
+                """app.config.update(SECRET_KEY='123SOMEKEY')
+var = 1""",
+                """app.config.update(SECRET_KEY='123SOMEKEY')
+var = 1
+app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+            ),
+            (
                 """app.config.update(SECRET_KEY='123SOMEKEY')""",
-                """app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax', SECRET_KEY='123SOMEKEY')""",
+                """app.config.update(SECRET_KEY='123SOMEKEY')
+app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
             ),
             (
                 """app.config.update(SESSION_COOKIE_SECURE=True)""",
-                """app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+                """app.config.update(SESSION_COOKIE_SECURE=True)
+app.config.update(SESSION_COOKIE_SAMESITE='Lax')""",
             ),
             (
                 """app.config.update(SESSION_COOKIE_HTTPONLY=True)""",
-                """app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+                """app.config.update(SESSION_COOKIE_HTTPONLY=True)
+app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+            ),
+            (
+                """app.config.update(SESSION_COOKIE_HTTPONLY=False)""",
+                """app.config.update(SESSION_COOKIE_HTTPONLY=True)
+app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
             ),
             (
                 """app.config['SESSION_COOKIE_SECURE'] = False""",
@@ -158,40 +175,40 @@ app.config.update(SESSION_COOKIE_SAMESITE='Lax')""",
 app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
             ),
             (
-                    '''app.config["SESSION_COOKIE_SECURE"] = True
+                """app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-''',
-                    '''app.config["SESSION_COOKIE_SECURE"] = True
+""",
+                """app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-''',
+""",
             ),
             (
-                    '''app.config["SESSION_COOKIE_SECURE"] = False
+                """app.config["SESSION_COOKIE_SECURE"] = False
 app.config["SESSION_COOKIE_SAMESITE"] = None
-''',
-                    '''app.config["SESSION_COOKIE_SECURE"] = True
+""",
+                """app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-''',
+""",
             ),
-#             (
-#                     '''app.config["SESSION_COOKIE_SECURE"] = False
-# app.config["SESSION_COOKIE_HTTPONLY"] = False
-# app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
-# ''',
-#                     '''app.config["SESSION_COOKIE_SECURE"] = True
-# app.config["SESSION_COOKIE_HTTPONLY"] = True
-# app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
-# ''',
-#             ),
-            #         (
-            #                 """app.config["SESSION_COOKIE_SECURE"] = False
-            # app.config["SESSION_COOKIE_SECURE"] = True
-            # """,
-            #                 """app.config["SESSION_COOKIE_SECURE"] = False
-            # app.config["SESSION_COOKIE_SECURE"] = True
-            # app.config.update(SESSION_COOKIE_SAMESITE='Lax')
-            # """,
-            #         ),
+            (
+                """app.config["SESSION_COOKIE_SECURE"] = False
+app.config["SESSION_COOKIE_HTTPONLY"] = False
+app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
+""",
+                """app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
+""",
+            ),
+            (
+                """app.config["SESSION_COOKIE_SECURE"] = False
+app.config["SESSION_COOKIE_SECURE"] = True
+""",
+                """app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config.update(SESSION_COOKIE_SAMESITE='Lax')
+""",
+            ),
         ],
     )
     def test_config_accessed_variations(
@@ -231,4 +248,4 @@ app.secret_key = "dev"
         # either within configure() call or after it's called
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
-        # assert len(self.file_context.codemod_changes) == 1
+        assert len(self.file_context.codemod_changes) == 1
