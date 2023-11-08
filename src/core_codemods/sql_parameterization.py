@@ -32,6 +32,8 @@ from codemodder.codemods.utils import Append, ReplaceNodes, get_function_name_no
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.file_context import FileContext
 
+from enum import Enum
+
 parameter_token = "?"
 
 literal_number = matchers.Integer() | matchers.Float() | matchers.Imaginary()
@@ -40,6 +42,54 @@ literal = literal_number | literal_string
 
 quote_pattern = re.compile(r"(?<!\\)\\'|(?<!\\)'")
 raw_quote_pattern = re.compile(r"(?<!\\)'")
+
+
+class BaseType(Enum):
+    """
+    An enumeration representing the base literal types in Python.
+    """
+
+    NUMBER = 1
+    LIST = 2
+    STRING = 3
+    BYTES = 4
+
+    @classmethod
+    # pylint: disable-next=R0911
+    def infer_expression_type(cls, node: cst.BaseExpression) -> Optional["BaseType"]:
+        """
+        Tries to infer if the type of a given expression is one of the base literal types.
+        """
+        # The current implementation could be enhanced with a few more cases
+        match node:
+            case cst.Integer() | cst.Imaginary() | cst.Float() | cst.Call(
+                func=cst.Name("int")
+            ) | cst.Call(func=cst.Name("float")) | cst.Call(
+                func=cst.Name("abs")
+            ) | cst.Call(
+                func=cst.Name("len")
+            ):
+                return BaseType.NUMBER
+            case cst.Call(name=cst.Name("list")) | cst.List() | cst.ListComp():
+                return BaseType.LIST
+            case cst.Call(func=cst.Name("str")) | cst.FormattedString():
+                return BaseType.STRING
+            case cst.SimpleString():
+                if "b" in node.prefix.lower():
+                    return BaseType.BYTES
+                return BaseType.STRING
+            case cst.ConcatenatedString():
+                return cls.infer_expression_type(node.left)
+            case cst.BinaryOperation(operator=cst.Add()):
+                return cls.infer_expression_type(
+                    node.left
+                ) or cls.infer_expression_type(node.right)
+            case cst.IfExp():
+                if_true = cls.infer_expression_type(node.body)
+                or_else = cls.infer_expression_type(node.orelse)
+                if if_true == or_else:
+                    return if_true
+        return None
 
 
 class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
@@ -80,26 +130,36 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
         UtilsMixin.__init__(self, [])
         Codemod.__init__(self, context)
 
-    def _build_param_element_recurse(self, middle, index: int) -> cst.BaseExpression:
-        # TODO maybe a parameterized string would be better here
-        # f-strings need python 3.6 though
-        if index == 0:
-            return middle[0]
-        operator = cst.Add(
-            whitespace_after=cst.SimpleWhitespace(" "),
-            whitespace_before=cst.SimpleWhitespace(" "),
-        )
-        return cst.BinaryOperation(
-            operator=operator,
-            left=self._build_param_element_recurse(middle, index - 1),
-            right=middle[index],
-        )
-
     def _build_param_element(self, prepend, middle, append):
         new_middle = (
             ([prepend] if prepend else []) + middle + ([append] if append else [])
         )
-        return self._build_param_element_recurse(new_middle, len(new_middle) - 1)
+        format_pieces: list[str] = []
+        format_expr_count = 0
+        args = []
+        if len(new_middle) == 1:
+            # TODO maybe handle conversion here?
+            return new_middle[0]
+        for e in new_middle:
+            exception = False
+            if isinstance(e, cst.SimpleString | cst.FormattedStringText):
+                t = _extract_prefix_raw_value(self, e)
+                if t:
+                    prefix, raw_value = t
+                    if not "b" in prefix and not "r" in prefix and not "u" in prefix:
+                        format_pieces.append(raw_value)
+                        exception = True
+            if not exception:
+                format_pieces.append(f"{{{format_expr_count}}}")
+                format_expr_count += 1
+                args.append(cst.Arg(e))
+
+        format_string = "".join(format_pieces)
+        format_string_node = cst.SimpleString(f"'{format_string}'")
+        return cst.Call(
+            func=cst.Attribute(value=format_string_node, attr=cst.Name(value="format")),
+            args=args,
+        )
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         find_queries = FindQueryCalls(self.context)
@@ -118,8 +178,6 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
             # build tuple elements and fix injection
             params_elements: list[cst.Element] = []
             for start, middle, end in ep.injection_patterns:
-                # TODO support for elements from f-strings?
-                # reminder that python has no implicit conversion while concatenating with +, might need to use str() for a particular expression
                 prepend, append = self._fix_injection(start, middle, end)
                 expr = self._build_param_element(prepend, middle, append)
                 params_elements.append(
@@ -155,7 +213,12 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
         self, start: cst.CSTNode, middle: list[cst.CSTNode], end: cst.CSTNode
     ):
         for expr in middle:
-            self.changed_nodes[expr] = cst.parse_expression('""')
+            if isinstance(
+                expr, cst.FormattedStringText | cst.FormattedStringExpression
+            ):
+                self.changed_nodes[expr] = cst.RemovalSentinel.REMOVE
+            else:
+                self.changed_nodes[expr] = cst.parse_expression('""')
 
         prepend = append = None
 
@@ -262,10 +325,6 @@ class LinearizeQuery(ContextAwareVisitor, NameResolutionMixin):
         self.leaves: list[cst.CSTNode] = []
 
     def on_visit(self, node: cst.CSTNode):
-        # TODO function to detect if BinaryExpression results in a number or list?
-        # will it only matter inside fstrings? (outside it, we expect query to be string)
-        # check if any is a string should be necessary
-
         # We only care about expressions, ignore everything else
         # Mostly as a sanity check, this may not be necessary since we start the visit with an expression node
         if isinstance(
@@ -280,14 +339,21 @@ class LinearizeQuery(ContextAwareVisitor, NameResolutionMixin):
             if not matchers.matches(
                 node,
                 matchers.Name()
-                | matchers.BinaryOperation()
                 | matchers.FormattedString()
+                | matchers.BinaryOperation()
                 | matchers.FormattedStringExpression()
                 | matchers.ConcatenatedString(),
             ):
                 self.leaves.append(node)
             else:
                 return super().on_visit(node)
+        return False
+
+    def visit_BinaryOperation(self, node: cst.BinaryOperation) -> Optional[bool]:
+        maybe_type = BaseType.infer_expression_type(node)
+        if not maybe_type or maybe_type == BaseType.STRING:
+            return True
+        self.leaves.append(node)
         return False
 
     # recursive search
@@ -380,7 +446,6 @@ class ExtractParameters(ContextAwareVisitor):
             # end may contain the start of another literal, put it back
             # should not be a single quote
 
-            # TODO think of a better solution here
             if self._is_literal_start(end, 0) and self._is_not_a_single_quote(end):
                 modulo_2 = 0
                 leaves.append(end)
@@ -398,28 +463,8 @@ class ExtractParameters(ContextAwareVisitor):
             return raw_quote_pattern.fullmatch(raw_value) is None
         return quote_pattern.fullmatch(raw_value) is None
 
-    def _is_injectable(self, expression: cst.CSTNode) -> bool:
-        # TODO exceptions
-        # tuple and list literals ???
-        # BinaryExpression case
-        match expression:
-            case cst.Integer() | cst.Float() | cst.Imaginary() | cst.SimpleString():
-                return False
-            case cst.Call(func=cst.Name(value="str"), args=[cst.Arg(value=arg), *_]):
-                # TODO
-                # treat str(encoding = 'utf-8', object=obj)
-                # ensure this is the built-in
-                if matchers.matches(arg, literal):  # type: ignore
-                    return False
-            case cst.FormattedStringExpression() if matchers.matches(
-                expression, literal
-            ):
-                return False
-            case cst.IfExp():
-                return self._is_injectable(expression.body) or self._is_injectable(
-                    expression.orelse
-                )
-        return True
+    def _is_injectable(self, expression: cst.BaseExpression) -> bool:
+        return not bool(BaseType.infer_expression_type(expression))
 
     def _is_literal_start(self, node: cst.CSTNode, modulo_2: int) -> bool:
         t = _extract_prefix_raw_value(self, node)

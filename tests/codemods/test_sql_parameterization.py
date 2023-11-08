@@ -58,7 +58,7 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         name = input()
         connection = sqlite3.connect("my_db.db")
         cursor = connection.cursor()
-        cursor.execute(r"SELECT * from USERS WHERE name ='user_" + name + r"_system'")
+        cursor.execute("SELECT * from USERS WHERE name ='user_" + name + r"_system'")
         """
         expected = """\
         import sqlite3
@@ -66,7 +66,7 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         name = input()
         connection = sqlite3.connect("my_db.db")
         cursor = connection.cursor()
-        cursor.execute(r"SELECT * from USERS WHERE name =?", (r"user_" + name + r"_system", ))
+        cursor.execute("SELECT * from USERS WHERE name =?", ('user_{0}{1}'.format(name, r"_system"), ))
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
@@ -178,6 +178,46 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
+    def test_formatted_string_quote_in_middle(self, tmpdir):
+        input_code = """\
+        import sqlite3
+
+        name = input()
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * from USERS WHERE name='user_{name}_admin'")
+        """
+        expected = """\
+        import sqlite3
+
+        name = input()
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * from USERS WHERE name=?", ('user_{0}_admin'.format(name), ))
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
+    def test_formatted_string_with_literal(self, tmpdir):
+        input_code = """\
+        import sqlite3
+
+        name = input()
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * from USERS WHERE name='{name}_{1+2}'")
+        """
+        expected = """\
+        import sqlite3
+
+        name = input()
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * from USERS WHERE name=?", ('{0}_{1}'.format(name, 1+2), ))
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
     # negative tests below
 
     def test_no_sql_keyword(self, tmpdir):
@@ -209,7 +249,7 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         name = input()
         connection = sqlite3.connect("my_db.db")
         cursor = connection.cursor()
-        cursor.execute("SELECT * from USERS WHERE name =?", (name + "_username", ))
+        cursor.execute("SELECT * from USERS WHERE name =?", ('{0}_username'.format(name), ))
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
@@ -231,7 +271,7 @@ class TestSQLQueryParameterization(BaseCodemodTest):
 
         connection = sqlite3.connect("my_db.db")
         cursor = connection.cursor()
-        cursor.execute("SELECT * from USERS WHERE name ='" + ('Jenny' if True else 123) + "'")
+        cursor.execute("SELECT * from USERS WHERE name ='" + ('Jenny' if True else 'Lorelei') + "'")
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
         assert len(self.file_context.codemod_changes) == 0
