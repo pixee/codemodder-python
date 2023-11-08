@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 authors = [{name = "Pixee", email = "support@pixee.ai"}]
 dynamic = ["version"]
-name = "codemodder-python"
+name = "codemodder"
 requires-python = ">=3.10.0"
 readme = "README.md"
 license = {file = "LICENSE"}
