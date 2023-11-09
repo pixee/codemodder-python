@@ -9,7 +9,6 @@ from libcst.codemod import (
     ContextAwareTransformer,
     ContextAwareVisitor,
 )
-from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatString
 from libcst.metadata import (
     ClassScope,
     GlobalScope,
@@ -28,11 +27,14 @@ from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.transformations.remove_empty_string_concatenation import (
     RemoveEmptyStringConcatenation,
 )
-from codemodder.codemods.utils import Append, ReplaceNodes, get_function_name_node
+from codemodder.codemods.utils import (
+    Append,
+    BaseType,
+    ReplaceNodes,
+    get_function_name_node,
+)
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.file_context import FileContext
-
-from enum import Enum
 
 parameter_token = "?"
 
@@ -42,54 +44,6 @@ literal = literal_number | literal_string
 
 quote_pattern = re.compile(r"(?<!\\)\\'|(?<!\\)'")
 raw_quote_pattern = re.compile(r"(?<!\\)'")
-
-
-class BaseType(Enum):
-    """
-    An enumeration representing the base literal types in Python.
-    """
-
-    NUMBER = 1
-    LIST = 2
-    STRING = 3
-    BYTES = 4
-
-    @classmethod
-    # pylint: disable-next=R0911
-    def infer_expression_type(cls, node: cst.BaseExpression) -> Optional["BaseType"]:
-        """
-        Tries to infer if the type of a given expression is one of the base literal types.
-        """
-        # The current implementation could be enhanced with a few more cases
-        match node:
-            case cst.Integer() | cst.Imaginary() | cst.Float() | cst.Call(
-                func=cst.Name("int")
-            ) | cst.Call(func=cst.Name("float")) | cst.Call(
-                func=cst.Name("abs")
-            ) | cst.Call(
-                func=cst.Name("len")
-            ):
-                return BaseType.NUMBER
-            case cst.Call(name=cst.Name("list")) | cst.List() | cst.ListComp():
-                return BaseType.LIST
-            case cst.Call(func=cst.Name("str")) | cst.FormattedString():
-                return BaseType.STRING
-            case cst.SimpleString():
-                if "b" in node.prefix.lower():
-                    return BaseType.BYTES
-                return BaseType.STRING
-            case cst.ConcatenatedString():
-                return cls.infer_expression_type(node.left)
-            case cst.BinaryOperation(operator=cst.Add()):
-                return cls.infer_expression_type(
-                    node.left
-                ) or cls.infer_expression_type(node.right)
-            case cst.IfExp():
-                if_true = cls.infer_expression_type(node.body)
-                or_else = cls.infer_expression_type(node.orelse)
-                if if_true == or_else:
-                    return if_true
-        return None
 
 
 class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
@@ -205,7 +159,9 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
                 # Normalization and cleanup
                 result = result.visit(RemoveEmptyStringConcatenation())
                 result = NormalizeFStrings(self.context).transform_module(result)
-                result = UnnecessaryFormatString(self.context).transform_module(result)
+                # TODO The transform below may break nested f-strings: f"{f"1"}" -> f"{"1"}"
+                # May be a bug...
+                # result = UnnecessaryFormatString(self.context).transform_module(result)
 
         return result
 
@@ -561,7 +517,7 @@ def _extract_prefix_raw_value(self, node) -> Optional[Tuple[str, str]]:
             try:
                 parent = self.get_metadata(ParentNodeProvider, node)
                 parent = ensure_type(parent, FormattedString)
-            except:
+            except Exception:
                 return None
             return parent.start.lower(), node.value
         case _:
