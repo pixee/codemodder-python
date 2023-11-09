@@ -1,67 +1,54 @@
 from typing import List
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
-from libcst.metadata import PositionProvider
 from codemodder.change import Change
 from codemodder.codemods.base_visitor import BaseTransformer
-from codemodder.codemods.base_codemod import (
-    SemgrepCodemod,
-    CodemodMetadata,
-    ReviewGuidance,
-)
+from codemodder.codemods.api import SemgrepCodemod
+from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.utils import is_django_settings_file
 from codemodder.file_context import FileContext
 
 
-class DjangoSessionCookieSecureOff(SemgrepCodemod, Codemod):
-    METADATA = CodemodMetadata(
-        DESCRIPTION=("Sets Django's `SESSION_COOKIE_SECURE` flag if off or missing."),
-        NAME="django-session-cookie-secure-off",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
-        REFERENCES=[
-            {
-                "url": "https://owasp.org/www-community/controls/SecureCookieAttribute",
-                "description": "",
-            },
-            {
-                "url": "https://docs.djangoproject.com/en/4.2/ref/settings/#session-cookie-secure",
-                "description": "",
-            },
-        ],
-    )
+class DjangoSessionCookieSecureOff(SemgrepCodemod):
+    NAME = "django-session-cookie-secure-off"
+    DESCRIPTION = "Sets Django's `SESSION_COOKIE_SECURE` flag if off or missing."
     SUMMARY = "Secure Setting for Django `SESSION_COOKIE_SECURE` flag"
-    CHANGE_DESCRIPTION = METADATA.DESCRIPTION
-    YAML_FILES = [
-        "detect-django-settings.yaml",
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
+    REFERENCES = [
+        {
+            "url": "https://owasp.org/www-community/controls/SecureCookieAttribute",
+            "description": "",
+        },
+        {
+            "url": "https://docs.djangoproject.com/en/4.2/ref/settings/#session-cookie-secure",
+            "description": "",
+        },
     ]
 
-    METADATA_DEPENDENCIES = (PositionProvider,)
+    @classmethod
+    def rule(cls):
+        return """
+        rules:
+          - id: django-session-cookie-secure-off
+            # This pattern creates one finding with no text for settings.py file.
+            pattern-regex: ^
+            paths:
+              include:
+               - settings.py
+        """
 
-    def __init__(self, codemod_context: CodemodContext, *args):
-        Codemod.__init__(self, codemod_context)
-        SemgrepCodemod.__init__(self, *args)
-
-    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        if is_django_settings_file(self.file_context.file_path):
-            transformer = SessionCookieSecureTransformer(
-                self.context, self.file_context, self.file_context.findings
-            )
-            new_tree = transformer.transform_module(tree)
-            if transformer.changes_in_file:
-                self.file_context.codemod_changes.extend(transformer.changes_in_file)
-            return new_tree
-        return tree
-
-
-class SessionCookieSecureTransformer(BaseTransformer):
-    def __init__(
-        self, codemod_context: CodemodContext, file_context: FileContext, results
-    ):
-        super().__init__(codemod_context, results)
-        self.line_exclude = file_context.line_exclude
-        self.line_include = file_context.line_include
-        self.changes_in_file: List[Change] = []
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.is_django_settings_file = is_django_settings_file(
+            self.file_context.file_path
+        )
         self.flag_correctly_set = False
+
+    def visit_Module(self, _: cst.Module) -> bool:
+        """
+        Only visit module with this codemod if it's a settings.py file.
+        """
+        return self.is_django_settings_file
 
     def leave_Module(
         self, original_node: cst.Module, updated_node: cst.Module
@@ -69,7 +56,10 @@ class SessionCookieSecureTransformer(BaseTransformer):
         """
         Handle case for `SESSION_COOKIE_SECURE`  is missing from settings.py
         """
-        if self.flag_correctly_set or len(self.changes_in_file):
+        if not self.is_django_settings_file:
+            return updated_node
+
+        if self.flag_correctly_set or len(self.file_context.codemod_changes):
             # Nothing to do at the end of the module if
             # `SESSION_COOKIE_SECURE = True` or if assigned to
             # something else and we changed it in `leave_Assign`.
@@ -78,8 +68,8 @@ class SessionCookieSecureTransformer(BaseTransformer):
         # line_number is the end of the module where we will insert the new flag.
         pos_to_match = self.node_position(original_node)
         line_number = pos_to_match.end.line
-        self.changes_in_file.append(
-            Change(line_number, DjangoSessionCookieSecureOff.CHANGE_DESCRIPTION)
+        self.file_context.codemod_changes.append(
+            Change(line_number, self.CHANGE_DESCRIPTION)
         )
         final_line = cst.parse_statement("SESSION_COOKIE_SECURE = True")
         new_body = updated_node.body + (final_line,)
@@ -100,10 +90,7 @@ class SessionCookieSecureTransformer(BaseTransformer):
                 return updated_node
 
             # SESSION_COOKIE_SECURE = anything other than True
-            line_number = pos_to_match.start.line
-            self.changes_in_file.append(
-                Change(line_number, DjangoSessionCookieSecureOff.CHANGE_DESCRIPTION)
-            )
+            self.add_change(original_node, self.CHANGE_DESCRIPTION)
             return updated_node.with_changes(value=cst.Name("True"))
         return updated_node
 
