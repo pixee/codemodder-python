@@ -1,80 +1,41 @@
-from typing import List
 import libcst as cst
-from libcst.codemod import Codemod, CodemodContext
-from libcst.metadata import PositionProvider
-from codemodder.change import Change
-from codemodder.codemods.base_visitor import BaseTransformer
-from codemodder.codemods.base_codemod import (
-    SemgrepCodemod,
-    CodemodMetadata,
-    ReviewGuidance,
-)
-from codemodder.file_context import FileContext
+from codemodder.codemods.api import SemgrepCodemod
+from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.utils import is_django_settings_file
 
 
-class DjangoDebugFlagOn(SemgrepCodemod, Codemod):
-    METADATA = CodemodMetadata(
-        DESCRIPTION="Flip `Django` debug flag to off.",
-        NAME="django-debug-flag-on",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
-        REFERENCES=[
-            {
-                "url": "https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure",
-                "description": "",
-            },
-            {
-                "url": "https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-DEBUG",
-                "description": "",
-            },
-        ],
-    )
+class DjangoDebugFlagOn(SemgrepCodemod):
+    NAME = "django-debug-flag-on"
+    DESCRIPTION = "Flip `Django` debug flag to off."
     SUMMARY = "Disable Django Debug Mode"
-    CHANGE_DESCRIPTION = METADATA.DESCRIPTION
-    YAML_FILES = [
-        "django-debug-flag-on.yaml",
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
+    REFERENCES = [
+        {
+            "url": "https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure",
+            "description": "",
+        },
+        {
+            "url": "https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-DEBUG",
+            "description": "",
+        },
     ]
 
-    METADATA_DEPENDENCIES = (PositionProvider,)
+    @classmethod
+    def rule(cls):
+        return """
+        rules:
+          - id: django-debug-flag-on
+            pattern: DEBUG = True
+            paths:
+              include:
+               - settings.py
+        """
 
-    def __init__(self, codemod_context: CodemodContext, *args):
-        Codemod.__init__(self, codemod_context)
-        SemgrepCodemod.__init__(self, *args)
+    def visit_Module(self, _: cst.Module) -> bool:
+        """
+        Only visit module with this codemod if it's a settings.py file.
+        """
+        return is_django_settings_file(self.file_context.file_path)
 
-    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        # checks if the file we looking is a settings.py file from django's default directory structure
-        if is_django_settings_file(self.file_context.file_path):
-            debug_flag_transformer = DebugFlagTransformer(
-                self.context, self.file_context, self.file_context.findings
-            )
-            new_tree = debug_flag_transformer.transform_module(tree)
-            if debug_flag_transformer.changes_in_file:
-                self.file_context.codemod_changes.extend(
-                    debug_flag_transformer.changes_in_file
-                )
-                return new_tree
-        return tree
-
-
-class DebugFlagTransformer(BaseTransformer):
-    def __init__(
-        self, codemod_context: CodemodContext, file_context: FileContext, results
-    ):
-        super().__init__(codemod_context, results)
-        self.line_exclude = file_context.line_exclude
-        self.line_include = file_context.line_include
-        self.changes_in_file: List[Change] = []
-
-    def leave_Assign(
-        self, original_node: cst.Assign, updated_node: cst.Assign
-    ) -> cst.Assign:
-        pos_to_match = self.node_position(original_node)
-        if self.filter_by_result(
-            pos_to_match
-        ) and self.filter_by_path_includes_or_excludes(pos_to_match):
-            line_number = pos_to_match.start.line
-            self.changes_in_file.append(
-                Change(line_number, DjangoDebugFlagOn.CHANGE_DESCRIPTION)
-            )
-            return updated_node.with_changes(value=cst.Name("False"))
-        return updated_node
+    def on_result_found(self, _, updated_node):
+        return updated_node.with_changes(value=cst.Name("False"))
