@@ -15,6 +15,7 @@ class TestDjangoDebugFlagOn(BaseDjangoCodemodTest):
         input_code = """DEBUG = True"""
         expected = """DEBUG = False"""
         self.run_and_assert_filepath(django_root, file_path, input_code, expected)
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_not_settings_dot_py(self, tmpdir):
         django_root, settings_folder = self.create_dir_structure(tmpdir)
@@ -23,6 +24,7 @@ class TestDjangoDebugFlagOn(BaseDjangoCodemodTest):
         input_code = """DEBUG = True"""
         expected = input_code
         self.run_and_assert_filepath(django_root, file_path, input_code, expected)
+        assert len(self.file_context.codemod_changes) == 0
 
     def test_no_manage_dot_py(self, tmpdir):
         django_root, settings_folder = self.create_dir_structure(tmpdir)
@@ -30,3 +32,4 @@ class TestDjangoDebugFlagOn(BaseDjangoCodemodTest):
         input_code = """DEBUG = True"""
         expected = input_code
         self.run_and_assert_filepath(django_root, file_path, input_code, expected)
+        assert len(self.file_context.codemod_changes) == 0
