@@ -39,19 +39,22 @@ class RemoveEmptyStringConcatenation(CSTTransformer):
     def handle_node(
         self, updated_node: cst.BinaryOperation | cst.ConcatenatedString
     ) -> cst.BaseExpression:
-        match updated_node.left:
-            # TODO f-string cases
-            case cst.SimpleString() if updated_node.left.raw_value == "":
-                match updated_node.right:
-                    case cst.SimpleString() if updated_node.right.raw_value == "":
-                        return cst.SimpleString(value='""')
-                    case _:
-                        return updated_node.right
-        match updated_node.right:
-            case cst.SimpleString() if updated_node.right.raw_value == "":
-                match updated_node.left:
-                    case cst.SimpleString() if updated_node.left.raw_value == "":
-                        return cst.SimpleString(value='""')
-                    case _:
-                        return updated_node.left
+        left = updated_node.left
+        right = updated_node.right
+        if self._is_empty_string_literal(left):
+            if self._is_empty_string_literal(right):
+                return cst.SimpleString(value='""')
+            return right
+        if self._is_empty_string_literal(right):
+            if self._is_empty_string_literal(left):
+                return cst.SimpleString(value='""')
+            return left
         return updated_node
+
+    def _is_empty_string_literal(self, node):
+        match node:
+            case cst.SimpleString() if node.raw_value == "":
+                return True
+            case cst.FormattedString() if not node.parts:
+                return True
+        return False

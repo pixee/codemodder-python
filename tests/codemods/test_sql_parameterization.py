@@ -37,7 +37,7 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         phone = input()
         connection = sqlite3.connect("my_db.db")
         cursor = connection.cursor()
-        cursor.execute("SELECT * from USERS WHERE name ='" + name + "' AND phone ='" + phone + "'" )
+        cursor.execute("SELECT * from USERS WHERE name ='" + name + r"' AND phone ='" + phone + "'" )
         """
         expected = """\
         import sqlite3
@@ -46,7 +46,7 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         phone = input()
         connection = sqlite3.connect("my_db.db")
         cursor = connection.cursor()
-        cursor.execute("SELECT * from USERS WHERE name =?" + " AND phone =?",  (name, phone, ))
+        cursor.execute("SELECT * from USERS WHERE name =?" + r" AND phone =?",  (name, phone, ))
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
@@ -158,6 +158,10 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
+
+class TestSQLQueryParameterizationFormattedString(BaseCodemodTest):
+    codemod = SQLQueryParameterization
+
     def test_formatted_string_simple(self, tmpdir):
         input_code = """\
         import sqlite3
@@ -173,7 +177,7 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         name = input()
         connection = sqlite3.connect("my_db.db")
         cursor = connection.cursor()
-        cursor.execute("SELECT * from USERS WHERE name=?", (name, ))
+        cursor.execute(f"SELECT * from USERS WHERE name=?", (name, ))
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
@@ -193,7 +197,7 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         name = input()
         connection = sqlite3.connect("my_db.db")
         cursor = connection.cursor()
-        cursor.execute("SELECT * from USERS WHERE name=?", ('user_{0}_admin'.format(name), ))
+        cursor.execute(f"SELECT * from USERS WHERE name=?", ('user_{0}_admin'.format(name), ))
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
@@ -213,26 +217,50 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         name = input()
         connection = sqlite3.connect("my_db.db")
         cursor = connection.cursor()
-        cursor.execute("SELECT * from USERS WHERE name=?", ('{0}_{1}'.format(name, 1+2), ))
+        cursor.execute(f"SELECT * from USERS WHERE name=?", ('{0}_{1}'.format(name, 1+2), ))
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
-    # negative tests below
-
-    def test_no_sql_keyword(self, tmpdir):
+    def test_formatted_string_nested(self, tmpdir):
         input_code = """\
         import sqlite3
 
-        def foo(self, cursor, name, phone):
-
-            a = "COLLECT * from USERS "
-            b = "WHERE name = '" + name
-            c = "' AND phone = '" + phone + "'"
-            return cursor.execute(a + b + c)
+        name = input()
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * from USERS WHERE name={f"'{name}'"}")
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
+        expected = """\
+        import sqlite3
+
+        name = input()
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * from USERS WHERE name={f"?"}", (name, ))
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
+    def test_formatted_string_concat_mixed(self, tmpdir):
+        input_code = """\
+        import sqlite3
+
+        name = input()
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * from USERS WHERE name='" + f"{name}_{b'123'}" "'")
+        """
+        expected = """\
+        import sqlite3
+
+        name = input()
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * from USERS WHERE name=?", ('{0}_{1}'.format(name, b'123'), ))
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_multiple_expressions_injection(self, tmpdir):
         input_code = """\
@@ -253,6 +281,36 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
+
+
+class TestSQLQueryParameterizationNegative(BaseCodemodTest):
+    codemod = SQLQueryParameterization
+
+    # negative tests below
+    def test_no_sql_keyword(self, tmpdir):
+        input_code = """\
+        import sqlite3
+
+        def foo(self, cursor, name, phone):
+
+            a = "COLLECT * from USERS "
+            b = "WHERE name = '" + name
+            c = "' AND phone = '" + phone + "'"
+            return cursor.execute(a + b + c)
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        assert len(self.file_context.codemod_changes) == 0
+
+    def test_wont_mess_with_byte_strings(self, tmpdir):
+        input_code = """\
+        import sqlite3
+
+        connection = sqlite3.connect("my_db.db")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * from USERS WHERE " + b"name ='" + str(1234) + b"'")
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        assert len(self.file_context.codemod_changes) == 0
 
     def test_wont_parameterize_literals(self, tmpdir):
         input_code = """\
