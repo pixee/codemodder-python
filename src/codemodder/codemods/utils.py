@@ -76,13 +76,7 @@ class ReplaceNodes(cst.CSTTransformer):
         self,
         replacements: dict[
             cst.CSTNode,
-            dict[
-                str,
-                cst.CSTNode
-                | cst.FlattenSentinel
-                | cst.RemovalSentinel
-                | dict[str, Any],
-            ],
+            cst.CSTNode | cst.FlattenSentinel | cst.RemovalSentinel | dict[str, Any],
         ],
     ):
         self.replacements = replacements

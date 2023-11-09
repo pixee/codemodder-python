@@ -1,5 +1,5 @@
 import re
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 import itertools
 import libcst as cst
 from libcst import FormattedString, SimpleWhitespace, ensure_type, matchers
@@ -38,10 +38,6 @@ from codemodder.file_context import FileContext
 
 parameter_token = "?"
 
-literal_number = matchers.Integer() | matchers.Float() | matchers.Imaginary()
-literal_string = matchers.SimpleString()
-literal = literal_number | literal_string
-
 quote_pattern = re.compile(r"(?<!\\)\\'|(?<!\\)'")
 raw_quote_pattern = re.compile(r"(?<!\\)'")
 
@@ -78,7 +74,8 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
         *codemod_args,
     ) -> None:
         self.changed_nodes: dict[
-            cst.CSTNode, cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel
+            cst.CSTNode,
+            cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel | dict[str, Any],
         ] = {}
         BaseCodemod.__init__(self, file_context, *codemod_args)
         UtilsMixin.__init__(self, [])
@@ -237,7 +234,7 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
 
         new_raw_value = raw_value[quote_span.end() :]
         append_raw_value = raw_value[: quote_span.start()]
-        match end:
+        match current_end:
             case cst.SimpleString():
                 # gather string up to quote to parameter
                 if append_raw_value:
