@@ -75,14 +75,17 @@ class BaseCodemod:
         # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
         return self.get_metadata(self.METADATA_DEPENDENCIES[0], node)
 
-    def add_change(self, node, description):
+    def add_change(self, node, description: str, start: bool = True):
         position = self.node_position(node)
-        self.add_change_from_position(position, description)
+        self.add_change_from_position(position, description, start)
 
-    def add_change_from_position(self, position: CodeRange, description):
+    def add_change_from_position(
+        self, position: CodeRange, description: str, start: bool = True
+    ):
+        lineno = position.start.line if start else position.end.line
         self.file_context.codemod_changes.append(
             Change(
-                lineNumber=position.start.line,
+                lineNumber=lineno,
                 description=description,
             )
         )

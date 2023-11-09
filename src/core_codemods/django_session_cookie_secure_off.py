@@ -1,12 +1,7 @@
-from typing import List
 import libcst as cst
-from libcst.codemod import Codemod, CodemodContext
-from codemodder.change import Change
-from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.codemods.api import SemgrepCodemod
 from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.utils import is_django_settings_file
-from codemodder.file_context import FileContext
+from codemodder.codemods.utils import is_django_settings_file, is_assigned_to_True
 
 
 class DjangoSessionCookieSecureOff(SemgrepCodemod):
@@ -65,12 +60,7 @@ class DjangoSessionCookieSecureOff(SemgrepCodemod):
             # something else and we changed it in `leave_Assign`.
             return updated_node
 
-        # line_number is the end of the module where we will insert the new flag.
-        pos_to_match = self.node_position(original_node)
-        line_number = pos_to_match.end.line
-        self.file_context.codemod_changes.append(
-            Change(line_number, self.CHANGE_DESCRIPTION)
-        )
+        self.add_change(original_node, self.CHANGE_DESCRIPTION, start=False)
         final_line = cst.parse_statement("SESSION_COOKIE_SECURE = True")
         new_body = updated_node.body + (final_line,)
         return updated_node.with_changes(body=new_body)
@@ -102,11 +92,4 @@ def is_session_cookie_secure(original_node: cst.Assign):
     target_var = original_node.targets[0].target
     return (
         isinstance(target_var, cst.Name) and target_var.value == "SESSION_COOKIE_SECURE"
-    )
-
-
-def is_assigned_to_True(original_node: cst.Assign):
-    return (
-        isinstance(original_node.value, cst.Name)
-        and original_node.value.value == "True"
     )
