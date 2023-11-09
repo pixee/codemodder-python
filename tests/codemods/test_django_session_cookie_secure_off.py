@@ -18,6 +18,7 @@ class TestDjangoSessionSecureCookieOff(BaseDjangoCodemodTest):
         input_code = """SESSION_COOKIE_SECURE = True"""
         expected = input_code
         self.run_and_assert_filepath(django_root, file_path, input_code, expected)
+        assert len(self.file_context.codemod_changes) == 0
 
     def test_no_manage_dot_py(self, tmpdir):
         django_root, settings_folder = self.create_dir_structure(tmpdir)
@@ -25,6 +26,7 @@ class TestDjangoSessionSecureCookieOff(BaseDjangoCodemodTest):
         input_code = """SESSION_COOKIE_SECURE = True"""
         expected = input_code
         self.run_and_assert_filepath(django_root, file_path, input_code, expected)
+        assert len(self.file_context.codemod_changes) == 0
 
     def test_settings_dot_py_secure_true(self, tmpdir):
         django_root, settings_folder = self.create_dir_structure(tmpdir)
@@ -34,6 +36,7 @@ class TestDjangoSessionSecureCookieOff(BaseDjangoCodemodTest):
 SESSION_COOKIE_SECURE = True
 """
         self.run_and_assert_filepath(django_root, file_path, input_code, input_code)
+        assert len(self.file_context.codemod_changes) == 0
 
     @pytest.mark.parametrize("value", ["False", "gibberish"])
     def test_settings_dot_py_secure_bad(self, tmpdir, value):
@@ -47,6 +50,7 @@ SESSION_COOKIE_SECURE = {value}
 SESSION_COOKIE_SECURE = True
 """
         self.run_and_assert_filepath(django_root, file_path, input_code, expected)
+        assert len(self.file_context.codemod_changes) == 1
 
     def test_settings_dot_py_secure_missing(self, tmpdir):
         django_root, settings_folder = self.create_dir_structure(tmpdir)
@@ -58,3 +62,4 @@ SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 """
         self.run_and_assert_filepath(django_root, file_path, input_code, expected)
+        assert len(self.file_context.codemod_changes) == 1
