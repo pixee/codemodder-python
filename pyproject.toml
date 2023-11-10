@@ -17,7 +17,7 @@ dependencies = [
     "PyYAML~=6.0.0",
     "semgrep~=1.48.0",
     "toml~=0.10.2",
-    "wrapt~=1.15.0",
+    "wrapt~=1.16.0",
 ]
 
 [project.scripts]
