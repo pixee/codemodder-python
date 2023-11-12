@@ -37,12 +37,16 @@ def run(
         )
         command.extend(map(str, files_to_analyze or [execution_context.directory]))
         logger.debug("semgrep command: `%s`", " ".join(command))
-        subprocess.run(
+        call = subprocess.run(
             command,
             shell=False,
-            check=True,
+            check=False,
             stdout=None if execution_context.verbose else subprocess.PIPE,
             stderr=None if execution_context.verbose else subprocess.PIPE,
         )
+        if call.returncode != 0:
+            if not execution_context.verbose:
+                logger.error("captured semgrep stderr: %s", call.stderr)
+            raise subprocess.CalledProcessError(call.returncode, command)
         results = SarifResultSet.from_sarif(temp_sarif_file.name)
         return results
