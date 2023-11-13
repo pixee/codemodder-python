@@ -19,9 +19,8 @@ class RemoveEmptyStringConcatenation(CSTTransformer):
     ]:
         expr = original_node.expression
         match expr:
-            case SimpleString():  # type: ignore
-                if expr.raw_value == "":
-                    return RemovalSentinel.REMOVE
+            case SimpleString() if expr.raw_value == "":  # type: ignore
+                return RemovalSentinel.REMOVE
         return updated_node
 
     def leave_BinaryOperation(
