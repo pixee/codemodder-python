@@ -195,6 +195,51 @@ def log_report(context, argv, elapsed_ms, files_to_analyze):
     logger.info("  write:       %s ms", context.timer.get_time_ms("write"))
 
 
+def apply_codemods(
+    context: CodemodExecutionContext,
+    codemods_to_run: list[CodemodExecutorWrapper],
+    semgrep_results: ResultSet,
+    files_to_analyze: list[Path],
+    argv,
+):
+    log_section("scanning")
+
+    if not files_to_analyze:
+        logger.info("no files to scan")
+        return
+
+    if not codemods_to_run:
+        logger.info("no codemods to run")
+        return
+
+    semgrep_finding_ids = semgrep_results.all_rule_ids()
+
+    # run codemods one at a time making sure to respect the given sequence
+    for codemod in codemods_to_run:
+        # Unfortunately the IDs from semgrep are not fully specified
+        # TODO: eventually we need to be able to use fully specified IDs here
+        if codemod.is_semgrep and codemod.name not in semgrep_finding_ids:
+            logger.debug(
+                "no results from semgrep for %s, skipping analysis",
+                codemod.id,
+            )
+            continue
+
+        logger.info("running codemod %s", codemod.id)
+        semgrep_files = semgrep_results.files_for_rule(codemod.name)
+        # Non-semgrep codemods ignore the semgrep results
+        results = codemod.apply(context, semgrep_files)
+        analyze_files(
+            context,
+            files_to_analyze,
+            codemod,
+            results,
+            argv,
+        )
+        context.process_dependencies(codemod.id)
+        context.log_changes(codemod.id)
+
+
 def run(original_args) -> int:
     start = datetime.datetime.now()
 
@@ -229,10 +274,6 @@ def run(original_args) -> int:
     codemods_to_run = codemod_registry.match_codemods(
         argv.codemod_include, argv.codemod_exclude
     )
-    if not codemods_to_run:
-        # XXX: sarif files given on the command line are currently not used by any codemods
-        logger.error("no codemods to run")
-        return 0
 
     log_section("setup")
     log_list(logging.INFO, "running", codemods_to_run, predicate=lambda c: c.id)
@@ -242,41 +283,19 @@ def run(original_args) -> int:
     files_to_analyze: list[Path] = match_files(
         context.directory, argv.path_exclude, argv.path_include
     )
-    if not files_to_analyze:
-        logger.error("no files matched.")
-        return 0
 
     full_names = [str(path) for path in files_to_analyze]
     log_list(logging.DEBUG, "matched files", full_names)
 
     semgrep_results: ResultSet = find_semgrep_results(context, codemods_to_run)
-    semgrep_finding_ids = semgrep_results.all_rule_ids()
 
-    log_section("scanning")
-    # run codemods one at a time making sure to respect the given sequence
-    for codemod in codemods_to_run:
-        # Unfortunately the IDs from semgrep are not fully specified
-        # TODO: eventually we need to be able to use fully specified IDs here
-        if codemod.is_semgrep and codemod.name not in semgrep_finding_ids:
-            logger.debug(
-                "no results from semgrep for %s, skipping analysis",
-                codemod.id,
-            )
-            continue
-
-        logger.info("running codemod %s", codemod.id)
-        semgrep_files = semgrep_results.files_for_rule(codemod.name)
-        # Non-semgrep codemods ignore the semgrep results
-        results = codemod.apply(context, semgrep_files)
-        analyze_files(
-            context,
-            files_to_analyze,
-            codemod,
-            results,
-            argv,
-        )
-        context.process_dependencies(codemod.id)
-        context.log_changes(codemod.id)
+    apply_codemods(
+        context,
+        codemods_to_run,
+        semgrep_results,
+        files_to_analyze,
+        argv,
+    )
 
     results = context.compile_results(codemods_to_run)
 
