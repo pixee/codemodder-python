@@ -42,7 +42,7 @@ deserialized_data = yaml.load(data, Loader=yaml.{loader})
 
         expected = """import yaml
 data = b'!!python/object/apply:subprocess.Popen \\n- ls'
-deserialized_data = yaml.load(data, yaml.SafeLoader)
+deserialized_data = yaml.load(data, Loader=yaml.SafeLoader)
 """
         self.run_and_assert(tmpdir, input_code, expected)
 
@@ -57,7 +57,7 @@ deserialized_data = yam.load(data, Loader=Loader)
 from yaml import Loader
 
 data = b'!!python/object/apply:subprocess.Popen \\n- ls'
-deserialized_data = yam.load(data, yam.SafeLoader)
+deserialized_data = yam.load(data, Loader=yam.SafeLoader)
 """
         self.run_and_assert(tmpdir, input_code, expected)
 
