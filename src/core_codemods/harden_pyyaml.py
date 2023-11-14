@@ -60,6 +60,8 @@ class HardenPyyaml(SemgrepCodemod, NameResolutionMixin):
             self.add_needed_import(self._module_name)
         new_args = [
             *updated_node.args[:1],
-            self.parse_expression(f"{maybe_name}.SafeLoader"),
+            updated_node.args[1].with_changes(
+                value=self.parse_expression(f"{maybe_name}.SafeLoader")
+            ),
         ]
         return self.update_arg_target(updated_node, new_args)
