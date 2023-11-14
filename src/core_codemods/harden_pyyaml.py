@@ -31,8 +31,11 @@ class HardenPyyaml(SemgrepCodemod, NameResolutionMixin):
                       - metavariable-pattern:
                           metavariable: $ARG
                           patterns:
-                            - pattern-not:
-                                pattern: yaml.SafeLoader
+                            - pattern-either:
+                                - pattern: yaml.Loader
+                                - pattern: yaml.BaseLoader
+                                - pattern: yaml.FullLoader
+                                - pattern: yaml.UnsafeLoader
                   - patterns:
                       - pattern: yaml.load(...)
                       - pattern-inside: |
@@ -42,8 +45,11 @@ class HardenPyyaml(SemgrepCodemod, NameResolutionMixin):
                       - metavariable-pattern:
                           metavariable: $ARG
                           patterns:
-                            - pattern-not:
-                                pattern: yaml.SafeLoader
+                            - pattern-either:
+                                - pattern: yaml.Loader
+                                - pattern: yaml.BaseLoader
+                                - pattern: yaml.FullLoader
+                                - pattern: yaml.UnsafeLoader
 
         """
 
