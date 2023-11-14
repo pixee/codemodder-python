@@ -16,42 +16,40 @@ class BaseType(Enum):
     STRING = 3
     BYTES = 4
 
-    @classmethod
-    # pylint: disable-next=R0911
-    def infer_expression_type(cls, node: cst.BaseExpression) -> Optional["BaseType"]:
-        """
-        Tries to infer if the type of a given expression is one of the base literal types.
-        """
-        # The current implementation could be enhanced with a few more cases
-        match node:
-            case cst.Integer() | cst.Imaginary() | cst.Float() | cst.Call(
-                func=cst.Name("int")
-            ) | cst.Call(func=cst.Name("float")) | cst.Call(
-                func=cst.Name("abs")
-            ) | cst.Call(
-                func=cst.Name("len")
-            ):
-                return BaseType.NUMBER
-            case cst.Call(name=cst.Name("list")) | cst.List() | cst.ListComp():
-                return BaseType.LIST
-            case cst.Call(func=cst.Name("str")) | cst.FormattedString():
-                return BaseType.STRING
-            case cst.SimpleString():
-                if "b" in node.prefix.lower():
-                    return BaseType.BYTES
-                return BaseType.STRING
-            case cst.ConcatenatedString():
-                return cls.infer_expression_type(node.left)
-            case cst.BinaryOperation(operator=cst.Add()):
-                return cls.infer_expression_type(
-                    node.left
-                ) or cls.infer_expression_type(node.right)
-            case cst.IfExp():
-                if_true = cls.infer_expression_type(node.body)
-                or_else = cls.infer_expression_type(node.orelse)
-                if if_true == or_else:
-                    return if_true
-        return None
+
+# pylint: disable-next=R0911
+def infer_expression_type(node: cst.BaseExpression) -> Optional[BaseType]:
+    """
+    Tries to infer if the resulting type of a given expression is one of the base literal types.
+    """
+    # The current implementation covers some common cases and is in no way complete
+    match node:
+        case cst.Integer() | cst.Imaginary() | cst.Float() | cst.Call(
+            func=cst.Name("int")
+        ) | cst.Call(func=cst.Name("float")) | cst.Call(
+            func=cst.Name("abs")
+        ) | cst.Call(
+            func=cst.Name("len")
+        ):
+            return BaseType.NUMBER
+        case cst.Call(name=cst.Name("list")) | cst.List() | cst.ListComp():
+            return BaseType.LIST
+        case cst.Call(func=cst.Name("str")) | cst.FormattedString():
+            return BaseType.STRING
+        case cst.SimpleString():
+            if "b" in node.prefix.lower():
+                return BaseType.BYTES
+            return BaseType.STRING
+        case cst.ConcatenatedString():
+            return infer_expression_type(node.left)
+        case cst.BinaryOperation(operator=cst.Add()):
+            return infer_expression_type(node.left) or infer_expression_type(node.right)
+        case cst.IfExp():
+            if_true = infer_expression_type(node.body)
+            or_else = infer_expression_type(node.orelse)
+            if if_true == or_else:
+                return if_true
+    return None
 
 
 class SequenceExtension:
