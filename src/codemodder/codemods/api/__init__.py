@@ -12,6 +12,8 @@ from codemodder.codemods.base_codemod import (
     CodemodMetadata,
     BaseCodemod as _BaseCodemod,
     SemgrepCodemod as _SemgrepCodemod,
+    # Make this available via the simplified API
+    ReviewGuidance,  # pylint: disable=unused-import
 )
 
 from codemodder.codemods.base_visitor import BaseTransformer
