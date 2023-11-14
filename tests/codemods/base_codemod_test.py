@@ -68,7 +68,7 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
 
     def results_by_id_filepath(self, input_code, file_path):
         with open(file_path, "w", encoding="utf-8") as tmp_file:
-            tmp_file.write(input_code)
+            tmp_file.write(dedent(input_code))
 
         name = self.codemod.name()
         results = self.registry.match_codemods(codemod_include=[name])
@@ -82,7 +82,7 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
             registry=mock.MagicMock(),
             repo_manager=mock.MagicMock(),
         )
-        input_tree = cst.parse_module(input_code)
+        input_tree = cst.parse_module(dedent(input_code))
         all_results = self.results_by_id_filepath(input_code, file_path)
         results = all_results.results_for_rule_and_file(self.codemod.name(), file_path)
         self.file_context = FileContext(
@@ -99,7 +99,7 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         )
         output_tree = command_instance.transform_module(input_tree)
 
-        assert output_tree.code == expected
+        assert output_tree.code == dedent(expected)
 
 
 class BaseDjangoCodemodTest(BaseSemgrepCodemodTest):
