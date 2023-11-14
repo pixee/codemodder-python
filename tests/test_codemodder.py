@@ -9,14 +9,21 @@ from codemodder.registry import load_registered_codemods
 from codemodder.result import ResultSet
 
 
+@pytest.fixture(autouse=True, scope="module")
+def disable_write_report():
+    """Override fixture from conftest.py"""
+
+
 class TestRun:
     @mock.patch("libcst.parse_module")
-    @mock.patch("codemodder.codemodder.logger.error")
-    def test_no_files_matched(self, error_log, mock_parse):
+    def test_no_files_matched(self, mock_parse, tmpdir):
+        codetf = tmpdir / "result.codetf"
+        assert not codetf.exists()
+
         args = [
             "tests/samples/",
             "--output",
-            "here.txt",
+            str(codetf),
             "--codemod-include=url-sandbox",
             "--path-exclude",
             "*py",
@@ -24,10 +31,8 @@ class TestRun:
         res = run(args)
         assert res == 0
 
-        error_log.assert_called()
-        assert error_log.call_args_list[0][0][0] == "no files matched."
-
         mock_parse.assert_not_called()
+        assert codetf.exists()
 
     @mock.patch("libcst.parse_module", side_effect=Exception)
     @mock.patch("codemodder.codemodder.report_default")
@@ -63,16 +68,20 @@ class TestRun:
 
     @mock.patch("codemodder.codemodder.update_code")
     @mock.patch("codemodder.codemods.base_codemod.semgrep_run", side_effect=semgrep_run)
-    def test_dry_run(self, _, mock_update_code):
+    def test_dry_run(self, _, mock_update_code, tmpdir):
+        codetf = tmpdir / "result.codetf"
         args = [
             "tests/samples/",
             "--output",
-            "here.txt",
+            str(codetf),
             "--dry-run",
         ]
 
+        assert not codetf.exists()
+
         res = run(args)
         assert res == 0
+        assert codetf.exists()
 
         mock_update_code.assert_not_called()
 
@@ -99,23 +108,31 @@ class TestRun:
         assert len(results_by_codemod) == len(registry.codemods)
 
     @mock.patch("codemodder.codemods.base_codemod.semgrep_run")
-    def test_no_codemods_to_run(self, mock_semgrep_run):
+    def test_no_codemods_to_run(self, mock_semgrep_run, tmpdir):
+        codetf = tmpdir / "result.codetf"
+        assert not codetf.exists()
+
         registry = load_registered_codemods()
         names = ",".join(registry.names)
         args = [
             "tests/samples/",
             "--output",
-            "here.txt",
+            str(codetf),
             f"--codemod-exclude={names}",
         ]
 
         exit_code = run(args)
         assert exit_code == 0
         mock_semgrep_run.assert_not_called()
+        assert codetf.exists()
 
     @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
     @mock.patch("codemodder.context.CodemodExecutionContext.compile_results")
-    def test_run_codemod_name_or_id(self, mock_compile_results, codemod):
+    @mock.patch("codemodder.codemodder.report_default")
+    def test_run_codemod_name_or_id(
+        self, report_default, mock_compile_results, codemod
+    ):
+        del report_default
         args = [
             "tests/samples/",
             "--output",
@@ -129,7 +146,9 @@ class TestRun:
 
 
 class TestExitCode:
-    def test_success_0(self):
+    @mock.patch("codemodder.codemodder.report_default")
+    def test_success_0(self, mock_report):
+        del mock_report
         args = [
             "tests/samples/",
             "--output",
@@ -142,7 +161,9 @@ class TestExitCode:
         exit_code = run(args)
         assert exit_code == 0
 
-    def test_bad_project_dir_1(self):
+    @mock.patch("codemodder.codemodder.report_default")
+    def test_bad_project_dir_1(self, mock_report):
+        del mock_report
         args = [
             "bad/path/",
             "--output",
@@ -153,7 +174,9 @@ class TestExitCode:
         exit_code = run(args)
         assert exit_code == 1
 
-    def test_conflicting_include_exclude(self):
+    @mock.patch("codemodder.codemodder.report_default")
+    def test_conflicting_include_exclude(self, mock_report):
+        del mock_report
         args = [
             "tests/samples/",
             "--output",
@@ -167,7 +190,9 @@ class TestExitCode:
             run(args)
         assert err.value.args[0] == 3
 
-    def test_bad_codemod_name(self):
+    @mock.patch("codemodder.codemodder.report_default")
+    def test_bad_codemod_name(self, mock_report):
+        del mock_report
         bad_codemod = "doesntexist"
         args = [
             "tests/samples/",
