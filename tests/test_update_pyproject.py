@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 from codemodder.dependency import Requirement
-from codemodder.update_pyproject import update_pyproject_dependencies
+from codemodder.update_pyproject import PyprojectWriter
 
 
 def test_update_pyproject_dependencies(tmpdir):
@@ -25,10 +25,8 @@ def test_update_pyproject_dependencies(tmpdir):
     pyproject_toml = tmpdir.join("pyproject.toml")
     pyproject_toml.write(dedent(orig_pyproject))
 
-    update_pyproject_dependencies(
-        pyproject_toml,
-        [Requirement("defusedxml~=0.7.1"), Requirement("security~=1.2.0")],
-    )
+    writer = PyprojectWriter(pyproject_toml)
+    writer.write([Requirement("defusedxml~=0.7.1"), Requirement("security~=1.2.0")])
 
     updated_pyproject = """\
         [build-system]

@@ -1,20 +1,22 @@
-from pathlib import Path
+from typing import Optional
 
 import tomlkit
 
 from codemodder.dependency import Requirement
+from codemodder.dependency_writer import DependencyWriter, ChangeSet
 
 
-def update_pyproject_dependencies(
-    pyproject_path: str | Path,
-    dependencies: list[Requirement],
-    dry_run: bool = False,
-):
-    with open(pyproject_path) as f:
-        pyproject = tomlkit.load(f)
+class PyprojectWriter(DependencyWriter):
+    def write(
+        self, dependencies: list[Requirement], dry_run: bool = False
+    ) -> Optional[ChangeSet]:
+        with open(self.path) as f:
+            pyproject = tomlkit.load(f)
 
-    pyproject["project"]["dependencies"].extend(map(str, dependencies))
+        pyproject["project"]["dependencies"].extend(map(str, dependencies))
 
-    if not dry_run:
-        with open(pyproject_path, "w") as f:
-            tomlkit.dump(pyproject, f)
+        if not dry_run:
+            with open(self.path, "w") as f:
+                tomlkit.dump(pyproject, f)
+
+        return None
