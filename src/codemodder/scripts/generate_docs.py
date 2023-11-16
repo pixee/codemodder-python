@@ -179,6 +179,9 @@ N/A
     return output
 
 
+SKIP_DOCS = ["order-imports", "unused-imports"]
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Generate public docs for registered codemods."
@@ -192,7 +195,7 @@ def main():
 
     registry = load_registered_codemods()
     for codemod in registry.codemods:
-        if codemod.name == "order-imports":
+        if codemod.name in SKIP_DOCS:
             continue
 
         doc = generate_docs(codemod)
