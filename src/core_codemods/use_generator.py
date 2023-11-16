@@ -1,9 +1,10 @@
 import libcst as cst
 
 from codemodder.codemods.api import BaseCodemod, ReviewGuidance
+from codemodder.codemods.utils_mixin import NameResolutionMixin
 
 
-class UseGenerator(BaseCodemod):
+class UseGenerator(BaseCodemod, NameResolutionMixin):
     NAME = "use-generator"
     SUMMARY = "Use generators for lazy evaluation"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
@@ -28,22 +29,23 @@ class UseGenerator(BaseCodemod):
             # NOTE: could also support things like `list` and `tuple`
             # but it's a less compelling use case
             case cst.Name("any" | "all" | "sum" | "min" | "max"):
-                match original_node.args[0].value:
-                    case cst.ListComp(elt=elt, for_in=for_in):
-                        self.add_change(original_node, self.CHANGE_DESCRIPTION)
-                        return updated_node.with_changes(
-                            args=[
-                                cst.Arg(
-                                    value=cst.GeneratorExp(
-                                        elt=elt,  # type: ignore
-                                        for_in=for_in,  # type: ignore
-                                        # No parens necessary since they are
-                                        # already included by the call expr itself
-                                        lpar=[],
-                                        rpar=[],
+                if self.is_builtin_function(original_node):
+                    match original_node.args[0].value:
+                        case cst.ListComp(elt=elt, for_in=for_in):
+                            self.add_change(original_node, self.CHANGE_DESCRIPTION)
+                            return updated_node.with_changes(
+                                args=[
+                                    cst.Arg(
+                                        value=cst.GeneratorExp(
+                                            elt=elt,  # type: ignore
+                                            for_in=for_in,  # type: ignore
+                                            # No parens necessary since they are
+                                            # already included by the call expr itself
+                                            lpar=[],
+                                            rpar=[],
+                                        )
                                     )
-                                )
-                            ],
-                        )
+                                ],
+                            )
 
         return original_node
