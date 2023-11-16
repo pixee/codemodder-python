@@ -12,38 +12,48 @@ class TestUrlSandbox(BaseSemgrepCodemodTest):
         assert self.codemod.name() == "url-sandbox"
 
     def test_import_requests(self, tmpdir):
-        input_code = """import requests
+        input_code = """
+        import requests
 
-requests.get("www.google.com")
-var = "hello"
-"""
-        expected = """from security import safe_requests
+        url = input()
+        requests.get(url)
+        var = "hello"
+        """
+        expected = """
+        from security import safe_requests
 
-safe_requests.get("www.google.com")
-var = "hello"
-"""
+        url = input()
+        safe_requests.get(url)
+        var = "hello"
+        """
         self.run_and_assert(tmpdir, input_code, expected)
         self.assert_dependency(Security)
 
     def test_from_requests(self, tmpdir):
-        input_code = """from requests import get
+        input_code = """
+        from requests import get
 
-get("www.google.com")
-var = "hello"
-"""
-        expected = """from security.safe_requests import get
+        url = input()
+        get(url)
+        var = "hello"
+        """
+        expected = """
+        from security.safe_requests import get
 
-get("www.google.com")
-var = "hello"
-"""
+        url = input()
+        get(url)
+        var = "hello"
+        """
         self.run_and_assert(tmpdir, input_code, expected)
         self.assert_dependency(Security)
 
     def test_requests_nameerror(self, tmpdir):
-        input_code = """requests.get("www.google.com")
+        input_code = """
+        url = input()
+        requests.get(url)
 
-import requests
-"""
+        import requests
+        """
         expected = input_code
         self.run_and_assert(tmpdir, input_code, expected)
 
@@ -51,30 +61,38 @@ import requests
         "input_code,expected",
         [
             (
-                """import requests
-import csv
-requests.get("www.google.com")
-csv.excel
-""",
-                """import csv
-from security import safe_requests
+                """
+                import requests
+                import csv
+                url = input()
+                requests.get(url)
+                csv.excel
+                """,
+                """
+                import csv
+                from security import safe_requests
 
-safe_requests.get("www.google.com")
-csv.excel
-""",
+                url = input()
+                safe_requests.get(url)
+                csv.excel
+                """,
             ),
             (
-                """import requests
-from csv import excel
-requests.get("www.google.com")
-excel
-""",
-                """from csv import excel
-from security import safe_requests
+                """
+                import requests
+                from csv import excel
+                url = input()
+                requests.get(url)
+                excel
+                """,
+                """
+                from csv import excel
+                from security import safe_requests
 
-safe_requests.get("www.google.com")
-excel
-""",
+                url = input()
+                safe_requests.get(url)
+                excel
+                """,
             ),
         ],
     )
@@ -86,61 +104,100 @@ excel
         # Test that `requests` import isn't removed if code uses part of the requests
         # library that isn't part of our codemods. If we add the function as one of
         # our codemods, this test would change.
-        input_code = """import requests
+        input_code = """
+        import requests
 
-requests.get("www.google.com")
-requests.status_codes.codes.FORBIDDEN"""
+        url = input()
+        requests.get(url)
+        requests.status_codes.codes.FORBIDDEN
+        """
 
-        expected = """import requests
-from security import safe_requests
+        expected = """
+        import requests
+        from security import safe_requests
 
-safe_requests.get("www.google.com")
-requests.status_codes.codes.FORBIDDEN"""
+        url = input()
+        safe_requests.get(url)
+        requests.status_codes.codes.FORBIDDEN
+        """
 
         self.run_and_assert(tmpdir, input_code, expected)
         self.assert_dependency(Security)
 
     def test_custom_get(self, tmpdir):
-        input_code = """from app_funcs import get
+        input_code = """
+        from app_funcs import get
 
-get("www.google.com")"""
+        url = input()
+        get(url)
+        """
         expected = input_code
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_ambiguous_get(self, tmpdir):
-        input_code = """from requests import get
+        input_code = """
+        from requests import get
 
-def get(url):
-    pass
+        def get(url):
+            pass
 
-get("www.google.com")"""
+        url = input()
+        get(url)
+        """
         expected = input_code
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_from_requests_with_alias(self, tmpdir):
-        input_code = """from requests import get as got
+        input_code = """
+        from requests import get as got
 
-got("www.google.com")
-var = "hello"
-"""
-        expected = """from security.safe_requests import get as got
+        url = input()
+        got(url)
+        var = "hello"
+        """
+        expected = """
+        from security.safe_requests import get as got
 
-got("www.google.com")
-var = "hello"
-"""
+        url = input()
+        got(url)
+        var = "hello"
+        """
         self.run_and_assert(tmpdir, input_code, expected)
         self.assert_dependency(Security)
 
     def test_requests_with_alias(self, tmpdir):
-        input_code = """import requests as req
+        input_code = """
+        import requests as req
 
-req.get("www.google.com")
-var = "hello"
-"""
-        expected = """from security import safe_requests
+        url = input()
+        req.get(url)
+        var = "hello"
+        """
+        expected = """
+        from security import safe_requests
 
-safe_requests.get("www.google.com")
-var = "hello"
-"""
+        url = input()
+        safe_requests.get(url)
+        var = "hello"
+        """
         self.run_and_assert(tmpdir, input_code, expected)
         self.assert_dependency(Security)
+
+    def test_ignore_hardcoded(self, tmpdir):
+        expected = input_code = """
+        import requests
+
+        requests.get("www.google.com")
+        """
+
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_ignore_hardcoded_from_variable(self, tmpdir):
+        expected = input_code = """
+        import requests
+
+        URL = "www.google.com"
+        requests.get(URL)
+        """
+
+        self.run_and_assert(tmpdir, input_code, expected)
