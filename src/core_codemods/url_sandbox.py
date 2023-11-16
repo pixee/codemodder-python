@@ -111,42 +111,49 @@ class FindRequestCallsAndImports(BaseVisitor):
 
     def leave_Call(self, original_node: cst.Call):
         pos_to_match = self.node_position(original_node)
-        if self.filter_by_result(
-            pos_to_match
-        ) and self.filter_by_path_includes_or_excludes(pos_to_match):
-            line_number = pos_to_match.start.line
-            # case get(...)
-            if matchers.matches(original_node, matchers.Call(func=matchers.Name())):
-                # find if get(...) comes from an from requests import get
-                maybe_node = self.find_single_assignment(original_node)
-                if maybe_node and matchers.matches(maybe_node, matchers.ImportFrom()):
-                    self.nodes_to_change.update(
-                        {
-                            maybe_node: cst.ImportFrom(
-                                module=cst.parse_expression(
-                                    f"{Security.name}.{replacement_import}"
-                                ),
-                                names=maybe_node.names,
-                            )
-                        }
-                    )
-                    self.changes_in_file.append(
-                        Change(line_number, UrlSandbox.CHANGE_DESCRIPTION)
-                    )
+        if not (
+            self.filter_by_result(pos_to_match)
+            and self.filter_by_path_includes_or_excludes(pos_to_match)
+        ):
+            return
 
-            # case req.get(...)
-            else:
+        line_number = pos_to_match.start.line
+        match original_node.args[0].value:
+            case cst.SimpleString():
+                return
+
+        # case get(...)
+        if matchers.matches(original_node, matchers.Call(func=matchers.Name())):
+            # find if get(...) comes from an from requests import get
+            maybe_node = self.find_single_assignment(original_node)
+            if maybe_node and matchers.matches(maybe_node, matchers.ImportFrom()):
                 self.nodes_to_change.update(
                     {
-                        original_node: cst.Call(
-                            func=cst.parse_expression(replacement_import + ".get"),
-                            args=original_node.args,
+                        maybe_node: cst.ImportFrom(
+                            module=cst.parse_expression(
+                                f"{Security.name}.{replacement_import}"
+                            ),
+                            names=maybe_node.names,
                         )
                     }
                 )
                 self.changes_in_file.append(
                     Change(line_number, UrlSandbox.CHANGE_DESCRIPTION)
                 )
+
+        # case req.get(...)
+        else:
+            self.nodes_to_change.update(
+                {
+                    original_node: cst.Call(
+                        func=cst.parse_expression(replacement_import + ".get"),
+                        args=original_node.args,
+                    )
+                }
+            )
+            self.changes_in_file.append(
+                Change(line_number, UrlSandbox.CHANGE_DESCRIPTION)
+            )
 
     def _find_assignments(self, node: CSTNode):
         """
