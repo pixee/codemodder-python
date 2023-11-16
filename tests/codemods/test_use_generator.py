@@ -23,7 +23,6 @@ class TestUseGenerator(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, original_code, expected)
 
-    @pytest.mark.xfail(reason="TODO: check for built-in names")
     def test_not_global_function(self, tmpdir):
         expected = original_code = """
         from foo import any

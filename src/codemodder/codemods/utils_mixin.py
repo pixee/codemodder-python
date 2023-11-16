@@ -5,6 +5,7 @@ from libcst.helpers import get_full_name_for_node
 from libcst.metadata import (
     Assignment,
     BaseAssignment,
+    BuiltinAssignment,
     ImportAssignment,
     ScopeProvider,
 )
@@ -148,6 +149,15 @@ class NameResolutionMixin(MetadataDependent):
         if len(assignments) == 1:
             return next(iter(assignments))
         return None
+
+    def is_builtin_function(self, node: cst.Call):
+        """
+        Given a `Call` node, find if it refers to a builtin function
+        """
+        maybe_assignment = self.find_single_assignment(node)
+        if maybe_assignment and isinstance(maybe_assignment, BuiltinAssignment):
+            return matchers.matches(node.func, matchers.Name())
+        return False
 
 
 def iterate_left_expressions(node: cst.BaseExpression):
