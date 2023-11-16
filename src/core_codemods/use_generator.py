@@ -6,7 +6,7 @@ from codemodder.codemods.utils_mixin import NameResolutionMixin
 
 class UseGenerator(BaseCodemod, NameResolutionMixin):
     NAME = "use-generator"
-    SUMMARY = "Use generators for lazy evaluation"
+    SUMMARY = "Use Generator Expressions Instead of List Comprehensions"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     DESCRIPTION = "Replace list comprehension with generator expression"
     REFERENCES = [
