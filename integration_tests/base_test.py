@@ -4,12 +4,15 @@ import json
 import os
 import pathlib
 import subprocess
+import sys
 
 from codemodder import __version__
 from codemodder import registry
 from tests.validations import execute_code
 
 SAMPLES_DIR = "tests/samples"
+# Enable import of test modules from test directory
+sys.path.append(SAMPLES_DIR)
 
 
 class CleanRepoMixin:

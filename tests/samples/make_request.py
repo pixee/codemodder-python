@@ -1,4 +1,6 @@
+from test_sources import untrusted_data
 import requests
 
-requests.get("https://www.google.com")
+url = untrusted_data()
+requests.get(url)
 var = "hello"
