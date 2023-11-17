@@ -2,10 +2,10 @@ from functools import cached_property
 from pathlib import Path
 from typing import Optional
 
-import difflib
 from packaging.requirements import Requirement
 
 from codemodder.change import Action, Change, ChangeSet, PackageAction, Result
+from codemodder.diff import create_diff
 from codemodder.dependency import Dependency
 
 
@@ -38,13 +38,18 @@ class DependencyManager:
         if not (self.dependency_file and self._new_requirements):
             return None
 
-        updated = self._lines + self.new_requirements + ["\n"]
+        original_lines = self._lines.copy()
+        if not original_lines[-1].endswith("\n"):
+            original_lines[-1] += "\n"
 
-        diff = "".join(difflib.unified_diff(self._lines, updated))
+        requirement_lines = [f"{req}\n" for req in self.new_requirements]
+
+        updated = original_lines + requirement_lines
+        diff = create_diff(self._lines, updated)
 
         changes = [
             Change(
-                lineNumber=len(self._lines) + i + 1,
+                lineNumber=len(original_lines) + i + 1,
                 description=dep.build_description(),
                 properties={"contextual_description": True},
                 packageActions=[
@@ -56,11 +61,8 @@ class DependencyManager:
 
         if not dry_run:
             with open(self.dependency_file, "w", encoding="utf-8") as f:
-                f.writelines(self._lines)
-                if not self._lines[-1].endswith("\n"):
-                    f.write("\n")
-
-                f.writelines([f"{line}\n" for line in self.new_requirements])
+                f.writelines(original_lines)
+                f.writelines(requirement_lines)
 
         self.dependency_file_changed = True
         return ChangeSet(

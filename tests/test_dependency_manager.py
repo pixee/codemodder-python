@@ -40,11 +40,11 @@ class TestDependencyManager:
         assert changeset.diff == (
             "--- \n"
             "+++ \n"
-            "@@ -1,3 +1,5 @@\n"
+            "@@ -1,3 +1,4 @@\n"
             " # comment\n"
             " \n"
             " requests\n"
-            "+defusedxml~=0.7.1+\n"
+            "+defusedxml~=0.7.1\n"
         )
         assert len(changeset.changes) == 1
         assert changeset.changes[0].lineNumber == 4
@@ -96,7 +96,18 @@ class TestDependencyManager:
 
         dm = DependencyManager(Path(tmpdir))
         dm.add([Security])
-        dm.write()
+        changeset = dm.write()
+
+        assert changeset is not None
+        assert changeset.diff == (
+            "--- \n"
+            "+++ \n"
+            "@@ -1,2 +1,3 @@\n"
+            " requests\n"
+            "-whatever\n"
+            "+whatever\n"
+            "+security~=1.2.0\n"
+        )
 
         assert dependency_file.read_text(encoding="utf-8") == (
             "requests\nwhatever\nsecurity~=1.2.0\n"
