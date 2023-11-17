@@ -140,6 +140,14 @@ class FixMutableParams(BaseCodemod):
         new_body.extend(body[offset:])
         return new_body
 
+    def _is_abstractmethod(self, node: cst.FunctionDef) -> bool:
+        for decorator in node.decorators:
+            match decorator.decorator:
+                case cst.Name("abstractmethod"):
+                    return True
+
+        return False
+
     def leave_FunctionDef(
         self,
         original_node: cst.FunctionDef,
@@ -151,7 +159,11 @@ class FixMutableParams(BaseCodemod):
             new_var_decls,
             add_annotation,
         ) = self._gather_and_update_params(original_node, updated_node)
-        new_body = self._build_new_body(new_var_decls, updated_node.body.body)
+        new_body = (
+            self._build_new_body(new_var_decls, updated_node.body.body)
+            if not self._is_abstractmethod(original_node)
+            else updated_node.body.body
+        )
         if new_var_decls:
             # If we're adding statements to the body, we know a change took place
             self.add_change(original_node, self.CHANGE_DESCRIPTION)

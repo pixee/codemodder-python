@@ -237,3 +237,22 @@ class TestFixMutableParams(BaseCodemodTest):
             print(foo)
         """
         self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_dont_modify_abstractmethod_body(self, tmpdir):
+        input_code = """
+        from abc import ABC, abstractmethod
+
+        class Foo(ABC):
+            @abstractmethod
+            def foo(self, bar=[]):
+                pass
+        """
+        expected_output = """
+        from abc import ABC, abstractmethod
+
+        class Foo(ABC):
+            @abstractmethod
+            def foo(self, bar=None):
+                pass
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
