@@ -11,115 +11,115 @@ class TestFixMutableParams(BaseCodemodTest):
     @pytest.mark.parametrize("mutable", ["[]", "{}", "set()"])
     def test_fix_single_arg(self, tmpdir, mutable):
         input_code = f"""
-def foo(bar={mutable}):
-    print(bar)
-"""
+        def foo(bar={mutable}):
+            print(bar)
+        """
         expected_output = f"""
-def foo(bar=None):
-    bar = {mutable} if bar is None else bar
-    print(bar)
-"""
+        def foo(bar=None):
+            bar = {mutable} if bar is None else bar
+            print(bar)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize("mutable", ["[]", "{}", "set()"])
     def test_fix_single_arg_method(self, tmpdir, mutable):
         input_code = f"""
-class Whatever:
-    def foo(self, bar={mutable}):
-        print(bar)
-"""
+        class Whatever:
+            def foo(self, bar={mutable}):
+                print(bar)
+        """
         expected_output = f"""
-class Whatever:
-    def foo(self, bar=None):
-        bar = {mutable} if bar is None else bar
-        print(bar)
-"""
+        class Whatever:
+            def foo(self, bar=None):
+                bar = {mutable} if bar is None else bar
+                print(bar)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize("mutable", ["[1, 2, 3]", '{"a": 42}', "{1, 2, 3}"])
     def test_with_values(self, tmpdir, mutable):
         input_code = f"""
-def foo(bar={mutable}):
-    print(bar)
-"""
+        def foo(bar={mutable}):
+            print(bar)
+        """
         expected_output = f"""
-def foo(bar=None):
-    bar = {mutable} if bar is None else bar
-    print(bar)
-"""
+        def foo(bar=None):
+            bar = {mutable} if bar is None else bar
+            print(bar)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize("orig,updated", [("list()", "[]"), ("dict()", "{}")])
     def test_fix_single_arg_call_builtin(self, tmpdir, orig, updated):
         input_code = f"""
-def foo(bar={orig}):
-    print(bar)
-"""
+        def foo(bar={orig}):
+            print(bar)
+        """
         expected_output = f"""
-def foo(bar=None):
-    bar = {updated} if bar is None else bar
-    print(bar)
-"""
+        def foo(bar=None):
+            bar = {updated} if bar is None else bar
+            print(bar)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize("mutable", ["list([1, 2, 3])", "dict({'a': 42})"])
     def test_fix_single_arg_call_builtin_with_values(self, tmpdir, mutable):
         input_code = f"""
-def foo(bar={mutable}):
-    print(bar)
-"""
+        def foo(bar={mutable}):
+            print(bar)
+        """
         expected_output = f"""
-def foo(bar=None):
-    bar = {mutable} if bar is None else bar
-    print(bar)
-"""
+        def foo(bar=None):
+            bar = {mutable} if bar is None else bar
+            print(bar)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_fix_multiple_args(self, tmpdir):
         input_code = """
-def foo(bar=[], baz={}):
-    print(bar)
-    print(baz)
-"""
+        def foo(bar=[], baz={}):
+            print(bar)
+            print(baz)
+        """
         expected_output = """
-def foo(bar=None, baz=None):
-    bar = [] if bar is None else bar
-    baz = {} if baz is None else baz
-    print(bar)
-    print(baz)
-"""
+        def foo(bar=None, baz=None):
+            bar = [] if bar is None else bar
+            baz = {} if baz is None else baz
+            print(bar)
+            print(baz)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_fix_multiple_args_mixed(self, tmpdir):
         input_code = """
-def foo(bar=[], x="hello", baz={"foo": 42}, biz=set(), boz=list(), buz={1, 2, 3}):
-    print(bar)
-    print(baz)
-"""
+        def foo(bar=[], x="hello", baz={"foo": 42}, biz=set(), boz=list(), buz={1, 2, 3}):
+            print(bar)
+            print(baz)
+        """
         expected_output = """
-def foo(bar=None, x="hello", baz=None, biz=None, boz=None, buz=None):
-    bar = [] if bar is None else bar
-    baz = {"foo": 42} if baz is None else baz
-    biz = set() if biz is None else biz
-    boz = [] if boz is None else boz
-    buz = {1, 2, 3} if buz is None else buz
-    print(bar)
-    print(baz)
-"""
+        def foo(bar=None, x="hello", baz=None, biz=None, boz=None, buz=None):
+            bar = [] if bar is None else bar
+            baz = {"foo": 42} if baz is None else baz
+            biz = set() if biz is None else biz
+            boz = [] if boz is None else boz
+            buz = {1, 2, 3} if buz is None else buz
+            print(bar)
+            print(baz)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_fix_only_one(self, tmpdir):
         input_code = """
-def foo(bar="hello", baz={}):
-    print(bar)
-    print(baz)
-"""
+        def foo(bar="hello", baz={}):
+            print(bar)
+            print(baz)
+        """
         expected_output = """
-def foo(bar="hello", baz=None):
-    baz = {} if baz is None else baz
-    print(bar)
-    print(baz)
-"""
+        def foo(bar="hello", baz=None):
+            baz = {} if baz is None else baz
+            print(bar)
+            print(baz)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize(
@@ -127,18 +127,18 @@ def foo(bar="hello", baz=None):
     )
     def test_fix_with_type_annotation(self, tmpdir, mutable, annotation):
         input_code = f"""
-from typing import {annotation}
+        from typing import {annotation}
 
-def foo(bar: {annotation}[int] = {mutable}):
-    print(bar)
-"""
+        def foo(bar: {annotation}[int] = {mutable}):
+            print(bar)
+        """
         expected_output = f"""
-from typing import Optional, {annotation}
+        from typing import Optional, {annotation}
 
-def foo(bar: Optional[{annotation}[int]] = None):
-    bar = {mutable} if bar is None else bar
-    print(bar)
-"""
+        def foo(bar: Optional[{annotation}[int]] = None):
+            bar = {mutable} if bar is None else bar
+            print(bar)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize(
@@ -146,78 +146,78 @@ def foo(bar: Optional[{annotation}[int]] = None):
     )
     def test_fix_with_type_annotation_new_import(self, tmpdir, mutable, annotation):
         input_code = f"""
-def foo(bar: {annotation}[int] = {mutable}):
-    print(bar)
-"""
+        def foo(bar: {annotation}[int] = {mutable}):
+            print(bar)
+        """
         expected_output = f"""
-from typing import Optional
+        from typing import Optional
 
-def foo(bar: Optional[{annotation}[int]] = None):
-    bar = {mutable} if bar is None else bar
-    print(bar)
-"""
+        def foo(bar: Optional[{annotation}[int]] = None):
+            bar = {mutable} if bar is None else bar
+            print(bar)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_fix_one_type_annotation(self, tmpdir):
         input_code = """
-from typing import List
+        from typing import List
 
-def foo(x = [], y: List[int] = [], z = {}):
-    print(x, y, z)
-"""
+        def foo(x = [], y: List[int] = [], z = {}):
+            print(x, y, z)
+        """
         expected_output = """
-from typing import Optional, List
+        from typing import Optional, List
 
-def foo(x = None, y: Optional[List[int]] = None, z = None):
-    x = [] if x is None else x
-    y = [] if y is None else y
-    z = {} if z is None else z
-    print(x, y, z)
-"""
+        def foo(x = None, y: Optional[List[int]] = None, z = None):
+            x = [] if x is None else x
+            y = [] if y is None else y
+            z = {} if z is None else z
+            print(x, y, z)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_fix_multiple_type_annotations(self, tmpdir):
         input_code = """
-from typing import Dict, List
+        from typing import Dict, List
 
-def foo(x = [], y: List[int] = [], z: Dict[str, int] = {}):
-    print(x, y, z)
-"""
+        def foo(x = [], y: List[int] = [], z: Dict[str, int] = {}):
+            print(x, y, z)
+        """
         expected_output = """
-from typing import Optional, Dict, List
+        from typing import Optional, Dict, List
 
-def foo(x = None, y: Optional[List[int]] = None, z: Optional[Dict[str, int]] = None):
-    x = [] if x is None else x
-    y = [] if y is None else y
-    z = {} if z is None else z
-    print(x, y, z)
-"""
+        def foo(x = None, y: Optional[List[int]] = None, z: Optional[Dict[str, int]] = None):
+            x = [] if x is None else x
+            y = [] if y is None else y
+            z = {} if z is None else z
+            print(x, y, z)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_fix_respect_docstring(self, tmpdir):
         input_code = '''
-def func(foo=[]):
-    """Here is a docstring"""
-    print(foo)
-'''
+        def func(foo=[]):
+            """Here is a docstring"""
+            print(foo)
+        '''
         expected_output = '''
-def func(foo=None):
-    """Here is a docstring"""
-    foo = [] if foo is None else foo
-    print(foo)
-'''
+        def func(foo=None):
+            """Here is a docstring"""
+            foo = [] if foo is None else foo
+            print(foo)
+        '''
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_fix_respect_leading_comment(self, tmpdir):
         input_code = """
-def func(foo=[]):
-    # Here is a comment
-    print(foo)
-"""
+        def func(foo=[]):
+            # Here is a comment
+            print(foo)
+        """
         expected_output = """
-def func(foo=None):
-    foo = [] if foo is None else foo
-    # Here is a comment
-    print(foo)
-"""
+        def func(foo=None):
+            foo = [] if foo is None else foo
+            # Here is a comment
+            print(foo)
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
