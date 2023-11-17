@@ -30,18 +30,25 @@ class FixMutableParams(BaseCodemod):
         self._matches_builtin = m.Call(func=m.Name("list") | m.Name("dict"))
 
     def _create_annotation(self, orig: cst.Param, updated: cst.Param):
+        match orig.annotation:
+            case cst.Annotation(annotation=cst.Subscript(sub)):
+                match sub:  # type: ignore
+                    case cst.Name("Optional"):
+                        # Already an Optional, so we can just preserve the original annotation
+                        return updated.annotation
+
         return (
             updated.annotation.with_changes(
                 annotation=cst.Subscript(
                     value=cst.Name("Optional"),
                     slice=[
                         cst.SubscriptElement(
-                            slice=cst.Index(value=orig.annotation.annotation)
+                            slice=cst.Index(value=updated.annotation.annotation)
                         )
                     ],
                 )
             )
-            if updated.annotation is not None
+            if orig.annotation is not None and updated.annotation is not None
             else None
         )
 
