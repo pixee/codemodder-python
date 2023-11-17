@@ -192,12 +192,58 @@ class TestUrlSandbox(BaseSemgrepCodemodTest):
 
         self.run_and_assert(tmpdir, input_code, expected)
 
-    def test_ignore_hardcoded_from_variable(self, tmpdir):
+    def test_ignore_hardcoded_from_global_variable(self, tmpdir):
         expected = input_code = """
         import requests
 
         URL = "www.google.com"
         requests.get(URL)
+        """
+
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_ignore_hardcoded_from_local_variable(self, tmpdir):
+        expected = input_code = """
+        import requests
+
+        def foo():
+            url = "www.google.com"
+            requests.get(url)
+        """
+
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_ignore_hardcoded_from_local_variable_transitive(self, tmpdir):
+        expected = input_code = """
+        import requests
+
+        def foo():
+            url = "www.google.com"
+            new_url = url
+            requests.get(new_url)
+        """
+
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_ignore_hardcoded_from_local_variable_transitive_reassigned(self, tmpdir):
+        input_code = """
+        import requests
+
+        def foo():
+            url = "www.google.com"
+            new_url = url
+            new_url = input()
+            requests.get(new_url)
+        """
+
+        expected = """
+        from security import safe_requests
+
+        def foo():
+            url = "www.google.com"
+            new_url = url
+            new_url = input()
+            safe_requests.get(new_url)
         """
 
         self.run_and_assert(tmpdir, input_code, expected)

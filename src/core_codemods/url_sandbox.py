@@ -1,10 +1,9 @@
 from typing import List, Optional, Union
+
 import libcst as cst
 from libcst import CSTNode, matchers
 from libcst.codemod import Codemod, CodemodContext
 from libcst.metadata import PositionProvider, ScopeProvider
-from codemodder.codemods.utils import ReplaceNodes
-from codemodder.file_context import FileContext
 
 from libcst.codemod.visitors import AddImportsVisitor, ImportItem
 from codemodder.change import Change
@@ -17,7 +16,10 @@ from codemodder.codemods.base_visitor import BaseVisitor
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsCodemod,
 )
+from codemodder.codemods.utils import ReplaceNodes
 from codemodder.dependency import Security
+from codemodder.file_context import FileContext
+
 
 replacement_import = "safe_requests"
 
@@ -122,38 +124,40 @@ class FindRequestCallsAndImports(BaseVisitor):
             case cst.SimpleString():
                 return
 
-        # case get(...)
-        if matchers.matches(original_node, matchers.Call(func=matchers.Name())):
-            # find if get(...) comes from an from requests import get
-            maybe_node = self.find_single_assignment(original_node)
-            if maybe_node and matchers.matches(maybe_node, matchers.ImportFrom()):
+        match original_node:
+            # case get(...)
+            case cst.Call(func=cst.Name()):
+                # find if get(...) comes from an from requests import get
+                match self.find_single_assignment(original_node):
+                    case cst.ImportFrom() as node:
+                        self.nodes_to_change.update(
+                            {
+                                node: cst.ImportFrom(
+                                    module=cst.Attribute(
+                                        value=cst.Name(Security.name),
+                                        attr=cst.Name(replacement_import),
+                                    ),
+                                    names=node.names,
+                                )
+                            }
+                        )
+                        self.changes_in_file.append(
+                            Change(line_number, UrlSandbox.CHANGE_DESCRIPTION)
+                        )
+
+            # case req.get(...)
+            case _:
                 self.nodes_to_change.update(
                     {
-                        maybe_node: cst.ImportFrom(
-                            module=cst.parse_expression(
-                                f"{Security.name}.{replacement_import}"
-                            ),
-                            names=maybe_node.names,
+                        original_node: cst.Call(
+                            func=cst.parse_expression(replacement_import + ".get"),
+                            args=original_node.args,
                         )
                     }
                 )
                 self.changes_in_file.append(
                     Change(line_number, UrlSandbox.CHANGE_DESCRIPTION)
                 )
-
-        # case req.get(...)
-        else:
-            self.nodes_to_change.update(
-                {
-                    original_node: cst.Call(
-                        func=cst.parse_expression(replacement_import + ".get"),
-                        args=original_node.args,
-                    )
-                }
-            )
-            self.changes_in_file.append(
-                Change(line_number, UrlSandbox.CHANGE_DESCRIPTION)
-            )
 
     def _find_assignments(self, node: CSTNode):
         """
