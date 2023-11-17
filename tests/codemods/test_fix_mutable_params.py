@@ -194,6 +194,22 @@ class TestFixMutableParams(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
+    def test_fix_type_already_optional(self, tmpdir):
+        input_code = """
+        from typing import Optional, List
+
+        def foo(x: Optional[List[int]] = []):
+            print(x)
+        """
+        expected_output = """
+        from typing import Optional, List
+
+        def foo(x: Optional[List[int]] = None):
+            x = [] if x is None else x
+            print(x)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
     def test_fix_respect_docstring(self, tmpdir):
         input_code = '''
         def func(foo=[]):
