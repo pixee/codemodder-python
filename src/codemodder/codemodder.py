@@ -1,6 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
 import datetime
-import difflib
 import itertools
 import logging
 import os
@@ -17,6 +16,7 @@ from codemodder.cli import parse_args
 from codemodder.change import ChangeSet
 from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.context import CodemodExecutionContext
+from codemodder.diff import create_diff as create_diff_from_lines
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default
@@ -49,18 +49,13 @@ def find_semgrep_results(
 
 
 def create_diff(original_tree: cst.Module, new_tree: cst.Module) -> str:
-    diff_lines = list(
-        difflib.unified_diff(
-            original_tree.code.splitlines(keepends=True),
-            new_tree.code.splitlines(keepends=True),
-        )
+    """
+    Create a diff between the original and output trees.
+    """
+    return create_diff_from_lines(
+        original_tree.code.splitlines(keepends=True),
+        new_tree.code.splitlines(keepends=True),
     )
-    # All but the last diff line should end with a newline
-    # The last diff line should be preserved as-is (with or without a newline)
-    diff_lines = [
-        line if line.endswith("\n") else line + "\n" for line in diff_lines[:-1]
-    ] + [diff_lines[-1]]
-    return "".join(diff_lines)
 
 
 def apply_codemod_to_file(
