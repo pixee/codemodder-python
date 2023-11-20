@@ -21,25 +21,6 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
         assert len(self.file_context.codemod_changes) == 0
 
-    def test_app_not_accessed(self, tmpdir):
-        input_code = """\
-        import flask
-
-        app = flask.Flask(__name__)
-        # more code
-        print(1)
-        """
-        expexted_output = """\
-        import flask
-
-        app = flask.Flask(__name__)
-        # more code
-        print(1)
-        app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
-        """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
-        assert len(self.file_context.codemod_changes) == 1
-
     def test_app_defined_separate_module(self, tmpdir):
         # TODO: test this as an integration test with two real modules
         input_code = """\
@@ -68,16 +49,8 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         app.secret_key = "dev"
         # more code
         """
-        expexted_output = """\
-        import flask
-
-        app = flask.Flask(__name__)
-        app.secret_key = "dev"
-        app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
-        # more code
-        """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
-        assert len(self.file_context.codemod_changes) == 1
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        assert len(self.file_context.codemod_changes) == 0
 
     def test_from_import(self, tmpdir):
         input_code = """\
@@ -85,32 +58,32 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
 
         app = flask.Flask(__name__)
         app.secret_key = "dev"
-        # more code
+        app.config.update(SESSION_COOKIE_SECURE=False)
         """
         expexted_output = """\
         from flask import Flask
 
         app = flask.Flask(__name__)
         app.secret_key = "dev"
-        app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
-        # more code
+        app.config.update(SESSION_COOKIE_SECURE=True)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
         assert len(self.file_context.codemod_changes) == 1
 
     def test_import_alias(self, tmpdir):
-        input_code = f"""\
+        input_code = """\
         from flask import Flask as flask_app
         app = flask_app(__name__)
         app.secret_key = "dev"
         # more code
+        app.config.update(SESSION_COOKIE_SECURE=False)
         """
-        expexted_output = f"""\
+        expexted_output = """\
         from flask import Flask as flask_app
         app = flask_app(__name__)
         app.secret_key = "dev"
-        app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')
         # more code
+        app.config.update(SESSION_COOKIE_SECURE=True)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
         assert len(self.file_context.codemod_changes) == 1
@@ -120,59 +93,39 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         [
             (
                 """app.config""",
-                """app.config
-app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+                """app.config""",
             ),
             (
                 """app.config["TESTING"] = True""",
-                """app.config["TESTING"] = True
-app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+                """app.config["TESTING"] = True""",
             ),
             (
                 """app.config.testing = True""",
-                """app.config.testing = True
-app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+                """app.config.testing = True""",
             ),
             (
                 """app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
                 """app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
-            ),
-            (
-                """app.config.update(SECRET_KEY='123SOMEKEY')
-var = 1""",
-                """app.config.update(SECRET_KEY='123SOMEKEY')
-var = 1
-app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
-            ),
-            (
-                """app.config.update(SECRET_KEY='123SOMEKEY')""",
-                """app.config.update(SECRET_KEY='123SOMEKEY')
-app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
             ),
             (
                 """app.config.update(SESSION_COOKIE_SECURE=True)""",
-                """app.config.update(SESSION_COOKIE_SECURE=True)
-app.config.update(SESSION_COOKIE_SAMESITE='Lax')""",
+                """app.config.update(SESSION_COOKIE_SECURE=True)""",
             ),
             (
                 """app.config.update(SESSION_COOKIE_HTTPONLY=True)""",
-                """app.config.update(SESSION_COOKIE_HTTPONLY=True)
-app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+                """app.config.update(SESSION_COOKIE_HTTPONLY=True)""",
             ),
             (
                 """app.config.update(SESSION_COOKIE_HTTPONLY=False)""",
-                """app.config.update(SESSION_COOKIE_HTTPONLY=True)
-app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+                """app.config.update(SESSION_COOKIE_HTTPONLY=True)""",
             ),
             (
                 """app.config['SESSION_COOKIE_SECURE'] = False""",
-                """app.config['SESSION_COOKIE_SECURE'] = True
-app.config.update(SESSION_COOKIE_SAMESITE='Lax')""",
+                """app.config['SESSION_COOKIE_SECURE'] = True""",
             ),
             (
                 """app.config['SESSION_COOKIE_HTTPONLY'] = False""",
-                """app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+                """app.config['SESSION_COOKIE_HTTPONLY'] = True""",
             ),
             (
                 """app.config["SESSION_COOKIE_SECURE"] = True
@@ -206,7 +159,6 @@ app.config["SESSION_COOKIE_SECURE"] = True
 """,
                 """app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SECURE"] = True
-app.config.update(SESSION_COOKIE_SAMESITE='Lax')
 """,
             ),
         ],

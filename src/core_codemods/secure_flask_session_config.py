@@ -1,35 +1,32 @@
 import libcst as cst
-from libcst.codemod import Codemod, CodemodContext, ContextAwareTransformer
-from libcst.metadata import ParentNodeProvider, ScopeProvider, PositionProvider
+from libcst.codemod import Codemod, CodemodContext
+from libcst.metadata import ParentNodeProvider, PositionProvider
 
 from libcst import matchers
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from codemodder.codemods.base_visitor import UtilsMixin
+from codemodder.utils.utils import true_value
 from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.change import Change
 from codemodder.file_context import FileContext
-from typing import Union
 
 
 class SecureFlaskSessionConfig(BaseCodemod, Codemod):
-    # METADATA_DEPENDENCIES = BaseCodemod.METADATA_DEPENDENCIES + (
-    #     ParentNodeProvider,
-    #     ScopeProvider,
-    # )
     NAME = "secure-flask-session-configuration"
-    SUMMARY = "UTODO"
+    SUMMARY = "Flip Insecure `Flask` Session Configurations"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_REVIEW
-    DESCRIPTION = "TODO"
+    DESCRIPTION = "Flip Flask session configuration if defined as insecure."
     REFERENCES = [
         {
-            "url": "todo",
+            "url": "https://owasp.org/www-community/controls/SecureCookieAttribute",
             "description": "",
-        }
+        },
+        {
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html",
+            "description": "",
+        },
     ]
-
-    METADATA_DEPENDENCIES = (PositionProvider,)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         flask_codemod = FixFlaskConfig(self.context, self.file_context)
@@ -38,45 +35,47 @@ class SecureFlaskSessionConfig(BaseCodemod, Codemod):
         if not flask_codemod.flask_app_name:
             return tree
 
-        if flask_codemod.configs_to_write:
-            return self.insert_secure_configs(
-                tree,
-                result_tree,
-                flask_codemod.flask_app_name,
-                flask_codemod.configs_to_write,
-            )
+        # Later: if we want to write at the end of the module any
+        # default insecure configs.
+        # if flask_codemod.configs_to_write:
+        #     return self.insert_secure_configs(
+        #         tree,
+        #         result_tree,
+        #         flask_codemod.flask_app_name,
+        #         flask_codemod.configs_to_write,
+        #     )
         return result_tree
 
-    def insert_secure_configs(
-        self,
-        original_node: cst.Module,
-        updated_node: cst.Module,
-        app_name: str,
-        configs: dict,
-    ) -> cst.Module:
-        if not configs:
-            return updated_node
-
-        config_string = ", ".join(
-            f"{key}='{value[0]}'" if isinstance(value[0], str) else f"{key}={value[0]}"
-            for key, value in configs.items()
-            if value and value[0] is not None
-        )
-        if not config_string:
-            return updated_node
-
-        self.report_change_endof_module(original_node)
-        final_line = cst.parse_statement(f"{app_name}.config.update({config_string})")
-        new_body = updated_node.body + (final_line,)
-        return updated_node.with_changes(body=new_body)
-
-    def report_change_endof_module(self, original_node: cst.Module) -> None:
-        # line_number is the end of the module where we will insert the new line.
-        pos_to_match = self.node_position(original_node)
-        line_number = pos_to_match.end.line
-        self.file_context.codemod_changes.append(
-            Change(line_number, self.CHANGE_DESCRIPTION)
-        )
+    # def insert_secure_configs(
+    #     self,
+    #     original_node: cst.Module,
+    #     updated_node: cst.Module,
+    #     app_name: str,
+    #     configs: dict,
+    # ) -> cst.Module:
+    #     if not configs:
+    #         return updated_node
+    #
+    #     config_string = ", ".join(
+    #         f"{key}='{value[0]}'" if isinstance(value[0], str) else f"{key}={value[0]}"
+    #         for key, value in configs.items()
+    #         if value and value[0] is not None
+    #     )
+    #     if not config_string:
+    #         return updated_node
+    #
+    #     self.report_change_endof_module(original_node)
+    #     final_line = cst.parse_statement(f"{app_name}.config.update({config_string})")
+    #     new_body = updated_node.body + (final_line,)
+    #     return updated_node.with_changes(body=new_body)
+    #
+    # def report_change_endof_module(self, original_node: cst.Module) -> None:
+    #     # line_number is the end of the module where we will insert the new line.
+    #     pos_to_match = self.node_position(original_node)
+    #     line_number = pos_to_match.end.line
+    #     self.file_context.codemod_changes.append(
+    #         Change(line_number, self.CHANGE_DESCRIPTION)
+    #     )
 
 
 class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
@@ -85,18 +84,19 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
     """
 
     METADATA_DEPENDENCIES = (PositionProvider, ParentNodeProvider)
-    SECURE_SESSION_CONFIGS = dict(
+    SECURE_SESSION_CONFIGS = {
         # None value indicates unassigned, using default is safe
         # values in order of precedence
-        SESSION_COOKIE_HTTPONLY=[None, True],
-        SESSION_COOKIE_SECURE=[True],
-        SESSION_COOKIE_SAMESITE=["Lax", "Strict"],
-    )
+        "SESSION_COOKIE_HTTPONLY": [None, True],
+        "SESSION_COOKIE_SECURE": [True],
+        "SESSION_COOKIE_SAMESITE": ["Lax", "Strict"],
+    }
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         super().__init__(codemod_context, [])
         self.flask_app_name = ""
-        self.configs_to_write = self.SECURE_SESSION_CONFIGS.copy()
+        # Later: if we want to store configs to write later
+        # self.configs_to_write = self.SECURE_SESSION_CONFIGS.copy()
         self.file_context = file_context
 
     def _store_flask_app(self, original_node) -> None:
@@ -106,11 +106,11 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
                 flask_app_attr = flask_app_parent.targets[0].target
                 self.flask_app_name = flask_app_attr.value
 
-    def _remove_config(self, key):
-        try:
-            del self.configs_to_write[key]
-        except KeyError:
-            pass
+    # def _remove_config(self, key):
+    #     try:
+    #         del self.configs_to_write[key]
+    #     except KeyError:
+    #         pass
 
     def _get_secure_config_val(self, key):
         val = self.SECURE_SESSION_CONFIGS[key][0] or self.SECURE_SESSION_CONFIGS[key][1]
@@ -135,8 +135,8 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
         new_args = []
         for arg in updated_node.args:
             if (key := arg.keyword.value) in self.SECURE_SESSION_CONFIGS:
-                self._remove_config(key)
-                if true_value(arg.value) not in self.SECURE_SESSION_CONFIGS[key]:
+                # self._remove_config(key)
+                if true_value(arg.value) not in self.SECURE_SESSION_CONFIGS[key]:  # type: ignore
                     safe_value = self._get_secure_config_val(key)
                     arg = arg.with_changes(value=safe_value)
             new_args.append(arg)
@@ -155,8 +155,8 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
     ) -> cst.Assign:
         key = true_value(updated_node.targets[0].target.slice[0].slice.value)
         if key in self.SECURE_SESSION_CONFIGS:
-            self._remove_config(key)
-            if true_value(updated_node.value) not in self.SECURE_SESSION_CONFIGS[key]:
+            # self._remove_config(key)
+            if true_value(updated_node.value) not in self.SECURE_SESSION_CONFIGS[key]:  # type: ignore
                 safe_value = self._get_secure_config_val(key)
                 self.report_change(original_node)
                 return updated_node.with_changes(value=safe_value)
@@ -180,31 +180,7 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
         )
 
     def report_change(self, original_node):
-        # TODO: GET POS TO WORK
-
-        # line_number = self.lineno_for_node(original_node)
         line_number = self.lineno_for_node(original_node)
         self.file_context.codemod_changes.append(
             Change(line_number, SecureFlaskSessionConfig.CHANGE_DESCRIPTION)
         )
-
-
-def true_value(node: cst.Name | cst.SimpleString) -> str | int | bool:
-    # todo: move to a more general util
-    from codemodder.project_analysis.file_parsers.utils import clean_simplestring
-
-    # convert 'True' to True, etc
-    # '123'  to 123
-    # leave strs as they are
-    # Try to convert the string to a boolean, integer, or float
-    match node:
-        case cst.SimpleString():
-            return clean_simplestring(node)
-        case cst.Name():
-            val = node.value
-            if val.lower() == "true":
-                return True
-            elif val.lower() == "false":
-                return False
-            return val
-    return ""

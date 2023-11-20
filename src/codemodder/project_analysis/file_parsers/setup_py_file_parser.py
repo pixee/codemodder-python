@@ -1,11 +1,11 @@
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
+from codemodder.utils.utils import clean_simplestring
 from pathlib import Path
 import libcst as cst
 from libcst import matchers
 from packaging.requirements import Requirement
 
 from .base_parser import BaseParser
-from .utils import clean_simplestring
 
 
 class SetupPyParser(BaseParser):
