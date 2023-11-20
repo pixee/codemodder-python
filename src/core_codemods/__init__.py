@@ -27,6 +27,7 @@ from .use_defused_xml import UseDefusedXml
 from .use_generator import UseGenerator
 from .use_walrus_if import UseWalrusIf
 from .with_threading_lock import WithThreadingLock
+from .secure_flask_session_config import SecureFlaskSessionConfig
 
 registry = CodemodCollection(
     origin="pixee",
@@ -60,5 +61,6 @@ registry = CodemodCollection(
         UseWalrusIf,
         WithThreadingLock,
         SQLQueryParameterization,
+        SecureFlaskSessionConfig,
     ],
 )
