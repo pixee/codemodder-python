@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-authors = [{name = "Pixee", email = "support@pixee.ai"}]
+authors = [{name = "Pixee", email = "python@pixee.ai"}]
 dynamic = ["version"]
 name = "codemodder"
 requires-python = ">=3.10.0"
