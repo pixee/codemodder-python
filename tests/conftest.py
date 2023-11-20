@@ -44,7 +44,9 @@ def disable_write_dependencies():
     """
     Unit tests should not write any dependency files
     """
-    dm_write = mock.patch("codemodder.dependency_manager.DependencyManager.write")
+    dm_write = mock.patch(
+        "codemodder.dependency_management.dependency_manager.DependencyManager.write"
+    )
 
     dm_write.start()
     yield
