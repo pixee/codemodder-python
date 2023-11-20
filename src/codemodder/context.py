@@ -6,7 +6,7 @@ from typing import List, Iterator
 
 from codemodder.change import ChangeSet
 from codemodder.dependency import Dependency
-from codemodder.dependency_manager import DependencyManager
+from codemodder.dependency_management import DependencyManager
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.file_context import FileContext
 from codemodder.logging import logger, log_list

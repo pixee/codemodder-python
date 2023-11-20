@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from codemodder.dependency import DefusedXML, Security
-from codemodder.dependency_manager import DependencyManager, Requirement
+from codemodder.dependency_management import DependencyManager, Requirement
 
 
 @pytest.fixture(autouse=True, scope="module")
