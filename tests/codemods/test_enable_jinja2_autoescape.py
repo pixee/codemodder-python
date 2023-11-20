@@ -98,3 +98,54 @@ class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
         """
         expexted_output = input_code
         self.run_and_assert(tmpdir, input_code, expexted_output)
+
+    def test_aiohttp_import_setup(self, tmpdir):
+        input_code = """
+        import aiohttp_jinja2
+        aiohttp_jinja2.setup(app)
+        """
+        expected_output = """
+        import aiohttp_jinja2
+        aiohttp_jinja2.setup(app, autoescape=True)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_aiohttp_import_from_setup(self, tmpdir):
+        input_code = """
+        from aiohttp_jinja2 import setup
+        setup(app)
+        """
+        expected_output = """
+        from aiohttp_jinja2 import setup
+        setup(app, autoescape=True)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_aiohttp_import_alias(self, tmpdir):
+        input_code = """
+        from aiohttp_jinja2 import setup as setup_jinja2
+        setup_jinja2(app)
+        """
+        expected_output = """
+        from aiohttp_jinja2 import setup as setup_jinja2
+        setup_jinja2(app, autoescape=True)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_aiohttp_import_alias_no_change(self, tmpdir):
+        expected_output = input_code = """
+        from aiohttp_jinja2 import foo as setup
+        setup_jinja2(app)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_aiohttp_set_false(self, tmpdir):
+        input_code = """
+        import aiohttp_jinja2
+        aiohttp_jinja2.setup(app, autoescape=False)
+        """
+        expected_output = """
+        import aiohttp_jinja2
+        aiohttp_jinja2.setup(app, autoescape=True)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)

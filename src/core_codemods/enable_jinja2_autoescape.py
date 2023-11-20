@@ -20,11 +20,18 @@ class EnableJinja2Autoescape(SemgrepCodemod):
     def rule(cls):
         return """
             rules:
+              - pattern-either:
                 - patterns:
                   - pattern: jinja2.Environment(...)
                   - pattern-not: jinja2.Environment(..., autoescape=True, ...)
                   - pattern-inside: |
                       import jinja2
+                      ...
+                - patterns:
+                  - pattern: aiohttp_jinja2.setup(...)
+                  - pattern-not: aiohttp_jinja2.setup(..., autoescape=True, ...)
+                  - pattern-inside: |
+                      import aiohttp_jinja2
                       ...
         """
 
