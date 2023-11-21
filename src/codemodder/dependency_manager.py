@@ -51,7 +51,11 @@ class DependencyManager:
             Change(
                 lineNumber=len(original_lines) + i + 1,
                 description=dep.build_description(),
-                properties={"contextual_description": True},
+                # Contextual comments should be added to the right side of split diffs
+                properties={
+                    "contextual_description": True,
+                    "contextual_description_position": "right",
+                },
                 packageActions=[
                     PackageAction(Action.ADD, Result.COMPLETED, str(dep.requirement))
                 ],

@@ -49,7 +49,10 @@ class TestDependencyManager:
         assert len(changeset.changes) == 1
         assert changeset.changes[0].lineNumber == 4
         assert changeset.changes[0].description == DefusedXML.build_description()
-        assert changeset.changes[0].properties == {"contextual_description": True}
+        assert changeset.changes[0].properties == {
+            "contextual_description": True,
+            "contextual_description_position": "right",
+        }
 
     def test_add_multiple_dependencies(self, tmpdir):
         dependency_file = Path(tmpdir) / "requirements.txt"
