@@ -110,7 +110,6 @@ class NameResolutionMixin(MetadataDependent):
         """
         scope = self.get_metadata(ScopeProvider, node)
         if node in scope.accesses:
-            # pylint: disable=protected-access
             return set(next(iter(scope.accesses[node])).referents)
         return set()
 
