@@ -6,7 +6,7 @@ from libcst import matchers
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from codemodder.utils.utils import true_value
+from codemodder.utils.utils import extract_targets_of_assignment, true_value
 from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.change import Change
 from codemodder.file_context import FileContext
@@ -103,8 +103,12 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
         flask_app_parent = self.get_metadata(ParentNodeProvider, original_node)
         match flask_app_parent:
             case cst.AnnAssign() | cst.Assign():
-                flask_app_attr = flask_app_parent.targets[0].target
-                self.flask_app_name = flask_app_attr.value
+                targets = extract_targets_of_assignment(flask_app_parent)
+                # TODO: handle other assignments ex. l[0] = Flask(...) , a.b = Flask(...)
+                if targets and matchers.matches(
+                    first_target := targets[0], matchers.Name()
+                ):
+                    self.flask_app_name = first_target.value
 
     # def _remove_config(self, key):
     #     try:
@@ -163,18 +167,18 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
         return updated_node
 
     def _is_config_update_call(self, original_node: cst.Call):
-        config = cst.Name(value="config")
-        app_name = cst.Name(value=self.flask_app_name)
-        app_config_node = cst.Attribute(value=app_name, attr=config)
+        config = matchers.Name(value="config")
+        app_name = matchers.Name(value=self.flask_app_name)
+        app_config_node = matchers.Attribute(value=app_name, attr=config)
         update = cst.Name(value="update")
         return matchers.matches(
             original_node.func, matchers.Attribute(value=app_config_node, attr=update)
         )
 
     def _is_config_subscript(self, original_node: cst.Assign):
-        config = cst.Name(value="config")
-        app_name = cst.Name(value=self.flask_app_name)
-        app_config_node = cst.Attribute(value=app_name, attr=config)
+        config = matchers.Name(value="config")
+        app_name = matchers.Name(value=self.flask_app_name)
+        app_config_node = matchers.Attribute(value=app_name, attr=config)
         return matchers.matches(
             original_node.targets[0].target, matchers.Subscript(value=app_config_node)
         )
