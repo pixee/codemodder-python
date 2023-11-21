@@ -19,3 +19,20 @@ def true_value(node: cst.Name | cst.SimpleString) -> str | int | bool:
                 return False
             return val
     return ""
+
+
+def extract_targets_of_assignment(
+    assignment: cst.AnnAssign | cst.Assign | cst.WithItem | cst.NamedExpr,
+) -> list[cst.BaseExpression]:
+    match assignment:
+        case cst.AnnAssign():
+            if assignment.target:
+                return [assignment.target]
+        case cst.Assign():
+            return [t.target for t in assignment.targets]
+        case cst.NamedExpr():
+            return [assignment.target]
+        case cst.WithItem():
+            if assignment.asname:
+                return [assignment.asname.name]
+    return []

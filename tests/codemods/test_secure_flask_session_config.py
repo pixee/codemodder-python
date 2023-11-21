@@ -56,14 +56,14 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         input_code = """\
         from flask import Flask
 
-        app = flask.Flask(__name__)
+        app = Flask(__name__)
         app.secret_key = "dev"
         app.config.update(SESSION_COOKIE_SECURE=False)
         """
         expexted_output = """\
         from flask import Flask
 
-        app = flask.Flask(__name__)
+        app = Flask(__name__)
         app.secret_key = "dev"
         app.config.update(SESSION_COOKIE_SECURE=True)
         """
@@ -87,6 +87,38 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
         assert len(self.file_context.codemod_changes) == 1
+
+    def test_annotated_assign(self, tmpdir):
+        input_code = """\
+        import flask
+        app: flask.Flask = flask.Flask(__name__)
+        app.secret_key = "dev"
+        # more code
+        app.config.update(SESSION_COOKIE_SECURE=False)
+        """
+        expexted_output = """\
+        import flask
+        app: flask.Flask = flask.Flask(__name__)
+        app.secret_key = "dev"
+        # more code
+        app.config.update(SESSION_COOKIE_SECURE=True)
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
+        assert len(self.file_context.codemod_changes) == 1
+
+    def test_other_assignment_type(self, tmpdir):
+        input_code = """\
+        import flask
+        class AppStore:
+            pass
+        store = AppStore()
+        store.app = flask.Flask(__name__)
+        store.app.secret_key = "dev"
+        # more code
+        store.app.config.update(SESSION_COOKIE_SECURE=False)
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        assert len(self.file_context.codemod_changes) == 0
 
     @pytest.mark.parametrize(
         "config_lines,expected_config_lines",
