@@ -134,6 +134,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="We believe this replacement is safe and leads to better performance.",
     ),
+    "secure-flask-session-configuration": DocMetadata(
+        importance="Medium",
+        guidance_explained="Our change fixes explicitly insecure session configuration for a Flask application. However, there may be valid cases to use these insecure configurations, such as for testing or backward compatibility.",
+    ),
 }
 
 
