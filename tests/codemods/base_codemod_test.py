@@ -21,6 +21,14 @@ class BaseCodemodTest:
     def setup_method(self):
         self.file_context = None
 
+    def initialize_codemod(self, input_tree):
+        wrapper = cst.MetadataWrapper(input_tree)
+        codemod_instance = self.codemod(
+            CodemodContext(wrapper=wrapper),
+            self.file_context,
+        )
+        return codemod_instance
+
     def run_and_assert(self, tmpdir, input_code, expected):
         tmp_file_path = Path(tmpdir / "code.py")
         self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)
@@ -41,12 +49,8 @@ class BaseCodemodTest:
             [],
             [],
         )
-        wrapper = cst.MetadataWrapper(input_tree)
-        command_instance = self.codemod(
-            CodemodContext(wrapper=wrapper),
-            self.file_context,
-        )
-        output_tree = command_instance.transform_module(input_tree)
+        codemod_instance = self.initialize_codemod(input_tree)
+        output_tree = codemod_instance.transform_module(input_tree)
 
         assert output_tree.code == dedent(expected)
 
@@ -92,12 +96,8 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
             [],
             results,
         )
-        wrapper = cst.MetadataWrapper(input_tree)
-        command_instance = self.codemod(
-            CodemodContext(wrapper=wrapper),
-            self.file_context,
-        )
-        output_tree = command_instance.transform_module(input_tree)
+        codemod_instance = self.initialize_codemod(input_tree)
+        output_tree = codemod_instance.transform_module(input_tree)
 
         assert output_tree.code == dedent(expected)
 

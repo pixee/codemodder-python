@@ -113,9 +113,8 @@ def is_django_settings_file(file_path: Path):
     return False
 
 
-def is_setup_py_file(file_path: str):
-    name = Path(file_path).name
-    return name == "setup.py"
+def is_setup_py_file(file_path: Path):
+    return file_path.name == "setup.py"
 
 
 def get_call_name(call: cst.Call) -> str:
