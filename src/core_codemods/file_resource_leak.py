@@ -214,7 +214,7 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
 
     def leave_Module(self, original_node: cst.Module, updated_node) -> cst.Module:
         result = original_node
-        # TODO for now it no dependent resources, it won't do anything if one exists
+        # TODO for now it assumes no dependent resources, it won't do anything if one exists
         for (
             block,
             stmt,
@@ -394,9 +394,9 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
                 case cst.Name(value=value):  # type: ignore
                     if value in ("close", "__exit__"):  # type: ignore
                         return True
-            # TODO test other uses of contextmanager functions
-            # e.g. with closing(name):
-            if self.is_with_item(node):
+            if self.is_with_item(
+                node
+            ) or self._is_arg_of_contextlib_function_in_with_item(node):
                 return True
         return False
 
@@ -437,6 +437,21 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
         """
         return []
 
+    def _is_arg_of_contextlib_function_in_with_item(
+        self, node: cst.CSTNode
+    ) -> Optional[cst.WithItem]:
+        """
+        Checks if the node is the argument of a contextlib function that is an item in a with statement.
+        """
+        maybe_parent = self.get_parent(node)
+        maybe_gparent = self.get_parent(maybe_parent) if maybe_parent else None
+        match maybe_gparent:
+            case cst.Call(item=node):
+                true_name = self.find_base_name(maybe_gparent)
+                if true_name and true_name.startswith("contextlib."):
+                    return self.is_with_item(maybe_gparent)
+        return None
+
     def find_accesses(self, node) -> Collection[Access]:
         scope = self.get_metadata(ScopeProvider, node, None)
         if scope:
@@ -446,13 +461,16 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
     def is_value_of_assignment(
         self, expr
     ) -> Optional[cst.AnnAssign | cst.Assign | cst.WithItem | cst.NamedExpr]:
-        # print(expr)
-        # a = self.context.module.body[1].body.body[0].body[0].value
-        # print(a)
-        # print(a==expr)
+        """
+        Tests if expr is the value in an assignment.
+        """
         parent = self.get_metadata(ParentNodeProvider, expr)
         match parent:
-            case cst.AnnAssign() | cst.Assign() | cst.WithItem() | cst.NamedExpr():
+            case cst.AnnAssign(value=value) | cst.Assign(value=value) | cst.WithItem(
+                item=value
+            ) | cst.NamedExpr(
+                value=value
+            ) if expr == value:  # type: ignore
                 return parent
         return None
 
@@ -549,10 +567,16 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
         return path
 
     def is_ancestor(self, node: cst.CSTNode, other_node: cst.CSTNode) -> bool:
+        """
+        Tests if other_node is an ancestor of node in the CST.
+        """
         path = self.path_to_root_as_set(node)
         return other_node in path
 
     def get_parent(self, node: cst.CSTNode) -> Optional[cst.CSTNode]:
+        """
+        Retrieves the parent of node. Will return None for the root.
+        """
         try:
             return self.get_metadata(ParentNodeProvider, node, None)
         except Exception:
