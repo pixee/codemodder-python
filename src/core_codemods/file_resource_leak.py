@@ -14,6 +14,7 @@ from libcst.metadata import (
     PositionProvider,
     ScopeProvider,
 )
+from codemodder.change import Change
 from codemodder.codemods.base_codemod import (
     BaseCodemod,
     CodemodMetadata,
@@ -64,7 +65,7 @@ class FileResourceLeak(BaseCodemod, UtilsMixin, Codemod):
     METADATA = CodemodMetadata(
         DESCRIPTION=SUMMARY,
         NAME="file-resource-leak",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         REFERENCES=[
             {
                 "url": "https://cwe.mitre.org/data/definitions/772.html",
@@ -100,9 +101,14 @@ class FileResourceLeak(BaseCodemod, UtilsMixin, Codemod):
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         fr = FindResources(self.context)
         tree.visit(fr)
-        # TODO filter by line includes excludes here...
-        # return ResourceLeakFixer(self.context, fr.assigned_resources).transform_module(original_node)
-        return tree.visit(ResourceLeakFixer(self.context, fr.assigned_resources))
+        line_filter = lambda x: self.filter_by_path_includes_or_excludes(x[3])
+        filtered_resources = [
+            resource for resource in fr.assigned_resources if line_filter(resource)
+        ]
+        fixer = ResourceLeakFixer(self.context, filtered_resources)
+        result = tree.visit(fixer)
+        self.file_context.codemod_changes.extend(fixer.changes)
+        return result
 
 
 class FindResources(ContextAwareVisitor, NameResolutionMixin):
@@ -211,6 +217,7 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
     ):
         super().__init__(context)
         self.leaked_assigned_resources = leaked_assigned_resources
+        self.changes: list[Change] = []
 
     def leave_Module(self, original_node: cst.Module, updated_node) -> cst.Module:
         result = original_node
@@ -238,8 +245,11 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
                 lambda n: not self._is_closed(n) and not name_escapes_partial(n),
                 named_targets,
             )
-
             if all(name_condition):
+                line_number = self.get_metadata(PositionProvider, resource).start.line
+                self.changes.append(
+                    Change(line_number, FileResourceLeak.CHANGE_DESCRIPTION)
+                )
                 last_index = self._find_last_index_with_access(
                     named_targets, block, index
                 )
@@ -257,8 +267,8 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
         for name in named_targets:
             accesses = self.find_accesses(name)
             for node in (access.node for access in accesses):
-                last_index_for_node = self._last_ancestor_index(
-                    node, block.body[index:]
+                last_index_for_node = (index + 1) + self._last_ancestor_index(
+                    node, block.body[index + 1 :]
                 )
                 if not last_index or (
                     last_index_for_node and last_index_for_node > last_index
@@ -435,7 +445,7 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
         """
         Find all the dependent resources of a given resource. A resource S is dependent to another resource R, if closing R also closes S.
         """
-        return []
+        return [resource]
 
     def _is_arg_of_contextlib_function_in_with_item(
         self, node: cst.CSTNode
