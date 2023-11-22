@@ -6,6 +6,7 @@ from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.utils import is_setup_py_file
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.file_context import FileContext
+from packaging.requirements import Requirement
 
 
 class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
@@ -16,7 +17,10 @@ class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
     REFERENCES: list = []
 
     def __init__(
-        self, codemod_context: CodemodContext, file_context: FileContext, dependencies
+        self,
+        codemod_context: CodemodContext,
+        file_context: FileContext,
+        dependencies: list[Requirement],
     ):
         BaseCodemod.__init__(self, codemod_context, file_context)
         NameResolutionMixin.__init__(self)
