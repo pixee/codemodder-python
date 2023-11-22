@@ -1,14 +1,12 @@
-from typing import Collection, Optional, Sequence
+from typing import Optional, Sequence
 import libcst as cst
-from libcst import MetadataDependent, ensure_type, matchers
-from libcst.matchers import MatcherDecoratableTransformer
+from libcst import ensure_type, matchers
 from libcst.codemod import (
     Codemod,
     CodemodContext,
     ContextAwareVisitor,
 )
 from libcst.metadata import (
-    Access,
     BuiltinAssignment,
     ParentNodeProvider,
     PositionProvider,
@@ -21,43 +19,10 @@ from codemodder.codemods.base_codemod import (
     ReviewGuidance,
 )
 from codemodder.codemods.base_visitor import UtilsMixin
-from codemodder.codemods.utils_mixin import NameResolutionMixin
+from codemodder.codemods.utils import MetadataPreservingTransformer
+from codemodder.codemods.utils_mixin import AncestorPatternsMixin, NameResolutionMixin
 from codemodder.file_context import FileContext
 from functools import partial
-
-
-class MetadataPreservingTransformer(
-    MatcherDecoratableTransformer, cst.MetadataDependent
-):
-    """
-    The CSTTransformer equivalent of ContextAwareVisitor. Will preserve metadata passed through a context. You should not chain more than one of these, otherwise metadata will not reflect the state of the tree.
-    """
-
-    def __init__(self, context: CodemodContext) -> None:
-        MetadataDependent.__init__(self)
-        MatcherDecoratableTransformer.__init__(self)
-        self.context = context
-        dependencies = self.get_inherited_dependencies()
-        if dependencies:
-            wrapper = self.context.wrapper
-            if wrapper is None:
-                # pylint: disable-next=broad-exception-raised
-                raise Exception(
-                    f"Attempting to instantiate {self.__class__.__name__} outside of "
-                    + "an active transform. This means that metadata hasn't been "
-                    + "calculated and we cannot successfully create this visitor."
-                )
-            for dep in dependencies:
-                if dep not in wrapper._metadata:
-                    # pylint: disable-next=broad-exception-raised
-                    raise Exception(
-                        f"Attempting to access metadata {dep.__name__} that was not a "
-                        + "declared dependency of parent transform! This means it is "
-                        + "not possible to compute this value. Please ensure that all "
-                        + f"parent transforms of {self.__class__.__name__} declare "
-                        + f"{dep.__name__} as a metadata dependency."
-                    )
-            self.metadata = {dep: wrapper._metadata[dep] for dep in dependencies}
 
 
 class FileResourceLeak(BaseCodemod, UtilsMixin, Codemod):
@@ -111,12 +76,10 @@ class FileResourceLeak(BaseCodemod, UtilsMixin, Codemod):
         return result
 
 
-class FindResources(ContextAwareVisitor, NameResolutionMixin):
+class FindResources(ContextAwareVisitor, NameResolutionMixin, AncestorPatternsMixin):
     """
     Finds and all the patterns of the form x = resource(...), where resource is an call that results in an open resource. It gathers the path in the tree corresponding to the mentioned pattern.
     """
-
-    METADATA_DEPENDENCIES = (ParentNodeProvider,)
 
     def __init__(self, context: CodemodContext) -> None:
         super().__init__(context)
@@ -188,15 +151,10 @@ class FindResources(ContextAwareVisitor, NameResolutionMixin):
                 return True
         return False
 
-    def get_parent(self, node: cst.CSTNode) -> Optional[cst.CSTNode]:
-        try:
-            return self.get_metadata(ParentNodeProvider, node, None)
-        except Exception:
-            pass
-        return None
 
-
-class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
+class ResourceLeakFixer(
+    MetadataPreservingTransformer, NameResolutionMixin, AncestorPatternsMixin
+):
     METADATA_DEPENDENCIES = (
         PositionProvider,
         ScopeProvider,
@@ -463,135 +421,4 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
                 true_name = self.find_base_name(maybe_gparent)
                 if true_name and true_name.startswith("contextlib."):
                     return self.is_with_item(maybe_gparent)
-        return None
-
-    def find_accesses(self, node) -> Collection[Access]:
-        scope = self.get_metadata(ScopeProvider, node, None)
-        if scope:
-            return scope.accesses[node]
-        return {}
-
-    def is_value_of_assignment(
-        self, expr
-    ) -> Optional[cst.AnnAssign | cst.Assign | cst.WithItem | cst.NamedExpr]:
-        """
-        Tests if expr is the value in an assignment.
-        """
-        parent = self.get_metadata(ParentNodeProvider, expr)
-        match parent:
-            case cst.AnnAssign(value=value) | cst.Assign(value=value) | cst.WithItem(
-                item=value
-            ) | cst.NamedExpr(
-                value=value
-            ) if expr == value:  # type: ignore
-                return parent
-        return None
-
-    def has_attr_called(self, node: cst.CSTNode) -> Optional[cst.Name]:
-        """
-        Checks if node is part of an expression of the form: <node>.call().
-        """
-        maybe_attr = self.is_attribute_value(node)
-        maybe_call = self.is_call_func(maybe_attr) if maybe_attr else None
-        if maybe_attr and maybe_call:
-            return maybe_attr.attr
-        return None
-
-    def is_argument_of_call(self, node: cst.CSTNode) -> Optional[cst.Arg]:
-        """
-        Checks if the node is an argument of a call.
-        """
-        maybe_parent = self.get_parent(node)
-        match maybe_parent:
-            case cst.Arg(value=node):
-                return maybe_parent
-        return None
-
-    def is_yield_value(self, node: cst.CSTNode) -> Optional[cst.Yield]:
-        """
-        Checks if the node is the value of a Yield statement.
-        """
-        maybe_parent = self.get_parent(node)
-        match maybe_parent:
-            case cst.Yield(value=node):
-                return maybe_parent
-        return None
-
-    def is_return_value(self, node: cst.CSTNode) -> Optional[cst.Return]:
-        """
-        Checks if the node is the value of a Return statement.
-        """
-        maybe_parent = self.get_parent(node)
-        match maybe_parent:
-            case cst.Return(value=node):
-                return maybe_parent
-        return None
-
-    def is_with_item(self, node: cst.CSTNode) -> Optional[cst.WithItem]:
-        """
-        Checks if the node is the name of a WithItem.
-        """
-        maybe_parent = self.get_parent(node)
-        match maybe_parent:
-            case cst.WithItem(item=node):
-                return maybe_parent
-        return None
-
-    def is_call_func(self, node: cst.CSTNode) -> Optional[cst.Call]:
-        """
-        Checks if the node is the func of an Call.
-        """
-        maybe_parent = self.get_parent(node)
-        match maybe_parent:
-            case cst.Call(func=node):
-                return maybe_parent
-        return None
-
-    def is_attribute_value(self, node: cst.CSTNode) -> Optional[cst.Attribute]:
-        """
-        Checks if node is the value of an Attribute.
-        """
-        maybe_parent = self.get_parent(node)
-        match maybe_parent:
-            case cst.Attribute(value=node):
-                return maybe_parent
-        return None
-
-    def path_to_root(self, node: cst.CSTNode) -> list[cst.CSTNode]:
-        """
-        Returns node's path to root. Includes self.
-        """
-        path = []
-        maybe_parent = node
-        while maybe_parent:
-            path.append(maybe_parent)
-            maybe_parent = self.get_parent(maybe_parent)
-        return path
-
-    def path_to_root_as_set(self, node: cst.CSTNode) -> set[cst.CSTNode]:
-        """
-        Returns the set of nodes in node's path to root. Includes self.
-        """
-        path = set()
-        maybe_parent = node
-        while maybe_parent:
-            path.add(maybe_parent)
-            maybe_parent = self.get_parent(maybe_parent)
-        return path
-
-    def is_ancestor(self, node: cst.CSTNode, other_node: cst.CSTNode) -> bool:
-        """
-        Tests if other_node is an ancestor of node in the CST.
-        """
-        path = self.path_to_root_as_set(node)
-        return other_node in path
-
-    def get_parent(self, node: cst.CSTNode) -> Optional[cst.CSTNode]:
-        """
-        Retrieves the parent of node. Will return None for the root.
-        """
-        try:
-            return self.get_metadata(ParentNodeProvider, node, None)
-        except Exception:
-            pass
         return None

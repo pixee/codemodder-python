@@ -1,12 +1,14 @@
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Collection, Optional, Tuple, Union
 import libcst as cst
 from libcst import MetadataDependent, matchers
 from libcst.helpers import get_full_name_for_node
 from libcst.metadata import (
+    Access,
     Assignment,
     BaseAssignment,
     BuiltinAssignment,
     ImportAssignment,
+    ParentNodeProvider,
     ScopeProvider,
 )
 from libcst.metadata.scope_provider import GlobalScope
@@ -157,6 +159,141 @@ class NameResolutionMixin(MetadataDependent):
         if maybe_assignment and isinstance(maybe_assignment, BuiltinAssignment):
             return matchers.matches(node.func, matchers.Name())
         return False
+
+    def find_accesses(self, node) -> Collection[Access]:
+        scope = self.get_metadata(ScopeProvider, node, None)
+        if scope:
+            return scope.accesses[node]
+        return {}
+
+
+class AncestorPatternsMixin(MetadataDependent):
+    METADATA_DEPENDENCIES: Tuple[Any, ...] = (ParentNodeProvider,)
+
+    def is_value_of_assignment(
+        self, expr
+    ) -> Optional[cst.AnnAssign | cst.Assign | cst.WithItem | cst.NamedExpr]:
+        """
+        Tests if expr is the value in an assignment.
+        """
+        parent = self.get_metadata(ParentNodeProvider, expr)
+        match parent:
+            case cst.AnnAssign(value=value) | cst.Assign(value=value) | cst.WithItem(
+                item=value
+            ) | cst.NamedExpr(
+                value=value
+            ) if expr == value:  # type: ignore
+                return parent
+        return None
+
+    def has_attr_called(self, node: cst.CSTNode) -> Optional[cst.Name]:
+        """
+        Checks if node is part of an expression of the form: <node>.call().
+        """
+        maybe_attr = self.is_attribute_value(node)
+        maybe_call = self.is_call_func(maybe_attr) if maybe_attr else None
+        if maybe_attr and maybe_call:
+            return maybe_attr.attr
+        return None
+
+    def is_argument_of_call(self, node: cst.CSTNode) -> Optional[cst.Arg]:
+        """
+        Checks if the node is an argument of a call.
+        """
+        maybe_parent = self.get_parent(node)
+        match maybe_parent:
+            case cst.Arg(value=node):
+                return maybe_parent
+        return None
+
+    def is_yield_value(self, node: cst.CSTNode) -> Optional[cst.Yield]:
+        """
+        Checks if the node is the value of a Yield statement.
+        """
+        maybe_parent = self.get_parent(node)
+        match maybe_parent:
+            case cst.Yield(value=node):
+                return maybe_parent
+        return None
+
+    def is_return_value(self, node: cst.CSTNode) -> Optional[cst.Return]:
+        """
+        Checks if the node is the value of a Return statement.
+        """
+        maybe_parent = self.get_parent(node)
+        match maybe_parent:
+            case cst.Return(value=node):
+                return maybe_parent
+        return None
+
+    def is_with_item(self, node: cst.CSTNode) -> Optional[cst.WithItem]:
+        """
+        Checks if the node is the name of a WithItem.
+        """
+        maybe_parent = self.get_parent(node)
+        match maybe_parent:
+            case cst.WithItem(item=node):
+                return maybe_parent
+        return None
+
+    def is_call_func(self, node: cst.CSTNode) -> Optional[cst.Call]:
+        """
+        Checks if the node is the func of an Call.
+        """
+        maybe_parent = self.get_parent(node)
+        match maybe_parent:
+            case cst.Call(func=node):
+                return maybe_parent
+        return None
+
+    def is_attribute_value(self, node: cst.CSTNode) -> Optional[cst.Attribute]:
+        """
+        Checks if node is the value of an Attribute.
+        """
+        maybe_parent = self.get_parent(node)
+        match maybe_parent:
+            case cst.Attribute(value=node):
+                return maybe_parent
+        return None
+
+    def path_to_root(self, node: cst.CSTNode) -> list[cst.CSTNode]:
+        """
+        Returns node's path to root. Includes self.
+        """
+        path = []
+        maybe_parent = node
+        while maybe_parent:
+            path.append(maybe_parent)
+            maybe_parent = self.get_parent(maybe_parent)
+        return path
+
+    def path_to_root_as_set(self, node: cst.CSTNode) -> set[cst.CSTNode]:
+        """
+        Returns the set of nodes in node's path to root. Includes self.
+        """
+        path = set()
+        maybe_parent = node
+        while maybe_parent:
+            path.add(maybe_parent)
+            maybe_parent = self.get_parent(maybe_parent)
+        return path
+
+    def is_ancestor(self, node: cst.CSTNode, other_node: cst.CSTNode) -> bool:
+        """
+        Tests if other_node is an ancestor of node in the CST.
+        """
+        path = self.path_to_root_as_set(node)
+        return other_node in path
+
+    def get_parent(self, node: cst.CSTNode) -> Optional[cst.CSTNode]:
+        """
+        Retrieves the parent of node. Will return None for the root.
+        """
+        try:
+            return self.get_metadata(ParentNodeProvider, node, None)
+        except Exception:
+            pass
+        return None
 
 
 def iterate_left_expressions(node: cst.BaseExpression):

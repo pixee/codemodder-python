@@ -2,7 +2,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, Any
 
-from libcst import matchers
+from libcst import MetadataDependent, matchers
+from libcst.codemod import CodemodContext
+from libcst.matchers import MatcherDecoratableTransformer
 import libcst as cst
 
 
@@ -102,6 +104,40 @@ class ReplaceNodes(cst.CSTTransformer):
                 case cst.CSTNode() | cst.RemovalSentinel() | cst.FlattenSentinel():
                     return replacement
         return updated_node
+
+
+class MetadataPreservingTransformer(
+    MatcherDecoratableTransformer, cst.MetadataDependent
+):
+    """
+    The CSTTransformer equivalent of ContextAwareVisitor. Will preserve metadata passed through a context. You should not chain more than one of these, otherwise metadata will not reflect the state of the tree.
+    """
+
+    def __init__(self, context: CodemodContext) -> None:
+        MetadataDependent.__init__(self)
+        MatcherDecoratableTransformer.__init__(self)
+        self.context = context
+        dependencies = self.get_inherited_dependencies()
+        if dependencies:
+            wrapper = self.context.wrapper
+            if wrapper is None:
+                # pylint: disable-next=broad-exception-raised
+                raise Exception(
+                    f"Attempting to instantiate {self.__class__.__name__} outside of "
+                    + "an active transform. This means that metadata hasn't been "
+                    + "calculated and we cannot successfully create this visitor."
+                )
+            for dep in dependencies:
+                if dep not in wrapper._metadata:
+                    # pylint: disable-next=broad-exception-raised
+                    raise Exception(
+                        f"Attempting to access metadata {dep.__name__} that was not a "
+                        + "declared dependency of parent transform! This means it is "
+                        + "not possible to compute this value. Please ensure that all "
+                        + f"parent transforms of {self.__class__.__name__} declare "
+                        + f"{dep.__name__} as a metadata dependency."
+                    )
+            self.metadata = {dep: wrapper._metadata[dep] for dep in dependencies}
 
 
 def is_django_settings_file(file_path: Path):
