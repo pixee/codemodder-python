@@ -384,11 +384,14 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameResolutionMixin):
                 ]
                 for t in tail:
                     items.append(
-                        cst.WithItem(item=t.target, asname=cst.AsName(name=head.target))
+                        cst.WithItem(item=head.target, asname=cst.AsName(name=t.target))
                     )
                 return cst.With(items=items, body=cst.IndentedBlock(body=body))
             case cst.AnnAssign():
-                pass
+                items = [
+                    cst.WithItem(item=resource, asname=cst.AsName(name=assign.target))
+                ]
+                return cst.With(items=items, body=cst.IndentedBlock(body=body))
         # should not get here
         return None
 
