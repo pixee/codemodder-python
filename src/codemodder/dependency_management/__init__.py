@@ -1,1 +1,1 @@
-from .dependency_manager import DependencyManager, Requirement
+from .dependency_manager import DependencyManager

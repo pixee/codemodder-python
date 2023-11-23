@@ -87,20 +87,23 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         )
 
     def process_dependencies(self, codemod_id: str):
+        """Write the dependencies a codemod added to the appropriate dependency
+        file in the project.
+        """
         dependencies = self.dependencies.get(codemod_id)
         if not dependencies:
             return
 
-        dm = DependencyManager(self.directory)
-        if not dm.found_dependency_file:
+        dependencies_store = self.repo_manager.dependencies_store
+        if dependencies_store is None:
             logger.info(
                 "unable to write dependencies for %s: no dependency file found",
                 codemod_id,
             )
             return
 
-        dm.add(list(dependencies))
-        if (changeset := dm.write(self.dry_run)) is not None:
+        dm = DependencyManager(dependencies_store, self.directory)
+        if (changeset := dm.write(list(dependencies), self.dry_run)) is not None:
             self.add_results(codemod_id, [changeset])
 
     def add_description(self, codemod: CodemodExecutorWrapper):
