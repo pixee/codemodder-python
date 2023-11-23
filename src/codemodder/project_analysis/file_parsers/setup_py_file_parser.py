@@ -4,6 +4,7 @@ from pathlib import Path
 import libcst as cst
 from libcst import matchers
 from packaging.requirements import Requirement
+from typing import Optional
 
 from .base_parser import BaseParser
 
@@ -21,10 +22,8 @@ class SetupPyParser(BaseParser):
             if (line := clean_simplestring(x.value)) and not line.startswith("#")
         ]
 
-    def _parse_dependencies_from_cst(self, cst_dependencies):
-        # todo: handle cases for
-        # 1. no dependencies,
-        return self._parse_dependencies(cst_dependencies)
+    def _parse_dependencies_from_cst(self, cst_dependencies: Optional[list]):
+        return self._parse_dependencies(cst_dependencies) if cst_dependencies else []
 
     def _parse_py_versions(self, version_str):
         # todo: handle for multiple versions
@@ -68,10 +67,12 @@ class SetupArgVisitor(cst.CSTVisitor):
         self.install_requires = None
 
     def visit_Arg(self, node: cst.Arg) -> None:
-        if matchers.matches(node.keyword, cst.Name(value="python_requires")):
+        if matchers.matches(node.keyword, matchers.Name(value="python_requires")):
             # todo: this works for `python_requires=">=3.7",` but what about
             # a list of versions?
             self.python_requires = node.value.value
-        if matchers.matches(node.keyword, cst.Name(value="install_requires")):
-            # todo: could it be something other than a list?
+        if matchers.matches(
+            node.keyword, matchers.Name(value="install_requires")
+        ) and matchers.matches(node.value, matchers.List()):
+            # todo: if node.value is Name node, find requirements in the variable at node.value
             self.install_requires = node.value.elements
