@@ -93,6 +93,7 @@ def apply_codemod_to_file(
     return True
 
 
+# pylint: disable-next=too-many-arguments
 def process_file(
     idx: int,
     file_path: Path,
@@ -100,7 +101,7 @@ def process_file(
     codemod,
     results: ResultSet,
     cli_args,
-):  # pylint: disable=too-many-arguments
+) -> FileContext:
     logger.debug("scanning file %s", file_path)
     if idx and idx % 100 == 0:
         logger.info("scanned %s files...", idx)  # pragma: no cover
@@ -262,8 +263,8 @@ def run(original_args) -> int:
         codemod_registry,
         repo_manager,
     )
-    # todo: enable when ready
-    # repo_manager.package_stores
+
+    repo_manager.parse_project()
 
     # TODO: this should be a method of CodemodExecutionContext
     codemods_to_run = codemod_registry.match_codemods(
