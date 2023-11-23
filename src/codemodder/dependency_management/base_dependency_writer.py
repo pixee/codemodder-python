@@ -17,7 +17,7 @@ class DependencyWriter(metaclass=ABCMeta):
 
     @abstractmethod
     def write(
-        self, dependencies: list[Requirement], dry_run: bool = False
+        self, dependencies: list[Dependency], dry_run: bool = False
     ) -> Optional[ChangeSet]:
         pass
 
