@@ -32,6 +32,6 @@ class SetupCfgParser(BaseParser):
         return PackageStore(
             type=self.file_name,
             file=str(file),
-            dependencies=self._parse_dependencies_from_cfg(config),
+            dependencies=set(self._parse_dependencies_from_cfg(config)),
             py_versions=self._parse_py_versions(config),
         )

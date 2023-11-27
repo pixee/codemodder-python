@@ -6,5 +6,5 @@ from packaging.requirements import Requirement
 class PackageStore:
     type: str
     file: str
-    dependencies: list[Requirement]
+    dependencies: set[Requirement]
     py_versions: list[str]

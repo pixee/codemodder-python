@@ -21,7 +21,7 @@ class TestRequirementsTxtWriter:
         store = PackageStore(
             type="requirements.txt",
             file=str(dependency_file),
-            dependencies=[],
+            dependencies=set(),
             py_versions=[],
         )
         writer = RequirementsTxtWriter(store, Path(tmpdir))
@@ -69,7 +69,7 @@ class TestRequirementsTxtWriter:
         store = PackageStore(
             type="requirements.txt",
             file=str(dependency_file),
-            dependencies=[],
+            dependencies=set(),
             py_versions=[],
         )
         writer = RequirementsTxtWriter(store, Path(tmpdir))
@@ -89,7 +89,7 @@ class TestRequirementsTxtWriter:
         store = PackageStore(
             type="requirements.txt",
             file=str(dependency_file),
-            dependencies=[Security.requirement],
+            dependencies=set([Security.requirement]),
             py_versions=[],
         )
         writer = RequirementsTxtWriter(store, Path(tmpdir))
@@ -106,7 +106,7 @@ class TestRequirementsTxtWriter:
         store = PackageStore(
             type="requirements.txt",
             file=str(dependency_file),
-            dependencies=[],
+            dependencies=set(),
             py_versions=[],
         )
         writer = RequirementsTxtWriter(store, Path(tmpdir))

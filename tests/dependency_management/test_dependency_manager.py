@@ -15,7 +15,7 @@ def disable_write_dependencies():
 class TestDependencyManager:
     def test_cant_write_unknown_store(self, tmpdir):
         store = PackageStore(
-            type="unknown", file="idk.txt", dependencies=[], py_versions=[]
+            type="unknown", file="idk.txt", dependencies=set(), py_versions=[]
         )
 
         dm = DependencyManager(store, tmpdir)
