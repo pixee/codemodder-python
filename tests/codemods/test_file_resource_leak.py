@@ -7,7 +7,7 @@ class TestFileResourceLeak(BaseCodemodTest):
     codemod = FileResourceLeak
 
     def test_name(self):
-        assert self.codemod.name() == "file-resource-leak"
+        assert self.codemod.name() == "fix-file-resource-leak"
 
     def test_simple(self, tmpdir):
         input_code = """\
