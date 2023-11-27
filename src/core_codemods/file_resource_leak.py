@@ -1,8 +1,8 @@
 from typing import Optional, Sequence
+from codemodder.utils.utils import extract_targets_of_assignment
 import libcst as cst
 from libcst import ensure_type, matchers
 from libcst.codemod import (
-    Codemod,
     CodemodContext,
     ContextAwareVisitor,
 )
@@ -14,34 +14,30 @@ from libcst.metadata import (
 )
 from codemodder.change import Change
 from codemodder.codemods.base_codemod import (
-    BaseCodemod,
-    CodemodMetadata,
     ReviewGuidance,
 )
-from codemodder.codemods.base_visitor import UtilsMixin
+from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.utils import MetadataPreservingTransformer
 from codemodder.codemods.utils_mixin import AncestorPatternsMixin, NameResolutionMixin
 from codemodder.file_context import FileContext
 from functools import partial
 
 
-class FileResourceLeak(BaseCodemod, UtilsMixin, Codemod):
-    SUMMARY = "Automatically close resources"
-    METADATA = CodemodMetadata(
-        DESCRIPTION=SUMMARY,
-        NAME="file-resource-leak",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        REFERENCES=[
-            {
-                "url": "https://cwe.mitre.org/data/definitions/772.html",
-                "description": "",
-            },
-            {
-                "url": "https://cwe.mitre.org/data/definitions/404.html",
-                "description": "",
-            },
-        ],
-    )
+class FileResourceLeak(BaseCodemod):
+    NAME = "file-resource-leak"
+    SUMMARY = "Automatically Close Resources"
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
+    DESCRIPTION = SUMMARY
+    REFERENCES = [
+        {
+            "url": "https://cwe.mitre.org/data/definitions/772.html",
+            "description": "",
+        },
+        {
+            "url": "https://cwe.mitre.org/data/definitions/404.html",
+            "description": "",
+        },
+    ]
     CHANGE_DESCRIPTION = "Wrapped opened resource in a with statement."
 
     METADATA_DEPENDENCIES = (
@@ -59,9 +55,7 @@ class FileResourceLeak(BaseCodemod, UtilsMixin, Codemod):
         self.changed_nodes: dict[
             cst.CSTNode, cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel
         ] = {}
-        BaseCodemod.__init__(self, file_context, *codemod_args)
-        UtilsMixin.__init__(self, [])
-        Codemod.__init__(self, context)
+        BaseCodemod.__init__(self, context, file_context, *codemod_args)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         fr = FindResources(self.context)
@@ -250,7 +244,7 @@ class ResourceLeakFixer(
         for node in (access.node for access in accesses):
             maybe_assigned = self.is_value_of_assignment(node)
             if maybe_assigned:
-                targets = self._extract_targets_of_assignment(maybe_assigned)
+                targets = extract_targets_of_assignment(maybe_assigned)
                 name_targets.extend(targets)
         return name_targets
 
@@ -286,7 +280,7 @@ class ResourceLeakFixer(
         maybe_assigned = self.is_value_of_assignment(expr)
         if maybe_assigned:
             named_targets, other_targets = self._sieve_targets(
-                self._extract_targets_of_assignment(maybe_assigned)
+                extract_targets_of_assignment(maybe_assigned)
             )
             for n in named_targets:
                 n_named_targets, n_other_targets = self._find_name_assignment_targets(n)
@@ -294,22 +288,6 @@ class ResourceLeakFixer(
                 other_targets.extend(n_other_targets)
             return named_targets, other_targets
         return ([], [])
-
-    def _extract_targets_of_assignment(
-        self, assignment: cst.AnnAssign | cst.Assign | cst.WithItem | cst.NamedExpr
-    ) -> list[cst.BaseExpression]:
-        match assignment:
-            case cst.AnnAssign():
-                if assignment.target:
-                    return [assignment.target]
-            case cst.Assign():
-                return [t.target for t in assignment.targets]
-            case cst.NamedExpr():
-                return [assignment.target]
-            case cst.WithItem():
-                if assignment.asname:
-                    return [assignment.asname.name]
-        return []
 
     # pylint: disable-next=too-many-arguments
     def _wrap_in_with_statement(
