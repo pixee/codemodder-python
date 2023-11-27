@@ -3,19 +3,12 @@ from codemodder.dependency_management.base_dependency_writer import DependencyWr
 from codemodder.change import Action, Change, ChangeSet, PackageAction, Result
 from codemodder.diff import create_diff
 from codemodder.dependency import Dependency
-from packaging.requirements import Requirement
 
 
 class RequirementsTxtWriter(DependencyWriter):
-    def write(
+    def add_to_file(
         self, dependencies: list[Dependency], dry_run: bool = False
     ) -> Optional[ChangeSet]:
-        new_dependencies = self.add(dependencies)
-        if new_dependencies:
-            return self.add_to_file(new_dependencies, dry_run)
-        return None
-
-    def add_to_file(self, dependencies: list[Requirement], dry_run: bool):
         lines = self._parse_file()
         original_lines = lines.copy()
         if not original_lines[-1].endswith("\n"):
@@ -25,6 +18,10 @@ class RequirementsTxtWriter(DependencyWriter):
         updated_lines = original_lines + requirement_lines
 
         diff = create_diff(original_lines, updated_lines)
+
+        if not dry_run:
+            with open(self.path, "w", encoding="utf-8") as f:
+                f.writelines(updated_lines)
 
         changes = [
             Change(
@@ -41,11 +38,6 @@ class RequirementsTxtWriter(DependencyWriter):
             )
             for i, dep in enumerate(dependencies)
         ]
-
-        if not dry_run:
-            with open(self.path, "w", encoding="utf-8") as f:
-                f.writelines(updated_lines)
-
         return ChangeSet(
             str(self.path.relative_to(self.parent_directory)),
             diff,

@@ -7,11 +7,6 @@ from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.dependency import DefusedXML, Security
 
 
-@pytest.fixture(autouse=True, scope="module")
-def disable_write_dependencies():
-    """Override fixture from conftest.py in order to allow testing"""
-
-
 class TestRequirementsTxtWriter:
     @pytest.mark.parametrize("dry_run", [True, False])
     def test_add_dependencies_preserve_comments(self, tmpdir, dry_run):

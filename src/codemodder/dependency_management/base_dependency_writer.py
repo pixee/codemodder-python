@@ -16,10 +16,18 @@ class DependencyWriter(metaclass=ABCMeta):
         self.parent_directory = parent_directory
 
     @abstractmethod
-    def write(
+    def add_to_file(
         self, dependencies: list[Dependency], dry_run: bool = False
     ) -> Optional[ChangeSet]:
         pass
+
+    def write(
+        self, dependencies: list[Dependency], dry_run: bool = False
+    ) -> Optional[ChangeSet]:
+        new_dependencies = self.add(dependencies)
+        if new_dependencies:
+            return self.add_to_file(new_dependencies, dry_run)
+        return None
 
     def add(self, dependencies: list[Dependency]) -> list[Dependency]:
         """add any number of dependencies to the end of list of dependencies."""
