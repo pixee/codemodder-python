@@ -4,6 +4,7 @@ from codemodder.dependency import Dependency
 from codemodder.dependency_management.requirements_txt_writer import (
     RequirementsTxtWriter,
 )
+from codemodder.dependency_management.pyproject_writer import PyprojectWriter
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from pathlib import Path
 
@@ -25,6 +26,10 @@ class DependencyManager:
         match self.dependencies_store.type:
             case "requirements.txt":
                 return RequirementsTxtWriter(
+                    self.dependencies_store, self.parent_directory
+                ).write(dependencies, dry_run)
+            case "pyproject.toml":
+                return PyprojectWriter(
                     self.dependencies_store, self.parent_directory
                 ).write(dependencies, dry_run)
             case "setup.py":
