@@ -41,7 +41,9 @@ class SetupPyParser(BaseParser):
         return PackageStore(
             type=self.file_name,
             file=str(file),
-            dependencies=self._parse_dependencies_from_cst(visitor.install_requires),
+            dependencies=set(
+                self._parse_dependencies_from_cst(visitor.install_requires)
+            ),
             py_versions=self._parse_py_versions(visitor.python_requires),
         )
 

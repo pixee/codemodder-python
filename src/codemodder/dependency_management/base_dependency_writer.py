@@ -21,12 +21,12 @@ class DependencyWriter(metaclass=ABCMeta):
     ) -> Optional[ChangeSet]:
         pass
 
-    def add(self, dependencies: list[Dependency]) -> Optional[list[Dependency]]:
+    def add(self, dependencies: list[Dependency]) -> list[Dependency]:
         """add any number of dependencies to the end of list of dependencies."""
         new = []
         for new_dep in dependencies:
             requirement: Requirement = new_dep.requirement
             if requirement not in self.dependency_store.dependencies:
-                self.dependency_store.dependencies.append(requirement)
+                self.dependency_store.dependencies.add(requirement)
                 new.append(new_dep)
         return new

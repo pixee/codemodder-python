@@ -28,6 +28,6 @@ class PyprojectTomlParser(BaseParser):
         return PackageStore(
             type=self.file_name,
             file=str(file),
-            dependencies=self._parse_dependencies_from_toml(data),
+            dependencies=set(self._parse_dependencies_from_toml(data)),
             py_versions=self._parse_py_versions(data),
         )
