@@ -24,7 +24,7 @@ from functools import partial
 
 
 class FileResourceLeak(BaseCodemod):
-    NAME = "file-resource-leak"
+    NAME = "fix-file-resource-leak"
     SUMMARY = "Automatically Close Resources"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     DESCRIPTION = SUMMARY
