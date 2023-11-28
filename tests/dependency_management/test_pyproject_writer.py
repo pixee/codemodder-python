@@ -65,25 +65,21 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
 
     assert changeset is not None
     assert changeset.path == pyproject_toml.basename
-
-    res = dedent(
-        """\
-            ---
-            +++
-            @@ -11,5 +11,7 @@
-                 "libcst~=1.1.0",
-                 "pylint~=3.0.0",
-                 "PyYAML~=6.0.0",
-            +    "defusedxml~=0.7.1",
-            +    "security~=1.2.0",
-             ]
-          """
+    res = (
+        "--- \n"
+        "+++ \n"
+        "@@ -11,5 +11,7 @@\n"
+        """     "libcst~=1.1.0",\n"""
+        """     "pylint~=3.0.0",\n"""
+        """     "PyYAML~=6.0.0",\n"""
+        """+    "defusedxml~=0.7.1",\n"""
+        """+    "security~=1.2.0",\n"""
+        " ]\n "
     )
-    # TODO
-    # assert changeset.diff == res
+    assert changeset.diff == res
     assert len(changeset.changes) == 2
     change_one = changeset.changes[0]
-    # todo line num
+
     assert change_one.lineNumber == 14
     assert change_one.description == DefusedXML.build_description()
     assert change_one.properties == {
