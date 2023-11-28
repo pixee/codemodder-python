@@ -1,7 +1,6 @@
 from textwrap import dedent
 import pytest
 
-from packaging.requirements import Requirement
 from codemodder.dependency_management.pyproject_writer import PyprojectWriter
 from codemodder.dependency import DefusedXML, Security
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
@@ -125,7 +124,7 @@ def test_add_same_dependency_only_once(tmpdir):
 
     writer = PyprojectWriter(store, tmpdir)
     dependencies = [Security, Security]
-    changeset = writer.write(dependencies)
+    writer.write(dependencies)
 
     updated_pyproject = """\
         [build-system]
@@ -178,6 +177,33 @@ def test_dont_add_existing_dependency(tmpdir):
 
     writer = PyprojectWriter(store, tmpdir)
     dependencies = [Security]
-    changeset = writer.write(dependencies)
+    writer.write(dependencies)
+
+    assert pyproject_toml.read() == dedent(orig_pyproject)
+
+
+def test_pyproject_no_dependencies(tmpdir):
+    orig_pyproject = """\
+        [build-system]
+        requires = ["setuptools", "setuptools_scm>=8"]
+        build-backend = "setuptools.build_meta"
+        [project]
+        name = "codemodder"
+    """
+
+    pyproject_toml = tmpdir.join("pyproject.toml")
+    pyproject_toml.write(dedent(orig_pyproject))
+
+    store = PackageStore(
+        type="requirements.txt",
+        file=str(pyproject_toml),
+        dependencies=set(),
+        py_versions=[">=3.10.0"],
+    )
+
+    writer = PyprojectWriter(store, tmpdir)
+    dependencies = [Security]
+
+    writer.write(dependencies)
 
     assert pyproject_toml.read() == dedent(orig_pyproject)
