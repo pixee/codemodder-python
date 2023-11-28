@@ -13,16 +13,20 @@ class PyprojectWriter(DependencyWriter):
     ) -> Optional[ChangeSet]:
         pyproject = self._parse_file()
         original = deepcopy(pyproject)
-        pyproject["project"]["dependencies"].extend(
-            [f"{dep.requirement}" for dep in dependencies]
-        )
+
+        try:
+            pyproject["project"]["dependencies"].extend(
+                [f"{dep.requirement}" for dep in dependencies]
+            )
+        except tomlkit.exceptions.NonExistentKey:
+            return None
 
         diff, added_line_nums = create_diff_and_linenums(
             tomlkit.dumps(original).split("\n"), tomlkit.dumps(pyproject).split("\n")
         )
 
         if not dry_run:
-            with open(self.path, "w") as f:
+            with open(self.path, "w", encoding="utf-8") as f:
                 tomlkit.dump(pyproject, f)
 
         changes = [
@@ -47,5 +51,5 @@ class PyprojectWriter(DependencyWriter):
         )
 
     def _parse_file(self):
-        with open(self.path) as f:
+        with open(self.path, encoding="utf-8") as f:
             return tomlkit.load(f)
