@@ -16,7 +16,7 @@ from codemodder.cli import parse_args
 from codemodder.change import ChangeSet
 from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.context import CodemodExecutionContext
-from codemodder.diff import create_diff as create_diff_from_lines
+from codemodder.diff import create_diff_from_tree
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default
@@ -48,16 +48,6 @@ def find_semgrep_results(
     return run_semgrep(context, yaml_files)
 
 
-def create_diff(original_tree: cst.Module, new_tree: cst.Module) -> str:
-    """
-    Create a diff between the original and output trees.
-    """
-    return create_diff_from_lines(
-        original_tree.code.splitlines(keepends=True),
-        new_tree.code.splitlines(keepends=True),
-    )
-
-
 def apply_codemod_to_file(
     base_directory: Path,
     file_context,
@@ -78,7 +68,7 @@ def apply_codemod_to_file(
     if output_tree.deep_equals(source_tree):
         return False
 
-    diff = create_diff(source_tree, output_tree)
+    diff = create_diff_from_tree(source_tree, output_tree)
     change_set = ChangeSet(
         str(file_context.file_path.relative_to(base_directory)),
         diff,

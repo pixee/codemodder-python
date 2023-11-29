@@ -1,12 +1,67 @@
 import libcst as cst
 from libcst.codemod import CodemodContext
 from libcst import matchers
+from typing import Optional
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.utils import is_setup_py_file
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.file_context import FileContext
 from packaging.requirements import Requirement
+from codemodder.dependency import Dependency
+from codemodder.dependency_management.base_dependency_writer import DependencyWriter
+from codemodder.change import Action, Change, ChangeSet, PackageAction, Result
+from codemodder.diff import create_diff_from_tree
+
+
+class SetupPyWriter(DependencyWriter):
+    def add_to_file(
+        self, dependencies: list[Dependency], dry_run: bool = False
+    ) -> Optional[ChangeSet]:
+        input_tree = self._parse_file()
+        wrapper = cst.MetadataWrapper(input_tree)
+        file_context = FileContext(self.parent_directory, self.path, [], [], [])
+
+        codemod = SetupPyAddDependencies(
+            CodemodContext(wrapper=wrapper),
+            file_context,
+            dependencies=[dep.requirement for dep in dependencies],
+        )
+
+        output_tree = codemod.transform_module(input_tree)
+        if codemod.line_num_changed is None:
+            return None
+
+        diff = create_diff_from_tree(input_tree, output_tree)
+
+        if not dry_run:
+            with open(self.path, "w", encoding="utf-8") as f:
+                f.write(output_tree.code)
+
+        changes = [
+            Change(
+                lineNumber=codemod.line_num_changed,
+                description=dep.build_description(),
+                # Contextual comments should be added to the right side of split diffs
+                properties={
+                    "contextual_description": True,
+                    "contextual_description_position": "right",
+                },
+                packageActions=[
+                    PackageAction(Action.ADD, Result.COMPLETED, str(dep.requirement))
+                ],
+            )
+            for i, dep in enumerate(dependencies)
+        ]
+        return ChangeSet(
+            str(self.path.relative_to(self.parent_directory)),
+            diff,
+            changes=changes,
+        )
+
+    def _parse_file(self):
+        with open(self.path, encoding="utf-8") as f:
+            return cst.parse_module(f.read())
 
 
 class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
@@ -26,6 +81,7 @@ class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
         NameResolutionMixin.__init__(self)
         self.filename = self.file_context.file_path
         self.dependencies = dependencies
+        self.line_num_changed = None
 
     def visit_Module(self, _: cst.Module) -> bool:
         """
@@ -54,6 +110,14 @@ class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
         return new_args
 
     def add_dependencies_to_arg(self, arg: cst.Arg) -> cst.Arg:
+        if not arg.value.elements:
+            # If there are no current dependencies, don't do anything
+            return arg
+
+        # we add the new dependencies in the same line as the last
+        # dependency listed in install_requires
+        self.line_num_changed = self.lineno_for_node(arg.value.elements[-1]) - 1
+
         new_dependencies = [
             cst.Element(value=cst.SimpleString(value=f'"{str(dep)}"'))
             for dep in self.dependencies

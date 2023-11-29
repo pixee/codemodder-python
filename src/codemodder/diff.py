@@ -1,9 +1,20 @@
 import difflib
+import libcst as cst
 
 
 def create_diff(original_lines: list[str], new_lines: list[str]) -> str:
     diff_lines = list(difflib.unified_diff(original_lines, new_lines))
     return difflines_to_str(diff_lines)
+
+
+def create_diff_from_tree(original_tree: cst.Module, new_tree: cst.Module) -> str:
+    """
+    Create a diff between the original and output trees.
+    """
+    return create_diff(
+        original_tree.code.splitlines(keepends=True),
+        new_tree.code.splitlines(keepends=True),
+    )
 
 
 def create_diff_and_linenums(
