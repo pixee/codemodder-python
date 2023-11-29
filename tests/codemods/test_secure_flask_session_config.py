@@ -52,6 +52,20 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
         assert len(self.file_context.codemod_changes) == 0
 
+    def test_app_update_no_keyword(self, tmpdir):
+        input_code = """\
+        import flask
+
+        from flask import Flask
+        def foo(test_config=None):
+            app = Flask(__name__)
+            app.secret_key = "dev"
+            app.config.update(test_config)
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        print(self.file_context.codemod_changes)
+        assert len(self.file_context.codemod_changes) == 0
+
     def test_from_import(self, tmpdir):
         input_code = """\
         from flask import Flask
