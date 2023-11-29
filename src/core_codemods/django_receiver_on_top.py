@@ -7,7 +7,7 @@ from codemodder.codemods.utils_mixin import NameResolutionMixin
 
 class DjangoReceiverOnTop(BaseCodemod, NameResolutionMixin):
     NAME = "django-receiver-on-top"
-    SUMMARY = "Ensures @receiver is on top of all decorators"
+    SUMMARY = "Ensure Django @receiver is the first decorator"
     DESCRIPTION = SUMMARY
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     REFERENCES = [

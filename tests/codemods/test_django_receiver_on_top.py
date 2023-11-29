@@ -58,6 +58,18 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
         assert len(self.file_context.codemod_changes) == 0
 
+    def test_receiver_but_not_djangos(self, tmpdir):
+        input_code = """\
+        from not_django import receiver
+
+        @receiver(request_finished)
+        @csrf_exempt
+        def foo():
+            pass
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        assert len(self.file_context.codemod_changes) == 0
+
     def test_receiver_on_top(self, tmpdir):
         input_code = """\
         from django.dispatch import receiver
