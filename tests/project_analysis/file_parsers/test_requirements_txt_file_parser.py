@@ -8,7 +8,7 @@ class TestRequirementsTxtParser:
         assert len(found) == 1
         store = found[0]
         assert store.type == "requirements.txt"
-        assert store.file == str(pkg_with_reqs_txt / parser.file_name)
+        assert store.file == str(pkg_with_reqs_txt / parser.file_type)
         assert store.py_versions == []
         assert len(store.dependencies) == 4
 

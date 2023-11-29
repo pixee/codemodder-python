@@ -39,7 +39,7 @@ class TestSetupCfgParser:
         assert len(found) == 1
         store = found[0]
         assert store.type == "setup.cfg"
-        assert store.file == str(pkg_with_setup_cfg / parser.file_name)
+        assert store.file == str(pkg_with_setup_cfg / parser.file_type)
         assert store.py_versions == [">=3.7"]
         assert len(store.dependencies) == 2
 
