@@ -58,6 +58,7 @@ test = [
     "pytest-xdist==3.*",
     "security~=1.2.0",
     "types-mock==5.1.*",
+    "django==4.*",
 ]
 complexity = [
     "radon==6.0.*",

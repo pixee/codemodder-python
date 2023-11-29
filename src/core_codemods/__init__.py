@@ -29,6 +29,7 @@ from .use_walrus_if import UseWalrusIf
 from .with_threading_lock import WithThreadingLock
 from .secure_flask_session_config import SecureFlaskSessionConfig
 from .file_resource_leak import FileResourceLeak
+from .django_receiver_on_top import DjangoReceiverOnTop
 
 registry = CodemodCollection(
     origin="pixee",
@@ -64,5 +65,6 @@ registry = CodemodCollection(
         SQLQueryParameterization,
         SecureFlaskSessionConfig,
         FileResourceLeak,
+        DjangoReceiverOnTop,
     ],
 )

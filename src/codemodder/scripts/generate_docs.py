@@ -142,6 +142,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="High",
         guidance_explained="We believe this change is safe and will only close file resources that are not referenced outside of the with statement block.",
     ),
+    "django-receiver-on-top": DocMetadata(
+        importance="Medium",
+        guidance_explained="We believe this change leads to the intended behavior the application and is thus safe.",
+    ),
 }
 
 
