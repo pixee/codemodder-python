@@ -46,7 +46,7 @@ class TestSetupPyParser:
         assert len(found) == 1
         store = found[0]
         assert store.type == "setup.py"
-        assert store.file == str(pkg_with_setup_py / parser.file_name)
+        assert store.file == str(pkg_with_setup_py / parser.file_type)
         assert store.py_versions == [">3.6"]
         assert len(store.dependencies) == 4
 

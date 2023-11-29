@@ -16,6 +16,8 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
         requires = ["setuptools", "setuptools_scm>=8"]
         build-backend = "setuptools.build_meta"
 
+        # some comment
+
         [project]
         dynamic = ["version"]
         name = "codemodder"
@@ -47,6 +49,8 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
         requires = ["setuptools", "setuptools_scm>=8"]
         build-backend = "setuptools.build_meta"
 
+        # some comment
+
         [project]
         dynamic = ["version"]
         name = "codemodder"
@@ -70,7 +74,7 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
     res = (
         "--- \n"
         "+++ \n"
-        "@@ -11,5 +11,7 @@\n"
+        "@@ -13,5 +13,7 @@\n"
         """     "libcst~=1.1.0",\n"""
         """     "pylint~=3.0.0",\n"""
         """     "PyYAML~=6.0.0",\n"""
@@ -82,14 +86,14 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
     assert len(changeset.changes) == 2
     change_one = changeset.changes[0]
 
-    assert change_one.lineNumber == 14
+    assert change_one.lineNumber == 16
     assert change_one.description == DefusedXML.build_description()
     assert change_one.properties == {
         "contextual_description": True,
         "contextual_description_position": "right",
     }
     change_two = changeset.changes[1]
-    assert change_two.lineNumber == 15
+    assert change_two.lineNumber == 17
     assert change_two.description == Security.build_description()
     assert change_two.properties == {
         "contextual_description": True,
