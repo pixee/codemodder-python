@@ -38,9 +38,19 @@ class SetupPyWriter(DependencyWriter):
             with open(self.path, "w", encoding="utf-8") as f:
                 f.write(output_tree.code)
 
-        changes = [
+        changes = self.build_changes(dependencies, codemod.line_num_changed)
+        return ChangeSet(
+            str(self.path.relative_to(self.parent_directory)),
+            diff,
+            changes=changes,
+        )
+
+    def build_changes(
+        self, dependencies: list[Dependency], line_num_changed: int
+    ) -> list[Change]:
+        return [
             Change(
-                lineNumber=codemod.line_num_changed,
+                lineNumber=line_num_changed,
                 description=dep.build_description(),
                 # Contextual comments should be added to the right side of split diffs
                 properties={
@@ -53,11 +63,6 @@ class SetupPyWriter(DependencyWriter):
             )
             for i, dep in enumerate(dependencies)
         ]
-        return ChangeSet(
-            str(self.path.relative_to(self.parent_directory)),
-            diff,
-            changes=changes,
-        )
 
     def _parse_file(self):
         with open(self.path, encoding="utf-8") as f:

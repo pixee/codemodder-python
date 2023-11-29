@@ -31,7 +31,17 @@ class PyprojectWriter(DependencyWriter):
             with open(self.path, "w", encoding="utf-8") as f:
                 tomlkit.dump(pyproject, f)
 
-        changes = [
+        changes = self.build_changes(dependencies, added_line_nums)
+        return ChangeSet(
+            str(self.path.relative_to(self.parent_directory)),
+            diff,
+            changes=changes,
+        )
+
+    def build_changes(
+        self, dependencies: list[Dependency], added_line_nums: list[int]
+    ) -> list[Change]:
+        return [
             Change(
                 lineNumber=added_line_nums[i],
                 description=dep.build_description(),
@@ -46,11 +56,6 @@ class PyprojectWriter(DependencyWriter):
             )
             for i, dep in enumerate(dependencies)
         ]
-        return ChangeSet(
-            str(self.path.relative_to(self.parent_directory)),
-            diff,
-            changes=changes,
-        )
 
     def _parse_file(self):
         with open(self.path, encoding="utf-8") as f:
