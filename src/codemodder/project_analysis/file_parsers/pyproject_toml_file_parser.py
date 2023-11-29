@@ -15,11 +15,12 @@ class PyprojectTomlParser(BaseParser):
         # 1. no dependencies
         return self._parse_dependencies(toml_data["project"]["dependencies"])
 
-    def _parse_py_versions(self, toml_data: dict):
+    def _parse_py_versions(self, toml_data: dict) -> list:
         # todo: handle cases for
-        # 1. no requires-python
-        # 2. multiple requires-python such as "">3.5.2"",  ">=3.11.1,<3.11.2"
-        return [toml_data["project"]["requires-python"]]
+        # 1. multiple requires-python such as "">3.5.2"",  ">=3.11.1,<3.11.2"
+        maybe_project = toml_data.get("project")
+        maybe_python = maybe_project.get("requires-python") if maybe_project else None
+        return [maybe_python] if maybe_python else []
 
     def _parse_file(self, file: Path):
         data = toml.load(file)

@@ -137,15 +137,20 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
         self, original_node: cst.Call, updated_node: cst.Call
     ) -> cst.Call:
         new_args = []
+        changed = False
         for arg in updated_node.args:
-            if (key := arg.keyword.value) in self.SECURE_SESSION_CONFIGS:
+            if (
+                arg.keyword
+                and (key := arg.keyword.value) in self.SECURE_SESSION_CONFIGS
+            ):
                 # self._remove_config(key)
                 if true_value(arg.value) not in self.SECURE_SESSION_CONFIGS[key]:  # type: ignore
                     safe_value = self._get_secure_config_val(key)
                     arg = arg.with_changes(value=safe_value)
+                    changed = True
             new_args.append(arg)
 
-        if updated_node.args != new_args:
+        if changed:
             self.report_change(original_node)
         return updated_node.with_changes(args=new_args)
 
