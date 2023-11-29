@@ -55,8 +55,8 @@ class TestPyprojectTomlParser:
         found = parser.parse()
         assert len(found) == 1
         store = found[0]
-        assert store.type == "pyproject.toml"
-        assert store.file == str(pkg_with_pyproject_toml / parser.file_type)
+        assert store.type.value == "pyproject.toml"
+        assert store.file == str(pkg_with_pyproject_toml / parser.file_type.value)
         assert store.py_versions == [">=3.10.0"]
         assert len(store.dependencies) == 6
 
@@ -65,8 +65,8 @@ class TestPyprojectTomlParser:
         found = parser.parse()
         assert len(found) == 1
         store = found[0]
-        assert store.type == "pyproject.toml"
-        assert store.file == str(pkg_with_pyproject_toml_no_python / parser.file_name)
+        assert store.type.value == "pyproject.toml"
+        assert store.file == str(pkg_with_pyproject_toml_no_python / parser.file_type)
         assert store.py_versions == []
         assert len(store.dependencies) == 1
 
