@@ -23,7 +23,17 @@ class RequirementsTxtWriter(DependencyWriter):
             with open(self.path, "w", encoding="utf-8") as f:
                 f.writelines(updated_lines)
 
-        changes = [
+        changes = self.build_changes(dependencies, original_lines)
+        return ChangeSet(
+            str(self.path.relative_to(self.parent_directory)),
+            diff,
+            changes=changes,
+        )
+
+    def build_changes(
+        self, dependencies: list[Dependency], original_lines: list[str]
+    ) -> list[Change]:
+        return [
             Change(
                 lineNumber=len(original_lines) + i + 1,
                 description=dep.build_description(),
@@ -38,11 +48,6 @@ class RequirementsTxtWriter(DependencyWriter):
             )
             for i, dep in enumerate(dependencies)
         ]
-        return ChangeSet(
-            str(self.path.relative_to(self.parent_directory)),
-            diff,
-            changes=changes,
-        )
 
     def _parse_file(self):
         with open(self.path, "r", encoding="utf-8") as f:
