@@ -1,4 +1,7 @@
-from codemodder.project_analysis.file_parsers.package_store import PackageStore
+from codemodder.project_analysis.file_parsers.package_store import (
+    PackageStore,
+    FileType,
+)
 from codemodder.utils.utils import clean_simplestring
 from pathlib import Path
 import libcst as cst
@@ -11,8 +14,8 @@ from .base_parser import BaseParser
 
 class SetupPyParser(BaseParser):
     @property
-    def file_name(self):
-        return "setup.py"
+    def file_type(self):
+        return FileType.SETUP_PY
 
     def _parse_dependencies(self, dependencies):
         return [
@@ -39,7 +42,7 @@ class SetupPyParser(BaseParser):
         # todo: handle no python_requires, install_requires
 
         return PackageStore(
-            type=self.file_name,
+            type=self.file_type,
             file=str(file),
             dependencies=set(
                 self._parse_dependencies_from_cst(visitor.install_requires)

@@ -1,4 +1,7 @@
-from codemodder.project_analysis.file_parsers.package_store import PackageStore
+from codemodder.project_analysis.file_parsers.package_store import (
+    PackageStore,
+    FileType,
+)
 from pathlib import Path
 import toml
 
@@ -7,8 +10,8 @@ from .base_parser import BaseParser
 
 class PyprojectTomlParser(BaseParser):
     @property
-    def file_name(self):
-        return "pyproject.toml"
+    def file_type(self):
+        return FileType.TOML
 
     def _parse_dependencies_from_toml(self, toml_data: dict):
         # todo: handle cases for
@@ -26,7 +29,7 @@ class PyprojectTomlParser(BaseParser):
         # todo: handle no "project" in data
 
         return PackageStore(
-            type=self.file_name,
+            type=self.file_type,
             file=str(file),
             dependencies=set(self._parse_dependencies_from_toml(data)),
             py_versions=self._parse_py_versions(data),
