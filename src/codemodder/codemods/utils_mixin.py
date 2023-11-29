@@ -23,22 +23,26 @@ class NameResolutionMixin(MetadataDependent):
         from sys import executable as exec
         exec.capitalize()
         """
-        if matchers.matches(node, matchers.Name()):
-            maybe_assignment = self.find_single_assignment(node)
-            if maybe_assignment and isinstance(maybe_assignment, ImportAssignment):
-                import_node = maybe_assignment.node
-                for alias in import_node.names:
-                    if maybe_assignment.name in (
-                        alias.evaluated_alias,
-                        alias.evaluated_name,
-                    ):
-                        return self.base_name_for_import(import_node, alias)
-            return node.value
+        match node:
+            case cst.Name():
+                maybe_assignment = self.find_single_assignment(node)
+                if maybe_assignment and isinstance(maybe_assignment, ImportAssignment):
+                    import_node = maybe_assignment.node
+                    for alias in import_node.names:
+                        if maybe_assignment.name in (
+                            alias.evaluated_alias,
+                            alias.evaluated_name,
+                        ):
+                            return self.base_name_for_import(import_node, alias)
+                return node.value
 
-        if matchers.matches(node, matchers.Attribute()):
-            maybe_name = self.find_base_name(node.value)
-            if maybe_name:
-                return maybe_name + "." + node.attr.value
+            case cst.Attribute():
+                maybe_name = self.find_base_name(node.value)
+                if maybe_name:
+                    return maybe_name + "." + node.attr.value
+
+            case cst.Call():
+                return self.find_base_name(node.func)
         return None
 
     def base_name_for_import(self, import_node, import_alias):
