@@ -5,6 +5,7 @@ from codemodder.dependency import Dependency
 from codemodder.change import Action, Change, ChangeSet, PackageAction, Result
 from codemodder.dependency_management.base_dependency_writer import DependencyWriter
 from codemodder.diff import create_diff_and_linenums
+from codemodder.logging import logger
 
 
 class PyprojectWriter(DependencyWriter):
@@ -19,6 +20,7 @@ class PyprojectWriter(DependencyWriter):
                 [f"{dep.requirement}" for dep in dependencies]
             )
         except tomlkit.exceptions.NonExistentKey:
+            logger.debug("Unable to add dependencies to pyproject.toml file.")
             return None
 
         diff, added_line_nums = create_diff_and_linenums(
