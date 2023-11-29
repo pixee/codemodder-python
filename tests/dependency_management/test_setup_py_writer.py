@@ -1,7 +1,10 @@
 import pytest
 from textwrap import dedent
 from codemodder.dependency_management.setup_py_writer import SetupPyWriter
-from codemodder.project_analysis.file_parsers.package_store import PackageStore
+from codemodder.project_analysis.file_parsers.package_store import (
+    PackageStore,
+    FileType,
+)
 from packaging.requirements import Requirement
 from codemodder.dependency import DefusedXML, Security
 
@@ -34,7 +37,7 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
     dependency_file.write(dedent(original))
 
     store = PackageStore(
-        type="setup.py",
+        type=FileType.SETUP_PY,
         file=str(dependency_file),
         dependencies=set(),
         py_versions=[">=3.6"],
@@ -118,7 +121,7 @@ def test_other_setup_func(tmpdir):
     dependency_file.write(dedent(original))
 
     store = PackageStore(
-        type="setup.py",
+        type=FileType.SETUP_PY,
         file=str(dependency_file),
         dependencies=set(),
         py_versions=[">=3.6"],
@@ -156,7 +159,7 @@ def test_not_setup_file(tmpdir):
     dependency_file.write(dedent(original))
 
     store = PackageStore(
-        type="setup.py",
+        type=FileType.SETUP_PY,
         file=str(dependency_file),
         dependencies=set(),
         py_versions=[">=3.6"],
@@ -187,7 +190,7 @@ def test_setup_call_no_install_requires(tmpdir):
     dependency_file.write(dedent(original))
 
     store = PackageStore(
-        type="setup.py",
+        type=FileType.SETUP_PY,
         file=str(dependency_file),
         dependencies=set(),
         py_versions=[">=3.6"],
@@ -219,7 +222,7 @@ def test_setup_no_existing_requirements(tmpdir):
     dependency_file.write(dedent(original))
 
     store = PackageStore(
-        type="setup.py",
+        type=FileType.SETUP_PY,
         file=str(dependency_file),
         dependencies=set(),
         py_versions=[">=3.6"],
@@ -251,7 +254,7 @@ def test_setup_call_bad_install_requires(tmpdir):
     dependency_file.write(dedent(original))
 
     store = PackageStore(
-        type="setup.py",
+        type=FileType.SETUP_PY,
         file=str(dependency_file),
         dependencies=set(),
         py_versions=[">=3.6"],
@@ -291,7 +294,7 @@ def test_setup_call_requirements_separate(tmpdir):
     dependency_file.write(dedent(original))
 
     store = PackageStore(
-        type="setup.py",
+        type=FileType.SETUP_PY,
         file=str(dependency_file),
         dependencies=set(),
         py_versions=[">=3.6"],

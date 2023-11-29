@@ -3,7 +3,10 @@ from pathlib import Path
 from codemodder.dependency_management.requirements_txt_writer import (
     RequirementsTxtWriter,
 )
-from codemodder.project_analysis.file_parsers.package_store import PackageStore
+from codemodder.project_analysis.file_parsers.package_store import (
+    PackageStore,
+    FileType,
+)
 from codemodder.dependency import DefusedXML, Security
 
 
@@ -14,7 +17,7 @@ class TestRequirementsTxtWriter:
         dependency_file = Path(tmpdir) / "requirements.txt"
         dependency_file.write_text(contents, encoding="utf-8")
         store = PackageStore(
-            type="requirements.txt",
+            type=FileType.REQ_TXT,
             file=str(dependency_file),
             dependencies=set(),
             py_versions=[],
@@ -62,7 +65,7 @@ class TestRequirementsTxtWriter:
         dependency_file.write_text("requests\n", encoding="utf-8")
 
         store = PackageStore(
-            type="requirements.txt",
+            type=FileType.REQ_TXT,
             file=str(dependency_file),
             dependencies=set(),
             py_versions=[],
@@ -82,7 +85,7 @@ class TestRequirementsTxtWriter:
         dependency_file.write_text(contents, encoding="utf-8")
 
         store = PackageStore(
-            type="requirements.txt",
+            type=FileType.REQ_TXT,
             file=str(dependency_file),
             dependencies=set([Security.requirement]),
             py_versions=[],
@@ -99,7 +102,7 @@ class TestRequirementsTxtWriter:
         dependency_file.write_text(contents, encoding="utf-8")
 
         store = PackageStore(
-            type="requirements.txt",
+            type=FileType.REQ_TXT,
             file=str(dependency_file),
             dependencies=set(),
             py_versions=[],

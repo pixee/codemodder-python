@@ -1,4 +1,7 @@
-from codemodder.project_analysis.file_parsers.package_store import PackageStore
+from codemodder.project_analysis.file_parsers.package_store import (
+    PackageStore,
+    FileType,
+)
 from pathlib import Path
 import configparser
 
@@ -7,8 +10,8 @@ from .base_parser import BaseParser
 
 class SetupCfgParser(BaseParser):
     @property
-    def file_name(self):
-        return "setup.cfg"
+    def file_type(self):
+        return FileType.SETUP_CFG
 
     def _parse_dependencies_from_cfg(self, config: configparser.ConfigParser):
         # todo: handle cases for
@@ -30,7 +33,7 @@ class SetupCfgParser(BaseParser):
         # todo: handle no config, no "options" in config
 
         return PackageStore(
-            type=self.file_name,
+            type=self.file_type,
             file=str(file),
             dependencies=set(self._parse_dependencies_from_cfg(config)),
             py_versions=self._parse_py_versions(config),

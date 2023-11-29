@@ -3,7 +3,10 @@ import pytest
 
 from codemodder.dependency_management.pyproject_writer import PyprojectWriter
 from codemodder.dependency import DefusedXML, Security
-from codemodder.project_analysis.file_parsers.package_store import PackageStore
+from codemodder.project_analysis.file_parsers.package_store import (
+    PackageStore,
+    FileType,
+)
 
 
 @pytest.mark.parametrize("dry_run", [True, False])
@@ -29,7 +32,7 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
     pyproject_toml.write(dedent(orig_pyproject))
 
     store = PackageStore(
-        type="requirements.txt",
+        type=FileType.REQ_TXT,
         file=str(pyproject_toml),
         dependencies=set(),
         py_versions=[">=3.10.0"],
@@ -116,7 +119,7 @@ def test_add_same_dependency_only_once(tmpdir):
     pyproject_toml.write(dedent(orig_pyproject))
 
     store = PackageStore(
-        type="requirements.txt",
+        type=FileType.REQ_TXT,
         file=str(pyproject_toml),
         dependencies=set(),
         py_versions=[">=3.10.0"],
@@ -169,7 +172,7 @@ def test_dont_add_existing_dependency(tmpdir):
     pyproject_toml.write(dedent(orig_pyproject))
 
     store = PackageStore(
-        type="requirements.txt",
+        type=FileType.REQ_TXT,
         file=str(pyproject_toml),
         dependencies=set([Security.requirement]),
         py_versions=[">=3.10.0"],
@@ -195,7 +198,7 @@ def test_pyproject_no_dependencies(tmpdir):
     pyproject_toml.write(dedent(orig_pyproject))
 
     store = PackageStore(
-        type="requirements.txt",
+        type=FileType.REQ_TXT,
         file=str(pyproject_toml),
         dependencies=set(),
         py_versions=[">=3.10.0"],

@@ -1,7 +1,10 @@
 from typing import Optional
 
 from packaging.requirements import InvalidRequirement
-from codemodder.project_analysis.file_parsers.package_store import PackageStore
+from codemodder.project_analysis.file_parsers.package_store import (
+    PackageStore,
+    FileType,
+)
 from pathlib import Path
 from .base_parser import BaseParser
 import chardet
@@ -10,8 +13,8 @@ from codemodder.logging import logger
 
 class RequirementsTxtParser(BaseParser):
     @property
-    def file_name(self):
-        return "requirements.txt"
+    def file_type(self):
+        return FileType.REQ_TXT
 
     def _parse_file(self, file: Path) -> Optional[PackageStore]:
         try:
