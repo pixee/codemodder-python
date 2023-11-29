@@ -5,6 +5,7 @@ from codemodder.dependency_management.requirements_txt_writer import (
     RequirementsTxtWriter,
 )
 from codemodder.dependency_management.pyproject_writer import PyprojectWriter
+
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from pathlib import Path
 
@@ -33,5 +34,12 @@ class DependencyManager:
                     self.dependencies_store, self.parent_directory
                 ).write(dependencies, dry_run)
             case "setup.py":
-                pass
+                # Avoid circular dependency
+                from codemodder.dependency_management.setup_py_writer import (
+                    SetupPyWriter,
+                )
+
+                return SetupPyWriter(
+                    self.dependencies_store, self.parent_directory
+                ).write(dependencies, dry_run)
         return None

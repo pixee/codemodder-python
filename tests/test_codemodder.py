@@ -3,7 +3,8 @@ import pytest
 
 import libcst as cst
 
-from codemodder.codemodder import create_diff, run, find_semgrep_results
+from codemodder.codemodder import run, find_semgrep_results
+from codemodder.diff import create_diff_from_tree
 from codemodder.semgrep import run as semgrep_run
 from codemodder.registry import load_registered_codemods
 from codemodder.result import ResultSet
@@ -232,7 +233,7 @@ SESSION_COOKIE_SECURE = True"""
         source_tree = cst.parse_module(source)
         result_tree = cst.parse_module(result)
 
-        diff = create_diff(source_tree, result_tree)
+        diff = create_diff_from_tree(source_tree, result_tree)
         assert (
             diff
             == """\
