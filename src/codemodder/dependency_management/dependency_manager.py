@@ -37,7 +37,7 @@ class DependencyManager:
                     self.dependencies_store, self.parent_directory
                 ).write(dependencies, dry_run)
             case FileType.SETUP_PY:
-                # Avoid circular dependency
+                # pylint: disable-next=cyclic-import
                 from codemodder.dependency_management.setup_py_writer import (
                     SetupPyWriter,
                 )
