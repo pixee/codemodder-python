@@ -60,3 +60,22 @@ def pkg_with_reqs_txt(tmp_path_factory):
     reqs = "# comment\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"
     req_file.write_text(reqs)
     return base_dir
+
+
+@pytest.fixture(scope="module")
+def pkg_with_reqs_txt_utf_16(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp("foo")
+    req_file = base_dir / "requirements.txt"
+    reqs = "# comment\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"
+    req_file.write_text(reqs)
+    return base_dir
+
+
+@pytest.fixture(scope="module")
+def pkg_with_reqs_txt_unknown_encoding(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp("foo")
+    req_file = base_dir / "requirements.txt"
+    # invalid utf8 string
+    reqs = "\xf0\x28\x8c\xbc"
+    req_file.write_text(reqs)
+    return base_dir
