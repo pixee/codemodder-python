@@ -62,8 +62,8 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
         input_code = """\
         from not_django import receiver
 
-        @receiver(request_finished)
         @csrf_exempt
+        @receiver(request_finished)
         def foo():
             pass
         """
