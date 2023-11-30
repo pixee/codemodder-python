@@ -38,5 +38,6 @@ class BaseParser(ABC):
         req_files = self.find_file_locations()
         for file in req_files:
             store = self._parse_file(file)
-            stores.append(store)
+            if store:
+                stores.append(store)
         return stores
