@@ -1,4 +1,6 @@
 from typing import Optional
+
+from packaging.requirements import InvalidRequirement
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from pathlib import Path
 from .base_parser import BaseParser
@@ -15,7 +17,7 @@ class RequirementsTxtParser(BaseParser):
         try:
             with open(file, "rb") as f:
                 whole_file = f.read()
-                enc = chardet.detect(f.read())
+                enc = chardet.detect(whole_file)
                 lines = []
                 if enc["confidence"] > 0.9:
                     encoding = enc.get("encoding")
@@ -32,6 +34,6 @@ class RequirementsTxtParser(BaseParser):
                     # and extracting py versions from them.
                     py_versions=[],
                 )
-        except (UnicodeError, OSError):
+        except (UnicodeError, OSError, InvalidRequirement):
             logger.debug("Error parsing file: %s", file)
         return None
