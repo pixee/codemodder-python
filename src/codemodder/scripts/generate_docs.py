@@ -144,7 +144,8 @@ If you want to allow those protocols, change the incoming PR to look more like t
     ),
     "django-receiver-on-top": DocMetadata(
         importance="Medium",
-        guidance_explained="We believe this change leads to the intended behavior the application and is thus safe."),
+        guidance_explained="We believe this change leads to the intended behavior the application and is thus safe.",
+    ),
     "numpy-nan-equality": DocMetadata(
         importance="Medium",
         guidance_explained="We believe any use of `==` to compare with `numpy.nan` is unintended given that it is always `False`. Thus we consider this change safe.",
