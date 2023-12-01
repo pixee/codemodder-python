@@ -1,8 +1,10 @@
 import argparse
+import json
 import sys
 
 from codemodder import __version__
 from codemodder.code_directory import DEFAULT_INCLUDED_PATHS, DEFAULT_EXCLUDED_PATHS
+from codemodder.registry import CodemodRegistry
 from codemodder.logging import OutputFormat, logger
 
 
@@ -15,7 +17,7 @@ class ArgumentParser(argparse.ArgumentParser):
         sys.exit(3)
 
 
-def build_list_action(codemod_registry):
+def build_list_action(codemod_registry: CodemodRegistry):
     class ListAction(argparse.Action):
         """ """
 
@@ -39,6 +41,27 @@ def build_list_action(codemod_registry):
     return ListAction
 
 
+def build_describe_action(codemod_registry: CodemodRegistry):
+    class DescribeAction(argparse.Action):
+        def _print_codemods(self, args: argparse.Namespace):
+            # TODO: this doesn't currently honor the include/exclude args
+            # This is because of the way arguments are parsed: at the time this
+            # action is called, the codemod arguments haven't necessarily been
+            # parsed yet. Making this work will require a fairly significant
+            # refactor of the argument parsing.
+            results = codemod_registry.describe_codemods(
+                args.codemod_include, args.codemod_exclude
+            )
+            print(json.dumps({"results": results}, indent=2))
+
+        def __call__(self, parser, *args, **kwargs):
+            parsed_args: argparse.Namespace = args[0]
+            self._print_codemods(parsed_args)
+            parser.exit()
+
+    return DescribeAction
+
+
 class CsvListAction(argparse.Action):
     """
     argparse Action to convert "a,b,c" into ["a", "b", "c"]
@@ -54,7 +77,7 @@ class CsvListAction(argparse.Action):
         """Basic Action does not validate the items"""
 
 
-def build_codemod_validator(codemod_registry):
+def build_codemod_validator(codemod_registry: CodemodRegistry):
     names = codemod_registry.names
     ids = codemod_registry.ids
 
@@ -81,7 +104,7 @@ def build_codemod_validator(codemod_registry):
     return ValidatedCodmods
 
 
-def parse_args(argv, codemod_registry):
+def parse_args(argv, codemod_registry: CodemodRegistry):
     """
     Parse CLI arguments according to:
     https://www.notion.so/pixee/Codemodder-CLI-Arguments
@@ -116,7 +139,13 @@ def parse_args(argv, codemod_registry):
         "--list",
         action=build_list_action(codemod_registry),
         nargs=0,
-        help="Print codemod(s) metadata",
+        help="Print codemod names to stdout and exit",
+    )
+    parser.add_argument(
+        "--describe",
+        action=build_describe_action(codemod_registry),
+        nargs=0,
+        help="Print detailed codemod metadata to stdout exit",
     )
     parser.add_argument(
         "--output-format",
