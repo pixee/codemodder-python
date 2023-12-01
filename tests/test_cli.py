@@ -1,3 +1,5 @@
+import json
+
 import mock
 import pytest
 
@@ -87,6 +89,20 @@ class TestParseArgs:
         assert sorted(self.registry.ids) == sorted(printed_names)
 
         assert err.value.args[0] == 0
+
+    @mock.patch("builtins.print")
+    def test_describe_prints_codemod_metadata(self, mock_print):
+        with pytest.raises(SystemExit) as err:
+            parse_args(
+                ["--describe"],
+                self.registry,
+            )
+
+        assert err.value.args[0] == 0
+        assert mock_print.call_count == 1
+
+        results = json.loads(mock_print.call_args_list[0][0][0])
+        assert len(results["results"]) == len(self.registry.codemods)
 
     @mock.patch("codemodder.cli.logger.error")
     def test_bad_output_format(self, error_logger):

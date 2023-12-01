@@ -99,6 +99,14 @@ class CodemodRegistry:
             for name in codemod_include
         ]
 
+    def describe_codemods(
+        self,
+        codemod_include: Optional[list] = None,
+        codemod_exclude: Optional[list] = None,
+    ) -> list[dict]:
+        codemods = self.match_codemods(codemod_include, codemod_exclude)
+        return [codemod.describe() for codemod in codemods]
+
 
 def load_registered_codemods() -> CodemodRegistry:
     registry = CodemodRegistry()

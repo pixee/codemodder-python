@@ -78,6 +78,14 @@ class CodemodExecutorWrapper(CallableObjectProxy):
             for yaml_file in getattr(self, "YAML_FILES", [])
         ]
 
+    def describe(self):
+        return {
+            "codemod": self.id,
+            "summary": self.summary,
+            "description": self.description,
+            "references": self.references,
+        }
+
     def __repr__(self):
         return "<{} at 0x{:x} for {}.{}>".format(
             type(self).__name__,
