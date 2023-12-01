@@ -45,6 +45,27 @@ class NameResolutionMixin(MetadataDependent):
                 return self.find_base_name(node.func)
         return None
 
+    def find_alias_for_import_in_node(self, import_name, node) -> Optional[str]:
+        """
+        Check if the node uses an imported alias for import_name.
+        """
+        match node:
+            case cst.Name():
+                maybe_assignment = self.find_single_assignment(node)
+                if maybe_assignment and isinstance(maybe_assignment, ImportAssignment):
+                    import_node = maybe_assignment.node
+                    for alias in import_node.names:
+                        if alias.evaluated_name == import_name:
+                            return alias.evaluated_alias
+
+            case cst.Attribute():
+                return self.find_alias_for_import_in_node(import_name, node.value)
+
+            case cst.Call():
+                return self.find_alias_for_import_in_node(import_name, node.func)
+
+        return None
+
     def base_name_for_import(self, import_node, import_alias):
         """
         For import nodes, this is defined as the module name. For ImportFrom, this is defined as <module name>.<alias_name>.
