@@ -135,3 +135,8 @@ class SemgrepCodemod(
 
     def leave_Assign(self, original_node, updated_node):
         return self._new_or_updated_node(original_node, updated_node)
+
+    def leave_ClassDef(
+        self, original_node: cst.ClassDef, updated_node: cst.ClassDef
+    ) -> cst.ClassDef:
+        return self._new_or_updated_node(original_node, updated_node)
