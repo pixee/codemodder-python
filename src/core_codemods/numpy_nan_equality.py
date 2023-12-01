@@ -12,7 +12,7 @@ NodeWithTrueName = namedtuple("NodeWithTrueName", ["node", "name"])
 
 class NumpyNanEquality(BaseCodemod, NameResolutionMixin):
     NAME = "numpy-nan-equality"
-    SUMMARY = "Uses numpy.isnan() instead of ==."
+    SUMMARY = "Replace == comparison with numpy.isnan()"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     DESCRIPTION = SUMMARY
     REFERENCES = [

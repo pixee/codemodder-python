@@ -23,6 +23,20 @@ class TestNumpyNanEquality(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
+    def test_simple_left(self, tmpdir):
+        input_code = """\
+        import numpy
+        if numpy.nan == a:
+            pass
+        """
+        expected = """\
+        import numpy
+        if numpy.isnan(a):
+            pass
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
     def test_alias(self, tmpdir):
         input_code = """\
         import numpy as np
