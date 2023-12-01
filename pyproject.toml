@@ -60,6 +60,7 @@ test = [
     "security~=1.2.0",
     "types-mock==5.1.*",
     "django==4.*",
+    "numpy~=1.26.0",
 ]
 complexity = [
     "radon==6.0.*",
