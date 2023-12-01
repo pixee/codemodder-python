@@ -10,8 +10,12 @@ from codemodder.file_context import FileContext
 from packaging.requirements import Requirement
 from codemodder.dependency import Dependency
 from codemodder.dependency_management.base_dependency_writer import DependencyWriter
-from codemodder.change import Action, Change, ChangeSet, PackageAction, Result
+from codemodder.change import ChangeSet
 from codemodder.diff import create_diff_from_tree
+
+
+def fixed_line_number_strategy(line_num_changed, _):
+    return line_num_changed
 
 
 class SetupPyWriter(DependencyWriter):
@@ -38,31 +42,14 @@ class SetupPyWriter(DependencyWriter):
             with open(self.path, "w", encoding="utf-8") as f:
                 f.write(output_tree.code)
 
-        changes = self.build_changes(dependencies, codemod.line_num_changed)
+        changes = self.build_changes(
+            dependencies, fixed_line_number_strategy, codemod.line_num_changed
+        )
         return ChangeSet(
             str(self.path.relative_to(self.parent_directory)),
             diff,
             changes=changes,
         )
-
-    def build_changes(
-        self, dependencies: list[Dependency], line_num_changed: int
-    ) -> list[Change]:
-        return [
-            Change(
-                lineNumber=line_num_changed,
-                description=dep.build_description(),
-                # Contextual comments should be added to the right side of split diffs
-                properties={
-                    "contextual_description": True,
-                    "contextual_description_position": "right",
-                },
-                packageActions=[
-                    PackageAction(Action.ADD, Result.COMPLETED, str(dep.requirement))
-                ],
-            )
-            for i, dep in enumerate(dependencies)
-        ]
 
     def _parse_file(self):
         with open(self.path, encoding="utf-8") as f:
