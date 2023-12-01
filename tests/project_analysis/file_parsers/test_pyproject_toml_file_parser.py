@@ -66,7 +66,9 @@ class TestPyprojectTomlParser:
         assert len(found) == 1
         store = found[0]
         assert store.type.value == "pyproject.toml"
-        assert store.file == str(pkg_with_pyproject_toml_no_python / parser.file_type)
+        assert store.file == str(
+            pkg_with_pyproject_toml_no_python / parser.file_type.value
+        )
         assert store.py_versions == []
         assert len(store.dependencies) == 1
 

@@ -21,7 +21,6 @@ class RequirementsTxtParser(BaseParser):
             with open(file, "rb") as f:
                 whole_file = f.read()
                 enc = chardet.detect(whole_file)
-                lines = []
                 if enc["confidence"] > 0.9:
                     encoding = enc.get("encoding")
                     decoded = whole_file.decode(encoding.lower()) if encoding else ""
@@ -29,7 +28,7 @@ class RequirementsTxtParser(BaseParser):
                 else:
                     raise UnicodeError()
                 return PackageStore(
-                    type=self.file_name,
+                    type=self.file_type,
                     file=str(file),
                     dependencies=set(self._parse_dependencies(lines)),
                     # requirements.txt files do not declare py versions explicitly

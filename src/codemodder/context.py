@@ -6,7 +6,6 @@ from typing import List, Iterator
 
 from codemodder.change import ChangeSet
 from codemodder.dependency import Dependency
-from codemodder.dependency_management import DependencyManager
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.file_context import FileContext
 from codemodder.logging import logger, log_list
@@ -101,6 +100,9 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
                 codemod_id,
             )
             return
+
+        # pylint: disable-next=cyclic-import
+        from codemodder.dependency_management import DependencyManager
 
         dm = DependencyManager(dependencies_store, self.directory)
         if (changeset := dm.write(list(dependencies), self.dry_run)) is not None:
