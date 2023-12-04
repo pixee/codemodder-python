@@ -26,6 +26,6 @@ class SetupCfgParser(BaseParser):
         return PackageStore(
             type=self.file_type,
             file=file,
-            dependencies=set(self._parse_dependencies(dependency_lines)),
+            dependencies=set(line for line in dependency_lines if line),
             py_versions=[python_requires] if python_requires else [],
         )
