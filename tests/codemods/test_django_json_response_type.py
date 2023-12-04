@@ -24,7 +24,7 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
 
         def foo(request):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
-            return HttpResponse(json_response, content_type = "application/json")
+            return HttpResponse(json_response, content_type="application/json")
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
@@ -44,7 +44,7 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
 
         def foo(request):
             json_response = jsan.dumps({ "user_input": request.GET.get("input") })
-            return response(json_response, content_type = "application/json")
+            return response(json_response, content_type="application/json")
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
@@ -62,7 +62,7 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
         import json
 
         def foo(request):
-            return HttpResponse(json.dumps({ "user_input": request.GET.get("input") }), content_type = "application/json")
+            return HttpResponse(json.dumps({ "user_input": request.GET.get("input") }), content_type="application/json")
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
