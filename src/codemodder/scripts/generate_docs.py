@@ -150,6 +150,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="We believe any use of `==` to compare with `numpy.nan` is unintended given that it is always `False`. Thus we consider this change safe.",
     ),
+    "django-json-response-type": DocMetadata(
+        importance="Medium",
+        guidance_explained="This change will only restrict the response type and will not alter the response data itself. Thus we deem it safe.",
+    ),
 }
 
 
