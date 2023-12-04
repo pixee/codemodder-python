@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
-from packaging.requirements import Requirement
+from pathlib import Path
+
+from codemodder.dependency import Requirement
 
 
 class FileType(Enum):
@@ -13,6 +15,6 @@ class FileType(Enum):
 @dataclass
 class PackageStore:
     type: FileType
-    file: str
+    file: Path
     dependencies: set[Requirement]
     py_versions: list[str]

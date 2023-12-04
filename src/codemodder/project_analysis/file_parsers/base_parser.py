@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-
 from pathlib import Path
 from typing import List
-from .package_store import PackageStore
-from packaging.requirements import Requirement
+
+from codemodder.dependency import Requirement
+from codemodder.logging import logger
+from .package_store import FileType, PackageStore
 
 
 class BaseParser(ABC):
@@ -12,8 +13,8 @@ class BaseParser(ABC):
 
     @property
     @abstractmethod
-    def file_type(self):
-        ...  # pragma: no cover
+    def file_type(self) -> FileType:
+        pass
 
     def _parse_dependencies(self, dependencies: List[str]):
         return [
@@ -24,8 +25,8 @@ class BaseParser(ABC):
         ]
 
     @abstractmethod
-    def _parse_file(self, file: Path):
-        ...  # pragma: no cover
+    def _parse_file(self, file: Path) -> PackageStore | None:
+        pass
 
     def find_file_locations(self) -> List[Path]:
         return list(Path(self.parent_directory).rglob(self.file_type.value))
@@ -37,7 +38,12 @@ class BaseParser(ABC):
         stores = []
         req_files = self.find_file_locations()
         for file in req_files:
-            store = self._parse_file(file)
+            try:
+                store = self._parse_file(file)
+            except Exception as e:
+                logger.debug("Error parsing file: %s", file, exc_info=e)
+                continue
+
             if store:
                 stores.append(store)
         return stores

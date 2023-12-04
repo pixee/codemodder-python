@@ -8,7 +8,7 @@ class TestRequirementsTxtParser:
         assert len(found) == 1
         store = found[0]
         assert store.type.value == "requirements.txt"
-        assert store.file == str(pkg_with_reqs_txt / parser.file_type.value)
+        assert store.file == pkg_with_reqs_txt / parser.file_type.value
         assert store.py_versions == []
         assert len(store.dependencies) == 4
 
@@ -18,7 +18,7 @@ class TestRequirementsTxtParser:
         assert len(found) == 1
         store = found[0]
         assert store.type.value == "requirements.txt"
-        assert store.file == str(pkg_with_reqs_txt_utf_16 / parser.file_type.value)
+        assert store.file == pkg_with_reqs_txt_utf_16 / parser.file_type.value
         assert store.py_versions == []
         assert len(store.dependencies) == 4
 
@@ -29,5 +29,11 @@ class TestRequirementsTxtParser:
 
     def test_parse_no_file(self, pkg_with_reqs_txt):
         parser = RequirementsTxtParser(pkg_with_reqs_txt / "foo")
+        found = parser.parse()
+        assert len(found) == 0
+
+    def test_open_error(self, pkg_with_reqs_txt, mocker):
+        mocker.patch("builtins.open", side_effect=Exception)
+        parser = RequirementsTxtParser(pkg_with_reqs_txt)
         found = parser.parse()
         assert len(found) == 0
