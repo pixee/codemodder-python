@@ -56,7 +56,7 @@ class TestPyprojectTomlParser:
         assert len(found) == 1
         store = found[0]
         assert store.type.value == "pyproject.toml"
-        assert store.file == str(pkg_with_pyproject_toml / parser.file_type.value)
+        assert store.file == pkg_with_pyproject_toml / parser.file_type.value
         assert store.py_versions == [">=3.10.0"]
         assert len(store.dependencies) == 6
 
@@ -66,13 +66,20 @@ class TestPyprojectTomlParser:
         assert len(found) == 1
         store = found[0]
         assert store.type.value == "pyproject.toml"
-        assert store.file == str(
-            pkg_with_pyproject_toml_no_python / parser.file_type.value
-        )
+        assert store.file == pkg_with_pyproject_toml_no_python / parser.file_type.value
         assert store.py_versions == []
         assert len(store.dependencies) == 1
 
     def test_parse_no_file(self, pkg_with_pyproject_toml):
         parser = PyprojectTomlParser(pkg_with_pyproject_toml / "foo")
+        found = parser.parse()
+        assert len(found) == 0
+
+    def test_parser_error(self, pkg_with_pyproject_toml, mocker):
+        mocker.patch(
+            "codemodder.project_analysis.file_parsers.pyproject_toml_file_parser.toml.load",
+            side_effect=Exception,
+        )
+        parser = PyprojectTomlParser(pkg_with_pyproject_toml)
         found = parser.parse()
         assert len(found) == 0

@@ -39,11 +39,26 @@ class TestSetupCfgParser:
         assert len(found) == 1
         store = found[0]
         assert store.type.value == "setup.cfg"
-        assert store.file == str(pkg_with_setup_cfg / parser.file_type.value)
+        assert store.file == pkg_with_setup_cfg / parser.file_type.value
         assert store.py_versions == [">=3.7"]
         assert len(store.dependencies) == 2
 
     def test_parse_no_file(self, pkg_with_setup_cfg):
         parser = SetupCfgParser(pkg_with_setup_cfg / "foo")
+        found = parser.parse()
+        assert len(found) == 0
+
+    def test_open_error(self, pkg_with_setup_cfg, mocker):
+        mocker.patch("builtins.open", side_effect=Exception)
+        parser = SetupCfgParser(pkg_with_setup_cfg)
+        found = parser.parse()
+        assert len(found) == 0
+
+    def test_parser_error(self, pkg_with_setup_cfg, mocker):
+        mocker.patch(
+            "codemodder.project_analysis.file_parsers.setup_cfg_file_parser.configparser.ConfigParser.read",
+            side_effect=Exception,
+        )
+        parser = SetupCfgParser(pkg_with_setup_cfg)
         found = parser.parse()
         assert len(found) == 0

@@ -46,11 +46,26 @@ class TestSetupPyParser:
         assert len(found) == 1
         store = found[0]
         assert store.type.value == "setup.py"
-        assert store.file == str(pkg_with_setup_py / parser.file_type.value)
+        assert store.file == pkg_with_setup_py / parser.file_type.value
         assert store.py_versions == [">3.6"]
         assert len(store.dependencies) == 4
 
     def test_parse_no_file(self, pkg_with_setup_py):
         parser = SetupPyParser(pkg_with_setup_py / "foo")
+        found = parser.parse()
+        assert len(found) == 0
+
+    def test_open_error(self, pkg_with_setup_py, mocker):
+        mocker.patch("builtins.open", side_effect=Exception)
+        parser = SetupPyParser(pkg_with_setup_py)
+        found = parser.parse()
+        assert len(found) == 0
+
+    def test_parser_error(self, pkg_with_setup_py, mocker):
+        mocker.patch(
+            "codemodder.project_analysis.file_parsers.setup_py_file_parser.cst.Module.visit",
+            side_effect=Exception,
+        )
+        parser = SetupPyParser(pkg_with_setup_py)
         found = parser.parse()
         assert len(found) == 0

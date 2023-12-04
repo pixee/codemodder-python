@@ -5,9 +5,6 @@ from codemodder.project_analysis.file_parsers.package_store import (
 from codemodder.utils.utils import clean_simplestring
 from pathlib import Path
 import libcst as cst
-from libcst import matchers
-from packaging.requirements import Requirement
-from typing import Optional
 
 from .base_parser import BaseParser
 
@@ -17,67 +14,59 @@ class SetupPyParser(BaseParser):
     def file_type(self):
         return FileType.SETUP_PY
 
-    def _parse_dependencies(self, dependencies):
-        return [
-            Requirement(line)
-            for x in dependencies
-            # Skip empty lines and comments
-            if (line := clean_simplestring(x.value)) and not line.startswith("#")
-        ]
-
-    def _parse_dependencies_from_cst(self, cst_dependencies: Optional[list]):
-        return self._parse_dependencies(cst_dependencies) if cst_dependencies else []
-
-    def _parse_py_versions(self, version_str):
-        # todo: handle for multiple versions
-        return [clean_simplestring(version_str)]
-
-    def _parse_file(self, file: Path):
-        visitor = SetupCallVisitor()
-        with open(str(file), "r", encoding="utf-8") as f:
-            # todo: handle failure in parsing
+    def _parse_file(self, file: Path) -> PackageStore | None:
+        with open(file, "r", encoding="utf8") as f:
             module = cst.parse_module(f.read())
+
+        visitor = SetupCallVisitor()
         module.visit(visitor)
 
         # todo: handle no python_requires, install_requires
 
         return PackageStore(
             type=self.file_type,
-            file=str(file),
-            dependencies=set(
-                self._parse_dependencies_from_cst(visitor.install_requires)
-            ),
-            py_versions=self._parse_py_versions(visitor.python_requires),
+            file=file,
+            dependencies=set(self._parse_dependencies(visitor.install_requires)),
+            py_versions=visitor.python_requires,
         )
 
 
 class SetupCallVisitor(cst.CSTVisitor):
+    python_requires: list[str]
+    install_requires: list[str]
+
     def __init__(self):
-        self.python_requires = None
-        self.install_requires = None
-        # todo setup_requires, tests_require, extras_require
+        self.python_requires = []
+        self.install_requires = []
+        # TODO: setup_requires, tests_require, extras_require
 
     def visit_Call(self, node: cst.Call) -> None:
-        # todo: only handle setup from setuptools, not others tho unlikely
-        if matchers.matches(node.func, cst.Name(value="setup")):
-            visitor = SetupArgVisitor()
-            node.visit(visitor)
-            self.python_requires = visitor.python_requires
-            self.install_requires = visitor.install_requires
+        # TODO: only handle setup from setuptools, not others tho unlikely
+        match node.func:
+            case cst.Name(value="setup"):
+                visitor = SetupArgVisitor()
+                node.visit(visitor)
+                self.python_requires.extend(visitor.python_requires)
+                self.install_requires.extend(visitor.install_requires)
 
 
 class SetupArgVisitor(cst.CSTVisitor):
+    python_requires: list[str]
+    install_requires: list[str]
+
     def __init__(self):
-        self.python_requires = None
-        self.install_requires = None
+        self.python_requires = []
+        self.install_requires = []
 
     def visit_Arg(self, node: cst.Arg) -> None:
-        if matchers.matches(node.keyword, matchers.Name(value="python_requires")):
-            # todo: this works for `python_requires=">=3.7",` but what about
-            # a list of versions?
-            self.python_requires = node.value.value
-        if matchers.matches(
-            node.keyword, matchers.Name(value="install_requires")
-        ) and matchers.matches(node.value, matchers.List()):
-            # todo: if node.value is Name node, find requirements in the variable at node.value
-            self.install_requires = node.value.elements
+        match node.keyword, node.value:
+            case cst.Name(value="python_requires"), cst.SimpleString() as string_node:
+                # TODO: this works for `python_requires=">=3.7",` but what about a list of versions?
+                self.python_requires.append(clean_simplestring(string_node.value))
+            case cst.Name(value="install_requires"), cst.List() as list_node:
+                for elm in list_node.elements:
+                    match elm:
+                        case cst.Element(value=cst.SimpleString() as string_node):
+                            self.install_requires.append(
+                                clean_simplestring(string_node.value)
+                            )
