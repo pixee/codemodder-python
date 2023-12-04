@@ -2,12 +2,13 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List
 
-from codemodder.dependency import Requirement
 from codemodder.logging import logger
 from .package_store import FileType, PackageStore
 
 
 class BaseParser(ABC):
+    parent_directory: Path
+
     def __init__(self, parent_directory: Path):
         self.parent_directory = parent_directory
 
@@ -15,14 +16,6 @@ class BaseParser(ABC):
     @abstractmethod
     def file_type(self) -> FileType:
         pass
-
-    def _parse_dependencies(self, dependencies: List[str]):
-        return [
-            Requirement(line)
-            for x in dependencies
-            # Skip empty lines and comments
-            if (line := x.strip()) and not line.startswith("#")
-        ]
 
     @abstractmethod
     def _parse_file(self, file: Path) -> PackageStore | None:

@@ -12,9 +12,24 @@ class FileType(Enum):
     SETUP_CFG = "setup.cfg"
 
 
-@dataclass
+@dataclass(init=False)
 class PackageStore:
     type: FileType
     file: Path
     dependencies: set[Requirement]
     py_versions: list[str]
+
+    def __init__(
+        self,
+        type: FileType,  # pylint: disable=redefined-builtin
+        file: Path,
+        dependencies: set[str | Requirement],
+        py_versions: list[str],
+    ):
+        self.type = type
+        self.file = file
+        self.dependencies = {
+            dep if isinstance(dep, Requirement) else Requirement(dep)
+            for dep in dependencies
+        }
+        self.py_versions = py_versions

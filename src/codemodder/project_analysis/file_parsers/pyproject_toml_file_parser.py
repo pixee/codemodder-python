@@ -26,6 +26,6 @@ class PyprojectTomlParser(BaseParser):
         return PackageStore(
             type=self.file_type,
             file=file,
-            dependencies=set(dependencies) if dependencies else set(),
+            dependencies=set(dependencies),
             py_versions=[version] if version else [],
         )

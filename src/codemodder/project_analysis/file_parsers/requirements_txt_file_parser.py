@@ -28,10 +28,12 @@ class RequirementsTxtParser(BaseParser):
             logger.debug("Unknown encoding for file: %s", file)
             return None
 
+        dependencies = set(line.strip() for line in lines if not line.startswith("#"))
+
         return PackageStore(
             type=self.file_type,
             file=file,
-            dependencies=set(self._parse_dependencies(lines)),
+            dependencies=dependencies,
             # requirements.txt files do not declare py versions explicitly
             # though we could create a heuristic by analyzing each dependency
             # and extracting py versions from them.
