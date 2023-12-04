@@ -13,7 +13,7 @@ class TestDjangoJsonResponseType(BaseIntegrationTest):
         [
             (
                 5,
-                """    return HttpResponse(json_response, content_type = "application/json")\n""",
+                """    return HttpResponse(json_response, content_type="application/json")\n""",
             ),
         ],
     )
@@ -27,7 +27,7 @@ class TestDjangoJsonResponseType(BaseIntegrationTest):
     """ def foo(request):\n"""
     """     json_response = json.dumps({ "user_input": request.GET.get("input") })\n"""
     """-    return HttpResponse(json_response)\n"""
-    """+    return HttpResponse(json_response, content_type = "application/json")\n"""
+    """+    return HttpResponse(json_response, content_type="application/json")\n"""
     )
     # fmt: on
 

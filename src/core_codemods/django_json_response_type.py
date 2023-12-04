@@ -6,7 +6,7 @@ from codemodder.codemods.api import SemgrepCodemod
 
 class DjangoJsonResponseType(SemgrepCodemod):
     NAME = "django-json-response-type"
-    SUMMARY = "Restricts the type to `json/application` for django.http.HttpResponse with json objects as argument."
+    SUMMARY = "Set content type to `json/application` for `django.http.HttpResponse` with JSON data"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     DESCRIPTION = "Sets `content_type` to `json/application`."
     REFERENCES = [
@@ -42,6 +42,10 @@ class DjangoJsonResponseType(SemgrepCodemod):
                 cst.Arg(
                     value=cst.parse_expression('"application/json"'),
                     keyword=cst.Name("content_type"),
+                    equal=cst.AssignEqual(
+                        whitespace_before=cst.SimpleWhitespace(""),
+                        whitespace_after=cst.SimpleWhitespace(""),
+                    ),
                 ),
             ],
         )
