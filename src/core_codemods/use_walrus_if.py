@@ -1,3 +1,5 @@
+from collections import namedtuple
+import itertools
 from typing import List, Tuple, Optional
 
 import libcst as cst
@@ -6,11 +8,20 @@ from libcst import matchers as m
 from libcst.metadata import ParentNodeProvider, ScopeProvider
 
 from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
+from codemodder.codemods.api import BaseCodemod
 
 
-class UseWalrusIf(SemgrepCodemod):
-    METADATA_DEPENDENCIES = SemgrepCodemod.METADATA_DEPENDENCIES + (
+FoundAssign = namedtuple("FoundAssign", ["assign", "target", "value"])
+
+
+def pairwise(iterable):
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+
+class UseWalrusIf(BaseCodemod):
+    METADATA_DEPENDENCIES = BaseCodemod.METADATA_DEPENDENCIES + (
         ParentNodeProvider,
         ScopeProvider,
     )
@@ -27,52 +38,89 @@ class UseWalrusIf(SemgrepCodemod):
         }
     ]
 
-    @classmethod
-    def rule(cls):
-        return """
-        rules:
-          - patterns:
-            - pattern: |
-                $ASSIGN
-                if $COND:
-                  $BODY
-            - metavariable-pattern:
-                metavariable: $ASSIGN
-                patterns:
-                  - pattern: $VAR = $RHS
-                  - metavariable-pattern:
-                      metavariable: $COND
-                      patterns:
-                        - pattern: $VAR
-                  - metavariable-pattern:
-                      metavariable: $BODY
-                      pattern: $VAR
-            - focus-metavariable: $ASSIGN
-        """
-
-    _modify_next_if: List[Tuple[CodeRange, cst.Assign]]
-    _if_stack: List[Optional[Tuple[CodeRange, cst.Assign]]]
+    _modify_next_if: List[Tuple[CodeRange, cst.NamedExpr]]
+    _if_stack: List[Optional[Tuple[CodeRange, cst.NamedExpr]]]
+    assigns: dict[cst.Assign, cst.NamedExpr]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._modify_next_if = []
         self._if_stack = []
+        self.assigns = {}
 
-    def visit_If(self, node):
+    def _build_named_expr(self, target, value, parens=True):
+        return cst.NamedExpr(
+            target=target,
+            value=value,
+            lpar=[cst.LeftParen()] if parens else [],
+            rpar=[cst.RightParen()] if parens else [],
+        )
+
+    def _filter_assigns(self, node: cst.CSTNode) -> FoundAssign | None:
+        match node:
+            case cst.SimpleStatementLine(
+                body=[
+                    cst.Assign(
+                        targets=[
+                            cst.AssignTarget(target=cst.Name() as target),
+                        ],
+                        value=value,
+                    ) as assign
+                ]
+            ):
+                return FoundAssign(assign, target, value)
+        return None
+
+    def _filter_if(self, node: cst.CSTNode) -> cst.BaseExpression | None:
+        match node:
+            case cst.If(test=test):
+                return test
+        return None
+
+    def on_visit(self, node: cst.CSTNode) -> Optional[bool]:
+        if len(node.children) < 2:
+            return super().on_visit(node)
+
+        for a, b in pairwise(node.children):
+            if not (found_assign := self._filter_assigns(a)):
+                continue
+            if not (if_test := self._filter_if(b)):
+                continue
+
+            assign, target, value = found_assign
+            # If test can be a comparison expression
+            match if_test:
+                case cst.Comparison(
+                    left=cst.Name() as left,
+                    comparisons=[
+                        cst.ComparisonTarget(
+                            operator=(
+                                cst.Is() | cst.IsNot() | cst.Equal() | cst.NotEqual()
+                            )
+                        )
+                    ],
+                ):
+                    if left.value == target.value:
+                        named_expr = self._build_named_expr(target, value, parens=True)
+                        self.assigns[assign] = named_expr
+                # If test can also be a bare name
+                case cst.Name() as name:
+                    if name.value == target.value:
+                        named_expr = self._build_named_expr(target, value, parens=False)
+                        self.assigns[assign] = named_expr
+
+        return super().on_visit(node)
+
+    def visit_If(self, node: cst.If):
+        del node
         self._if_stack.append(
             self._modify_next_if.pop() if len(self._modify_next_if) else None
         )
 
     def leave_If(self, original_node, updated_node):
         if (result := self._if_stack.pop()) is not None:
-            position, if_node = result
+            position, named_expr = result
             is_name = m.matches(updated_node.test, m.Name())
-            named_expr = cst.NamedExpr(
-                target=if_node.targets[0].target,
-                value=if_node.value,
-                lpar=[] if is_name else [cst.LeftParen()],
-                rpar=[] if is_name else [cst.RightParen()],
-            )
             self.add_change_from_position(position, self.CHANGE_DESCRIPTION)
             return (
                 updated_node.with_changes(test=named_expr)
@@ -84,38 +132,12 @@ class UseWalrusIf(SemgrepCodemod):
 
         return original_node
 
-    def _is_valid_modification(self, node):
-        """
-        Restricts the kind of modifications we can make to the AST.
-
-        This is necessary since the semgrep rule can't fully encode this restriction.
-        """
-        if parent := self.get_metadata(ParentNodeProvider, node):
-            if gparent := self.get_metadata(ParentNodeProvider, parent):
-                if (idx := gparent.children.index(parent)) >= 0:
-                    conditional = gparent.children[idx + 1]
-                    match conditional:
-                        case cst.If(test=(cst.Name())):
-                            return True
-                        case cst.If(test=cst.Comparison(left=cst.Name()) as test):
-                            match test.comparisons[0]:
-                                case cst.ComparisonTarget(
-                                    operator=(
-                                        cst.Is()
-                                        | cst.IsNot()
-                                        | cst.Equal()
-                                        | cst.NotEqual()
-                                    )
-                                ):
-                                    return True
-        return False
-
-    def leave_Assign(self, original_node, updated_node):
-        if self.node_is_selected(original_node):
-            if self._is_valid_modification(original_node):
-                position = self.node_position(original_node)
-                self._modify_next_if.append((position, updated_node))
-                return cst.RemoveFromParent()
+    def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign):
+        del updated_node
+        if named_expr := self.assigns.get(original_node):
+            position = self.node_position(original_node)
+            self._modify_next_if.append((position, named_expr))
+            return cst.RemoveFromParent()
 
         return original_node
 
@@ -147,7 +169,7 @@ class UseWalrusIf(SemgrepCodemod):
             # state management to fit within the visitor pattern. We should
             # revisit this at some point later.
             return cst.FlattenSentinel(
-                original_node.leading_lines + trailing_whitespace
+                tuple(original_node.leading_lines) + trailing_whitespace
             )
 
         return updated_node
