@@ -30,6 +30,7 @@ repos:
            tests/samples/.*|
            integration_tests/.*
        )$
+     args: [--disable-error-code=has-type,--disable-error-code=import-not-found]
      additional_dependencies:
        [
          "types-mock==5.0.*",
