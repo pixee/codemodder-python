@@ -163,3 +163,21 @@ if val is not None:
             do_something_else(val)
         """
         self.run_and_assert(tmpdir, input_code, input_code)
+
+    @pytest.mark.parametrize("comparator", [">", "<", ">=", "<="])
+    def test_walrus_with_comparison(self, tmpdir, comparator):
+        input_code = f"""
+        def func(y):
+            x = foo()
+            y = bar(y)
+            if x {comparator} y:
+                print("whatever", y)
+            """
+        expected_output = f"""
+        def func(y):
+            x = foo()
+            y = bar(y)
+            if x {comparator} y:
+                print("whatever", y)
+            """
+        self.run_and_assert(tmpdir, input_code, expected_output)

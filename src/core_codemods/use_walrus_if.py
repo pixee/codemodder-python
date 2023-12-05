@@ -93,10 +93,21 @@ class UseWalrusIf(SemgrepCodemod):
         if parent := self.get_metadata(ParentNodeProvider, node):
             if gparent := self.get_metadata(ParentNodeProvider, parent):
                 if (idx := gparent.children.index(parent)) >= 0:
-                    return m.matches(
-                        gparent.children[idx + 1],
-                        m.If(test=(m.Name() | m.Comparison(left=m.Name()))),
-                    )
+                    conditional = gparent.children[idx + 1]
+                    match conditional:
+                        case cst.If(test=(cst.Name())):
+                            return True
+                        case cst.If(test=cst.Comparison(left=cst.Name()) as test):
+                            match test.comparisons[0]:
+                                case cst.ComparisonTarget(
+                                    operator=(
+                                        cst.Is()
+                                        | cst.IsNot()
+                                        | cst.Equal()
+                                        | cst.NotEqual()
+                                    )
+                                ):
+                                    return True
         return False
 
     def leave_Assign(self, original_node, updated_node):
