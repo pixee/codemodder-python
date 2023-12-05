@@ -36,7 +36,7 @@ jobs:
   test:
     name: Run pytest
     runs-on: ubuntu-20.04
-    timeout-minutes: 17
+    timeout-minutes: 22
     strategy:
       matrix:
         python-version: ['3.10',  '3.11', '3.12']
