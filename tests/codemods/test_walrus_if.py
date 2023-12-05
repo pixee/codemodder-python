@@ -1,10 +1,10 @@
 import pytest
 
 from core_codemods.use_walrus_if import UseWalrusIf
-from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+from tests.codemods.base_codemod_test import BaseCodemodTest
 
 
-class TestUseWalrusIf(BaseSemgrepCodemodTest):
+class TestUseWalrusIf(BaseCodemodTest):
     codemod = UseWalrusIf
 
     @pytest.mark.parametrize(
@@ -168,15 +168,15 @@ if val is not None:
     def test_walrus_with_comparison(self, tmpdir, comparator):
         input_code = f"""
         def func(y):
-            x = foo()
             y = bar(y)
+            x = foo()
             if x {comparator} y:
                 print("whatever", y)
             """
         expected_output = f"""
         def func(y):
-            x = foo()
             y = bar(y)
+            x = foo()
             if x {comparator} y:
                 print("whatever", y)
             """
