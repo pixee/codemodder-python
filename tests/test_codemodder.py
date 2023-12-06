@@ -6,7 +6,7 @@ import libcst as cst
 from codemodder.codemodder import run, find_semgrep_results
 from codemodder.diff import create_diff_from_tree
 from codemodder.semgrep import run as semgrep_run
-from codemodder.registry import DEFAULT_EXCLUDED_CODEMODS, load_registered_codemods
+from codemodder.registry import load_registered_codemods
 from codemodder.result import ResultSet
 
 
@@ -76,6 +76,8 @@ class TestRun:
             "--output",
             str(codetf),
             "--dry-run",
+            # Make this test faster by restricting the number of codemods
+            "--codemod-include=url-sandbox",
         ]
 
         assert not codetf.exists()
@@ -93,6 +95,8 @@ class TestRun:
             "tests/samples/",
             "--output",
             "here.txt",
+            # Make this test faster by restricting the number of codemods
+            "--codemod-include=use-generator,use-defusedxml,use-walrus-if",
         ]
         if dry_run:
             args += ["--dry-run"]
@@ -105,8 +109,7 @@ class TestRun:
         assert len(args_to_reporting) == 4
         _, _, _, results_by_codemod = args_to_reporting
 
-        registry = load_registered_codemods()
-        assert len(results_by_codemod) == len(registry.codemods)
+        assert len(results_by_codemod) == 3
 
     @mock.patch("codemodder.codemods.base_codemod.semgrep_run")
     def test_no_codemods_to_run(self, mock_semgrep_run, tmpdir):
