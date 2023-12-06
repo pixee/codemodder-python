@@ -4,10 +4,8 @@ import pytest
 
 
 EXPECTED_FINDINGS = [
-    "pixee:python/order-imports",
     "pixee:python/secure-random",
     "pixee:python/sandbox-process-creation",
-    "pixee:python/unused-imports",
     "pixee:python/django-session-cookie-secure-off",
     "pixee:python/harden-pyyaml",
     "pixee:python/django-debug-flag-on",

@@ -6,7 +6,7 @@ import libcst as cst
 from codemodder.codemodder import run, find_semgrep_results
 from codemodder.diff import create_diff_from_tree
 from codemodder.semgrep import run as semgrep_run
-from codemodder.registry import load_registered_codemods
+from codemodder.registry import DEFAULT_EXCLUDED_CODEMODS, load_registered_codemods
 from codemodder.result import ResultSet
 
 
