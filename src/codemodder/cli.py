@@ -116,8 +116,6 @@ def parse_args(argv, codemod_registry: CodemodRegistry):
         "--output",
         type=str,
         help="name of output file to produce",
-        default="stdout",
-        required=True,
     )
 
     codemod_validator = build_codemod_validator(codemod_registry)

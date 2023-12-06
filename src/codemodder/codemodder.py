@@ -287,7 +287,9 @@ def run(original_args) -> int:
 
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
-    report_default(elapsed_ms, argv, original_args, results)
+
+    if argv.output:
+        report_default(elapsed_ms, argv, original_args, results)
 
     log_report(context, argv, elapsed_ms, files_to_analyze)
     return 0
