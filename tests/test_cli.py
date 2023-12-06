@@ -21,7 +21,7 @@ class TestParseArgs:
         error_logger.assert_called()
         assert error_logger.call_args_list[0][0] == (
             "CLI error: %s",
-            "the following arguments are required: directory, --output",
+            "the following arguments are required: directory",
         )
 
     @pytest.mark.parametrize(
