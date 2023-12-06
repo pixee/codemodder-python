@@ -7,6 +7,13 @@ from codemodder.executor import CodemodExecutorWrapper
 from codemodder.logging import logger
 
 
+# These are generally not intended to be applied directly so they are excluded by default.
+DEFAULT_EXCLUDED_CODEMODS = [
+    "pixee:python/order-imports",
+    "pixee:python/unused-imports",
+]
+
+
 @dataclass
 class CodemodCollection:
     """A collection of codemods that all share the same origin and documentation."""
@@ -77,16 +84,10 @@ class CodemodRegistry:
         codemod_include: Optional[list] = None,
         codemod_exclude: Optional[list] = None,
     ) -> list[CodemodExecutorWrapper]:
-        if not codemod_include and not codemod_exclude:
-            return self.codemods
-
         codemod_include = codemod_include or []
-        codemod_exclude = codemod_exclude or []
+        codemod_exclude = codemod_exclude or DEFAULT_EXCLUDED_CODEMODS
 
-        # cli should've already prevented both include/exclude from being set.
-        assert codemod_include or codemod_exclude
-
-        if codemod_exclude:
+        if codemod_exclude and not codemod_include:
             return [
                 codemod
                 for codemod in self.codemods

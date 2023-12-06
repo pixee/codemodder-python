@@ -1,5 +1,5 @@
 import pytest
-from codemodder.registry import load_registered_codemods
+from codemodder.registry import DEFAULT_EXCLUDED_CODEMODS, load_registered_codemods
 
 
 class TestMatchCodemods:
@@ -11,7 +11,10 @@ class TestMatchCodemods:
         )
 
     def test_no_include_exclude(self):
-        assert self.registry.match_codemods(None, None) == self.registry.codemods
+        defaults = set(
+            x for x in self.registry.codemods if x.id not in DEFAULT_EXCLUDED_CODEMODS
+        )
+        assert set(self.registry.match_codemods(None, None)) == defaults
 
     @pytest.mark.parametrize(
         "input_str", ["secure-random", "secure-random,url-sandbox"]
