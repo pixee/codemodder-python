@@ -5,6 +5,7 @@ from core_codemods.sql_parameterization import SQLQueryParameterization
 from .django_debug_flag_on import DjangoDebugFlagOn
 from .django_session_cookie_secure_off import DjangoSessionCookieSecureOff
 from .enable_jinja2_autoescape import EnableJinja2Autoescape
+from .fix_deprecated_abstractproperty import FixDeprecatedAbstractproperty
 from .fix_mutable_params import FixMutableParams
 from .harden_pyyaml import HardenPyyaml
 from .harden_ruamel import HardenRuamel
@@ -41,6 +42,7 @@ registry = CodemodCollection(
         DjangoDebugFlagOn,
         DjangoSessionCookieSecureOff,
         EnableJinja2Autoescape,
+        FixDeprecatedAbstractproperty,
         FixMutableParams,
         HardenPyyaml,
         HardenRuamel,
