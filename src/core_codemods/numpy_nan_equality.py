@@ -97,11 +97,11 @@ class NumpyNanEquality(BaseCodemod, NameResolutionMixin):
         return triples
 
     def _build_nan_comparison(self, nan_node, node):
-        maybe_numpy_alias = self.find_alias_for_import_in_node("numpy", nan_node)
-        if maybe_numpy_alias:
+        if maybe_numpy_alias := self.find_alias_for_import_in_node("numpy", nan_node):
             call = cst.parse_expression(f"{maybe_numpy_alias}.isnan()")
         else:
             self.add_needed_import("numpy")
+            self.remove_unused_import(nan_node)
             call = cst.parse_expression("numpy.isnan()")
         return call.with_changes(args=[cst.Arg(value=node)])
 
