@@ -154,6 +154,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="This change will only restrict the response type and will not alter the response data itself. Thus we deem it safe.",
     ),
+    "fix-deprecated-abstractproperty": DocMetadata(
+        importance="Low",
+        guidance_explained="This change fixes deprecated uses and is safe.",
+    ),
 }
 
 
