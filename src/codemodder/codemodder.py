@@ -202,6 +202,9 @@ def apply_codemods(
 
     # run codemods one at a time making sure to respect the given sequence
     for codemod in codemods_to_run:
+        # NOTE: this may be used as a progress indicator by upstream tools
+        logger.info("running codemod %s", codemod.id)
+
         # Unfortunately the IDs from semgrep are not fully specified
         # TODO: eventually we need to be able to use fully specified IDs here
         if codemod.is_semgrep and codemod.name not in semgrep_finding_ids:
@@ -211,7 +214,6 @@ def apply_codemods(
             )
             continue
 
-        logger.info("running codemod %s", codemod.id)
         semgrep_files = semgrep_results.files_for_rule(codemod.name)
         # Non-semgrep codemods ignore the semgrep results
         results = codemod.apply(context, semgrep_files)
