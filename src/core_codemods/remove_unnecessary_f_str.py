@@ -15,9 +15,13 @@ class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
     DESCRIPTION = UnnecessaryFormatString.DESCRIPTION
     REFERENCES = [
         {
+            "url": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/f-string-without-interpolation.html",
+            "description": "",
+        },
+        {
             "url": "https://github.com/Instagram/LibCST/blob/main/libcst/codemod/commands/unnecessary_format_string.py",
             "description": "",
-        }
+        },
     ]
 
     def __init__(self, codemod_context: CodemodContext, *codemod_args):
