@@ -33,6 +33,7 @@ from .secure_flask_session_config import SecureFlaskSessionConfig
 from .file_resource_leak import FileResourceLeak
 from .django_receiver_on_top import DjangoReceiverOnTop
 from .django_json_response_type import DjangoJsonResponseType
+from .flask_json_response_type import FlaskJsonResponseType
 
 registry = CodemodCollection(
     origin="pixee",
@@ -72,5 +73,6 @@ registry = CodemodCollection(
         DjangoReceiverOnTop,
         NumpyNanEquality,
         DjangoJsonResponseType,
+        FlaskJsonResponseType,
     ],
 )

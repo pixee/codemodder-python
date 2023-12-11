@@ -228,6 +228,20 @@ class AncestorPatternsMixin(MetadataDependent):
                 return parent
         return None
 
+    def is_target_of_assignment(
+        self, expr
+    ) -> Optional[cst.AnnAssign | cst.Assign | cst.WithItem | cst.NamedExpr]:
+        """
+        Tests if expr is the value in an assignment.
+        """
+        parent = self.get_metadata(ParentNodeProvider, expr)
+        parent = parent if isinstance(parent, cst.AssignTarget) else None
+        gparent = self.get_metadata(ParentNodeProvider, parent) if parent else None
+        match gparent:
+            case cst.AnnAssign() | cst.Assign() | cst.WithItem() | cst.NamedExpr():
+                return gparent
+        return None
+
     def has_attr_called(self, node: cst.CSTNode) -> Optional[cst.Name]:
         """
         Checks if node is part of an expression of the form: <node>.call().
@@ -298,6 +312,21 @@ class AncestorPatternsMixin(MetadataDependent):
                 return maybe_parent
         return None
 
+    def find_immediate_function_def(
+        self, node: cst.CSTNode
+    ) -> Optional[cst.FunctionDef]:
+        """
+        Find if node is inside a function definition. In case of nested functions it returns the most immediate one.
+        """
+        # We disregard nested functions, we consider only the immediate one
+        ancestors = self.path_to_root(node)
+        first_fdef = None
+        for ancestor in ancestors:
+            if isinstance(ancestor, cst.FunctionDef):
+                first_fdef = ancestor
+                break
+        return first_fdef
+
     def path_to_root(self, node: cst.CSTNode) -> list[cst.CSTNode]:
         """
         Returns node's path to root. Includes self.
@@ -335,6 +364,47 @@ class AncestorPatternsMixin(MetadataDependent):
             return self.get_metadata(ParentNodeProvider, node, None)
         except Exception:
             pass
+        return None
+
+
+class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin):
+    METADATA_DEPENDENCIES: Tuple[Any, ...] = (
+        ScopeProvider,
+        ParentNodeProvider,
+    )
+
+    def extract_value(self, node: cst.AnnAssign | cst.Assign | cst.WithItem):
+        match node:
+            case cst.AnnAssign(value=value) | cst.Assign(value=value) | cst.WithItem(
+                item=value
+            ) | cst.NamedExpr(value=value):
+                return value
+        return None
+
+    def resolve_expression(self, node: cst.BaseExpression) -> cst.BaseExpression:
+        """
+        If the expression is a Name, transitively resolves the name to another type of expression. Otherwise returns self.
+        """
+        maybe_expr = None
+        match node:
+            case cst.Name():
+                maybe_expr = self._resolve_name_transitive(node)
+                if maybe_expr:
+                    return maybe_expr
+        return node
+
+    def _resolve_name_transitive(self, node: cst.Name) -> Optional[cst.BaseExpression]:
+        maybe_assignment = self.find_single_assignment(node)
+        if maybe_assignment:
+            if maybe_target_assignment := self.is_target_of_assignment(
+                maybe_assignment.node
+            ):
+                value = self.extract_value(maybe_target_assignment)
+                match value:
+                    case cst.Name():
+                        return self._resolve_name_transitive(value)
+                    case _:
+                        return value
         return None
 
 
