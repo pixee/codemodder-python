@@ -11,7 +11,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 description = "A pluggable framework for building codemods in Python"
 dependencies = [
-    "isort~=5.12.0",
+    "isort>=5.12,<5.14",
     "libcst~=1.1.0",
     "packaging~=23.2",
     "pylint~=3.0.0",
