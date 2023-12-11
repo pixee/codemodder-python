@@ -35,6 +35,32 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
+    def test_simple_return_json(self, tmpdir):
+        input_code = """\
+        from flask import Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            return json_response
+        """
+        expected = """\
+        from flask import Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            return (json_response, {'Content-Type': 'application/json'})
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
     def test_alias(self, tmpdir):
         input_code = """\
         from flask import make_response as response, Flask
