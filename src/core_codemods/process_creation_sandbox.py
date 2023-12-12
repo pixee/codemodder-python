@@ -39,6 +39,11 @@ class ProcessSandbox(SemgrepCodemod):
                 - pattern-inside: |
                     import subprocess
                     ...
+              - patterns:
+                - pattern: subprocess.Popen(...)
+                - pattern-inside: |
+                    import subprocess
+                    ...
         """
 
     def on_result_found(self, original_node, updated_node):
@@ -47,5 +52,6 @@ class ProcessSandbox(SemgrepCodemod):
         return self.update_call_target(
             updated_node,
             "safe_command",
+            new_func="run",
             replacement_args=[cst.Arg(original_node.func), *original_node.args],
         )
