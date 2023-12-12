@@ -11,55 +11,62 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         assert self.codemod.name() == "sandbox-process-creation"
 
     def test_import_subprocess(self, tmpdir):
-        input_code = """import subprocess
+        input_code = """
+        import subprocess
 
-subprocess.run("echo 'hi'", shell=True)
-var = "hello"
-"""
-        expected = """import subprocess
-from security import safe_command
+        subprocess.run("echo 'hi'", shell=True)
+        var = "hello"
+        """
+        expected = """
+        import subprocess
+        from security import safe_command
 
-safe_command.run(subprocess.run, "echo 'hi'", shell=True)
-var = "hello"
-"""
+        safe_command.run(subprocess.run, "echo 'hi'", shell=True)
+        var = "hello"
+        """
         self.run_and_assert(tmpdir, input_code, expected)
         self.assert_dependency(Security)
 
     def test_import_alias(self, tmpdir):
-        input_code = """import subprocess as sub
+        input_code = """
+        import subprocess as sub
 
-sub.run("echo 'hi'", shell=True)
-var = "hello"
-"""
-        expected = """import subprocess as sub
-from security import safe_command
+        sub.run("echo 'hi'", shell=True)
+        var = "hello"
+        """
+        expected = """
+        import subprocess as sub
+        from security import safe_command
 
-safe_command.run(sub.run, "echo 'hi'", shell=True)
-var = "hello"
-"""
+        safe_command.run(sub.run, "echo 'hi'", shell=True)
+        var = "hello"
+        """
         self.run_and_assert(tmpdir, input_code, expected)
         self.assert_dependency(Security)
 
     def test_from_subprocess(self, tmpdir):
-        input_code = """from subprocess import run
+        input_code = """
+        from subprocess import run
 
-run("echo 'hi'", shell=True)
-var = "hello"
-"""
-        expected = """from subprocess import run
-from security import safe_command
+        run("echo 'hi'", shell=True)
+        var = "hello"
+        """
+        expected = """
+        from subprocess import run
+        from security import safe_command
 
-safe_command.run(run, "echo 'hi'", shell=True)
-var = "hello"
-"""
+        safe_command.run(run, "echo 'hi'", shell=True)
+        var = "hello"
+        """
         self.run_and_assert(tmpdir, input_code, expected)
         self.assert_dependency(Security)
 
     def test_subprocess_nameerror(self, tmpdir):
-        input_code = """subprocess.run("echo 'hi'", shell=True)
+        input_code = """
+        subprocess.run("echo 'hi'", shell=True)
 
-import subprocess
-"""
+        import subprocess
+        """
         expected = input_code
         self.run_and_assert(tmpdir, input_code, expected)
 
@@ -67,32 +74,36 @@ import subprocess
         "input_code,expected",
         [
             (
-                """import subprocess
-import csv
-subprocess.run("echo 'hi'", shell=True)
-csv.excel
-""",
-                """import subprocess
-import csv
-from security import safe_command
+                """
+                import subprocess
+                import csv
+                subprocess.run("echo 'hi'", shell=True)
+                csv.excel
+                """,
+                """
+                import subprocess
+                import csv
+                from security import safe_command
 
-safe_command.run(subprocess.run, "echo 'hi'", shell=True)
-csv.excel
-""",
+                safe_command.run(subprocess.run, "echo 'hi'", shell=True)
+                csv.excel
+                """,
             ),
             (
-                """import subprocess
-from csv import excel
-subprocess.run("echo 'hi'", shell=True)
-excel
-""",
-                """import subprocess
-from csv import excel
-from security import safe_command
+                """
+                import subprocess
+                from csv import excel
+                subprocess.run("echo 'hi'", shell=True)
+                excel
+                """,
+                """
+                import subprocess
+                from csv import excel
+                from security import safe_command
 
-safe_command.run(subprocess.run, "echo 'hi'", shell=True)
-excel
-""",
+                safe_command.run(subprocess.run, "echo 'hi'", shell=True)
+                excel
+                """,
             ),
         ],
     )
@@ -104,23 +115,26 @@ excel
         # Test that subprocess methods that aren't part of the codemod are not changed.
         # If we add the function as one of
         # our codemods, this test would change.
-        input_code = """import subprocess
+        input_code = """
+        import subprocess
 
-subprocess.run("echo 'hi'", shell=True)
-subprocess.check_output(["ls", "-l"])"""
+        subprocess.run("echo 'hi'", shell=True)
+        subprocess.check_output(["ls", "-l"])"""
 
-        expected = """import subprocess
-from security import safe_command
+        expected = """
+        import subprocess
+        from security import safe_command
 
-safe_command.run(subprocess.run, "echo 'hi'", shell=True)
-subprocess.check_output(["ls", "-l"])"""
+        safe_command.run(subprocess.run, "echo 'hi'", shell=True)
+        subprocess.check_output(["ls", "-l"])"""
 
         self.run_and_assert(tmpdir, input_code, expected)
         self.assert_dependency(Security)
 
     def test_custom_run(self, tmpdir):
-        input_code = """from app_funcs import run
+        input_code = """
+        from app_funcs import run
 
-run("echo 'hi'", shell=True)"""
+        run("echo 'hi'", shell=True)"""
         expected = input_code
         self.run_and_assert(tmpdir, input_code, expected)
