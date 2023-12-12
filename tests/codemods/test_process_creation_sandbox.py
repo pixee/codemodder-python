@@ -138,3 +138,33 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         run("echo 'hi'", shell=True)"""
         expected = input_code
         self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_subprocess_call(self, tmpdir):
+        input_code = """
+        import subprocess
+
+        subprocess.call(["ls", "-l"])
+        """
+        expected = """
+        import subprocess
+        from security import safe_command
+
+        safe_command.run(subprocess.call, ["ls", "-l"])
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
+        self.assert_dependency(Security)
+
+    def test_subprocess_popen(self, tmpdir):
+        input_code = """
+        import subprocess
+
+        subprocess.Popen(["ls", "-l"])
+        """
+        expected = """
+        import subprocess
+        from security import safe_command
+
+        safe_command.run(subprocess.Popen, ["ls", "-l"])
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
+        self.assert_dependency(Security)
