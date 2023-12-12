@@ -198,4 +198,10 @@ def parse_args(argv, codemod_registry: CodemodRegistry):
         action=CsvListAction,
         help="Comma-separated set of path(s) to SARIF file(s) to feed to the codemods",
     )
+    # At this time we don't do anything with the sonar-issues-json arg.
+    parser.add_argument(
+        "--sonar-issues-json",
+        action=CsvListAction,
+        help="Comma-separated set of path(s) to Sonar issues JSON file(s) to feed to the codemods",
+    )
     return parser.parse_args(argv)
