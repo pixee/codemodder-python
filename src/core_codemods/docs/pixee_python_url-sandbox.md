@@ -31,7 +31,7 @@ Our changes introduce sandboxing around URL creation that force developers to sp
   def request_url():
     url = request.args["loc"]
 -   resp = requests.get(url)
-+   resp = safe_requests.get.get(url)
++   resp = safe_requests.get(url)
     ...
 ```
 
@@ -59,5 +59,5 @@ If you want to allow those protocols, change the incoming PR to look more like t
 
 ```diff
 -resp = requests.get(url)
-+resp = safe_requests.get.get(url, allowed_protocols=("ftp",))
++resp = safe_requests.get(url, allowed_protocols=("ftp",))
 ```
