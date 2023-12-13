@@ -1,5 +1,6 @@
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 import libcst as cst
+from libcst.codemod import CodemodContext, ContextAwareVisitor
 from codemodder.codemods.api import BaseCodemod
 
 from codemodder.codemods.base_codemod import ReviewGuidance
@@ -26,13 +27,25 @@ class FlaskJsonResponseType(BaseCodemod, NameAndAncestorResolutionMixin):
     content_type_key = "Content-Type"
     json_content_type = "application/json"
 
-    def leave_Return(
-        self, original_node: cst.Return, updated_node: cst.Return
-    ) -> Union[
-        cst.BaseSmallStatement,
-        cst.FlattenSentinel[cst.BaseSmallStatement],
-        cst.RemovalSentinel,
-    ]:
+    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        visitor = FlaskJsonResponseTypeVisitor(self.context)
+        tree.visit(visitor)
+        if visitor.node_and_replacement:
+            node, replacement = visitor.node_and_replacement
+            self.report_change(node)
+            return tree.deep_replace(node, replacement)
+        return tree
+
+
+class FlaskJsonResponseTypeVisitor(ContextAwareVisitor, NameAndAncestorResolutionMixin):
+    content_type_key = "Content-Type"
+    json_content_type = "application/json"
+
+    def __init__(self, context: CodemodContext) -> None:
+        self.node_and_replacement: Optional[Tuple[cst.CSTNode, cst.CSTNode]] = None
+        super().__init__(context)
+
+    def leave_Return(self, original_node: cst.Return):
         if original_node.value:
             # is inside a function def with a route decorator
             maybe_function_def = self.find_immediate_function_def(original_node)
@@ -43,83 +56,75 @@ class FlaskJsonResponseType(BaseCodemod, NameAndAncestorResolutionMixin):
             )
             if maybe_has_decorator:
                 # json.dumps(...)
-                maybe_json_dumps = self._is_json_dumps_call(original_node.value)
-                if maybe_json_dumps:
-                    self.add_change(original_node, self.CHANGE_DESCRIPTION)
-                    return updated_node.with_changes(
-                        value=self._wrap_into_tuple_with_content_type(
-                            original_node.value
-                        )
+                if self._is_json_dumps_call(original_node.value):
+                    self.node_and_replacement = (
+                        original_node.value,
+                        self._fix_json_dumps(original_node.value),
                     )
-
-                # make_response(json.dumps(...),...)
-                maybe_make_response = self.is_make_response_with_json(
+                # make_response(...)
+                elif maybe_make_response := self._is_make_response_with_json(
                     original_node.value
-                )
-                if maybe_make_response:
-                    self.add_change(original_node, self.CHANGE_DESCRIPTION)
-                    return updated_node.with_changes(
-                        value=self._wrap_into_tuple_with_content_type(
-                            original_node.value
-                        )
-                    )
-
-                # tuple case
-                match original_node.value:
-                    case cst.Tuple():
-                        maybe_fixed_tuple = self._fix_response_tuple(
-                            original_node.value
-                        )
-                        if maybe_fixed_tuple:
-                            self.add_change(original_node, self.CHANGE_DESCRIPTION)
-                            return updated_node.with_changes(value=maybe_fixed_tuple)
-        return updated_node
-
-    def _is_string_or_int(self, node: cst.BaseExpression):
-        expr = self.resolve_expression(node)
-        if expr and isinstance(expr, cst.SimpleString | cst.Integer):
-            return True
-        return False
-
-    def _fix_response_tuple(self, node: cst.Tuple) -> Optional[cst.Tuple]:
-        elements = list(node.elements)
-        # (make_response | json.dumps, ..., {...})
-        if len(elements) == 3:
-            last = elements[-1].value
-            match last:
-                case cst.Dict() if not self._has_content_type_key(last):
-                    elements[-1] = cst.Element(
-                        self._add_key_value(
-                            last,
-                            cst.SimpleString(f"'{self.content_type_key}'"),
-                            cst.SimpleString(f"'{self.json_content_type}'"),
-                        )
-                    )
-                    return node.with_changes(elements=elements)
-        # (make_response | json.dumps, string|number)
-        # (make_response | json.dumps, {...})
-        if len(elements) == 2:
-            last = elements[-1].value
-            expr = self.resolve_expression(last)
-            match expr:
-                case cst.Dict() if not self._has_content_type_key(expr):
-                    if last == expr:
-                        elements[-1] = cst.Element(
-                            self._add_key_value(
-                                expr,
-                                cst.SimpleString(f"'{self.content_type_key}'"),
-                                cst.SimpleString(f"'{self.json_content_type}'"),
+                ):
+                    if maybe_dict := self._has_dict_with_headers_mr_call(
+                        maybe_make_response
+                    ):
+                        if not self._has_content_type_key(maybe_dict):
+                            self.node_and_replacement = (
+                                maybe_dict,
+                                self._fix_dict(maybe_dict),
                             )
+                    else:
+                        first_arg = maybe_make_response.args[0].value
+                        match first_arg:
+                            case cst.Tuple():
+                                self.node_and_replacement = (
+                                    first_arg,
+                                    self._fix_tuple(first_arg),
+                                )
+                            case _:
+                                self.node_and_replacement = (
+                                    maybe_make_response,
+                                    self._fix_make_response(maybe_make_response),
+                                )
+
+                # return (...,...)
+                elif maybe_tuple := self._is_tuple_with_json_string_response(
+                    original_node.value
+                ):
+                    if maybe_dict := self._has_dict_with_headers(maybe_tuple):
+                        if not self._has_content_type_key(maybe_dict):
+                            self.node_and_replacement = (
+                                maybe_dict,
+                                self._fix_dict(maybe_dict),
+                            )
+                    else:
+                        self.node_and_replacement = (
+                            maybe_tuple,
+                            self._fix_tuple(maybe_tuple),
                         )
-                        return node.with_changes(elements=elements)
-                    # TODO  last != expr case.
-                case cst.Integer() | cst.SimpleString():
-                    elements.append(cst.Element(self._build_dict()))
-                    return node.with_changes(elements=elements)
+
+    def _is_tuple_with_json_string_response(
+        self, node: cst.CSTNode
+    ) -> Optional[cst.Tuple]:
+        match node:
+            case cst.Tuple():
+                elements = node.elements
+                first = elements[0].value
+                maybe_vuln = self._is_json_dumps_call(
+                    first
+                ) or self._is_make_response_with_json(first)
+                if maybe_vuln:
+                    return node
         return None
 
-    def _wrap_into_tuple_with_content_type(self, node: cst.BaseExpression) -> cst.Tuple:
-        return cst.Tuple([cst.Element(node), cst.Element(self._build_dict())])
+    def _has_dict_with_headers(self, node: cst.Tuple) -> Optional[cst.Dict]:
+        elements = list(node.elements)
+        last = elements[-1].value
+        last = self.resolve_expression(last)
+        match last:
+            case cst.Dict():
+                return last
+        return None
 
     def _build_dict(self) -> cst.Dict:
         return cst.Dict(
@@ -142,10 +147,7 @@ class FlaskJsonResponseType(BaseCodemod, NameAndAncestorResolutionMixin):
         return False
 
     def _is_json_dumps_call(self, node: cst.BaseExpression) -> Optional[cst.Call]:
-        expr = node
-        match node:
-            case cst.Name():
-                expr = self._resolve_name_transitive(node)
+        expr = self.resolve_expression(node)
         match expr:
             case cst.Call():
                 true_name = self.find_base_name(expr)
@@ -153,21 +155,32 @@ class FlaskJsonResponseType(BaseCodemod, NameAndAncestorResolutionMixin):
                     return expr
         return None
 
-    def is_make_response_with_json(
+    def _is_make_response_with_json(
         self, node: cst.BaseExpression
     ) -> Optional[cst.Call]:
-        expr = node
-        match node:
-            case cst.Name():
-                expr = self._resolve_name_transitive(node)
+        expr = self.resolve_expression(node)
         match expr:
-            case cst.Call():
+            case cst.Call(args=[cst.Arg(first_arg), *_]):
                 true_name = self.find_base_name(expr)
                 if true_name != "flask.make_response":
                     return None
-                first_arg = expr.args[0].value if expr.args else None
+                match first_arg:
+                    case cst.Tuple():
+                        first_arg = first_arg.elements[0].value
                 if first_arg and self._is_json_dumps_call(first_arg):
                     return expr
+        return None
+
+    def _has_dict_with_headers_mr_call(self, call: cst.Call) -> Optional[cst.Dict]:
+        first_arg = call.args[0].value
+        match first_arg:
+            case cst.Tuple():
+                return self._has_dict_with_headers(first_arg)
+        last = call.args[-1].value
+        last = self.resolve_expression(last)
+        match last:
+            case cst.Dict():
+                return last
         return None
 
     def _has_content_type_key(self, dict_expr: cst.Dict):
@@ -191,3 +204,23 @@ class FlaskJsonResponseType(BaseCodemod, NameAndAncestorResolutionMixin):
         elements = list(dict_expr.elements)
         elements.append(cst.DictElement(key, value))
         return dict_expr.with_changes(elements=elements)
+
+    def _fix_dict(self, dict_expr: cst.Dict) -> cst.Dict:
+        return self._add_key_value(
+            dict_expr,
+            cst.SimpleString(f"'{self.content_type_key}'"),
+            cst.SimpleString(f"'{self.json_content_type}'"),
+        )
+
+    def _fix_tuple(self, tuple_expr: cst.Tuple) -> cst.Tuple:
+        elements = list(tuple_expr.elements)
+        elements.append(cst.Element(self._build_dict()))
+        return tuple_expr.with_changes(elements=elements)
+
+    def _fix_make_response(self, call: cst.Call) -> cst.Call:
+        args = list(call.args)
+        args.append(cst.Arg(self._build_dict()))
+        return call.with_changes(args=args)
+
+    def _fix_json_dumps(self, node: cst.BaseExpression) -> cst.Tuple:
+        return cst.Tuple([cst.Element(node), cst.Element(self._build_dict())])

@@ -12,5 +12,5 @@ app = Flask(__name__)
 def foo(request):
     json_response = json.dumps({ "user_input": request.GET.get("input") })
 -   return make_response(json_response)
-+   return (make_response(json_response), {'Content-Type':'application/json'}
++   return make_response(json_response, {'Content-Type':'application/json'})
 ```
