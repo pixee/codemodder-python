@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 import libcst as cst
 from libcst.codemod import CodemodContext, ContextAwareVisitor
 from codemodder.codemods.api import BaseCodemod
