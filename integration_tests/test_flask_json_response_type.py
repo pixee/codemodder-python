@@ -13,7 +13,7 @@ class TestFlaskJsonResponseType(BaseIntegrationTest):
         [
             (
                 8,
-                """    return (make_response(json_response), {'Content-Type': 'application/json'})\n""",
+                """    return make_response(json_response, {'Content-Type': 'application/json'})\n""",
             ),
         ],
     )
@@ -27,7 +27,7 @@ class TestFlaskJsonResponseType(BaseIntegrationTest):
     """ def foo(request):\n"""
     """     json_response = json.dumps({ "user_input": request.GET.get("input") })\n"""
     """-    return make_response(json_response)\n"""
-    """+    return (make_response(json_response), {'Content-Type': 'application/json'})\n"""
+    """+    return make_response(json_response, {'Content-Type': 'application/json'})\n"""
     )
     # fmt: on
 

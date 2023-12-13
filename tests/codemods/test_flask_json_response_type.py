@@ -30,7 +30,61 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
         @app.route("/test")
         def foo(request):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
-            return (make_response(json_response), {'Content-Type': 'application/json'})
+            return make_response(json_response, {'Content-Type': 'application/json'})
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
+    def test_simple_indirect(self, tmpdir):
+        input_code = """\
+        from flask import make_response, Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            response = make_response(json_response)
+            return response
+        """
+        expected = """\
+        from flask import make_response, Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            response = make_response(json_response, {'Content-Type': 'application/json'})
+            return response
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
+    def test_simple_tuple_arg(self, tmpdir):
+        input_code = """\
+        from flask import make_response, Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            return make_response((json_response, 404))
+        """
+        expected = """\
+        from flask import make_response, Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            return make_response((json_response, 404, {'Content-Type': 'application/json'}))
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
@@ -61,6 +115,32 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
+    def test_simple_tuple(self, tmpdir):
+        input_code = """\
+        from flask import Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            return (json_response, 404)
+        """
+        expected = """\
+        from flask import Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            return (json_response, 404, {'Content-Type': 'application/json'})
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
     def test_alias(self, tmpdir):
         input_code = """\
         from flask import make_response as response, Flask
@@ -82,12 +162,40 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
         @app.route("/test")
         def foo(request):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
-            return (response(json_response), {'Content-Type': 'application/json'})
+            return response(json_response, {'Content-Type': 'application/json'})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
-    def test_direct(self, tmpdir):
+    def test_indirect_dict(self, tmpdir):
+        input_code = """\
+        from flask import make_response, Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            headers = {'key': 'value'}
+            return make_response(json_response, headers)
+        """
+        expected = """\
+        from flask import make_response, Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            headers = {'key': 'value', 'Content-Type': 'application/json'}
+            return make_response(json_response, headers)
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
+    def test_direct_return(self, tmpdir):
         input_code = """\
         from flask import make_response, Flask
         import json
@@ -106,35 +214,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
 
         @app.route("/test")
         def foo(request):
-            return (make_response(json.dumps({ "user_input": request.GET.get("input") })), {'Content-Type': 'application/json'})
-        """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
-
-    def test_tuple_no_dict(self, tmpdir):
-        input_code = """\
-        from flask import make_response, Flask
-        import json
-
-        app = Flask(__name__)
-
-        @app.route("/test")
-        def foo(request):
-            json_response = json.dumps({ "user_input": request.GET.get("input") })
-            code = 404
-            return (make_response(json_response), code)
-        """
-        expected = """\
-        from flask import make_response, Flask
-        import json
-
-        app = Flask(__name__)
-
-        @app.route("/test")
-        def foo(request):
-            json_response = json.dumps({ "user_input": request.GET.get("input") })
-            code = 404
-            return (make_response(json_response), code, {'Content-Type': 'application/json'})
+            return make_response(json.dumps({ "user_input": request.GET.get("input") }), {'Content-Type': 'application/json'})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
@@ -161,34 +241,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
         def foo(request):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return (make_response(json_response), {'Content-Type': 'application/json'})
-        """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
-
-    def test_triple_dict(self, tmpdir):
-        input_code = """\
-        from flask import make_response, Flask
-        import json
-
-        app = Flask(__name__)
-
-        @app.route("/test")
-        def foo(request):
-            json_response = json.dumps({ "user_input": request.GET.get("input") })
-            code = 404
-            return (make_response(json_response), code, {})
-        """
-        expected = """\
-        from flask import make_response, Flask
-        import json
-
-        app = Flask(__name__)
-
-        @app.route("/test")
-        def foo(request):
-            json_response = json.dumps({ "user_input": request.GET.get("input") })
-            code = 404
-            return (make_response(json_response), code, {'Content-Type': 'application/json'})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
@@ -222,7 +274,39 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
         assert len(self.file_context.codemod_changes) == 0
 
-    def test_no_json_input(self, tmpdir):
+    def test_content_type_maybe_set_star(self, tmpdir):
+        input_code = """\
+        from flask import make_response, Flask
+        import json
+        from foo import another_dict
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            return (make_response(json_response), {**another_dict})
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        assert len(self.file_context.codemod_changes) == 0
+
+    def test_content_type_maybe_set(self, tmpdir):
+        input_code = """\
+        from flask import make_response, Flask
+        import json
+        from foo import key
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            return (make_response(json_response), {key:'application/json'})
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        assert len(self.file_context.codemod_changes) == 0
+
+    def test_no_json_dumps_input(self, tmpdir):
         input_code = """\
         from flask import make_response, Flask
         import json
@@ -233,6 +317,22 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
         def foo(request):
             dict_response = { "user_input": request.GET.get("input") }
             return make_response(dict_response)
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        assert len(self.file_context.codemod_changes) == 0
+
+    def test_unknown_call_response(self, tmpdir):
+        input_code = """\
+        from flask import make_response, Flask
+        import json
+        from foo import bar
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            dict_response = { "user_input": request.GET.get("input") }
+            return bar(dict_response)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
         assert len(self.file_context.codemod_changes) == 0
