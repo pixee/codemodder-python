@@ -9,6 +9,7 @@ from codemodder.dependency import Dependency
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.file_context import FileContext
 from codemodder.logging import logger, log_list
+from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.registry import CodemodRegistry
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.utils.timer import Timer
@@ -85,28 +86,39 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
             )
         )
 
-    def process_dependencies(self, codemod_id: str):
+    def process_dependencies(
+        self, codemod_id: str
+    ) -> dict[Dependency, PackageStore | None]:
         """Write the dependencies a codemod added to the appropriate dependency
-        file in the project.
+        file in the project. Returns a dict listing the locations the dependencies were added.
         """
         dependencies = self.dependencies.get(codemod_id)
         if not dependencies:
-            return
+            return {}
 
-        dependencies_store = self.repo_manager.dependencies_store
-        if dependencies_store is None:
+        store_list = self.repo_manager.package_stores
+        if store_list == []:
             logger.info(
                 "unable to write dependencies for %s: no dependency file found",
                 codemod_id,
             )
-            return
+            return {}
 
         # pylint: disable-next=cyclic-import
         from codemodder.dependency_management import DependencyManager
 
-        dm = DependencyManager(dependencies_store, self.directory)
-        if (changeset := dm.write(list(dependencies), self.dry_run)) is not None:
-            self.add_results(codemod_id, [changeset])
+        record: dict[Dependency, PackageStore | None] = {}
+        for package_store in store_list:
+            dm = DependencyManager(package_store, self.directory)
+            if (changeset := dm.write(list(dependencies), self.dry_run)) is not None:
+                self.add_results(codemod_id, [changeset])
+                for dep in dependencies:
+                    record[dep] = package_store
+                break
+
+        for dep in dependencies - record.keys():
+            record[dep] = None
+        return record
 
     def add_description(self, codemod: CodemodExecutorWrapper):
         description = codemod.description

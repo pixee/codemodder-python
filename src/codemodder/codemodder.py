@@ -8,6 +8,7 @@ from pathlib import Path
 
 import libcst as cst
 from libcst.codemod import CodemodContext
+from codemodder.dependency import Dependency
 from codemodder.file_context import FileContext
 
 from codemodder import registry, __version__
@@ -18,6 +19,7 @@ from codemodder.code_directory import file_line_patterns, match_files
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff_from_tree
 from codemodder.executor import CodemodExecutorWrapper
+from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default
 from codemodder.result import ResultSet
@@ -224,8 +226,17 @@ def apply_codemods(
             results,
             argv,
         )
-        context.process_dependencies(codemod.id)
+        record_dependency_update(context.process_dependencies(codemod.id))
         context.log_changes(codemod.id)
+
+
+def record_dependency_update(dependency_results: dict[Dependency, PackageStore | None]):
+    # TODO populate dependencies in CodeTF here
+    for dep, pkg_store in dependency_results.items():
+        if pkg_store:
+            logger.debug("Added dependency %s to %s.", dep.name, pkg_store.file)
+        else:
+            logger.debug("Failed to add dependency '%s'.", dep.name)
 
 
 def run(original_args) -> int:

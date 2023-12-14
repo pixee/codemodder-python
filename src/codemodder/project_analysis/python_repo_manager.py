@@ -14,10 +14,10 @@ class PythonRepoManager:
     def __init__(self, parent_directory: Path):
         self.parent_directory = parent_directory
         self._potential_stores = [
-            RequirementsTxtParser,
             PyprojectTomlParser,
-            SetupCfgParser,
             SetupPyParser,
+            RequirementsTxtParser,
+            SetupCfgParser,
         ]
 
     @cached_property

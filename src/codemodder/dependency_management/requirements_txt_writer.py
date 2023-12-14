@@ -14,6 +14,8 @@ class RequirementsTxtWriter(DependencyWriter):
         self, dependencies: list[Dependency], dry_run: bool = False
     ) -> Optional[ChangeSet]:
         lines = self._parse_file()
+        if lines is None:
+            return None
         original_lines = lines.copy()
         if not original_lines[-1].endswith("\n"):
             original_lines[-1] += "\n"
@@ -24,8 +26,11 @@ class RequirementsTxtWriter(DependencyWriter):
         diff = create_diff(original_lines, updated_lines)
 
         if not dry_run:
-            with open(self.path, "w", encoding="utf-8") as f:
-                f.writelines(updated_lines)
+            try:
+                with open(self.path, "w", encoding="utf-8") as f:
+                    f.writelines(updated_lines)
+            except Exception:
+                return None
 
         changes = self.build_changes(
             dependencies, original_lines_strategy, original_lines
@@ -36,6 +41,9 @@ class RequirementsTxtWriter(DependencyWriter):
             changes=changes,
         )
 
-    def _parse_file(self):
-        with open(self.path, "r", encoding="utf-8") as f:
-            return f.readlines()
+    def _parse_file(self) -> Optional[list[str]]:
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                return f.readlines()
+        except Exception:
+            return None
