@@ -1,6 +1,4 @@
 from codemodder.registry import CodemodCollection
-from core_codemods.numpy_nan_equality import NumpyNanEquality
-from core_codemods.sql_parameterization import SQLQueryParameterization
 
 from .django_debug_flag_on import DjangoDebugFlagOn
 from .django_session_cookie_secure_off import DjangoSessionCookieSecureOff
@@ -34,6 +32,9 @@ from .file_resource_leak import FileResourceLeak
 from .django_receiver_on_top import DjangoReceiverOnTop
 from .django_json_response_type import DjangoJsonResponseType
 from .flask_json_response_type import FlaskJsonResponseType
+from .numpy_nan_equality import NumpyNanEquality
+from .sql_parameterization import SQLQueryParameterization
+from .exception_without_raise import ExceptionWithoutRaise
 
 registry = CodemodCollection(
     origin="pixee",
@@ -74,5 +75,6 @@ registry = CodemodCollection(
         NumpyNanEquality,
         DjangoJsonResponseType,
         FlaskJsonResponseType,
+        ExceptionWithoutRaise,
     ],
 )
