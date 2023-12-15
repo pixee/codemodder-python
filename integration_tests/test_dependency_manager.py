@@ -44,7 +44,7 @@ class TestDependencyManager(CleanRepoMixin):
         )
 
     def test_fail_to_add(self, tmp_repo):
-        os.chmod(tmp_repo / self.requirements_file, 0o000)
+        os.chmod(tmp_repo / self.requirements_file, 0o400)
 
         command = [
             "codemodder",
