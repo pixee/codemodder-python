@@ -97,10 +97,26 @@ class Helpers:
             )
         )
         return cst.Arg(
-            keyword=cst.parse_expression(name),
+            keyword=cst.Name(value=name),
             value=cst.parse_expression(value),
             equal=equal,
         )
+
+    def add_arg_to_call(self, node: cst.Call, name: str, value):
+        """
+        Add a new arg to the end of the args list.
+        """
+        new_args = list(node.args) + [
+            cst.Arg(
+                keyword=cst.Name(value=name),
+                value=cst.parse_expression(str(value)),
+                equal=cst.AssignEqual(
+                    whitespace_before=cst.SimpleWhitespace(""),
+                    whitespace_after=cst.SimpleWhitespace(""),
+                ),
+            )
+        ]
+        return node.with_changes(args=new_args)
 
 
 def _match_with_existing_arg(arg, args_info):

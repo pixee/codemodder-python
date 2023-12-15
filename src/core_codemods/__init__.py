@@ -1,5 +1,6 @@
 from codemodder.registry import CodemodCollection
 
+from .add_requests_timeouts import AddRequestsTimeouts
 from .django_debug_flag_on import DjangoDebugFlagOn
 from .django_session_cookie_secure_off import DjangoSessionCookieSecureOff
 from .enable_jinja2_autoescape import EnableJinja2Autoescape
@@ -41,6 +42,7 @@ registry = CodemodCollection(
     docs_module="core_codemods.docs",
     semgrep_config_module="core_codemods.semgrep",
     codemods=[
+        AddRequestsTimeouts,
         DjangoDebugFlagOn,
         DjangoSessionCookieSecureOff,
         EnableJinja2Autoescape,

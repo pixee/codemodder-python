@@ -4,6 +4,7 @@ import pytest
 
 
 EXPECTED_FINDINGS = [
+    "pixee:python/add-requests-timeouts",
     "pixee:python/secure-random",
     "pixee:python/sandbox-process-creation",
     "pixee:python/django-session-cookie-secure-off",

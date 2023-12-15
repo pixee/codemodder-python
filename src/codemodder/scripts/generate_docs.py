@@ -15,6 +15,10 @@ class DocMetadata:
 
 # codemod-specific metadata that's used only for docs, not for codemod API
 METADATA = {
+    "add-requests-timeouts": DocMetadata(
+        importance="Medium",
+        guidance_explained="This change makes your code safer but in some cases it may be necessary to adjust the timeout value for your particular application.",
+    ),
     "django-debug-flag-on": DocMetadata(
         importance="Medium",
         guidance_explained="Django's `DEBUG` flag may be overridden somewhere else or the runtime settings file may be set with the `DJANGO_SETTINGS_MODULE` environment variable. This means that the `DEBUG` flag may intentionally be left on as a development aid.",
