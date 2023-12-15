@@ -1,12 +1,22 @@
 import libcst as cst
+from functools import cache
 
 
-def list_subclasses(kls) -> set[str]:
-    l = set()
-    for subkls in kls.__subclasses__():
-        l.add(subkls.__name__)
-        l = l | list_subclasses(subkls)
-    return l
+@cache
+def list_subclasses(base_kls) -> set[str]:
+    all_subclasses = set()
+    stack = [base_kls]
+    while stack:
+        kls = stack.pop()
+        all_subclasses.add(kls)
+        stack.extend(kls.__subclasses__())
+    return all_subclasses
+
+
+def full_qualified_name_from_class(cls) -> str:
+    if cls.__module__ == "builtins":
+        return cls.__qualname__
+    return f"{cls.__module__}.{cls.__qualname__}"
 
 
 def clean_simplestring(node: cst.SimpleString | str) -> str:

@@ -164,7 +164,7 @@ If you want to allow those protocols, change the incoming PR to look more like t
     ),
     "exception-without-raise": DocMetadata(
         importance="Low",
-        guidance_explained="An statement with an exception has no effect. Raising the exception is most likely the intended effect and thus we deem it safe.",
+        guidance_explained="A statement with an exception by itself has no effect. Raising the exception is most likely the intended effect and thus we deem it safe.",
     ),
 }
 

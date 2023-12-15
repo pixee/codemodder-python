@@ -4,12 +4,12 @@ from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.base_codemod import ReviewGuidance
 
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from codemodder.utils.utils import list_subclasses
+from codemodder.utils.utils import full_qualified_name_from_class, list_subclasses
 
 
 class ExceptionWithoutRaise(BaseCodemod, NameResolutionMixin):
     NAME = "exception-without-raise"
-    SUMMARY = "Added raise statement to exception creation"
+    SUMMARY = "Ensure bare exception statements are raised"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     DESCRIPTION = SUMMARY
     REFERENCES = [
@@ -18,7 +18,7 @@ class ExceptionWithoutRaise(BaseCodemod, NameResolutionMixin):
             "description": "",
         },
     ]
-    CHANGE_DESCRIPTION = "Wrapped exception in a raise statement"
+    CHANGE_DESCRIPTION = "Raised bare exception statement"
 
     def leave_SimpleStatementLine(
         self,
@@ -31,11 +31,27 @@ class ExceptionWithoutRaise(BaseCodemod, NameResolutionMixin):
             case cst.SimpleStatementLine(
                 body=[cst.Expr(cst.Name() | cst.Attribute() as name)]
             ):
-                true_name = self.find_base_name(name)
-                if true_name:
-                    true_name = true_name.split(".")[-1]
-                all_exceptions = list_subclasses(BaseException)
-                if true_name in all_exceptions:
+                if self._is_subclass_of_base_exception(name):
                     self.report_change(original_node)
                     return updated_node.with_changes(body=[cst.Raise(exc=name)])
+            case cst.SimpleStatementLine(
+                body=[
+                    cst.Expr(
+                        cst.Call(func=cst.Name() | cst.Attribute() as name)
+                    ) as call
+                ]
+            ):
+                if self._is_subclass_of_base_exception(name):
+                    self.report_change(original_node)
+                    return updated_node.with_changes(body=[cst.Raise(exc=call)])
         return updated_node
+
+    def _is_subclass_of_base_exception(self, name: cst.Name | cst.Attribute) -> bool:
+        true_name = self.find_base_name(name)
+        all_exceptions = [
+            full_qualified_name_from_class(kls)
+            for kls in list_subclasses(BaseException)
+        ]
+        if true_name in all_exceptions:
+            return True
+        return False

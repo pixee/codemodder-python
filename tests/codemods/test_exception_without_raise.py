@@ -19,13 +19,23 @@ class TestExceptionWithoutRaise(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
+    def test_simple_call(self, tmpdir):
+        input_code = """\
+        ValueError("Bad value!")
+        """
+        expected = """\
+        raise ValueError("Bad value!")
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
     def test_alias(self, tmpdir):
         input_code = """\
-        from libcst import CSTValidationError as error
+        from decimal import Overflow as error
         error
         """
         expected = """\
-        from libcst import CSTValidationError as error
+        from decimal import Overflow as error
         raise error
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
