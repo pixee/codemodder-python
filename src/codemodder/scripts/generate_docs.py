@@ -162,6 +162,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="This change will only restrict the response type and will not alter the response data itself. Thus we deem it safe.",
     ),
+    "exception-without-raise": DocMetadata(
+        importance="Low",
+        guidance_explained="An statement with an exception has no effect. Raising the exception is most likely the intended effect and thus we deem it safe.",
+    ),
 }
 
 

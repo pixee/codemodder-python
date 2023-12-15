@@ -1,12 +1,9 @@
-from collections import namedtuple
 import libcst as cst
 from libcst import UnaryOperation
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.base_codemod import ReviewGuidance
 
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-
-NodeWithTrueName = namedtuple("NodeWithTrueName", ["node", "name"])
 
 
 class NumpyNanEquality(BaseCodemod, NameResolutionMixin):

@@ -1,6 +1,14 @@
 import libcst as cst
 
 
+def list_subclasses(kls) -> set[str]:
+    l = set()
+    for subkls in kls.__subclasses__():
+        l.add(subkls.__name__)
+        l = l | list_subclasses(subkls)
+    return l
+
+
 def clean_simplestring(node: cst.SimpleString | str) -> str:
     if isinstance(node, str):
         return node.strip('"')
