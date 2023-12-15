@@ -96,18 +96,22 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         if not dependencies:
             return {}
 
+        # populate everything with None and then change the ones added
+        record: dict[Dependency, PackageStore | None] = {}
+        for dep in dependencies:
+            record[dep] = None
+
         store_list = self.repo_manager.package_stores
-        if store_list == []:
+        if not store_list:
             logger.info(
                 "unable to write dependencies for %s: no dependency file found",
                 codemod_id,
             )
-            return {}
+            return record
 
         # pylint: disable-next=cyclic-import
         from codemodder.dependency_management import DependencyManager
 
-        record: dict[Dependency, PackageStore | None] = {}
         for package_store in store_list:
             dm = DependencyManager(package_store, self.directory)
             if (changeset := dm.write(list(dependencies), self.dry_run)) is not None:
@@ -116,8 +120,6 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
                     record[dep] = package_store
                 break
 
-        for dep in dependencies - record.keys():
-            record[dep] = None
         return record
 
     def add_description(self, codemod: CodemodExecutorWrapper):

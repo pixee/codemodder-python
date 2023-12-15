@@ -232,11 +232,22 @@ def apply_codemods(
 
 def record_dependency_update(dependency_results: dict[Dependency, PackageStore | None]):
     # TODO populate dependencies in CodeTF here
-    for dep, pkg_store in dependency_results.items():
-        if pkg_store:
-            logger.debug("Added dependency %s to %s.", dep.name, pkg_store.file)
+    inverse: dict[None | str, list[Dependency]] = {}
+    for k, v in dependency_results.items():
+        inv_key = str(v.file) if v else None
+        if inv_key in inverse:
+            inverse.get(inv_key, []).append(k)
         else:
-            logger.debug("Failed to add dependency '%s'.", dep.name)
+            inverse[inv_key] = [k]
+
+    for file in inverse.keys():
+        str_list = str([d.requirement.name for d in inverse[file]])[2:-2]
+        if file:
+            logger.debug(
+                "The following dependencies were added to '%s': %s", file, str_list
+            )
+        else:
+            logger.debug("The following dependencies could not be added: %s", str_list)
 
 
 def run(original_args) -> int:
