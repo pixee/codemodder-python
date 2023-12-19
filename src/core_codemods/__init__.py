@@ -15,6 +15,7 @@ from .lxml_safe_parser_defaults import LxmlSafeParserDefaults
 from .lxml_safe_parsing import LxmlSafeParsing
 from .order_imports import OrderImports
 from .process_creation_sandbox import ProcessSandbox
+from .remove_future_imports import RemoveFutureImports
 from .remove_unnecessary_f_str import RemoveUnnecessaryFStr
 from .remove_unused_imports import RemoveUnusedImports
 from .requests_verify import RequestsVerify
@@ -57,6 +58,7 @@ registry = CodemodCollection(
         LxmlSafeParsing,
         OrderImports,
         ProcessSandbox,
+        RemoveFutureImports,
         RemoveUnnecessaryFStr,
         RemoveUnusedImports,
         RequestsVerify,
