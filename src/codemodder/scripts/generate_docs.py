@@ -187,7 +187,7 @@ sidebar_position: 1
 
 ## {codemod.id}
 
-| Importance | Review Guidance            | Requires SARIF Tool |
+| Importance | Review Guidance            | Requires Scanning Tool |
 |------------|----------------------------|---------------------|
 | {codemod_data.importance}       | {codemod.review_guidance} | {codemod_data.need_sarif}                  |
 
