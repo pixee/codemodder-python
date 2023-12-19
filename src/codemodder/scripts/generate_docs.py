@@ -170,6 +170,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="A statement with an exception by itself has no effect. Raising the exception is most likely the intended effect and thus we deem it safe.",
     ),
+    "remove-future-imports": DocMetadata(
+        importance="Low",
+        guidance_explained="Removing future imports is safe and will not cause any issues.",
+    ),
 }
 
 
