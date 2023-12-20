@@ -37,6 +37,7 @@ from .flask_json_response_type import FlaskJsonResponseType
 from .numpy_nan_equality import NumpyNanEquality
 from .sql_parameterization import SQLQueryParameterization
 from .exception_without_raise import ExceptionWithoutRaise
+from .literal_or_new_object_identity import LiteralOrNewObjectIdentity
 
 registry = CodemodCollection(
     origin="pixee",
@@ -80,5 +81,6 @@ registry = CodemodCollection(
         DjangoJsonResponseType,
         FlaskJsonResponseType,
         ExceptionWithoutRaise,
+        LiteralOrNewObjectIdentity,
     ],
 )
