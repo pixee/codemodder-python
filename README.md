@@ -5,9 +5,11 @@ codemods with additional context and services. Codemodder plugins inject codemod
 
 Pluggability and the complex transforms they enable distinguish codemodder codemods from traditional codemods.
 
+Codemodder is sponsored by [pixee.ai](https://pixee.ai).
+
 ## Development Status
 
-The `codemodder-python` project is still under development. 🚧
+The `codemodder-python` project is still under heavy development. 🚧
 
 The project includes a (growing) set of core codemods. It also supports the
 development of custom codemods.
