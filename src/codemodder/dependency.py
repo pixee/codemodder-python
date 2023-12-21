@@ -61,3 +61,71 @@ Security = Dependency(
     oss_link="https://github.com/pixee/python-security",
     package_link="https://pypi.org/project/security/",
 )
+
+
+DEPENDENCY_NOTIFICATION = """
+## Dependency Updates
+
+This codemod relies on an external dependency. We have automatically added this dependency to your project's `{filename}` file. 
+
+{description} 
+
+There are a number of places where Python project dependencies can be expressed, including `setup.py`, `pyproject.toml`, `setup.cfg`, and `requirements.txt` files. If this change is incorrect, or if you are using another packaging system such as `poetry`, it may be necessary for you to manually add the dependency to the proper location in your project.
+"""
+
+FAILED_DEPENDENCY_NOTIFICATION = """
+## Dependency Updates
+
+This codemod relies on an external dependency. However, we were unable to automatically add the dependency to your project. 
+
+{description} 
+
+There are a number of places where Python project dependencies can be expressed, including `setup.py`, `pyproject.toml`, `setup.cfg`, and `requirements.txt` files. You may need to manually add this dependency to the proper location in your project.
+
+### Manual Installation
+
+For `setup.py`:
+```diff
+ install_requires=[
++    "{requirement}",
+ ],
+```
+
+For `pyproject.toml` (using `setuptools`):
+```diff
+[project]
+dependencies = [
++    "{requirement}",
+]
+```
+
+For `setup.cfg`:
+```diff
+[options]
+install_requires =
++    {requirement}
+```
+
+For `requirements.txt`:
+```diff
++{requirement}
+```
+
+For more information on adding dependencies to `setuptools` projects, see [the setuptools documentation](https://setuptools.pypa.io/en/latest/userguide/dependency_management.html#declaring-required-dependency). 
+
+If you are using another build system, please refer to the documentation for that system to determine how to add dependencies.
+"""
+
+
+def build_dependency_notification(filename: str, dependency: Dependency) -> str:
+    return DEPENDENCY_NOTIFICATION.format(
+        filename=filename,
+        description=dependency.description,
+    )
+
+
+def build_failed_dependency_notification(dependency: Dependency) -> str:
+    return FAILED_DEPENDENCY_NOTIFICATION.format(
+        description=dependency.description,
+        requirement=dependency.requirement,
+    )

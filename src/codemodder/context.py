@@ -5,7 +5,11 @@ from textwrap import indent
 from typing import List, Iterator
 
 from codemodder.change import ChangeSet
-from codemodder.dependency import Dependency
+from codemodder.dependency import (
+    Dependency,
+    build_dependency_notification,
+    build_failed_dependency_notification,
+)
 from codemodder.executor import CodemodExecutorWrapper
 from codemodder.file_context import FileContext
 from codemodder.logging import logger, log_list
@@ -15,22 +19,10 @@ from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.utils.timer import Timer
 
 
-DEPENDENCY_NOTIFICATION = """```
-💡 This codemod adds a dependency to your project. \
-Currently we add the dependency to a file named `requirements.txt` if it \
-exists in your project.
-
-There are a number of other places where Python project dependencies can be \
-expressed, including `setup.py`, `pyproject.toml`, and `setup.cfg`. We are \
-working on adding support for these files, but for now you may need to update \
-these files manually before accepting this change.
-```
-"""
-
-
 class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     _results_by_codemod: dict[str, list[ChangeSet]] = {}
     _failures_by_codemod: dict[str, list[Path]] = {}
+    _dependency_update_by_codemod: dict[str, PackageStore | None] = {}
     dependencies: dict[str, set[Dependency]] = {}
     directory: Path
     dry_run: bool = False
@@ -107,6 +99,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
                 "unable to write dependencies for %s: no dependency file found",
                 codemod_id,
             )
+            self._dependency_update_by_codemod[codemod_id] = None
             return record
 
         # pylint: disable-next=cyclic-import
@@ -116,6 +109,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
             dm = DependencyManager(package_store, self.directory)
             if (changeset := dm.write(list(dependencies), self.dry_run)) is not None:
                 self.add_results(codemod_id, [changeset])
+                self._dependency_update_by_codemod[codemod_id] = package_store
                 for dep in dependencies:
                     record[dep] = package_store
                 break
@@ -124,8 +118,13 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
 
     def add_description(self, codemod: CodemodExecutorWrapper):
         description = codemod.description
-        if codemod.adds_dependency:
-            description = f"{description}\n\n{DEPENDENCY_NOTIFICATION}"
+        if dependencies := list(self.dependencies.get(codemod.id, [])):
+            if pkg_store := self._dependency_update_by_codemod.get(codemod.id):
+                description += build_dependency_notification(
+                    pkg_store.type.value, dependencies[0]
+                )
+            else:
+                description += build_failed_dependency_notification(dependencies[0])
 
         return description
 
