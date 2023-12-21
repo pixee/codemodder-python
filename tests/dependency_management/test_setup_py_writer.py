@@ -11,6 +11,57 @@ from codemodder.dependency import DefusedXML, Security
 TEST_DEPENDENCIES = [Requirement("defusedxml==0.7.1"), Requirement("security~=1.2.0")]
 
 
+def test_update_setuppy_comma_default(tmpdir):
+    original = """
+    from setuptools import setup
+    setup(
+        name="test pkg",
+        description="testing",
+        long_description="...",
+        author="Pixee",
+        packages=find_packages("src"),
+        package_dir={"": "src"},
+        python_requires=">3.6",
+        install_requires=[
+            "protobuf>=3.12,<3.18; python_version < '3'",
+        ],
+        entry_points={},
+    )
+    """
+
+    dependency_file = tmpdir.join("setup.py")
+    dependency_file.write(dedent(original))
+
+    store = PackageStore(
+        type=FileType.SETUP_PY,
+        file=str(dependency_file),
+        dependencies=set(),
+        py_versions=[">=3.6"],
+    )
+
+    writer = SetupPyWriter(store, tmpdir)
+    dependencies = [DefusedXML, Security]
+    writer.write(dependencies, dry_run=False)
+
+    after = """
+        from setuptools import setup
+        setup(
+            name="test pkg",
+            description="testing",
+            long_description="...",
+            author="Pixee",
+            packages=find_packages("src"),
+            package_dir={"": "src"},
+            python_requires=">3.6",
+            install_requires=[
+                "protobuf>=3.12,<3.18; python_version < '3'", "defusedxml~=0.7.1", "security~=1.2.0"
+            ],
+            entry_points={},
+        )
+        """
+    assert dependency_file.read() == dedent(after)
+
+
 @pytest.mark.parametrize("dry_run", [True, False])
 def test_update_setuppy_dependencies(tmpdir, dry_run):
     original = """
@@ -61,7 +112,9 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
                 "protobuf>=3.12,<3.18; python_version < '3'",
                 "protobuf>=3.12,<4; python_version >= '3'",
                 "psutil>=5.7,<6",
-                "requests>=2.4.2,<3", "defusedxml~=0.7.1", "security~=1.2.0"
+                "requests>=2.4.2,<3",
+                "defusedxml~=0.7.1",
+                "security~=1.2.0"
             ],
             entry_points={},
         )
@@ -73,12 +126,14 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
     res = (
         "--- \n"
         "+++ \n"
-        "@@ -12,7 +12,7 @@\n"
+        "@@ -12,7 +12,9 @@\n"
         """         "protobuf>=3.12,<3.18; python_version < '3'",\n"""
         """         "protobuf>=3.12,<4; python_version >= '3'",\n"""
         """         "psutil>=5.7,<6",\n"""
         """-        "requests>=2.4.2,<3"\n"""
-        """+        "requests>=2.4.2,<3", "defusedxml~=0.7.1", "security~=1.2.0"\n"""
+        """+        "requests>=2.4.2,<3",\n"""
+        """+        "defusedxml~=0.7.1",\n"""
+        """+        "security~=1.2.0"\n"""
         "     ],\n "
         "    entry_points={},\n"
         " )\n"
