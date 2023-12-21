@@ -12,7 +12,7 @@ class LiteralOrNewObjectIdentity(BaseCodemod, NameResolutionMixin):
     DESCRIPTION = SUMMARY
     REFERENCES = [
         {
-            "url": "https://docs.python.org/3/library/operator.html#operator.is_",
+            "url": "https://docs.python.org/3/library/stdtypes.html#comparisons",
             "description": "",
         },
     ]

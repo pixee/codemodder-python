@@ -174,6 +174,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="Removing future imports is safe and will not cause any issues.",
     ),
+    "literal-or-new-object-identity": DocMetadata(
+        importance="Low",
+        guidance_explained="Since literals and new objects have their own identities, comparisons against them using `is` operators are most likely a bug and thus we deem the change safe.",
+    ),
 }
 
 
