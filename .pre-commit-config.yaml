@@ -9,6 +9,7 @@ repos:
         exclude: |
           (?x)^(
               src/core_codemods/docs/.*|
+              src/codemodder/dependency.py |
               integration_tests/.*|
               tests/test_codemodder.py
           )$
