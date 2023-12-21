@@ -110,15 +110,28 @@ class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
         # dependency listed in install_requires
         self.line_num_changed = self.lineno_for_node(arg.value.elements[-1]) - 1
 
+        # grab the penultimate comma value, or the last one if it has a single element
+        last_element = arg.value.elements[-1]
+        new_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
+        if len(arg.value.elements) > 1:
+            new_comma = arg.value.elements[-2].comma
+
+        # last new dependency will not have the new comma value
         new_dependencies = [
-            cst.Element(value=cst.SimpleString(value=f'"{str(dep)}"'))
-            for dep in self.dependencies
+            cst.Element(value=cst.SimpleString(value=f'"{str(dep)}"'), comma=new_comma)
+            for dep in self.dependencies[:-1]
+        ] + [
+            cst.Element(value=cst.SimpleString(value=f'"{str(self.dependencies[-1])}"'))
         ]
-        # TODO: detect if elements are separated by newline in source code.
+
         return cst.Arg(
             keyword=arg.keyword,
             value=arg.value.with_changes(
-                elements=arg.value.elements + tuple(new_dependencies)
+                elements=[
+                    *arg.value.elements[:-1],
+                    last_element.with_changes(comma=new_comma),
+                    *new_dependencies,
+                ]
             ),
             equal=arg.equal,
             comma=arg.comma,
