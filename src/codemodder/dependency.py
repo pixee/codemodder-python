@@ -93,16 +93,16 @@ For `setup.py`:
 
 For `pyproject.toml` (using `setuptools`):
 ```diff
-[project]
-dependencies = [
+ [project]
+ dependencies = [
 +    "{requirement}",
-]
+ ]
 ```
 
 For `setup.cfg`:
 ```diff
-[options]
-install_requires =
+ [options]
+ install_requires =
 +    {requirement}
 ```
 
