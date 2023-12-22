@@ -33,3 +33,6 @@ class PackageStore:
             for dep in dependencies
         }
         self.py_versions = py_versions
+
+    def has_requirement(self, requirement: Requirement) -> bool:
+        return requirement.name in {dep.name for dep in self.dependencies}

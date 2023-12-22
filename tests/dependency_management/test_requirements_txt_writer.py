@@ -7,7 +7,7 @@ from codemodder.project_analysis.file_parsers.package_store import (
     PackageStore,
     FileType,
 )
-from codemodder.dependency import DefusedXML, Security
+from codemodder.dependency import DefusedXML, Security, Requirement
 
 
 class TestRequirementsTxtWriter:
@@ -18,7 +18,7 @@ class TestRequirementsTxtWriter:
         dependency_file.write_text(contents, encoding="utf-8")
         store = PackageStore(
             type=FileType.REQ_TXT,
-            file=str(dependency_file),
+            file=dependency_file,
             dependencies=set(),
             py_versions=[],
         )
@@ -66,7 +66,7 @@ class TestRequirementsTxtWriter:
 
         store = PackageStore(
             type=FileType.REQ_TXT,
-            file=str(dependency_file),
+            file=dependency_file,
             dependencies=set(),
             py_versions=[],
         )
@@ -86,12 +86,32 @@ class TestRequirementsTxtWriter:
 
         store = PackageStore(
             type=FileType.REQ_TXT,
-            file=str(dependency_file),
-            dependencies=set([Security.requirement]),
+            file=dependency_file,
+            dependencies={Security.requirement},
             py_versions=[],
         )
         writer = RequirementsTxtWriter(store, Path(tmpdir))
         dependencies = [Security]
+        changeset = writer.write(dependencies)
+        assert changeset is None
+        assert dependency_file.read_text(encoding="utf-8") == contents
+
+    def test_dont_add_existing_dependency_with_different_version(self, tmpdir):
+        """This is dependabot's job, not ours"""
+        dependency_file = Path(tmpdir) / "requirements.txt"
+
+        existing_requirement = "defusedxml==1.1.0"
+        contents = f"requests\n{existing_requirement}\n"
+        dependency_file.write_text(contents, encoding="utf-8")
+
+        store = PackageStore(
+            type=FileType.REQ_TXT,
+            file=dependency_file,
+            dependencies={Requirement(existing_requirement)},
+            py_versions=[],
+        )
+        writer = RequirementsTxtWriter(store, Path(tmpdir))
+        dependencies = [DefusedXML]
         changeset = writer.write(dependencies)
         assert changeset is None
         assert dependency_file.read_text(encoding="utf-8") == contents

@@ -13,9 +13,9 @@ class RequirementsTxtWriter(DependencyWriter):
     def add_to_file(
         self, dependencies: list[Dependency], dry_run: bool = False
     ) -> Optional[ChangeSet]:
-        lines = self._parse_file()
-        if lines is None:
+        if (lines := self._parse_file()) is None:
             return None
+
         original_lines = lines.copy()
         if not original_lines[-1].endswith("\n"):
             original_lines[-1] += "\n"
