@@ -33,9 +33,10 @@ class DependencyWriter(metaclass=ABCMeta):
     def add(self, dependencies: list[Dependency]) -> list[Dependency]:
         """add any number of dependencies to the end of list of dependencies."""
         new = []
+
         for new_dep in dependencies:
             requirement: Requirement = new_dep.requirement
-            if requirement not in self.dependency_store.dependencies:
+            if not self.dependency_store.has_requirement(requirement):
                 self.dependency_store.dependencies.add(requirement)
                 new.append(new_dep)
         return new
