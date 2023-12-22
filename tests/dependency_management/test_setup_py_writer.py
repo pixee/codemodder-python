@@ -11,7 +11,7 @@ from codemodder.dependency import DefusedXML, Security
 TEST_DEPENDENCIES = [Requirement("defusedxml==0.7.1"), Requirement("security~=1.2.0")]
 
 
-def test_update_setuppy_comma_default(tmpdir):
+def test_update_setuppy_comma_single_element_newline(tmpdir):
     original = """
     from setuptools import setup
     setup(
@@ -54,8 +54,57 @@ def test_update_setuppy_comma_default(tmpdir):
             package_dir={"": "src"},
             python_requires=">3.6",
             install_requires=[
-                "protobuf>=3.12,<3.18; python_version < '3'", "defusedxml~=0.7.1", "security~=1.2.0"
+                "protobuf>=3.12,<3.18; python_version < '3'",
+                "defusedxml~=0.7.1",
+                "security~=1.2.0"
             ],
+            entry_points={},
+        )
+        """
+    assert dependency_file.read() == dedent(after)
+
+
+def test_update_setuppy_comma_single_element_inline(tmpdir):
+    original = """
+    from setuptools import setup
+    setup(
+        name="test pkg",
+        description="testing",
+        long_description="...",
+        author="Pixee",
+        packages=find_packages("src"),
+        package_dir={"": "src"},
+        python_requires=">3.6",
+        install_requires=["protobuf>=3.12,<3.18; python_version < '3'",],
+        entry_points={},
+    )
+    """
+
+    dependency_file = tmpdir.join("setup.py")
+    dependency_file.write(dedent(original))
+
+    store = PackageStore(
+        type=FileType.SETUP_PY,
+        file=str(dependency_file),
+        dependencies=set(),
+        py_versions=[">=3.6"],
+    )
+
+    writer = SetupPyWriter(store, tmpdir)
+    dependencies = [DefusedXML, Security]
+    writer.write(dependencies, dry_run=False)
+
+    after = """
+        from setuptools import setup
+        setup(
+            name="test pkg",
+            description="testing",
+            long_description="...",
+            author="Pixee",
+            packages=find_packages("src"),
+            package_dir={"": "src"},
+            python_requires=">3.6",
+            install_requires=["protobuf>=3.12,<3.18; python_version < '3'", "defusedxml~=0.7.1", "security~=1.2.0"],
             entry_points={},
         )
         """

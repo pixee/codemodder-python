@@ -110,11 +110,21 @@ class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
         # dependency listed in install_requires
         self.line_num_changed = self.lineno_for_node(arg.value.elements[-1]) - 1
 
-        # grab the penultimate comma value, or the last one if it has a single element
         last_element = arg.value.elements[-1]
         new_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
+        # grab the penultimate comma value if it has more than one element
         if len(arg.value.elements) > 1:
             new_comma = arg.value.elements[-2].comma
+        else:
+            # infer the indentation from lbracket, if any
+            match arg.value.lbracket.whitespace_after:
+                case cst.ParenthesizedWhitespace():
+                    new_comma = cst.Comma(
+                        whitespace_after=cst.ParenthesizedWhitespace(
+                            indent=True,
+                            last_line=arg.value.lbracket.whitespace_after.last_line,
+                        )
+                    )
 
         # last new dependency will not have the new comma value
         new_dependencies = [
