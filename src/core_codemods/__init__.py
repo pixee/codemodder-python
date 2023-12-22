@@ -27,6 +27,7 @@ from .upgrade_sslcontext_tls import UpgradeSSLContextTLS
 from .url_sandbox import UrlSandbox
 from .use_defused_xml import UseDefusedXml
 from .use_generator import UseGenerator
+from .use_set_literal import UseSetLiteral
 from .use_walrus_if import UseWalrusIf
 from .with_threading_lock import WithThreadingLock
 from .secure_flask_session_config import SecureFlaskSessionConfig
@@ -72,6 +73,7 @@ registry = CodemodCollection(
         UrlSandbox,
         UseDefusedXml,
         UseGenerator,
+        UseSetLiteral,
         UseWalrusIf,
         WithThreadingLock,
         SQLQueryParameterization,

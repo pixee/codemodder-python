@@ -182,6 +182,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="High",
         guidance_explained="In most cases setting `shell=False` is correct and leads to much safer code. However there are valid use cases for `shell=True` when using shell functionality like pipes or wildcard is required. In such cases it is important to run only trusted, validated commands.",
     ),
+    "use-set-literal": DocMetadata(
+        importance="Low",
+        guidance_explained="We believe this change is safe and will not cause any issues.",
+    ),
 }
 
 
