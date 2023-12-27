@@ -38,6 +38,7 @@ from .numpy_nan_equality import NumpyNanEquality
 from .sql_parameterization import SQLQueryParameterization
 from .exception_without_raise import ExceptionWithoutRaise
 from .literal_or_new_object_identity import LiteralOrNewObjectIdentity
+from .subprocess_shell_false import SubprocessShellFalse
 
 registry = CodemodCollection(
     origin="pixee",
@@ -75,6 +76,7 @@ registry = CodemodCollection(
         WithThreadingLock,
         SQLQueryParameterization,
         SecureFlaskSessionConfig,
+        SubprocessShellFalse,
         FileResourceLeak,
         DjangoReceiverOnTop,
         NumpyNanEquality,
