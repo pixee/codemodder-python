@@ -186,6 +186,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="We believe this change is safe and will not cause any issues.",
     ),
+    "remove-module-global": DocMetadata(
+        importance="Low",
+        guidance_explained="Since the `global` keyword is intended for use in non-module scopes, using it at the module scope is unnecessary.",
+    ),
 }
 
 
