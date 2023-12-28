@@ -24,6 +24,22 @@ class TestRemoveDebugBreakpoint(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
+    def test_builtin_breakpoint_multiple_statements(self, tmpdir):
+        input_code = """\
+        def something():
+            var = 1
+            print(var); breakpoint()
+        something()
+        """
+        expected = """\
+        def something():
+            var = 1
+            print(var);
+        something()
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
     def test_inline_pdb(self, tmpdir):
         input_code = """\
         def something():
@@ -57,7 +73,7 @@ class TestRemoveDebugBreakpoint(BaseCodemodTest):
 
     def test_pdb_from_import(self, tmpdir):
         input_code = """\
-        from pdb import set_trace()
+        from pdb import set_trace
         def something():
             var = 1
             set_trace()
@@ -70,5 +86,3 @@ class TestRemoveDebugBreakpoint(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
-
-        # what about line line print(1); breakpoint
