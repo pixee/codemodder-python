@@ -6,9 +6,9 @@ from codemodder.codemods.utils_mixin import NameResolutionMixin, AncestorPattern
 
 class RemoveDebugBreakpoint(BaseCodemod, NameResolutionMixin, AncestorPatternsMixin):
     NAME = "remove-debug-breakpoint"
-    SUMMARY = "TODORemove Module-level Global Call"
+    SUMMARY = "Remove Breakpoint"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "TODORemove Lines with `global` keyword at Module Level"
+    DESCRIPTION = "Remove calls to builtin `breakpoint` or `pdb.set_trace."
     REFERENCES: list = []
 
     def leave_Expr(

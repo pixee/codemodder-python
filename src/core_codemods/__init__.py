@@ -41,6 +41,8 @@ from .exception_without_raise import ExceptionWithoutRaise
 from .literal_or_new_object_identity import LiteralOrNewObjectIdentity
 from .subprocess_shell_false import SubprocessShellFalse
 from .remove_module_global import RemoveModuleGlobal
+from .remove_debug_breakpoint import RemoveDebugBreakpoint
+
 
 registry = CodemodCollection(
     origin="pixee",
@@ -88,5 +90,6 @@ registry = CodemodCollection(
         ExceptionWithoutRaise,
         LiteralOrNewObjectIdentity,
         RemoveModuleGlobal,
+        RemoveDebugBreakpoint,
     ],
 )
