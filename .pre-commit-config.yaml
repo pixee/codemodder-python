@@ -11,7 +11,7 @@ repos:
               src/core_codemods/docs/.*|
               src/codemodder/dependency.py |
               integration_tests/.*|
-              tests/codemods/test_remove_debug_breakpoint.py
+              tests/codemods/test_remove_debug_breakpoint.py |
               tests/test_codemodder.py
           )$
     -   id: check-added-large-files

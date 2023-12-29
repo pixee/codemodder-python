@@ -34,7 +34,7 @@ class TestRemoveDebugBreakpoint(BaseCodemodTest):
         expected = """\
         def something():
             var = 1
-            print(var);
+            print(var); 
         something()
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
