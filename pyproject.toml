@@ -42,6 +42,7 @@ Repository = "https://github.com/pixee/codemodder-python"
 [project.scripts]
 codemodder = "codemodder.codemodder:main"
 generate-docs = 'codemodder.scripts.generate_docs:main'
+new-codemod = 'codemodder.scripts.generate_codemod:main'
 
 [project.optional-dependencies]
 test = [
