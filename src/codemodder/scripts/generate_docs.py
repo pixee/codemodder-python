@@ -190,6 +190,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="Since the `global` keyword is intended for use in non-module scopes, using it at the module scope is unnecessary.",
     ),
+    "remove-debug-breakpoint": DocMetadata(
+        importance="Medium",
+        guidance_explained="Breakpoints are used for development debugging and can easily be forgotten before deploying code.",
+    ),
 }
 
 
