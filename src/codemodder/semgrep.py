@@ -6,6 +6,7 @@ from pathlib import Path
 from codemodder.context import CodemodExecutionContext
 from codemodder.sarifs import SarifResultSet
 from codemodder.logging import logger
+from security import safe_command
 
 
 def run(
@@ -37,8 +38,7 @@ def run(
         )
         command.extend(map(str, files_to_analyze or [execution_context.directory]))
         logger.debug("semgrep command: `%s`", " ".join(command))
-        call = subprocess.run(
-            command,
+        call = safe_command.run(subprocess.run, command,
             shell=False,
             check=False,
             stdout=None if execution_context.verbose else subprocess.PIPE,

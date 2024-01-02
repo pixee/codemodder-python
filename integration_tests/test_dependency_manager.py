@@ -4,6 +4,7 @@ import shutil
 import pytest
 from integration_tests.base_test import SAMPLES_DIR, CleanRepoMixin
 from textwrap import dedent
+from security import safe_command
 
 
 class TestDependencyManager(CleanRepoMixin):
@@ -60,8 +61,7 @@ class TestDependencyManager(CleanRepoMixin):
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
             shell=False,
             capture_output=True,
@@ -83,8 +83,7 @@ class TestDependencyManager(CleanRepoMixin):
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
             shell=False,
             capture_output=True,
@@ -108,8 +107,7 @@ class TestDependencyManager(CleanRepoMixin):
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
             shell=False,
             capture_output=True,
@@ -133,8 +131,7 @@ class TestDependencyManager(CleanRepoMixin):
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
             shell=False,
             capture_output=True,
