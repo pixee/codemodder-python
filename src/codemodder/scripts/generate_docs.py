@@ -179,8 +179,8 @@ If you want to allow those protocols, change the incoming PR to look more like t
         guidance_explained="Since literals and new objects have their own identities, comparisons against them using `is` operators are most likely a bug and thus we deem the change safe.",
     ),
     "subprocess-shell-false": DocMetadata(
-        importance="Medium",
-        guidance_explained="There are valid use cases for `shell=True` such as executing a validated string command or using shell functionality like globs or wildcard.",
+        importance="High",
+        guidance_explained="In most cases setting `shell=False` is correct and leads to much safer code. However there are valid use cases for `shell=True` when using shell functionality like pipes or wildcard is required. In such cases it is important to run only trusted, validated commands.",
     ),
 }
 
