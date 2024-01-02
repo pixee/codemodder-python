@@ -110,29 +110,51 @@ class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
         # dependency listed in install_requires
         self.line_num_changed = self.lineno_for_node(arg.value.elements[-1]) - 1
 
-        last_element = arg.value.elements[-1]
-        new_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
         # grab the penultimate comma value if it has more than one element
+        new_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
+        last_element = arg.value.elements[-1]
+        new_last_element = cst.Element(
+            value=cst.SimpleString(value=f'"{str(self.dependencies[-1])}"')
+        )
         if len(arg.value.elements) > 1:
             new_comma = arg.value.elements[-2].comma
+            # if it has a newline, add a comma to the last element
+            # this follows black's standard
+            match new_comma:
+                case cst.ParenthesizedWhitespace(newline=cst.Newline()):
+                    new_last_element = new_last_element.with_changes(comma=cst.Comma())
         else:
             # infer the indentation from lbracket, if any
-            match arg.value.lbracket.whitespace_after:
+            match lbracket_whitespace := arg.value.lbracket.whitespace_after:
                 case cst.ParenthesizedWhitespace():
                     new_comma = cst.Comma(
                         whitespace_after=cst.ParenthesizedWhitespace(
                             indent=True,
-                            last_line=arg.value.lbracket.whitespace_after.last_line,
+                            last_line=lbracket_whitespace.last_line,
                         )
                     )
+                    # In a list with a single element, libcst will attribute the newline to the rbracket
+                    match arg.value.rbracket.whitespace_before.first_line:
+                        case cst.ParenthesizedWhitespace(
+                            newline=cst.Newline()
+                        ) | cst.TrailingWhitespace(newline=cst.Newline()):
+                            new_last_element = new_last_element.with_changes(
+                                comma=cst.Comma()
+                            )
 
         # last new dependency will not have the new comma value
         new_dependencies = [
             cst.Element(value=cst.SimpleString(value=f'"{str(dep)}"'), comma=new_comma)
             for dep in self.dependencies[:-1]
-        ] + [
-            cst.Element(value=cst.SimpleString(value=f'"{str(self.dependencies[-1])}"'))
-        ]
+        ] + [new_last_element]
+
+        # enforce newline at the rbracket if multiline
+        # this is the way cst naturally parses, instead of attributing it to the Comma
+        # new_rbracket = arg.value.rbracket
+        # if len(arg.value.elements) > 1:
+        #    match new_comma.whitespace_after:
+        #        case cst.ParenthesizedWhitespace():
+        #            new_rbracket = new_rbracket.with_changes(newline = new_comma.whitespace_after.first_line.newline)
 
         return cst.Arg(
             keyword=arg.keyword,
@@ -141,7 +163,7 @@ class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
                     *arg.value.elements[:-1],
                     last_element.with_changes(comma=new_comma),
                     *new_dependencies,
-                ]
+                ],
             ),
             equal=arg.equal,
             comma=arg.comma,
