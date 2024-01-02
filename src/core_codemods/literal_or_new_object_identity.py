@@ -2,10 +2,10 @@ import libcst as cst
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.base_codemod import ReviewGuidance
 
-from codemodder.codemods.utils_mixin import NameResolutionMixin
+from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 
 
-class LiteralOrNewObjectIdentity(BaseCodemod, NameResolutionMixin):
+class LiteralOrNewObjectIdentity(BaseCodemod, NameAndAncestorResolutionMixin):
     NAME = "literal-or-new-object-identity"
     SUMMARY = "Replaces is operator with == for literal or new object comparisons"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
@@ -40,7 +40,8 @@ class LiteralOrNewObjectIdentity(BaseCodemod, NameResolutionMixin):
                     left=left, comparisons=[cst.ComparisonTarget() as target]
                 ):
                     if isinstance(target.operator, cst.Is | cst.IsNot):
-                        right = target.comparator
+                        left = self.resolve_expression(left)
+                        right = self.resolve_expression(target.comparator)
                         if self._is_object_creation_or_literal(
                             left
                         ) or self._is_object_creation_or_literal(right):

@@ -19,6 +19,18 @@ class TestLiteralOrNewObjectIdentity(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
         assert len(self.file_context.codemod_changes) == 1
 
+    def test_list_indirect(self, tmpdir):
+        input_code = """\
+        some_list = [1,2,3]
+        l is some_list
+        """
+        expected = """\
+        some_list = [1,2,3]
+        l == some_list
+        """
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        assert len(self.file_context.codemod_changes) == 1
+
     def test_list_lhs(self, tmpdir):
         input_code = """\
         [1,2,3] is l
