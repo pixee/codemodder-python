@@ -1,6 +1,5 @@
 from core_codemods.remove_debug_breakpoint import RemoveDebugBreakpoint
 from tests.codemods.base_codemod_test import BaseCodemodTest
-from textwrap import dedent
 
 
 class TestRemoveDebugBreakpoint(BaseCodemodTest):
@@ -21,7 +20,7 @@ class TestRemoveDebugBreakpoint(BaseCodemodTest):
             var = 1
         something()
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
         assert len(self.file_context.codemod_changes) == 1
 
     def test_builtin_breakpoint_multiple_statements(self, tmpdir):
@@ -37,7 +36,7 @@ class TestRemoveDebugBreakpoint(BaseCodemodTest):
             print(var); 
         something()
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
         assert len(self.file_context.codemod_changes) == 1
 
     def test_inline_pdb(self, tmpdir):
@@ -52,7 +51,7 @@ class TestRemoveDebugBreakpoint(BaseCodemodTest):
             var = 1
         something()
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
         assert len(self.file_context.codemod_changes) == 1
 
     def test_pdb_import(self, tmpdir):
@@ -68,7 +67,7 @@ class TestRemoveDebugBreakpoint(BaseCodemodTest):
             var = 1
         something()
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
         assert len(self.file_context.codemod_changes) == 1
 
     def test_pdb_from_import(self, tmpdir):
@@ -84,5 +83,5 @@ class TestRemoveDebugBreakpoint(BaseCodemodTest):
             var = 1
         something()
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
         assert len(self.file_context.codemod_changes) == 1
