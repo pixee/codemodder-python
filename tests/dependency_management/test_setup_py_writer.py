@@ -127,7 +127,7 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
             "protobuf>=3.12,<3.18; python_version < '3'",
             "protobuf>=3.12,<4; python_version >= '3'",
             "psutil>=5.7,<6",
-            "requests>=2.4.2,<3"
+            "requests>=2.4.2,<3",
         ],
         entry_points={},
     )
@@ -163,7 +163,7 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
                 "psutil>=5.7,<6",
                 "requests>=2.4.2,<3",
                 "defusedxml~=0.7.1",
-                "security~=1.2.0"
+                "security~=1.2.0",
             ],
             entry_points={},
         )
@@ -175,14 +175,12 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
     res = (
         "--- \n"
         "+++ \n"
-        "@@ -12,7 +12,9 @@\n"
-        """         "protobuf>=3.12,<3.18; python_version < '3'",\n"""
+        "@@ -13,6 +13,8 @@\n"
         """         "protobuf>=3.12,<4; python_version >= '3'",\n"""
         """         "psutil>=5.7,<6",\n"""
-        """-        "requests>=2.4.2,<3"\n"""
-        """+        "requests>=2.4.2,<3",\n"""
+        """         "requests>=2.4.2,<3",\n"""
         """+        "defusedxml~=0.7.1",\n"""
-        """+        "security~=1.2.0"\n"""
+        """+        "security~=1.2.0",\n"""
         "     ],\n "
         "    entry_points={},\n"
         " )\n"
@@ -215,7 +213,7 @@ def test_other_setup_func(tmpdir):
             "protobuf>=3.12,<3.18; python_version < '3'",
             "protobuf>=3.12,<4; python_version >= '3'",
             "psutil>=5.7,<6",
-            "requests>=2.4.2,<3"
+            "requests>=2.4.2,<3",
         ],
         entry_points={},
     )
@@ -253,7 +251,7 @@ def test_not_setup_file(tmpdir):
                 "protobuf>=3.12,<3.18; python_version < '3'",
                 "protobuf>=3.12,<4; python_version >= '3'",
                 "psutil>=5.7,<6",
-                "requests>=2.4.2,<3"
+                "requests>=2.4.2,<3",
             ],
             entry_points={},
         )
@@ -414,7 +412,9 @@ def test_setup_call_requirements_separate(tmpdir):
             "protobuf>=3.12,<3.18; python_version < '3'",
             "protobuf>=3.12,<4; python_version >= '3'",
             "psutil>=5.7,<6",
-            "requests>=2.4.2,<3", "defusedxml==0.7.1", "security~=1.2.0"
+            "requests>=2.4.2,<3",
+            "defusedxml==0.7.1",
+            "security~=1.2.0",
     ]
     setup(
         name="test pkg",
@@ -440,7 +440,9 @@ def test_setup_call_requirements_separate(tmpdir):
         """         "protobuf>=3.12,<4; python_version >= '3'",\n"""
         """         "psutil>=5.7,<6",\n"""
         """-        "requests>=2.4.2,<3"\n"""
-        """+        "requests>=2.4.2,<3", "defusedxml~=0.7.1", "security~=1.2.0"\n"""
+        """+        "requests>=2.4.2,<3",\n"""
+        """+        "defusedxml~=0.7.1",\n"""
+        """+        "security~=1.2.0",\n"""
         "     ],\n "
         "    entry_points={},\n"
         " )\n"
