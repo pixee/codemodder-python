@@ -120,8 +120,10 @@ class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
             new_comma = arg.value.elements[-2].comma
             # if it has a newline, add a comma to the last element
             # this follows black's standard
-            match new_comma:
-                case cst.ParenthesizedWhitespace(newline=cst.Newline()):
+            match new_comma.whitespace_after:
+                case cst.ParenthesizedWhitespace(
+                    first_line=cst.TrailingWhitespace(newline=cst.Newline())
+                ):
                     new_last_element = new_last_element.with_changes(comma=cst.Comma())
         else:
             # infer the indentation from lbracket, if any
@@ -135,26 +137,15 @@ class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
                     )
                     # In a list with a single element, libcst will attribute the newline to the rbracket
                     match arg.value.rbracket.whitespace_before.first_line:
-                        case cst.ParenthesizedWhitespace(
-                            newline=cst.Newline()
-                        ) | cst.TrailingWhitespace(newline=cst.Newline()):
+                        case cst.TrailingWhitespace(newline=cst.Newline()):
                             new_last_element = new_last_element.with_changes(
                                 comma=cst.Comma()
                             )
 
-        # last new dependency will not have the new comma value
         new_dependencies = [
             cst.Element(value=cst.SimpleString(value=f'"{str(dep)}"'), comma=new_comma)
             for dep in self.dependencies[:-1]
         ] + [new_last_element]
-
-        # enforce newline at the rbracket if multiline
-        # this is the way cst naturally parses, instead of attributing it to the Comma
-        # new_rbracket = arg.value.rbracket
-        # if len(arg.value.elements) > 1:
-        #    match new_comma.whitespace_after:
-        #        case cst.ParenthesizedWhitespace():
-        #            new_rbracket = new_rbracket.with_changes(newline = new_comma.whitespace_after.first_line.newline)
 
         return cst.Arg(
             keyword=arg.keyword,
