@@ -15,6 +15,10 @@ class RemoveModuleGlobal(BaseCodemod, NameResolutionMixin):
     def leave_Global(
         self, original_node: cst.Global, _
     ) -> Union[cst.Global, cst.RemovalSentinel,]:
+        if not self.filter_by_path_includes_or_excludes(
+            self.node_position(original_node)
+        ):
+            return original_node
         scope = self.get_metadata(ScopeProvider, original_node)
         if isinstance(scope, GlobalScope):
             self.report_change(original_node)
