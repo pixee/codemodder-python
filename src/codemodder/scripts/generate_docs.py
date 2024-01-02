@@ -194,6 +194,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="Breakpoints are generally used only for debugging and can easily be forgotten before deploying code.",
     ),
+    "combine-startswith-endswith": DocMetadata(
+        importance="Low",
+        guidance_explained="Simplifying expressions involving `startswith` or `endswith` calls is safe.",
+    ),
 }
 
 
