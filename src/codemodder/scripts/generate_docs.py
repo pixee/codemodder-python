@@ -192,7 +192,7 @@ If you want to allow those protocols, change the incoming PR to look more like t
     ),
     "remove-debug-breakpoint": DocMetadata(
         importance="Medium",
-        guidance_explained="Breakpoints are used for development debugging and can easily be forgotten before deploying code.",
+        guidance_explained="Breakpoints are generally used only for debugging and can easily be forgotten before deploying code.",
     ),
 }
 
