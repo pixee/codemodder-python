@@ -1,4 +1,6 @@
-This codemod removes any calls to `breakpoint()` or `pdb.set_trace()` which should only be used for active debugging and not in production code.
+This codemod removes any calls to `breakpoint()` or `pdb.set_trace()` which are generally only used for interactive debugging and should not be deployed in production code.
+
+In most cases if these calls are included in committed code, they were left there by mistake and indicate a potential problem.
 
 ```diff
  print("hello")
