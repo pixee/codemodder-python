@@ -184,7 +184,7 @@ class NameResolutionMixin(MetadataDependent):
     def find_single_assignment(
         self,
         node: Union[cst.Name, cst.Attribute, cst.Call, cst.Subscript, cst.Decorator],
-    ) -> Optional[Assignment]:
+    ) -> Optional[BaseAssignment]:
         """
         Given a MetadataWrapper and a CSTNode representing an access, find if there is a single assignment that it refers to.
         """
@@ -395,7 +395,7 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
 
     def _resolve_name_transitive(self, node: cst.Name) -> Optional[cst.BaseExpression]:
         maybe_assignment = self.find_single_assignment(node)
-        if maybe_assignment:
+        if maybe_assignment and isinstance(maybe_assignment, Assignment):
             if maybe_target_assignment := self.is_target_of_assignment(
                 maybe_assignment.node
             ):
