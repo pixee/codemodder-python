@@ -56,7 +56,7 @@ def test_update_setuppy_comma_single_element_newline(tmpdir):
             install_requires=[
                 "protobuf>=3.12,<3.18; python_version < '3'",
                 "defusedxml~=0.7.1",
-                "security~=1.2.0"
+                "security~=1.2.0",
             ],
             entry_points={},
         )
@@ -75,7 +75,7 @@ def test_update_setuppy_comma_single_element_inline(tmpdir):
         packages=find_packages("src"),
         package_dir={"": "src"},
         python_requires=">3.6",
-        install_requires=["protobuf>=3.12,<3.18; python_version < '3'",],
+        install_requires=["protobuf>=3.12,<3.18; python_version < '3'"],
         entry_points={},
     )
     """
