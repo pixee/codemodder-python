@@ -7,9 +7,9 @@ from codemodder.codemods.utils_mixin import NameResolutionMixin
 
 class RemoveModuleGlobal(BaseCodemod, NameResolutionMixin):
     NAME = "remove-module-global"
-    SUMMARY = "Remove Module-level Global Call"
+    SUMMARY = "Remove `global` Usage at Module Level"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "Remove Lines with `global` keyword at Module Level"
+    DESCRIPTION = "Remove `global` usage at module level."
     REFERENCES: list = []
 
     def leave_Global(
