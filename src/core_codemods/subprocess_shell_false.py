@@ -10,18 +10,39 @@ class SubprocessShellFalse(BaseCodemod, NameResolutionMixin):
     SUMMARY = "Use `shell=False` in `subprocess` Function Calls"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
     DESCRIPTION = "Set `shell` keyword argument to `False`"
-    REFERENCES: list = []
+    REFERENCES = [
+        {
+            "url": "https://docs.python.org/3/library/subprocess.html#security-considerations",
+            "description": "",
+        },
+        {
+            "url": "https://en.wikipedia.org/wiki/Code_injection#Shell_injection",
+            "description": "",
+        },
+        {
+            "url": "https://stackoverflow.com/a/3172488",
+            "description": "",
+        },
+    ]
     SUBPROCESS_FUNCS = [
         f"subprocess.{func}"
         for func in {"run", "call", "check_output", "check_call", "Popen"}
     ]
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
+        if not self.filter_by_path_includes_or_excludes(
+            self.node_position(original_node)
+        ):
+            return original_node
+
         if self.find_base_name(original_node.func) in self.SUBPROCESS_FUNCS:
             for arg in original_node.args:
                 if matchers.matches(
-                    arg.keyword, matchers.Name("shell")
-                ) and matchers.matches(arg.value, matchers.Name("True")):
+                    arg,
+                    matchers.Arg(
+                        keyword=matchers.Name("shell"), value=matchers.Name("True")
+                    ),
+                ):
                     self.report_change(original_node)
                     new_args = self.replace_args(
                         original_node,
