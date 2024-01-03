@@ -204,6 +204,10 @@ def generate_docs(codemod):
     ]
     markdown_references = "\n".join(formatted_references) or "N/A"
 
+    # A bit of a hack but keeps the table aligned
+    spacing = " " * (len(codemod.review_guidance) - 19)
+    spacers = "-" * (len(codemod.review_guidance) - 19)
+
     output = f"""---
 title: {codemod.summary}
 sidebar_position: 1
@@ -211,9 +215,9 @@ sidebar_position: 1
 
 ## {codemod.id}
 
-| Importance | Review Guidance            | Requires Scanning Tool |
-|------------|----------------------------|---------------------|
-| {codemod_data.importance}       | {codemod.review_guidance} | {codemod_data.need_sarif}                  |
+| Importance | Review Guidance     {spacing}| Requires Scanning Tool |
+|------------|---------------------{spacers}|------------------------|
+| {codemod_data.importance:10} | {codemod.review_guidance:19} | {codemod_data.need_sarif:22} |
 
 {codemod.description}
 If you have feedback on this codemod, [please let us know](mailto:feedback@pixee.ai)!
