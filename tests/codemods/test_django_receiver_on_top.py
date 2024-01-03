@@ -7,7 +7,7 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
     codemod = DjangoReceiverOnTop
 
     def test_name(self):
-        assert self.codemod.name() == "django-receiver-on-top"
+        assert self.codemod.name == "django-receiver-on-top"
 
     def test_simple(self, tmpdir):
         input_code = """\
@@ -27,7 +27,6 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_alias(self, tmpdir):
         input_code = """\
@@ -47,7 +46,6 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_no_receiver(self, tmpdir):
         input_code = """\
@@ -56,7 +54,6 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_receiver_but_not_djangos(self, tmpdir):
         input_code = """\
@@ -68,7 +65,6 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_receiver_on_top(self, tmpdir):
         input_code = """\
@@ -80,4 +76,3 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0

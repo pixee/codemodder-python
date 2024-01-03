@@ -1,24 +1,28 @@
 from typing import Union
 import libcst as cst
-from codemodder.codemods.api import BaseCodemod
-from codemodder.codemods.base_codemod import ReviewGuidance
 
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.utils.utils import full_qualified_name_from_class, list_subclasses
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class ExceptionWithoutRaise(BaseCodemod, NameResolutionMixin):
-    NAME = "exception-without-raise"
-    SUMMARY = "Ensure bare exception statements are raised"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = SUMMARY
-    REFERENCES = [
-        {
-            "url": "https://docs.python.org/3/tutorial/errors.html#raising-exceptions",
-            "description": "",
-        },
-    ]
-    CHANGE_DESCRIPTION = "Raised bare exception statement"
+class ExceptionWithoutRaise(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="exception-without-raise",
+        summary="Ensure bare exception statements are raised",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/tutorial/errors.html#raising-exceptions"
+            ),
+        ],
+    )
+    change_description = "Raised bare exception statement"
 
     def leave_SimpleStatementLine(
         self,

@@ -1,30 +1,29 @@
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class UpgradeSSLContextMinimumVersion(SemgrepCodemod, NameResolutionMixin):
-    NAME = "upgrade-sslcontext-minimum-version"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Upgrade SSLContext Minimum Version"
-    DESCRIPTION = "Replaces minimum SSL/TLS version for SSLContext."
-    REFERENCES = [
-        {
-            "url": "https://docs.python.org/3/library/ssl.html#security-considerations",
-            "description": "",
-        },
-        {"url": "https://datatracker.ietf.org/doc/rfc8996/", "description": ""},
-        {
-            "url": "https://www.digicert.com/blog/depreciating-tls-1-0-and-1-1",
-            "description": "",
-        },
-    ]
+class UpgradeSSLContextMinimumVersion(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="upgrade-sslcontext-minimum-version",
+        summary="Upgrade SSLContext Minimum Version",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/library/ssl.html#security-considerations"
+            ),
+            Reference(url="https://datatracker.ietf.org/doc/rfc8996/"),
+            Reference(url="https://www.digicert.com/blog/depreciating-tls-1-0-and-1-1"),
+        ],
+    )
+    change_description = "Replaces minimum SSL/TLS version for SSLContext."
 
     _module_name = "ssl"
-
-    @classmethod
-    def rule(cls):
-        return """
+    detector_pattern = """
         rules:
           - mode: taint
             pattern-sources:

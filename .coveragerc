@@ -3,6 +3,7 @@ source = codemodder
 omit =
     */codemodder/scripts/*
     */codemodder/_version.py
+    */core_codemods/refactor/*
 
 [paths]
 codemodder =

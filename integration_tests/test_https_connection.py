@@ -22,4 +22,4 @@ class TestHTTPSConnection(BaseIntegrationTest):
     expected_diff = '--- \n+++ \n@@ -1,8 +1,7 @@\n import urllib3\n import urllib3.connectionpool as pool\n-from urllib3 import HTTPConnectionPool as something\n \n-urllib3.HTTPConnectionPool("localhost", "80")\n-urllib3.connectionpool.HTTPConnectionPool("localhost", "80")\n-something("localhost", "80")\n-pool.HTTPConnectionPool("localhost", "80")\n+urllib3.HTTPSConnectionPool("localhost", "80")\n+urllib3.connectionpool.HTTPSConnectionPool("localhost", "80")\n+urllib3.HTTPSConnectionPool("localhost", "80")\n+pool.HTTPSConnectionPool("localhost", "80")\n'
     expected_line_change = "5"
     num_changes = 4
-    change_description = HTTPSConnection.CHANGE_DESCRIPTION
+    change_description = HTTPSConnection.change_description

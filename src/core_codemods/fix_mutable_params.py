@@ -1,15 +1,16 @@
 import libcst as cst
 from libcst import matchers as m
-
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import BaseCodemod
+from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 
 
-class FixMutableParams(BaseCodemod):
-    NAME = "fix-mutable-params"
-    SUMMARY = "Replace Mutable Default Parameters"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "Replace mutable parameter with `None`."
+class FixMutableParams(SimpleCodemod):
+    metadata = Metadata(
+        name="fix-mutable-params",
+        summary="Replace Mutable Default Parameters",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[],
+    )
+    change_description = "Replace mutable parameter with `None`."
     REFERENCES: list = []
     _BUILTIN_TO_LITERAL = {
         "list": cst.List(elements=[]),
@@ -168,7 +169,7 @@ class FixMutableParams(BaseCodemod):
         )
         if new_var_decls:
             # If we're adding statements to the body, we know a change took place
-            self.add_change(original_node, self.CHANGE_DESCRIPTION)
+            self.add_change(original_node, self.change_description)
         if add_annotation:
             self.add_needed_import("typing", "Optional")
 

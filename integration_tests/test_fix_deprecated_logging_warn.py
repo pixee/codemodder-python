@@ -13,4 +13,4 @@ class TestFixDeprecatedLoggingWarn(BaseIntegrationTest):
     )
     expected_diff = '--- \n+++ \n@@ -1,4 +1,4 @@\n import logging\n \n log = logging.getLogger("my logger")\n-log.warn("hello")\n+log.warning("hello")\n'
     expected_line_change = "4"
-    change_description = FixDeprecatedLoggingWarn.CHANGE_DESCRIPTION
+    change_description = FixDeprecatedLoggingWarn.change_description

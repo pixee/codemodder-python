@@ -1,16 +1,19 @@
 import pytest
+import mock
+
 from codemodder.dependency import Security
 from core_codemods.process_creation_sandbox import ProcessSandbox
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 
+@mock.patch("codemodder.codemods.api.FileContext.add_dependency")
 class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
     codemod = ProcessSandbox
 
-    def test_name(self):
-        assert self.codemod.name() == "sandbox-process-creation"
+    def test_name(self, _):
+        assert self.codemod.name == "sandbox-process-creation"
 
-    def test_import_subprocess(self, tmpdir):
+    def test_import_subprocess(self, adds_dependency, tmpdir):
         input_code = """
         import subprocess
 
@@ -25,9 +28,9 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         var = "hello"
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency(Security)
+        adds_dependency.assert_called_once_with(Security)
 
-    def test_import_alias(self, tmpdir):
+    def test_import_alias(self, adds_dependency, tmpdir):
         input_code = """
         import subprocess as sub
 
@@ -42,9 +45,9 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         var = "hello"
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency(Security)
+        adds_dependency.assert_called_once_with(Security)
 
-    def test_from_subprocess(self, tmpdir):
+    def test_from_subprocess(self, adds_dependency, tmpdir):
         input_code = """
         from subprocess import run
 
@@ -59,9 +62,9 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         var = "hello"
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency(Security)
+        adds_dependency.assert_called_once_with(Security)
 
-    def test_subprocess_nameerror(self, tmpdir):
+    def test_subprocess_nameerror(self, _, tmpdir):
         input_code = """
         subprocess.run("echo 'hi'", shell=True)
 
@@ -107,11 +110,13 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
             ),
         ],
     )
-    def test_other_import_untouched(self, tmpdir, input_code, expected):
+    def test_other_import_untouched(
+        self, adds_dependency, tmpdir, input_code, expected
+    ):
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency(Security)
+        adds_dependency.assert_called_once_with(Security)
 
-    def test_multifunctions(self, tmpdir):
+    def test_multifunctions(self, adds_dependency, tmpdir):
         # Test that subprocess methods that aren't part of the codemod are not changed.
         # If we add the function as one of
         # our codemods, this test would change.
@@ -129,9 +134,9 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         subprocess.check_output(["ls", "-l"])"""
 
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency(Security)
+        adds_dependency.assert_called_once_with(Security)
 
-    def test_custom_run(self, tmpdir):
+    def test_custom_run(self, _, tmpdir):
         input_code = """
         from app_funcs import run
 
@@ -139,7 +144,7 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         expected = input_code
         self.run_and_assert(tmpdir, input_code, expected)
 
-    def test_subprocess_call(self, tmpdir):
+    def test_subprocess_call(self, adds_dependency, tmpdir):
         input_code = """
         import subprocess
 
@@ -152,9 +157,9 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         safe_command.run(subprocess.call, ["ls", "-l"])
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency(Security)
+        adds_dependency.assert_called_once_with(Security)
 
-    def test_subprocess_popen(self, tmpdir):
+    def test_subprocess_popen(self, adds_dependency, tmpdir):
         input_code = """
         import subprocess
 
@@ -167,4 +172,4 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         safe_command.run(subprocess.Popen, ["ls", "-l"])
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        self.assert_dependency(Security)
+        adds_dependency.assert_called_once_with(Security)

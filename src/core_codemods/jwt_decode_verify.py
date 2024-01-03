@@ -1,26 +1,28 @@
 import libcst as cst
 from libcst import matchers
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
-from codemodder.codemods.api.helpers import NewArg
+from codemodder.codemods.libcst_transformer import NewArg
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class JwtDecodeVerify(SemgrepCodemod):
-    NAME = "jwt-decode-verify"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Verify JWT Decode"
-    DESCRIPTION = "Enable all verifications in `jwt.decode` call."
-    REFERENCES = [
-        {"url": "https://pyjwt.readthedocs.io/en/stable/api.html", "description": ""},
-        {
-            "url": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens",
-            "description": "",
-        },
-    ]
-
-    @classmethod
-    def rule(cls):
-        return r"""
+class JwtDecodeVerify(SimpleCodemod):
+    metadata = Metadata(
+        name="jwt-decode-verify",
+        summary="Verify JWT Decode",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(url="https://pyjwt.readthedocs.io/en/stable/api.html"),
+            Reference(
+                url="https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens"
+            ),
+        ],
+    )
+    change_description = "Enable all verifications in `jwt.decode` call."
+    detector_pattern = r"""
             rules:
                 - pattern-either:
                   - patterns:

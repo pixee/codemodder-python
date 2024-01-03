@@ -2,8 +2,7 @@ import libcst as cst
 from libcst.codemod import CodemodContext
 from libcst import matchers
 from typing import Optional
-from codemodder.codemods.api import BaseCodemod
-from codemodder.codemods.base_codemod import ReviewGuidance
+from codemodder.codemods.api import SimpleCodemod, Metadata, ReviewGuidance
 from codemodder.codemods.utils import is_setup_py_file
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.file_context import FileContext
@@ -30,6 +29,7 @@ class SetupPyWriter(DependencyWriter):
             CodemodContext(wrapper=wrapper),
             file_context,
             dependencies=[dep.requirement for dep in dependencies],
+            _transformer=True,
         )
 
         output_tree = codemod.transform_module(input_tree)
@@ -56,20 +56,21 @@ class SetupPyWriter(DependencyWriter):
             return cst.parse_module(f.read())
 
 
-class SetupPyAddDependencies(BaseCodemod, NameResolutionMixin):
-    NAME = "setup-py-add-dependencies"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Add Dependencies to `setup.py` `install_requires`"
-    DESCRIPTION = SUMMARY
-    REFERENCES: list = []
+class SetupPyAddDependencies(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="setup-py-add-dependencies",
+        summary="Add Dependencies to `setup.py` `install_requires`",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+    )
 
     def __init__(
         self,
         codemod_context: CodemodContext,
         file_context: FileContext,
         dependencies: list[Requirement],
+        **kwargs,
     ):
-        BaseCodemod.__init__(self, codemod_context, file_context)
+        SimpleCodemod.__init__(self, codemod_context, [], file_context, **kwargs)
         NameResolutionMixin.__init__(self)
         self.filename = self.file_context.file_path
         self.dependencies = dependencies

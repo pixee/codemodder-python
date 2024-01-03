@@ -1,24 +1,20 @@
-from concurrent.futures import ThreadPoolExecutor
 import datetime
 import itertools
 import logging
 import os
 import sys
+from typing import Sequence
 from pathlib import Path
 
-import libcst as cst
-from libcst.codemod import CodemodContext
 from codemodder.dependency import Dependency
-from codemodder.file_context import FileContext
 
 from codemodder import registry, __version__
 from codemodder.logging import configure_logger, logger, log_section, log_list
 from codemodder.cli import parse_args
-from codemodder.change import ChangeSet
-from codemodder.code_directory import file_line_patterns, match_files
+from codemodder.code_directory import match_files
+from codemodder.codemods.semgrep import SemgrepRuleDetector
 from codemodder.context import CodemodExecutionContext
-from codemodder.diff import create_diff_from_tree
-from codemodder.executor import CodemodExecutorWrapper
+from codemodder.codemods.api import BaseCodemod
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default
@@ -36,128 +32,24 @@ def update_code(file_path, new_code):
 
 def find_semgrep_results(
     context: CodemodExecutionContext,
-    codemods: list[CodemodExecutorWrapper],
+    codemods: Sequence[BaseCodemod],
+    files_to_analyze: list[Path] | None = None,
 ) -> ResultSet:
     """Run semgrep once with all configuration files from all codemods and return a set of applicable rule IDs"""
     yaml_files = list(
         itertools.chain.from_iterable(
-            [codemod.yaml_files for codemod in codemods if codemod.yaml_files]
+            [
+                codemod.detector.get_yaml_files(codemod.name)
+                for codemod in codemods
+                if codemod.detector
+                and isinstance(codemod.detector, SemgrepRuleDetector)
+            ]
         )
     )
     if not yaml_files:
         return ResultSet()
 
-    return run_semgrep(context, yaml_files)
-
-
-def apply_codemod_to_file(
-    base_directory: Path,
-    file_context,
-    codemod_kls: CodemodExecutorWrapper,
-    source_tree,
-    dry_run: bool = False,
-):
-    wrapper = cst.MetadataWrapper(source_tree)
-    codemod = codemod_kls(CodemodContext(wrapper=wrapper), file_context)
-    if not codemod.should_transform:
-        return False
-
-    with file_context.timer.measure("transform"):
-        output_tree = codemod.transform_module(source_tree)
-
-    # TODO: we can probably just use the presence of recorded changes instead of
-    # comparing the trees to gain some efficiency
-    if output_tree.deep_equals(source_tree):
-        return False
-
-    diff = create_diff_from_tree(source_tree, output_tree)
-    change_set = ChangeSet(
-        str(file_context.file_path.relative_to(base_directory)),
-        diff,
-        changes=file_context.codemod_changes,
-    )
-    file_context.add_result(change_set)
-
-    if not dry_run:
-        with file_context.timer.measure("write"):
-            update_code(file_context.file_path, output_tree.code)
-
-    return True
-
-
-# pylint: disable-next=too-many-arguments
-def process_file(
-    idx: int,
-    file_path: Path,
-    base_directory: Path,
-    codemod,
-    results: ResultSet,
-    cli_args,
-) -> FileContext:
-    logger.debug("scanning file %s", file_path)
-    if idx and idx % 100 == 0:
-        logger.info("scanned %s files...", idx)  # pragma: no cover
-
-    line_exclude = file_line_patterns(file_path, cli_args.path_exclude)
-    line_include = file_line_patterns(file_path, cli_args.path_include)
-    findings_for_rule = results.results_for_rule_and_file(
-        codemod.name,  # TODO: should be full ID
-        file_path,
-    )
-
-    file_context = FileContext(
-        base_directory,
-        file_path,
-        line_exclude,
-        line_include,
-        findings_for_rule,
-    )
-
-    try:
-        with file_context.timer.measure("parse"):
-            with open(file_path, "r", encoding="utf-8") as f:
-                source_tree = cst.parse_module(f.read())
-    except Exception:
-        file_context.add_failure(file_path)
-        logger.exception("error parsing file %s", file_path)
-        return file_context
-
-    apply_codemod_to_file(
-        base_directory,
-        file_context,
-        codemod,
-        source_tree,
-        cli_args.dry_run,
-    )
-
-    return file_context
-
-
-def analyze_files(
-    execution_context: CodemodExecutionContext,
-    files_to_analyze,
-    codemod,
-    results: ResultSet,
-    cli_args,
-):
-    with ThreadPoolExecutor(max_workers=cli_args.max_workers) as executor:
-        logger.debug(
-            "using executor with %s threads",
-            cli_args.max_workers,
-        )
-        analysis_results = executor.map(
-            lambda args: process_file(
-                args[0],
-                args[1],
-                execution_context.directory,
-                codemod,
-                results,
-                cli_args,
-            ),
-            enumerate(files_to_analyze),
-        )
-        executor.shutdown(wait=True)
-        execution_context.process_results(codemod.id, analysis_results)
+    return run_semgrep(context, yaml_files, files_to_analyze)
 
 
 def log_report(context, argv, elapsed_ms, files_to_analyze):
@@ -185,10 +77,9 @@ def log_report(context, argv, elapsed_ms, files_to_analyze):
 
 def apply_codemods(
     context: CodemodExecutionContext,
-    codemods_to_run: list[CodemodExecutorWrapper],
+    codemods_to_run: Sequence[BaseCodemod],
     semgrep_results: ResultSet,
     files_to_analyze: list[Path],
-    argv,
 ):
     log_section("scanning")
 
@@ -207,25 +98,20 @@ def apply_codemods(
         # NOTE: this may be used as a progress indicator by upstream tools
         logger.info("running codemod %s", codemod.id)
 
-        # Unfortunately the IDs from semgrep are not fully specified
-        # TODO: eventually we need to be able to use fully specified IDs here
-        if codemod.is_semgrep and codemod.name not in semgrep_finding_ids:
-            logger.debug(
-                "no results from semgrep for %s, skipping analysis",
-                codemod.id,
-            )
-            continue
+        if isinstance(codemod.detector, SemgrepRuleDetector):
+            # Unfortunately the IDs from semgrep are not fully specified
+            # TODO: eventually we need to be able to use fully specified IDs here
+            if codemod.name not in semgrep_finding_ids:
+                logger.debug(
+                    "no results from semgrep for %s, skipping analysis",
+                    codemod.id,
+                )
+                continue
 
-        semgrep_files = semgrep_results.files_for_rule(codemod.name)
+            files_to_analyze = semgrep_results.files_for_rule(codemod.name)
+
         # Non-semgrep codemods ignore the semgrep results
-        results = codemod.apply(context, semgrep_files)
-        analyze_files(
-            context,
-            files_to_analyze,
-            codemod,
-            results,
-            argv,
-        )
+        codemod.apply(context, files_to_analyze)
         record_dependency_update(context.process_dependencies(codemod.id))
         context.log_changes(codemod.id)
 
@@ -276,6 +162,9 @@ def run(original_args) -> int:
         argv.verbose,
         codemod_registry,
         repo_manager,
+        argv.path_include,
+        argv.path_exclude,
+        argv.max_workers,
     )
 
     repo_manager.parse_project()
@@ -297,14 +186,17 @@ def run(original_args) -> int:
     full_names = [str(path) for path in files_to_analyze]
     log_list(logging.DEBUG, "matched files", full_names)
 
-    semgrep_results: ResultSet = find_semgrep_results(context, codemods_to_run)
+    semgrep_results: ResultSet = find_semgrep_results(
+        context,
+        codemods_to_run,
+        files_to_analyze,
+    )
 
     apply_codemods(
         context,
         codemods_to_run,
         semgrep_results,
         files_to_analyze,
-        argv,
     )
 
     results = context.compile_results(codemods_to_run)

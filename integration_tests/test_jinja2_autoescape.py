@@ -18,4 +18,4 @@ class TestEnableJinja2Autoescape(BaseIntegrationTest):
     expected_diff = "--- \n+++ \n@@ -1,4 +1,4 @@\n from jinja2 import Environment\n \n-env = Environment()\n-env = Environment(autoescape=False)\n+env = Environment(autoescape=True)\n+env = Environment(autoescape=True)\n"
     expected_line_change = "3"
     num_changes = 2
-    change_description = EnableJinja2Autoescape.CHANGE_DESCRIPTION
+    change_description = EnableJinja2Autoescape.change_description

@@ -1,28 +1,28 @@
 import libcst as cst
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
 
-
-class DjangoJsonResponseType(SemgrepCodemod):
-    NAME = "django-json-response-type"
-    SUMMARY = "Set content type to `application/json` for `django.http.HttpResponse` with JSON data"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "Sets `content_type` to `application/json`."
-    REFERENCES = [
-        {
-            "url": "https://docs.djangoproject.com/en/4.0/ref/request-response/#django.http.HttpResponse.__init__",
-            "description": "",
-        },
-        {
-            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#output-encoding-for-javascript-contexts",
-            "description": "",
-        },
-    ]
-
-    @classmethod
-    def rule(cls):
-        return """
+class DjangoJsonResponseType(SimpleCodemod):
+    metadata = Metadata(
+        name="django-json-response-type",
+        summary="Set content type to `application/json` for `django.http.HttpResponse` with JSON data",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.djangoproject.com/en/4.0/ref/request-response/#django.http.HttpResponse.__init__"
+            ),
+            Reference(
+                url="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#output-encoding-for-javascript-contexts"
+            ),
+        ],
+    )
+    change_description = "Sets `content_type` to `application/json`."
+    detector_pattern = """
         rules:
           - id: django-json-response-type
             mode: taint

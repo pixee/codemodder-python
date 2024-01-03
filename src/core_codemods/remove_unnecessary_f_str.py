@@ -4,29 +4,35 @@ from libcst.codemod import (
 )
 from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatString
 import libcst.matchers as m
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import BaseCodemod
+
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
-    NAME = "remove-unnecessary-f-str"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Remove Unnecessary F-strings"
-    DESCRIPTION = UnnecessaryFormatString.DESCRIPTION
-    REFERENCES = [
-        {
-            "url": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/f-string-without-interpolation.html",
-            "description": "",
-        },
-        {
-            "url": "https://github.com/Instagram/LibCST/blob/main/libcst/codemod/commands/unnecessary_format_string.py",
-            "description": "",
-        },
-    ]
+class RemoveUnnecessaryFStr(SimpleCodemod, UnnecessaryFormatString):
+    metadata = Metadata(
+        name="remove-unnecessary-f-str",
+        summary="Remove Unnecessary F-strings",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/f-string-without-interpolation.html"
+            ),
+            Reference(
+                url="https://github.com/Instagram/LibCST/blob/main/libcst/codemod/commands/unnecessary_format_string.py"
+            ),
+        ],
+    )
 
-    def __init__(self, codemod_context: CodemodContext, *codemod_args):
+    def __init__(
+        self, codemod_context: CodemodContext, *codemod_args, **codemod_kwargs
+    ):
         UnnecessaryFormatString.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, codemod_context, *codemod_args)
+        SimpleCodemod.__init__(self, codemod_context, *codemod_args, **codemod_kwargs)
 
     @m.leave(m.FormattedString(parts=(m.FormattedStringText(),)))
     def _check_formatted_string(

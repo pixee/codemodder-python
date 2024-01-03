@@ -8,7 +8,7 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
     codemod = SecureFlaskSessionConfig
 
     def test_name(self):
-        assert self.codemod.name() == "secure-flask-session-configuration"
+        assert self.codemod.name == "secure-flask-session-configuration"
 
     def test_no_flask_app(self, tmpdir):
         input_code = """\
@@ -19,7 +19,6 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         response.set_cookie("name", "value")
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_app_defined_separate_module(self, tmpdir):
         # TODO: test this as an integration test with two real modules
@@ -29,7 +28,6 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         app.config["SESSION_COOKIE_SECURE"] = False
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_app_not_assigned(self, tmpdir):
         input_code = """\
@@ -39,7 +37,6 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         print(1)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_app_accessed_config_not_called(self, tmpdir):
         input_code = """\
@@ -50,7 +47,6 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         # more code
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_app_update_no_keyword(self, tmpdir):
         input_code = """\
@@ -63,8 +59,6 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
             app.config.update(test_config)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        print(self.file_context.codemod_changes)
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_from_import(self, tmpdir):
         input_code = """\
@@ -82,7 +76,6 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         app.config.update(SESSION_COOKIE_SECURE=True)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_import_alias(self, tmpdir):
         input_code = """\
@@ -100,7 +93,6 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         app.config.update(SESSION_COOKIE_SECURE=True)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_annotated_assign(self, tmpdir):
         input_code = """\
@@ -118,7 +110,6 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         app.config.update(SESSION_COOKIE_SECURE=True)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_other_assignment_type(self, tmpdir):
         input_code = """\
@@ -132,46 +123,54 @@ class TestSecureFlaskSessionConfig(BaseCodemodTest):
         store.app.config.update(SESSION_COOKIE_SECURE=False)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     @pytest.mark.parametrize(
-        "config_lines,expected_config_lines",
+        "config_lines,expected_config_lines,num_changes",
         [
             (
                 """app.config""",
                 """app.config""",
+                0,
             ),
             (
                 """app.config["TESTING"] = True""",
                 """app.config["TESTING"] = True""",
+                0,
             ),
             (
                 """app.config.testing = True""",
                 """app.config.testing = True""",
+                0,
             ),
             (
                 """app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
                 """app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_SAMESITE='Lax')""",
+                0,
             ),
             (
                 """app.config.update(SESSION_COOKIE_SECURE=True)""",
                 """app.config.update(SESSION_COOKIE_SECURE=True)""",
+                0,
             ),
             (
                 """app.config.update(SESSION_COOKIE_HTTPONLY=True)""",
                 """app.config.update(SESSION_COOKIE_HTTPONLY=True)""",
+                0,
             ),
             (
                 """app.config.update(SESSION_COOKIE_HTTPONLY=False)""",
                 """app.config.update(SESSION_COOKIE_HTTPONLY=True)""",
+                1,
             ),
             (
                 """app.config['SESSION_COOKIE_SECURE'] = False""",
                 """app.config['SESSION_COOKIE_SECURE'] = True""",
+                1,
             ),
             (
                 """app.config['SESSION_COOKIE_HTTPONLY'] = False""",
                 """app.config['SESSION_COOKIE_HTTPONLY'] = True""",
+                1,
             ),
             (
                 """app.config["SESSION_COOKIE_SECURE"] = True
@@ -180,6 +179,7 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
                 """app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 """,
+                0,
             ),
             (
                 """app.config["SESSION_COOKIE_SECURE"] = False
@@ -188,6 +188,7 @@ app.config["SESSION_COOKIE_SAMESITE"] = None
                 """app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 """,
+                2,
             ),
             (
                 """app.config["SESSION_COOKIE_SECURE"] = False
@@ -198,6 +199,7 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
 """,
+                2,
             ),
             (
                 """app.config["SESSION_COOKIE_SECURE"] = False
@@ -206,11 +208,12 @@ app.config["SESSION_COOKIE_SECURE"] = True
                 """app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SECURE"] = True
 """,
+                1,
             ),
         ],
     )
     def test_config_accessed_variations(
-        self, tmpdir, config_lines, expected_config_lines
+        self, tmpdir, config_lines, expected_config_lines, num_changes
     ):
         input_code = f"""import flask
 app = flask.Flask(__name__)
@@ -222,7 +225,9 @@ app = flask.Flask(__name__)
 app.secret_key = "dev"
 {expected_config_lines}
 """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected_output))
+        self.run_and_assert(
+            tmpdir, dedent(input_code), dedent(expected_output), num_changes=num_changes
+        )
 
     @pytest.mark.skip()
     def test_func_scope(self, tmpdir):
@@ -246,4 +251,3 @@ app.secret_key = "dev"
         # either within configure() call or after it's called
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expexted_output))
-        assert len(self.file_context.codemod_changes) == 1

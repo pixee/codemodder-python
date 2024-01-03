@@ -1,33 +1,33 @@
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
-from codemodder.codemods.api.helpers import NewArg
+from codemodder.codemods.libcst_transformer import NewArg
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class LxmlSafeParsing(SemgrepCodemod):
-    NAME = "safe-lxml-parsing"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Use Safe Parsers in `lxml` Parsing Functions"
-    DESCRIPTION = (
+class LxmlSafeParsing(SimpleCodemod):
+    metadata = Metadata(
+        name="safe-lxml-parsing",
+        summary="Use Safe Parsers in `lxml` Parsing Functions",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://lxml.de/apidoc/lxml.etree.html#lxml.etree.XMLParser"
+            ),
+            Reference(
+                url="https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing"
+            ),
+            Reference(
+                url="https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
+            ),
+        ],
+    )
+    change_description = (
         "Call `lxml.etree.parse` and `lxml.etree.fromstring` with a safe parser."
     )
-    REFERENCES = [
-        {
-            "url": "https://lxml.de/apidoc/lxml.etree.html#lxml.etree.XMLParser",
-            "description": "",
-        },
-        {
-            "url": "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing",
-            "description": "",
-        },
-        {
-            "url": "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
-            "description": "",
-        },
-    ]
-
-    @classmethod
-    def rule(cls):
-        return """
+    detector_pattern = """
             rules:
                 - pattern-either:
                   - patterns:

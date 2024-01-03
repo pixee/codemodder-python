@@ -13,32 +13,29 @@ from libcst.metadata import (
     ScopeProvider,
 )
 from codemodder.change import Change
-from codemodder.codemods.base_codemod import (
-    ReviewGuidance,
-)
-from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.utils import MetadataPreservingTransformer
 from codemodder.codemods.utils_mixin import AncestorPatternsMixin, NameResolutionMixin
 from codemodder.file_context import FileContext
 from functools import partial
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class FileResourceLeak(BaseCodemod):
-    NAME = "fix-file-resource-leak"
-    SUMMARY = "Automatically Close Resources"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = SUMMARY
-    REFERENCES = [
-        {
-            "url": "https://cwe.mitre.org/data/definitions/772.html",
-            "description": "",
-        },
-        {
-            "url": "https://cwe.mitre.org/data/definitions/404.html",
-            "description": "",
-        },
-    ]
-    CHANGE_DESCRIPTION = "Wrapped opened resource in a with statement."
+class FileResourceLeak(SimpleCodemod):
+    metadata = Metadata(
+        name="fix-file-resource-leak",
+        summary="Automatically Close Resources",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(url="https://cwe.mitre.org/data/definitions/772.html"),
+            Reference(url="https://cwe.mitre.org/data/definitions/404.html"),
+        ],
+    )
+    change_description = "Wrapped opened resource in a with statement."
 
     METADATA_DEPENDENCIES = (
         PositionProvider,
@@ -51,11 +48,14 @@ class FileResourceLeak(BaseCodemod):
         context: CodemodContext,
         file_context: FileContext,
         *codemod_args,
+        **codemod_kwargs,
     ) -> None:
         self.changed_nodes: dict[
             cst.CSTNode, cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel
         ] = {}
-        BaseCodemod.__init__(self, context, file_context, *codemod_args)
+        SimpleCodemod.__init__(
+            self, context, file_context, *codemod_args, **codemod_kwargs
+        )
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         fr = FindResources(self.context)
@@ -200,7 +200,7 @@ class ResourceLeakFixer(
             if all(name_condition):
                 line_number = self.get_metadata(PositionProvider, resource).start.line
                 self.changes.append(
-                    Change(line_number, FileResourceLeak.CHANGE_DESCRIPTION)
+                    Change(line_number, FileResourceLeak.change_description)
                 )
                 last_index = self._find_last_index_with_access(
                     named_targets, block, index

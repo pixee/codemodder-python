@@ -24,5 +24,5 @@ class TestLxmlSafeParsing(BaseIntegrationTest):
     expected_diff = '--- \n+++ \n@@ -1,3 +1,3 @@\n import lxml.etree\n-lxml.etree.parse("path_to_file")\n-lxml.etree.fromstring("xml_str")\n+lxml.etree.parse("path_to_file", parser=lxml.etree.XMLParser(resolve_entities=False))\n+lxml.etree.fromstring("xml_str", parser=lxml.etree.XMLParser(resolve_entities=False))\n'
     expected_line_change = "2"
     num_changes = 2
-    change_description = LxmlSafeParsing.CHANGE_DESCRIPTION
+    change_description = LxmlSafeParsing.change_description
     allowed_exceptions = (OSError,)

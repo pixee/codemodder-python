@@ -1,23 +1,26 @@
 import libcst as cst
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
 default_limit = "5_000_000"
 
 
-class LimitReadline(SemgrepCodemod):
-    NAME = "limit-readline"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Limit readline()"
-    DESCRIPTION = "Adds a size limit argument to readline() calls."
-    REFERENCES = [
-        {"url": "https://cwe.mitre.org/data/definitions/400.html", "description": ""}
-    ]
-
-    @classmethod
-    def rule(cls):
-        return """
+class LimitReadline(SimpleCodemod):
+    metadata = Metadata(
+        name="limit-readline",
+        summary="Limit readline()",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        references=[
+            Reference(url="https://cwe.mitre.org/data/definitions/400.html"),
+        ],
+    )
+    change_description = "Adds a size limit argument to readline() calls."
+    detector_pattern = """
         rules:
           - id: limit-readline
             mode: taint

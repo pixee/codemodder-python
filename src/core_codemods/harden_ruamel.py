@@ -1,23 +1,27 @@
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
-from codemodder.codemods.api.helpers import NewArg
+from codemodder.codemods.libcst_transformer import NewArg
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class HardenRuamel(SemgrepCodemod):
-    NAME = "harden-ruamel"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Use `typ='safe'` in ruamel.yaml() Calls"
-    DESCRIPTION = "Ensures all unsafe calls to ruamel.yaml.YAML use `typ='safe'`."
-    REFERENCES = [
-        {
-            "url": "https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data",
-            "description": "",
-        }
-    ]
-
-    @classmethod
-    def rule(cls):
-        return """
+class HardenRuamel(SimpleCodemod):
+    metadata = Metadata(
+        name="harden-ruamel",
+        summary="Use `typ='safe'` in ruamel.yaml() Calls",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data"
+            ),
+        ],
+    )
+    change_description = (
+        "Ensures all unsafe calls to ruamel.yaml.YAML use `typ='safe'`."
+    )
+    detector_pattern = """
             rules:
                 - pattern-either:
                   - patterns:

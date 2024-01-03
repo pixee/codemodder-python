@@ -32,5 +32,5 @@ class TestFlaskEnableCSRFProtection(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "3"
-    change_description = FlaskEnableCSRFProtection.CHANGE_DESCRIPTION
+    change_description = FlaskEnableCSRFProtection.change_description
     num_changed_files = 2

@@ -29,4 +29,4 @@ def whatever():
 
     num_changes = 3
     expected_line_change = 1
-    change_description = UseWalrusIf.CHANGE_DESCRIPTION
+    change_description = UseWalrusIf.change_description

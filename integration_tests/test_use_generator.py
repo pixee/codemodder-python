@@ -27,4 +27,4 @@ class TestUseGenerator(BaseIntegrationTest):
 """
 
     expected_line_change = "6"
-    change_description = UseGenerator.CHANGE_DESCRIPTION
+    change_description = UseGenerator.change_description

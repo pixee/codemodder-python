@@ -61,14 +61,13 @@ class TestRun:
 
         requests_report = results_by_codemod[0]
         assert requests_report["changeset"] == []
-        assert len(requests_report["failedFiles"]) == 2
+        assert len(requests_report["failedFiles"]) == 1
         assert sorted(requests_report["failedFiles"]) == [
-            "tests/samples/make_request.py",
             "tests/samples/unverified_request.py",
         ]
 
-    @mock.patch("codemodder.codemodder.update_code")
-    @mock.patch("codemodder.codemods.base_codemod.semgrep_run", side_effect=semgrep_run)
+    @mock.patch("codemodder.codemods.libcst_transformer.update_code")
+    @mock.patch("codemodder.codemods.semgrep.semgrep_run", side_effect=semgrep_run)
     def test_dry_run(self, _, mock_update_code, tmpdir):
         codetf = tmpdir / "result.codetf"
         args = [
@@ -111,7 +110,7 @@ class TestRun:
 
         assert len(results_by_codemod) == 3
 
-    @mock.patch("codemodder.codemods.base_codemod.semgrep_run")
+    @mock.patch("codemodder.codemods.semgrep.semgrep_run")
     def test_no_codemods_to_run(self, mock_semgrep_run, tmpdir):
         codetf = tmpdir / "result.codetf"
         assert not codetf.exists()

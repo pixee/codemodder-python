@@ -3,30 +3,34 @@ from libcst.codemod import Codemod, CodemodContext
 from libcst.metadata import ParentNodeProvider, PositionProvider
 
 from libcst import matchers
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.utils.utils import extract_targets_of_assignment, true_value
 from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.change import Change
 from codemodder.file_context import FileContext
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class SecureFlaskSessionConfig(BaseCodemod, Codemod):
-    NAME = "secure-flask-session-configuration"
-    SUMMARY = "Flip Insecure `Flask` Session Configurations"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_REVIEW
-    DESCRIPTION = "Flip Flask session configuration if defined as insecure."
-    REFERENCES = [
-        {
-            "url": "https://owasp.org/www-community/controls/SecureCookieAttribute",
-            "description": "",
-        },
-        {
-            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html",
-            "description": "",
-        },
-    ]
+class SecureFlaskSessionConfig(SimpleCodemod, Codemod):
+    metadata = Metadata(
+        name="secure-flask-session-configuration",
+        summary="Flip Insecure `Flask` Session Configurations",
+        review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
+        references=[
+            Reference(
+                url="https://owasp.org/www-community/controls/SecureCookieAttribute"
+            ),
+            Reference(
+                url="https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html"
+            ),
+        ],
+    )
+    change_description = "Flip Flask session configuration if defined as insecure."
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         flask_codemod = FixFlaskConfig(self.context, self.file_context)
@@ -191,5 +195,5 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
     def report_change(self, original_node):
         line_number = self.lineno_for_node(original_node)
         self.file_context.codemod_changes.append(
-            Change(line_number, SecureFlaskSessionConfig.CHANGE_DESCRIPTION)
+            Change(line_number, SecureFlaskSessionConfig.change_description)
         )

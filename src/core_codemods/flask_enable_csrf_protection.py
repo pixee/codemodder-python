@@ -1,22 +1,28 @@
 from typing import Optional, Union
+
 import libcst as cst
-from codemodder.codemods.api import BaseCodemod
-from codemodder.codemods.base_codemod import ReviewGuidance
+
+from core_codemods.api import SimpleCodemod, Metadata, Reference, ReviewGuidance
 from codemodder.codemods.utils_mixin import AncestorPatternsMixin, NameResolutionMixin
 from codemodder.dependency import FlaskWTF
 
 
 class FlaskEnableCSRFProtection(
-    BaseCodemod, NameResolutionMixin, AncestorPatternsMixin
+    SimpleCodemod,
+    NameResolutionMixin,
+    AncestorPatternsMixin,
 ):
-    NAME = "flask-enable-csrf-protection"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_REVIEW
-    DESCRIPTION = "Uses CSRFProtect module to harden the app."
-    SUMMARY = "Enable CSRF protection globally for a Flask app."
-    REFERENCES = [
-        {"url": "https://owasp.org/www-community/attacks/csrf", "description": ""},
-        {"url": "https://flask-wtf.readthedocs.io/en/1.2.x/csrf/", "description": ""},
-    ]
+    metadata = Metadata(
+        name="flask-enable-csrf-protection",
+        summary="Enable CSRF protection globally for a Flask app.",
+        review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
+        references=[
+            Reference(url="https://owasp.org/www-community/attacks/csrf"),
+            Reference(url="https://flask-wtf.readthedocs.io/en/1.2.x/csrf/"),
+        ],
+    )
+
+    change_description = "Add CSRFProtect module to harden the app"
 
     def leave_SimpleStatementSuite(
         self,

@@ -1,32 +1,33 @@
 import libcst as cst
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
 from codemodder.dependency import Security
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class ProcessSandbox(SemgrepCodemod):
-    NAME = "sandbox-process-creation"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Sandbox Process Creation"
-    DESCRIPTION = (
+class ProcessSandbox(SimpleCodemod):
+    metadata = Metadata(
+        name="sandbox-process-creation",
+        summary="Sandbox Process Creation",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        references=[
+            Reference(
+                url="https://github.com/pixee/python-security/blob/main/src/security/safe_command/api.py"
+            ),
+            Reference(
+                url="https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html"
+            ),
+        ],
+    )
+    change_description = (
         "Replaces subprocess.{func} with more secure safe_command library functions."
     )
-    REFERENCES = [
-        {
-            "url": "https://github.com/pixee/python-security/blob/main/src/security/safe_command/api.py",
-            "description": "",
-        },
-        {
-            "url": "https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html",
-            "description": "",
-        },
-    ]
 
     adds_dependency = True
-
-    @classmethod
-    def rule(cls):
-        return """
+    detector_pattern = """
         rules:
             - pattern-either:
               - patterns:

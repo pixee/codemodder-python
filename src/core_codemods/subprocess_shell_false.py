@@ -1,29 +1,31 @@
 import libcst as cst
 from libcst import matchers
-from codemodder.codemods.api import BaseCodemod, ReviewGuidance
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from codemodder.codemods.api.helpers import NewArg
+from codemodder.codemods.libcst_transformer import NewArg
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class SubprocessShellFalse(BaseCodemod, NameResolutionMixin):
-    NAME = "subprocess-shell-false"
-    SUMMARY = "Use `shell=False` in `subprocess` Function Calls"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    DESCRIPTION = "Set `shell` keyword argument to `False`"
-    REFERENCES = [
-        {
-            "url": "https://docs.python.org/3/library/subprocess.html#security-considerations",
-            "description": "",
-        },
-        {
-            "url": "https://en.wikipedia.org/wiki/Code_injection#Shell_injection",
-            "description": "",
-        },
-        {
-            "url": "https://stackoverflow.com/a/3172488",
-            "description": "",
-        },
-    ]
+class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="subprocess-shell-false",
+        summary="Use `shell=False` in `subprocess` Function Calls",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/library/subprocess.html#security-considerations"
+            ),
+            Reference(
+                url="https://en.wikipedia.org/wiki/Code_injection#Shell_injection"
+            ),
+            Reference(url="https://stackoverflow.com/a/3172488"),
+        ],
+    )
+    change_description = "Set `shell` keyword argument to `False`"
     SUBPROCESS_FUNCS = [
         f"subprocess.{func}"
         for func in {"run", "call", "check_output", "check_call", "Popen"}

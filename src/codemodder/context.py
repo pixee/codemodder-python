@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import logging
 from pathlib import Path
 import itertools
 from textwrap import indent
-from typing import List, Iterator
+from typing import TYPE_CHECKING, List, Iterator
 
 from codemodder.change import ChangeSet
 from codemodder.dependency import (
@@ -10,13 +12,15 @@ from codemodder.dependency import (
     build_dependency_notification,
     build_failed_dependency_notification,
 )
-from codemodder.executor import CodemodExecutorWrapper
 from codemodder.file_context import FileContext
 from codemodder.logging import logger, log_list
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.registry import CodemodRegistry
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.utils.timer import Timer
+
+if TYPE_CHECKING:
+    from codemodder.codemods.base_codemod import BaseCodemod
 
 
 class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
@@ -30,6 +34,9 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     registry: CodemodRegistry
     repo_manager: PythonRepoManager
     timer: Timer
+    path_include: list[str]
+    path_exclude: list[str]
+    max_workers: int = 1
 
     def __init__(
         self,
@@ -38,6 +45,9 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         verbose: bool,
         registry: CodemodRegistry,
         repo_manager: PythonRepoManager,
+        path_include: list[str],
+        path_exclude: list[str],
+        max_workers: int = 1,
     ):  # pylint: disable=too-many-arguments
         self.directory = directory
         self.dry_run = dry_run
@@ -48,6 +58,9 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         self.registry = registry
         self.repo_manager = repo_manager
         self.timer = Timer()
+        self.path_include = path_include
+        self.path_exclude = path_exclude
+        self.max_workers = max_workers
 
     def add_results(self, codemod_name: str, change_sets: List[ChangeSet]):
         self._results_by_codemod.setdefault(codemod_name, []).extend(change_sets)
@@ -116,7 +129,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
 
         return record
 
-    def add_description(self, codemod: CodemodExecutorWrapper):
+    def add_description(self, codemod: BaseCodemod):
         description = codemod.description
         if dependencies := list(self.dependencies.get(codemod.id, [])):
             if pkg_store := self._dependency_update_by_codemod.get(codemod.id):
@@ -135,14 +148,14 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
             self.add_dependencies(codemod_id, file_context.dependencies)
             self.timer.aggregate(file_context.timer)
 
-    def compile_results(self, codemods: list[CodemodExecutorWrapper]):
+    def compile_results(self, codemods: list[BaseCodemod]):
         results = []
         for codemod in codemods:
             data = {
                 "codemod": codemod.id,
                 "summary": codemod.summary,
                 "description": self.add_description(codemod),
-                "references": codemod.references,
+                "references": [ref.to_json() for ref in codemod.references],
                 "properties": {},
                 "failedFiles": [str(file) for file in self.get_failures(codemod.id)],
                 "changeset": [

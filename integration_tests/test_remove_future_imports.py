@@ -33,4 +33,4 @@ class TestRemoveFutureImports(BaseIntegrationTest):
 
     num_changes = 2
     expected_line_change = "1"
-    change_description = RemoveFutureImports.CHANGE_DESCRIPTION
+    change_description = RemoveFutureImports.change_description

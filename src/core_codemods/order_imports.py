@@ -1,33 +1,24 @@
+import libcst as cst
 from libcst.metadata import PositionProvider
-from codemodder.codemods.base_codemod import (
-    BaseCodemod,
-    CodemodMetadata,
-    ReviewGuidance,
-)
+
+from core_codemods.api import SimpleCodemod, Metadata, ReviewGuidance
 from codemodder.change import Change
 from codemodder.codemods.transformations.clean_imports import (
     GatherTopLevelImportBlocks,
     OrderImportsBlocksTransform,
 )
-import libcst as cst
-from libcst.codemod import Codemod, CodemodContext
 
 
-class OrderImports(BaseCodemod, Codemod):
-    METADATA = CodemodMetadata(
-        DESCRIPTION=("Formats and orders imports by categories."),
-        NAME="order-imports",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        REFERENCES=[],
+class OrderImports(SimpleCodemod):
+    metadata = Metadata(
+        name="order-imports",
+        summary="Order Imports",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        has_description=False,
     )
-    SUMMARY = "Order Imports"
-    CHANGE_DESCRIPTION = "Ordered and formatted import block below this line"
+    change_description = "Ordered and formatted import block below this line"
 
     METADATA_DEPENDENCIES = (PositionProvider,)
-
-    def __init__(self, codemod_context: CodemodContext, *codemod_args):
-        Codemod.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, *codemod_args)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         top_imports_visitor = GatherTopLevelImportBlocks()
@@ -54,7 +45,7 @@ class OrderImports(BaseCodemod, Codemod):
                         top_imports_visitor.top_imports_blocks[i][0]
                     ).start.line
                     self.file_context.codemod_changes.append(
-                        Change(line_number, self.CHANGE_DESCRIPTION)
+                        Change(line_number, self.change_description)
                     )
             return result_tree
         return tree

@@ -7,7 +7,7 @@ class TestJwtDecodeVerify(BaseCodemodTest):
     codemod = RemoveModuleGlobal
 
     def test_name(self):
-        assert self.codemod.name() == "remove-module-global"
+        assert self.codemod.name == "remove-module-global"
 
     def test_simple(self, tmpdir):
         input_code = """\
@@ -18,7 +18,6 @@ class TestJwtDecodeVerify(BaseCodemodTest):
         price = 25
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_reassigned(self, tmpdir):
         input_code = """\
@@ -33,7 +32,6 @@ class TestJwtDecodeVerify(BaseCodemodTest):
         price = 30
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_attr_call(self, tmpdir):
         input_code = """\
@@ -50,7 +48,6 @@ class TestJwtDecodeVerify(BaseCodemodTest):
         PRICE.__repr__
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_correct_scope(self, tmpdir):
         input_code = """\
@@ -60,4 +57,3 @@ class TestJwtDecodeVerify(BaseCodemodTest):
             price = 30
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0

@@ -7,7 +7,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
     codemod = FlaskJsonResponseType
 
     def test_name(self):
-        assert self.codemod.name() == "flask-json-response-type"
+        assert self.codemod.name == "flask-json-response-type"
 
     def test_simple(self, tmpdir):
         input_code = """\
@@ -33,7 +33,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return make_response(json_response, {'Content-Type': 'application/json'})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_indirect(self, tmpdir):
         input_code = """\
@@ -61,7 +60,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return response
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_tuple_arg(self, tmpdir):
         input_code = """\
@@ -87,7 +85,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return make_response((json_response, 404, {'Content-Type': 'application/json'}))
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_return_json(self, tmpdir):
         input_code = """\
@@ -113,7 +110,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return (json_response, {'Content-Type': 'application/json'})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_tuple(self, tmpdir):
         input_code = """\
@@ -139,7 +135,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return (json_response, 404, {'Content-Type': 'application/json'})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_alias(self, tmpdir):
         input_code = """\
@@ -165,7 +160,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return response(json_response, {'Content-Type': 'application/json'})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_indirect_dict(self, tmpdir):
         input_code = """\
@@ -193,7 +187,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return make_response(json_response, headers)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_direct_return(self, tmpdir):
         input_code = """\
@@ -217,7 +210,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return make_response(json.dumps({ "user_input": request.GET.get("input") }), {'Content-Type': 'application/json'})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_tuple_dict_no_key(self, tmpdir):
         input_code = """\
@@ -243,7 +235,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return (make_response(json_response), {'Content-Type': 'application/json'})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_no_route_decorator(self, tmpdir):
         input_code = """\
@@ -257,7 +248,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return make_response(json_response)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_content_type_set(self, tmpdir):
         input_code = """\
@@ -272,7 +262,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return (make_response(json_response), {'Content-Type': 'application/json'})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_content_type_maybe_set_star(self, tmpdir):
         input_code = """\
@@ -288,7 +277,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return (make_response(json_response), {**another_dict})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_content_type_maybe_set(self, tmpdir):
         input_code = """\
@@ -304,7 +292,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return (make_response(json_response), {key:'application/json'})
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_no_json_dumps_input(self, tmpdir):
         input_code = """\
@@ -319,7 +306,6 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return make_response(dict_response)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_unknown_call_response(self, tmpdir):
         input_code = """\
@@ -335,4 +321,3 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             return bar(dict_response)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0

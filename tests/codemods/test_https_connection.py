@@ -11,7 +11,6 @@ class TestHTTPSConnection(BaseCodemodTest):
 urllib3.HTTPSConnectionPool("localhost", "80")
 """
         self.run_and_assert(tmpdir, before, before)
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_simple(self, tmpdir):
         before = r"""import urllib3
@@ -23,7 +22,6 @@ urllib3.HTTPConnectionPool("localhost", "80")
 urllib3.HTTPSConnectionPool("localhost", "80")
 """
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_module_alias(self, tmpdir):
         before = r"""import urllib3 as module
@@ -35,7 +33,6 @@ module.HTTPConnectionPool("localhost", "80")
 module.HTTPSConnectionPool("localhost", "80")
 """
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_alias(self, tmpdir):
         before = r"""from urllib3 import HTTPConnectionPool as something
@@ -47,7 +44,6 @@ something("localhost", "80")
 urllib3.HTTPSConnectionPool("localhost", "80")
 """
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_connectionpool(self, tmpdir):
         before = r"""import urllib3
@@ -59,7 +55,6 @@ urllib3.connectionpool.HTTPConnectionPool("localhost", "80")
 urllib3.connectionpool.HTTPSConnectionPool("localhost", "80")
 """
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_connectionpool_alias(self, tmpdir):
         before = r"""import urllib3.connectionpool as pool
@@ -71,7 +66,6 @@ pool.HTTPConnectionPool("localhost", "80")
 pool.HTTPSConnectionPool("localhost", "80")
 """
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_last_arg(self, tmpdir):
         before = r"""import urllib3
@@ -83,4 +77,3 @@ urllib3.HTTPConnectionPool(None, None, None, None, None, None, None, None, None,
 urllib3.HTTPSConnectionPool(None, None, None, None, None, None, None, None, None, _proxy_config = None)
 """
         self.run_and_assert(tmpdir, before, after)
-        assert len(self.file_context.codemod_changes) == 1

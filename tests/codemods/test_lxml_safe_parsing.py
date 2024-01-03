@@ -9,7 +9,7 @@ class TestLxmlSafeParsing(BaseSemgrepCodemodTest):
     codemod = LxmlSafeParsing
 
     def test_name(self):
-        assert self.codemod.name() == "safe-lxml-parsing"
+        assert self.codemod.name == "safe-lxml-parsing"
 
     @each_func
     def test_import(self, tmpdir, func):

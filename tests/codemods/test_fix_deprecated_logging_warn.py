@@ -28,7 +28,6 @@ class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):
         original_code = code.format("warn")
         new_code = code.format("warning")
         self.run_and_assert(tmpdir, original_code, new_code)
-        assert len(self.file_context.codemod_changes) == 1
 
     @pytest.mark.parametrize(
         "code",
@@ -47,7 +46,6 @@ class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):
         original_code = code.format("warn")
         new_code = code.format("warning")
         self.run_and_assert(tmpdir, original_code, new_code)
-        assert len(self.file_context.codemod_changes) == 1
 
     @pytest.mark.parametrize(
         "input_code,expected_output",
@@ -74,7 +72,6 @@ class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):
     )
     def test_import_alias(self, tmpdir, input_code, expected_output):
         self.run_and_assert(tmpdir, input_code, expected_output)
-        assert len(self.file_context.codemod_changes) == 1
 
     @pytest.mark.parametrize(
         "code",
@@ -92,7 +89,6 @@ class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):
     )
     def test_different_warn(self, tmpdir, code):
         self.run_and_assert(tmpdir, code, code)
-        assert len(self.file_context.codemod_changes) == 0
 
     @pytest.mark.xfail(reason="Not currently supported")
     def test_log_as_arg(self, tmpdir):
@@ -106,4 +102,3 @@ class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):
         original_code = code.format("warn")
         new_code = code.format("warning")
         self.run_and_assert(tmpdir, original_code, new_code)
-        assert len(self.file_context.codemod_changes) == 1

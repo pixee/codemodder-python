@@ -1,10 +1,13 @@
 import pytest
 
-from core_codemods.add_requests_timeouts import AddRequestsTimeouts
+from core_codemods.add_requests_timeouts import (
+    AddRequestsTimeouts,
+    TransformAddRequestsTimeouts,
+)
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
 METHODS = ["get", "post", "put", "delete", "head", "options", "patch"]
-TIMEOUT = AddRequestsTimeouts.DEFAULT_TIMEOUT
+TIMEOUT = TransformAddRequestsTimeouts.DEFAULT_TIMEOUT
 
 
 class TestAddRequestsTimeouts(BaseSemgrepCodemodTest):

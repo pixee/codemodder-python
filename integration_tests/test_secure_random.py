@@ -19,4 +19,4 @@ class TestSecureRandom(BaseIntegrationTest):
 
     expected_diff = '--- \n+++ \n@@ -1,4 +1,4 @@\n-import random\n+import secrets\n \n-random.random()\n+secrets.SystemRandom().random()\n var = "hello"\n'
     expected_line_change = "3"
-    change_description = SecureRandom.CHANGE_DESCRIPTION
+    change_description = SecureRandom.change_description

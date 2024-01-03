@@ -16,4 +16,4 @@ price = 30
 """.lstrip()
     expected_diff = '--- \n+++ \n@@ -1,4 +1,3 @@\n price = 25\n print("hello")\n-global price\n price = 30\n'
     expected_line_change = "3"
-    change_description = RemoveModuleGlobal.CHANGE_DESCRIPTION
+    change_description = RemoveModuleGlobal.change_description

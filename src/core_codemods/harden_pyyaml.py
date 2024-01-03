@@ -1,70 +1,71 @@
 from typing import Union
 import libcst as cst
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class HardenPyyaml(SemgrepCodemod, NameResolutionMixin):
-    NAME = "harden-pyyaml"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Replace unsafe `pyyaml` loader with `SafeLoader`"
-    DESCRIPTION = "Replace unsafe `pyyaml` loader with `SafeLoader` in calls to `yaml.load` or custom loader classes."
-    REFERENCES = [
-        {
-            "url": "https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data",
-            "description": "",
-        }
-    ]
+class HardenPyyaml(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="harden-pyyaml",
+        summary="Replace unsafe `pyyaml` loader with `SafeLoader`",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data"
+            ),
+        ],
+    )
+    change_description = "Replace unsafe `pyyaml` loader with `SafeLoader` in calls to `yaml.load` or custom loader classes."
 
     _module_name = "yaml"
-
-    @classmethod
-    def rule(cls):
-        return """
-            rules:
-                - pattern-either:
-                  - patterns:
-                      - pattern: yaml.load(...)
-                      - pattern-inside: |
-                          import yaml
-                          ...
-                          yaml.load(...,$ARG)
-                      - metavariable-pattern:
-                          metavariable: $ARG
-                          patterns:
-                            - pattern-either:
-                                - pattern: yaml.Loader
-                                - pattern: yaml.BaseLoader
-                                - pattern: yaml.FullLoader
-                                - pattern: yaml.UnsafeLoader
-                  - patterns:
-                      - pattern: yaml.load(...)
-                      - pattern-inside: |
-                          import yaml
-                          ...
-                          yaml.load(...,Loader=$ARG)
-                      - metavariable-pattern:
-                          metavariable: $ARG
-                          patterns:
-                            - pattern-either:
-                                - pattern: yaml.Loader
-                                - pattern: yaml.BaseLoader
-                                - pattern: yaml.FullLoader
-                                - pattern: yaml.UnsafeLoader
-                  - patterns:
-                      - pattern: |
-                          class $X(...,$LOADER, ...):
-                            ...
-                      - metavariable-pattern:
-                          metavariable: $LOADER
-                          patterns:
-                            - pattern-either:
-                                - pattern: yaml.Loader
-                                - pattern: yaml.BaseLoader
-                                - pattern: yaml.FullLoader
-                                - pattern: yaml.UnsafeLoader
-
+    detector_pattern = """
+        rules:
+            - pattern-either:
+              - patterns:
+                  - pattern: yaml.load(...)
+                  - pattern-inside: |
+                      import yaml
+                      ...
+                      yaml.load(...,$ARG)
+                  - metavariable-pattern:
+                      metavariable: $ARG
+                      patterns:
+                        - pattern-either:
+                            - pattern: yaml.Loader
+                            - pattern: yaml.BaseLoader
+                            - pattern: yaml.FullLoader
+                            - pattern: yaml.UnsafeLoader
+              - patterns:
+                  - pattern: yaml.load(...)
+                  - pattern-inside: |
+                      import yaml
+                      ...
+                      yaml.load(...,Loader=$ARG)
+                  - metavariable-pattern:
+                      metavariable: $ARG
+                      patterns:
+                        - pattern-either:
+                            - pattern: yaml.Loader
+                            - pattern: yaml.BaseLoader
+                            - pattern: yaml.FullLoader
+                            - pattern: yaml.UnsafeLoader
+              - patterns:
+                  - pattern: |
+                      class $X(...,$LOADER, ...):
+                        ...
+                  - metavariable-pattern:
+                      metavariable: $LOADER
+                      patterns:
+                        - pattern-either:
+                            - pattern: yaml.Loader
+                            - pattern: yaml.BaseLoader
+                            - pattern: yaml.FullLoader
+                            - pattern: yaml.UnsafeLoader
         """
 
     def on_result_found(

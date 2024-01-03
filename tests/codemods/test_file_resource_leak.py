@@ -7,7 +7,7 @@ class TestFileResourceLeak(BaseCodemodTest):
     codemod = FileResourceLeak
 
     def test_name(self):
-        assert self.codemod.name() == "fix-file-resource-leak"
+        assert self.codemod.name == "fix-file-resource-leak"
 
     def test_simple(self, tmpdir):
         input_code = """\
@@ -19,7 +19,6 @@ class TestFileResourceLeak(BaseCodemodTest):
             file.read()
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_annotated(self, tmpdir):
         input_code = """\
@@ -31,7 +30,6 @@ class TestFileResourceLeak(BaseCodemodTest):
             file.read()
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_just_open(self, tmpdir):
         # strange as this change may be, it still leaks if left untouched
@@ -43,7 +41,6 @@ class TestFileResourceLeak(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_multiple_assignments(self, tmpdir):
         input_code = """\
@@ -55,7 +52,6 @@ class TestFileResourceLeak(BaseCodemodTest):
             file.read()
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_minimal_block(self, tmpdir):
         input_code = """\
@@ -69,7 +65,6 @@ class TestFileResourceLeak(BaseCodemodTest):
         pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     # negative tests below
 
@@ -80,7 +75,6 @@ class TestFileResourceLeak(BaseCodemodTest):
         file.close()
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_is_closed_with_exit(self, tmpdir):
         input_code = """\
@@ -89,7 +83,6 @@ class TestFileResourceLeak(BaseCodemodTest):
         file.__exit__()
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_is_closed_with_statement(self, tmpdir):
         input_code = """\
@@ -98,7 +91,6 @@ class TestFileResourceLeak(BaseCodemodTest):
             file.read()
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_is_closed_with_statement_and_contextlib(self, tmpdir):
         input_code = """\
@@ -108,7 +100,6 @@ class TestFileResourceLeak(BaseCodemodTest):
             file.read()
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_is_closed_transitivelly(self, tmpdir):
         input_code = """\
@@ -117,7 +108,6 @@ class TestFileResourceLeak(BaseCodemodTest):
         same_file.close()
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_escapes_with_assignment(self, tmpdir):
         input_code = """\
@@ -125,7 +115,6 @@ class TestFileResourceLeak(BaseCodemodTest):
         Object.attribute = file
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_escapes_as_function_argument(self, tmpdir):
         input_code = """\
@@ -133,7 +122,6 @@ class TestFileResourceLeak(BaseCodemodTest):
         foo(file)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_escapes_returned(self, tmpdir):
         input_code = """\
@@ -142,7 +130,6 @@ class TestFileResourceLeak(BaseCodemodTest):
             return file
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_escapes_yielded(self, tmpdir):
         input_code = """\
@@ -151,7 +138,6 @@ class TestFileResourceLeak(BaseCodemodTest):
             yield file
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_escapes_outside_reference(self, tmpdir):
         input_code = """\
@@ -163,4 +149,3 @@ class TestFileResourceLeak(BaseCodemodTest):
         out.read()
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0

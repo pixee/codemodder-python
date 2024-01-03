@@ -18,4 +18,4 @@ class TestHardenRuamel(BaseIntegrationTest):
     expected_diff = '--- \n+++ \n@@ -1,4 +1,4 @@\n from ruamel.yaml import YAML\n \n-serializer = YAML(typ="unsafe")\n-serializer = YAML(typ="base")\n+serializer = YAML(typ="safe")\n+serializer = YAML(typ="safe")\n'
     expected_line_change = "3"
     num_changes = 2
-    change_description = HardenRuamel.CHANGE_DESCRIPTION
+    change_description = HardenRuamel.change_description

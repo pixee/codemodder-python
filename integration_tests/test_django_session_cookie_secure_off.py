@@ -16,4 +16,4 @@ class TestDjangoSessionCookieSecureOff(BaseIntegrationTest):
     )
     expected_diff = '--- \n+++ \n@@ -121,3 +121,4 @@\n # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field\n \n DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"\n+SESSION_COOKIE_SECURE = True\n'
     expected_line_change = "124"
-    change_description = DjangoSessionCookieSecureOff.CHANGE_DESCRIPTION
+    change_description = DjangoSessionCookieSecureOff.change_description

@@ -32,5 +32,5 @@ class TestFlaskJsonResponseType(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "9"
-    change_description = FlaskJsonResponseType.CHANGE_DESCRIPTION
+    change_description = FlaskJsonResponseType.change_description
     num_changed_files = 1

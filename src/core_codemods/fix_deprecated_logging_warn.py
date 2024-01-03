@@ -1,24 +1,27 @@
 import libcst as cst
-from codemodder.codemods.api import SemgrepCodemod, ReviewGuidance
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class FixDeprecatedLoggingWarn(SemgrepCodemod, NameResolutionMixin):
-    NAME = "fix-deprecated-logging-warn"
-    SUMMARY = "Replace Deprecated `logging.warn`"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "Replace deprecated `logging.warn` with `logging.warning`"
-    REFERENCES = [
-        {
-            "url": "https://docs.python.org/3/library/logging.html#logging.Logger.warning",
-            "description": "",
-        },
-    ]
+class FixDeprecatedLoggingWarn(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="fix-deprecated-logging-warn",
+        summary="Replace Deprecated `logging.warn`",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/library/logging.html#logging.Logger.warning"
+            ),
+        ],
+    )
+    change_description = "Replace deprecated `logging.warn` with `logging.warning`"
     _module_name = "logging"
-
-    @classmethod
-    def rule(cls):
-        return """
+    detector_pattern = """
         rules:
             - pattern-either:
               - patterns:

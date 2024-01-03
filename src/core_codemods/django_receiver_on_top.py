@@ -1,22 +1,24 @@
 from typing import Union
 import libcst as cst
-from codemodder.codemods.api import BaseCodemod
-from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class DjangoReceiverOnTop(BaseCodemod, NameResolutionMixin):
-    NAME = "django-receiver-on-top"
-    SUMMARY = "Ensure Django @receiver is the first decorator"
-    DESCRIPTION = SUMMARY
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    REFERENCES = [
-        {
-            "url": "https://docs.djangoproject.com/en/4.1/topics/signals/",
-            "description": "",
-        },
-    ]
-    CHANGE_DESCRIPTION = "Moved @receiver to the top."
+class DjangoReceiverOnTop(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="django-receiver-on-top",
+        summary="Ensure Django @receiver is the first decorator",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(url="https://docs.djangoproject.com/en/4.1/topics/signals/"),
+        ],
+    )
+    change_description = "Moved @receiver to the top."
 
     def leave_FunctionDef(
         self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef

@@ -26,4 +26,4 @@ class TestUseSetLiteral(BaseIntegrationTest):
 
     expected_line_change = "1"
     num_changes = 2
-    change_description = UseSetLiteral.CHANGE_DESCRIPTION
+    change_description = UseSetLiteral.change_description

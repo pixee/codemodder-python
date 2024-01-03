@@ -31,7 +31,7 @@ class TestUrlSandbox(BaseIntegrationTest):
 """
 
     expected_line_change = "5"
-    change_description = UrlSandbox.CHANGE_DESCRIPTION
+    change_description = UrlSandbox.change_description
     num_changed_files = 2
 
     requirements_path = "tests/samples/requirements.txt"

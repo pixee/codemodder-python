@@ -17,4 +17,4 @@ class TestRemoveUnusedImports(BaseIntegrationTest):
 
     expected_diff = "--- \n+++ \n@@ -1,5 +1,5 @@\n import abc\n-from builtins import complex, dict\n+from builtins import complex\n \n abc\n complex\n"
     expected_line_change = 2
-    change_description = RemoveUnusedImports.CHANGE_DESCRIPTION
+    change_description = RemoveUnusedImports.change_description

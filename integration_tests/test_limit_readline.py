@@ -13,6 +13,6 @@ class TestLimitReadline(BaseIntegrationTest):
     )
     expected_diff = '--- \n+++ \n@@ -1,2 +1,2 @@\n file = open("some_file.txt")\n-file.readline()\n+file.readline(5_000_000)\n'
     expected_line_change = "2"
-    change_description = LimitReadline.CHANGE_DESCRIPTION
+    change_description = LimitReadline.change_description
     # expected because output code points to fake file
     allowed_exceptions = (FileNotFoundError,)

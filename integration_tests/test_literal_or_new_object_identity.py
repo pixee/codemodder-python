@@ -28,5 +28,5 @@ class TestLiteralOrNewObjectIdentity(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "2"
-    change_description = LiteralOrNewObjectIdentity.CHANGE_DESCRIPTION
+    change_description = LiteralOrNewObjectIdentity.change_description
     num_changed_files = 1

@@ -7,7 +7,7 @@ class TestJwtDecodeVerify(BaseSemgrepCodemodTest):
     codemod = JwtDecodeVerify
 
     def test_name(self):
-        assert self.codemod.name() == "jwt-decode-verify"
+        assert self.codemod.name == "jwt-decode-verify"
 
     def test_import(self, tmpdir):
         input_code = """import jwt

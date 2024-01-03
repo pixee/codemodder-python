@@ -1,28 +1,31 @@
 from typing import Optional, Tuple
 import libcst as cst
 from libcst.codemod import CodemodContext, ContextAwareVisitor
-from codemodder.codemods.api import BaseCodemod
-
-from codemodder.codemods.base_codemod import ReviewGuidance
 
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class FlaskJsonResponseType(BaseCodemod, NameAndAncestorResolutionMixin):
-    NAME = "flask-json-response-type"
-    SUMMARY = "Set content type to `application/json` for `flask.make_response` with JSON data"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "Sets `mimetype` to `application/json`."
-    REFERENCES = [
-        {
-            "url": "https://flask.palletsprojects.com/en/2.3.x/patterns/javascript/#return-json-from-views",
-            "description": "",
-        },
-        {
-            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#output-encoding-for-javascript-contexts",
-            "description": "",
-        },
-    ]
+class FlaskJsonResponseType(SimpleCodemod, NameAndAncestorResolutionMixin):
+    metadata = Metadata(
+        name="flask-json-response-type",
+        summary="Set content type to `application/json` for `flask.make_response` with JSON data",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://flask.palletsprojects.com/en/2.3.x/patterns/javascript/#return-json-from-views"
+            ),
+            Reference(
+                url="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#output-encoding-for-javascript-contexts"
+            ),
+        ],
+    )
+    change_description = "Sets `mimetype` to `application/json`."
 
     content_type_key = "Content-Type"
     json_content_type = "application/json"

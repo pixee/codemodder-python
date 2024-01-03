@@ -13,4 +13,4 @@ class TestFStr(BaseIntegrationTest):
     )
     expected_diff = '--- \n+++ \n@@ -1,2 +1,2 @@\n-bad = f"hello"\n+bad = "hello"\n good = f"{2+3}"\n'
     expected_line_change = "1"
-    change_description = RemoveUnnecessaryFStr.CHANGE_DESCRIPTION
+    change_description = RemoveUnnecessaryFStr.change_description

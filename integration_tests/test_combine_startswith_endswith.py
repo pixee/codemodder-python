@@ -13,4 +13,4 @@ class TestCombineStartswithEndswith(BaseIntegrationTest):
     )
     expected_diff = '--- \n+++ \n@@ -1,3 +1,3 @@\n x = \'foo\'\n-if x.startswith("foo") or x.startswith("bar"):\n+if x.startswith(("foo", "bar")):\n     print("Yes")\n'
     expected_line_change = "2"
-    change_description = CombineStartswithEndswith.CHANGE_DESCRIPTION
+    change_description = CombineStartswithEndswith.change_description
