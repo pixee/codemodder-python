@@ -1,4 +1,7 @@
-from core_codemods.add_requests_timeouts import AddRequestsTimeouts
+from core_codemods.add_requests_timeouts import (
+    AddRequestsTimeouts,
+    TransformAddRequestsTimeouts,
+)
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
@@ -33,4 +36,4 @@ class TestAddRequestsTimeouts(BaseIntegrationTest):
 
     num_changes = 2
     expected_line_change = "3"
-    change_description = AddRequestsTimeouts.CHANGE_DESCRIPTION
+    change_description = TransformAddRequestsTimeouts.change_description

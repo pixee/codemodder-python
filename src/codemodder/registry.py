@@ -1,10 +1,13 @@
-from dataclasses import dataclass, asdict
-from importlib.resources import files
-from importlib.metadata import entry_points
-from typing import Optional
+from __future__ import annotations
 
-from codemodder.executor import CodemodExecutorWrapper
+from dataclasses import dataclass
+from importlib.metadata import entry_points
+from typing import Optional, TYPE_CHECKING
+
 from codemodder.logging import logger
+
+if TYPE_CHECKING:
+    from codemodder.codemods.base_codemod import BaseCodemod
 
 
 # These are generally not intended to be applied directly so they are excluded by default.
@@ -25,8 +28,8 @@ class CodemodCollection:
 
 
 class CodemodRegistry:
-    _codemods_by_name: dict[str, CodemodExecutorWrapper]
-    _codemods_by_id: dict[str, CodemodExecutorWrapper]
+    _codemods_by_name: dict[str, BaseCodemod]
+    _codemods_by_id: dict[str, BaseCodemod]
 
     def __init__(self):
         self._codemods_by_name = {}
@@ -45,45 +48,16 @@ class CodemodRegistry:
         return list(self._codemods_by_name.values())
 
     def add_codemod_collection(self, collection: CodemodCollection):
-        docs_module = files(collection.docs_module)
-        semgrep_module = files(collection.semgrep_config_module)
         for codemod in collection.codemods:
-            self._validate_codemod(codemod)
-            wrapper = CodemodExecutorWrapper(
-                codemod,
-                collection.origin,
-                docs_module,
-                semgrep_module,
-            )
+            wrapper = codemod() if isinstance(codemod, type) else codemod
             self._codemods_by_name[wrapper.name] = wrapper
             self._codemods_by_id[wrapper.id] = wrapper
-
-    def _validate_codemod(self, codemod):
-        for name in ["SUMMARY", "METADATA"]:
-            if not (attr := getattr(codemod, name)) or attr is NotImplemented:
-                raise ValueError(
-                    f'Missing required attribute "{name}" on codemod {codemod}'
-                )
-
-        for k, v in asdict(codemod.METADATA).items():
-            if v is NotImplemented:
-                raise NotImplementedError(f"METADATA.{k} not defined for {codemod}")
-            if k != "REFERENCES" and not v:
-                raise NotImplementedError(
-                    f"METADATA.{k} should not be None or empty for {codemod}"
-                )
-
-        # TODO: eventually we will represent IS_SEMGREP using the class hierarchy
-        if codemod.is_semgrep and not codemod.YAML_FILES:
-            raise ValueError(
-                f"Missing required attribute YAML_FILES on semgrep codemod {codemod}"
-            )
 
     def match_codemods(
         self,
         codemod_include: Optional[list] = None,
         codemod_exclude: Optional[list] = None,
-    ) -> list[CodemodExecutorWrapper]:
+    ) -> list[BaseCodemod]:
         codemod_include = codemod_include or []
         codemod_exclude = codemod_exclude or DEFAULT_EXCLUDED_CODEMODS
 

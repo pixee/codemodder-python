@@ -10,7 +10,7 @@ class TestSecureFlaskCookie(BaseSemgrepCodemodTest):
     codemod = SecureFlaskCookie
 
     def test_name(self):
-        assert self.codemod.name() == "secure-flask-cookie"
+        assert self.codemod.name == "secure-flask-cookie"
 
     @each_func
     def test_import(self, tmpdir, func):

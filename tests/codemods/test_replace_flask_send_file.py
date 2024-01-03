@@ -8,7 +8,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
     codemod = ReplaceFlaskSendFile
 
     def test_name(self):
-        assert self.codemod.name() == "replace-flask-send-file"
+        assert self.codemod.name == "replace-flask-send-file"
 
     def test_direct_string(self, tmpdir):
         input_code = """\
@@ -32,7 +32,6 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
             return flask.send_from_directory((p := Path(f'path/to/{name}.txt')).parent, p.name)
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_direct_simple_string(self, tmpdir):
         input_code = """\
@@ -56,7 +55,6 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
             return flask.send_from_directory((p := Path('path/to/file.txt')).parent, p.name)
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_direct_string_convert_arguments(self, tmpdir):
         input_code = """\
@@ -80,7 +78,6 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
             return flask.send_from_directory((p := Path(f'path/to/{name}.txt')).parent, p.name, mimetype = None, as_attachment = False, download_name = True)
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_direct_path(self, tmpdir):
         input_code = """\
@@ -105,7 +102,6 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
             return flask.send_from_directory((p := Path(f'path/to/{name}.txt')).parent, p.name)
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_indirect_path(self, tmpdir):
         input_code = """\
@@ -132,7 +128,6 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
             return flask.send_from_directory(path.parent, path.name)
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_indirect_path_alias(self, tmpdir):
         input_code = """\
@@ -159,7 +154,6 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
             return flask.send_from_directory(path.parent, path.name)
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_indirect_string(self, tmpdir):
         input_code = """\
@@ -185,7 +179,6 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
             return flask.send_from_directory((p := Path(path)).parent, p.name)
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_unknown_type(self, tmpdir):
         input_code = """\
@@ -198,4 +191,3 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
             return send_file(name)
         """
         self.run_and_assert(tmpdir, input_code, input_code)
-        assert len(self.file_context.codemod_changes) == 0

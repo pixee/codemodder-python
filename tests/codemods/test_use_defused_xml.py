@@ -1,4 +1,5 @@
 import pytest
+import mock
 
 from codemodder.dependency import DefusedXML
 from core_codemods.use_defused_xml import (
@@ -10,12 +11,13 @@ from core_codemods.use_defused_xml import (
 from tests.codemods.base_codemod_test import BaseCodemodTest
 
 
+@mock.patch("codemodder.codemods.api.FileContext.add_dependency")
 class TestUseDefusedXml(BaseCodemodTest):
     codemod = UseDefusedXml
 
     @pytest.mark.parametrize("method", ETREE_METHODS)
     @pytest.mark.parametrize("module", ["ElementTree", "cElementTree"])
-    def test_etree_simple_call(self, tmpdir, module, method):
+    def test_etree_simple_call(self, add_dependency, tmpdir, module, method):
         original_code = f"""
             from xml.etree.{module} import {method}, ElementPath
 
@@ -30,10 +32,10 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
-        self.assert_dependency(DefusedXML)
+        add_dependency.assert_called_once_with(DefusedXML)
 
     @pytest.mark.parametrize("method", ETREE_METHODS)
-    def test_etree_module_alias(self, tmpdir, method):
+    def test_etree_module_alias(self, add_dependency, tmpdir, method):
         original_code = f"""
             import xml.etree.ElementTree as alias
             import xml.etree.cElementTree as calias
@@ -49,12 +51,12 @@ class TestUseDefusedXml(BaseCodemodTest):
             cet = defusedxml.ElementTree.{method}('some.xml')
         """
 
-        self.run_and_assert(tmpdir, original_code, new_code)
-        self.assert_dependency(DefusedXML)
+        self.run_and_assert(tmpdir, original_code, new_code, num_changes=2)
+        add_dependency.assert_called_once_with(DefusedXML)
 
     @pytest.mark.parametrize("method", ETREE_METHODS)
     @pytest.mark.parametrize("module", ["ElementTree", "cElementTree"])
-    def test_etree_attribute_call(self, tmpdir, module, method):
+    def test_etree_attribute_call(self, add_dependency, tmpdir, module, method):
         original_code = f"""
             from xml.etree import {module}
 
@@ -68,9 +70,9 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
-        self.assert_dependency(DefusedXML)
+        add_dependency.assert_called_once_with(DefusedXML)
 
-    def test_etree_elementtree_with_alias(self, tmpdir):
+    def test_etree_elementtree_with_alias(self, add_dependency, tmpdir):
         original_code = """
             from xml.etree import ElementTree as ET
 
@@ -84,9 +86,9 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
-        self.assert_dependency(DefusedXML)
+        add_dependency.assert_called_once_with(DefusedXML)
 
-    def test_etree_parse_with_alias(self, tmpdir):
+    def test_etree_parse_with_alias(self, add_dependency, tmpdir):
         original_code = """
             from xml.etree.ElementTree import parse as parse_xml
 
@@ -100,10 +102,10 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
-        self.assert_dependency(DefusedXML)
+        add_dependency.assert_called_once_with(DefusedXML)
 
     @pytest.mark.parametrize("method", SAX_METHODS)
-    def test_sax_simple_call(self, tmpdir, method):
+    def test_sax_simple_call(self, add_dependency, tmpdir, method):
         original_code = f"""
             from xml.sax import {method}
 
@@ -117,10 +119,10 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
-        self.assert_dependency(DefusedXML)
+        add_dependency.assert_called_once_with(DefusedXML)
 
     @pytest.mark.parametrize("method", SAX_METHODS)
-    def test_sax_attribute_call(self, tmpdir, method):
+    def test_sax_attribute_call(self, add_dependency, tmpdir, method):
         original_code = f"""
             from xml import sax
 
@@ -134,11 +136,11 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
-        self.assert_dependency(DefusedXML)
+        add_dependency.assert_called_once_with(DefusedXML)
 
     @pytest.mark.parametrize("method", DOM_METHODS)
     @pytest.mark.parametrize("module", ["minidom", "pulldom"])
-    def test_dom_simple_call(self, tmpdir, module, method):
+    def test_dom_simple_call(self, add_dependency, tmpdir, module, method):
         original_code = f"""
             from xml.dom.{module} import {method}
 
@@ -152,4 +154,4 @@ class TestUseDefusedXml(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, original_code, new_code)
-        self.assert_dependency(DefusedXML)
+        add_dependency.assert_called_once_with(DefusedXML)

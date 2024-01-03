@@ -4,13 +4,10 @@ from pathlib import Path
 from textwrap import dedent
 from typing import ClassVar
 
-import libcst as cst
-from libcst.codemod import CodemodContext
 import mock
 
 from codemodder.context import CodemodExecutionContext
-from codemodder.dependency import Dependency
-from codemodder.file_context import FileContext
+from codemodder.diff import create_diff
 from codemodder.registry import CodemodRegistry, CodemodCollection
 from codemodder.semgrep import run as semgrep_run
 
@@ -19,69 +16,88 @@ class BaseCodemodTest:
     codemod: ClassVar = NotImplemented
 
     def setup_method(self):
+        if isinstance(self.codemod, type):
+            self.codemod = self.codemod()
+
         self.file_context = None
 
-    def initialize_codemod(self, input_tree):
-        wrapper = cst.MetadataWrapper(input_tree)
-        codemod_instance = self.codemod(
-            CodemodContext(wrapper=wrapper),
-            self.file_context,
-        )
-        return codemod_instance
-
-    def run_and_assert(self, tmpdir, input_code, expected):
-        tmp_file_path = Path(tmpdir / "code.py")
-        self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)
-
-    def assert_no_change_line_excluded(
-        self, tmpdir, input_code, expected, lines_to_exclude
+    def run_and_assert(  # pylint: disable=too-many-arguments
+        self,
+        tmpdir,
+        input_code,
+        expected,
+        num_changes: int = 1,
+        root: Path | None = None,
+        files: list[Path] | None = None,
+        lines_to_exclude: list[int] | None = None,
     ):
-        tmp_file_path = Path(tmpdir / "code.py")
-        input_tree = cst.parse_module(dedent(input_code))
-        self.execution_context = CodemodExecutionContext(
-            directory=tmpdir,
-            dry_run=True,
-            verbose=False,
-            registry=mock.MagicMock(),
-            repo_manager=mock.MagicMock(),
-        )
+        root = root or tmpdir
+        tmp_file_path = files[0] if files else Path(tmpdir) / "code.py"
+        tmp_file_path.write_text(dedent(input_code))
 
-        self.file_context = FileContext(
-            tmpdir,
-            tmp_file_path,
-            lines_to_exclude,
-            [],
-            [],
-        )
-        codemod_instance = self.initialize_codemod(input_tree)
-        output_tree = codemod_instance.transform_module(input_tree)
+        files_to_check = files or [tmp_file_path]
 
-        assert output_tree.code == dedent(expected)
-        assert len(self.file_context.codemod_changes) == 0
+        path_exclude = [f"{tmp_file_path}:{line}" for line in lines_to_exclude or []]
 
-    def run_and_assert_filepath(self, root, file_path, input_code, expected):
-        input_tree = cst.parse_module(dedent(input_code))
         self.execution_context = CodemodExecutionContext(
             directory=root,
-            dry_run=True,
+            dry_run=False,
             verbose=False,
             registry=mock.MagicMock(),
             repo_manager=mock.MagicMock(),
+            path_include=[f.name for f in files_to_check],
+            path_exclude=path_exclude,
         )
-        self.file_context = FileContext(
-            root,
-            file_path,
-            [],
-            [],
-            [],
+
+        self.codemod.apply(self.execution_context, files_to_check)
+        changes = self.execution_context.get_results(self.codemod.id)
+
+        if input_code == expected:
+            assert not changes
+            return
+
+        assert len(changes) == 1
+        assert len(changes[0].changes) == num_changes
+
+        self.assert_changes(
+            tmpdir,
+            tmp_file_path,
+            input_code,
+            expected,
+            changes[0],
         )
-        codemod_instance = self.initialize_codemod(input_tree)
-        output_tree = codemod_instance.transform_module(input_tree)
 
-        assert output_tree.code == dedent(expected)
+    def assert_changes(  # pylint: disable=too-many-arguments
+        self, root, file_path, input_code, expected, changes
+    ):
+        expected_diff = create_diff(
+            dedent(input_code).splitlines(keepends=True),
+            dedent(expected).splitlines(keepends=True),
+        )
 
-    def assert_dependency(self, dependency: Dependency):
-        assert self.file_context and self.file_context.dependencies == set([dependency])
+        assert expected_diff == changes.diff
+        assert os.path.relpath(file_path, root) == changes.path
+
+        with open(file_path, "r", encoding="utf-8") as tmp_file:
+            output_code = tmp_file.read()
+
+        assert output_code == dedent(expected)
+
+    def run_and_assert_filepath(  # pylint: disable=too-many-arguments
+        self,
+        root: Path,
+        file_path: Path,
+        input_code: str,
+        expected: str,
+        num_changes: int = 1,
+    ):
+        self.run_and_assert(
+            tmpdir=root,
+            input_code=input_code,
+            expected=expected,
+            num_changes=num_changes,
+            files=[file_path],
+        )
 
 
 class BaseSemgrepCodemodTest(BaseCodemodTest):
@@ -100,35 +116,12 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         with open(file_path, "w", encoding="utf-8") as tmp_file:
             tmp_file.write(dedent(input_code))
 
-        name = self.codemod.name()
+        name = self.codemod.name
         results = self.registry.match_codemods(codemod_include=[name])
         return semgrep_run(self.execution_context, results[0].yaml_files)
 
-    def run_and_assert_filepath(self, root, file_path, input_code, expected):
-        self.execution_context = CodemodExecutionContext(
-            directory=root,
-            dry_run=True,
-            verbose=False,
-            registry=mock.MagicMock(),
-            repo_manager=mock.MagicMock(),
-        )
-        input_tree = cst.parse_module(dedent(input_code))
-        all_results = self.results_by_id_filepath(input_code, file_path)
-        results = all_results.results_for_rule_and_file(self.codemod.name(), file_path)
-        self.file_context = FileContext(
-            root,
-            file_path,
-            [],
-            [],
-            results,
-        )
-        codemod_instance = self.initialize_codemod(input_tree)
-        output_tree = codemod_instance.transform_module(input_tree)
 
-        assert output_tree.code == dedent(expected)
-
-
-class BaseDjangoCodemodTest(BaseSemgrepCodemodTest):
+class BaseDjangoCodemodTest(BaseCodemodTest):
     def create_dir_structure(self, tmpdir):
         django_root = Path(tmpdir) / "mysite"
         settings_folder = django_root / "mysite"

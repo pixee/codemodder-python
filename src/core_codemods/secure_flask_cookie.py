@@ -1,28 +1,29 @@
 from libcst import matchers
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
-from codemodder.codemods.api.helpers import NewArg
+from codemodder.codemods.libcst_transformer import NewArg
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class SecureFlaskCookie(SemgrepCodemod):
-    NAME = "secure-flask-cookie"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Use Safe Parameters in `flask` Response `set_cookie` Call"
-    DESCRIPTION = "Flask response `set_cookie` call should be called with `secure=True`, `httponly=True`, and `samesite='Lax'`."
-    REFERENCES = [
-        {
-            "url": "https://flask.palletsprojects.com/en/3.0.x/api/#flask.Response.set_cookie",
-            "description": "",
-        },
-        {
-            "url": "https://owasp.org/www-community/controls/SecureCookieAttribute",
-            "description": "",
-        },
-    ]
-
-    @classmethod
-    def rule(cls):
-        return """
+class SecureFlaskCookie(SimpleCodemod):
+    metadata = Metadata(
+        name="secure-flask-cookie",
+        summary="Use Safe Parameters in `flask` Response `set_cookie` Call",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        references=[
+            Reference(
+                url="https://flask.palletsprojects.com/en/3.0.x/api/#flask.Response.set_cookie"
+            ),
+            Reference(
+                url="https://owasp.org/www-community/controls/SecureCookieAttribute"
+            ),
+        ],
+    )
+    change_description = "Flask response `set_cookie` call should be called with `secure=True`, `httponly=True`, and `samesite='Lax'`."
+    detector_pattern = """
         rules:
           - id: secure-flask-cookie
             mode: taint

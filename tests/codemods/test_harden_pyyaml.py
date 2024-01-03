@@ -12,7 +12,7 @@ class TestHardenPyyaml(BaseSemgrepCodemodTest):
     codemod = HardenPyyaml
 
     def test_name(self):
-        assert self.codemod.name() == "harden-pyyaml"
+        assert self.codemod.name == "harden-pyyaml"
 
     def test_safe_loader(self, tmpdir):
         input_code = """import yaml
@@ -20,7 +20,6 @@ data = b'!!python/object/apply:subprocess.Popen \\n- ls'
 deserialized_data = yaml.load(data, Loader=yaml.SafeLoader)
 """
         self.run_and_assert(tmpdir, input_code, input_code)
-        assert len(self.file_context.codemod_changes) == 0
 
     @loaders
     def test_all_unsafe_loaders_arg(self, tmpdir, loader):
@@ -34,7 +33,6 @@ data = b'!!python/object/apply:subprocess.Popen \\n- ls'
 deserialized_data = yaml.load(data, yaml.SafeLoader)
 """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     @loaders
     def test_all_unsafe_loaders_kwarg(self, tmpdir, loader):
@@ -48,7 +46,6 @@ data = b'!!python/object/apply:subprocess.Popen \\n- ls'
 deserialized_data = yaml.load(data, Loader=yaml.SafeLoader)
 """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_import_alias(self, tmpdir):
         input_code = """import yaml as yam
@@ -64,7 +61,6 @@ data = b'!!python/object/apply:subprocess.Popen \\n- ls'
 deserialized_data = yam.load(data, Loader=yam.SafeLoader)
 """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_preserve_custom_loader(self, tmpdir):
         expected = input_code = """
@@ -75,7 +71,6 @@ deserialized_data = yam.load(data, Loader=yam.SafeLoader)
         """
 
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_preserve_custom_loader_kwarg(self, tmpdir):
         expected = input_code = """
@@ -86,7 +81,6 @@ deserialized_data = yam.load(data, Loader=yam.SafeLoader)
         """
 
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 0
 
 
 class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
@@ -103,7 +97,6 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
         """
 
         self.run_and_assert(tmpdir, input_code, input_code)
-        assert len(self.file_context.codemod_changes) == 0
 
     @loaders
     def test_unsafe_loaders(self, tmpdir, loader):
@@ -122,7 +115,6 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
                 super(MyCustomLoader, self).__init__(*args, **kwargs)
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_from_import(self, tmpdir):
         input_code = """\
@@ -140,7 +132,6 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
                 super(MyCustomLoader, self).__init__(*args, **kwargs)
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_import_alias(self, tmpdir):
         input_code = """\
@@ -158,7 +149,6 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
                 super(MyCustomLoader, self).__init__(*args, **kwargs)
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_multiple_bases(self, tmpdir):
         input_code = """\
@@ -180,7 +170,6 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
                 super(MyCustomLoader, self).__init__(*args, **kwargs)
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_different_yaml(self, tmpdir):
         input_code = """\
@@ -198,4 +187,3 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
             ...
         """
         self.run_and_assert(tmpdir, input_code, expected)
-        assert len(self.file_context.codemod_changes) == 1

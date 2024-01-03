@@ -1,14 +1,16 @@
 import libcst as cst
-
-from codemodder.codemods.api import BaseCodemod, ReviewGuidance
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 
 
-class UseSetLiteral(BaseCodemod, NameResolutionMixin):
-    NAME = "use-set-literal"
-    SUMMARY = "Use Set Literals Instead of Sets from Lists"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "Replace sets from lists with set literals"
+class UseSetLiteral(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="use-set-literal",
+        summary="Use Set Literals Instead of Sets from Lists",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[],
+    )
+    change_description = "Replace sets from lists with set literals"
     REFERENCES: list = []
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):

@@ -29,5 +29,5 @@ class TestExceptionWithoutRaise(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "2"
-    change_description = ExceptionWithoutRaise.CHANGE_DESCRIPTION
+    change_description = ExceptionWithoutRaise.change_description
     num_changed_files = 1

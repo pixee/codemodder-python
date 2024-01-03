@@ -11,7 +11,7 @@ class TestLxmlSafeParserDefaults(BaseSemgrepCodemodTest):
     codemod = LxmlSafeParserDefaults
 
     def test_name(self):
-        assert self.codemod.name() == "safe-lxml-parser-defaults"
+        assert self.codemod.name == "safe-lxml-parser-defaults"
 
     @each_class
     def test_import(self, tmpdir, klass):

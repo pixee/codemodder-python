@@ -32,5 +32,5 @@ class TestDjangoJsonResponseType(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "6"
-    change_description = DjangoJsonResponseType.CHANGE_DESCRIPTION
+    change_description = DjangoJsonResponseType.change_description
     num_changed_files = 1

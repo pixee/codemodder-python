@@ -70,7 +70,7 @@ class TestUseWalrusIf(BaseCodemodTest):
         if (foo := hello()) == "bar":
             whatever(foo)
         """
-        self.run_and_assert(tmpdir, input_code, expected_output)
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
 
     def test_walrus_if_in_function(self, tmpdir):
         """Make sure this works inside more complex code"""
@@ -101,7 +101,7 @@ class TestUseWalrusIf(BaseCodemodTest):
             if (y := do_something_else(x)) is not None:
                 bizbaz(x, y)
         """
-        self.run_and_assert(tmpdir, input_code, expected_output)
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
 
     def test_walrus_if_used_inner(self, tmpdir):
         """Make sure this works inside more complex code"""

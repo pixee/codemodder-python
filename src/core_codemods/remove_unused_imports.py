@@ -1,3 +1,6 @@
+import re
+
+import libcst as cst
 from libcst import CSTVisitor, ensure_type, matchers
 from libcst.codemod.visitors import GatherUnusedImportsVisitor
 from libcst.metadata import (
@@ -6,32 +9,25 @@ from libcst.metadata import (
     ScopeProvider,
     ParentNodeProvider,
 )
-from codemodder.codemods.base_codemod import (
-    BaseCodemod,
-    CodemodMetadata,
-    ReviewGuidance,
-)
+
+from pylint.utils.pragma_parser import parse_pragma
+
+from core_codemods.api import SimpleCodemod, Metadata, ReviewGuidance
 from codemodder.change import Change
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsTransformer,
 )
-import libcst as cst
-from libcst.codemod import Codemod, CodemodContext
-import re
-from pylint.utils.pragma_parser import parse_pragma
 
 NOQA_PATTERN = re.compile(r"^#\s*noqa", re.IGNORECASE)
 
 
-class RemoveUnusedImports(BaseCodemod, Codemod):
-    METADATA = CodemodMetadata(
-        DESCRIPTION=("Remove unused imports from a module."),
-        NAME="unused-imports",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        REFERENCES=[],
+class RemoveUnusedImports(SimpleCodemod):
+    metadata = Metadata(
+        name="unused-imports",
+        summary="Remove Unused Imports",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
     )
-    SUMMARY = "Remove Unused Imports"
-    CHANGE_DESCRIPTION = "Unused import."
+    change_description = "Unused import."
 
     METADATA_DEPENDENCIES = (
         PositionProvider,
@@ -39,10 +35,6 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         QualifiedNameProvider,
         ParentNodeProvider,
     )
-
-    def __init__(self, codemod_context: CodemodContext, *codemod_args):
-        Codemod.__init__(self, codemod_context)
-        BaseCodemod.__init__(self, *codemod_args)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         # Do nothing in __init__.py files
@@ -57,7 +49,7 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
             if self.filter_by_path_includes_or_excludes(pos):
                 if not self._is_disabled_by_linter(importt):
                     self.file_context.codemod_changes.append(
-                        Change(pos.start.line, self.CHANGE_DESCRIPTION)
+                        Change(pos.start.line, self.change_description)
                     )
                     filtered_unused_imports.add((import_alias, importt))
         return tree.visit(RemoveUnusedImportsTransformer(filtered_unused_imports))

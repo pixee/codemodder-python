@@ -62,8 +62,14 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
 
     def setup_method(self):
         try:
-            self.codemod_wrapper = self.codemod_registry.match_codemods(
-                codemod_include=[self.codemod.name()]
+            name = (
+                self.codemod().name
+                if isinstance(self.codemod, type)
+                else self.codemod.name
+            )
+            # This is how we ensure that the codemod is actually in the registry
+            self.codemod_instance = self.codemod_registry.match_codemods(
+                codemod_include=[name]
             )[0]
         except IndexError as exc:
             raise IndexError(
@@ -77,7 +83,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert run["elapsed"] != ""
         assert (
             run["commandLine"]
-            == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_wrapper.name} --path-include={self.code_path}"
+            == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_instance.name} --path-include={self.code_path}"
         )
         assert run["directory"] == os.path.abspath(SAMPLES_DIR)
         assert run["sarifs"] == []
@@ -85,8 +91,10 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     def _assert_results_fields(self, results, output_path):
         assert len(results) == 1
         result = results[0]
-        assert result["codemod"] == self.codemod_wrapper.id
-        assert result["references"] == self.codemod_wrapper.references
+        assert result["codemod"] == self.codemod_instance.id
+        assert result["references"] == [
+            ref.to_json() for ref in self.codemod_instance.references
+        ]
 
         # TODO: once we add description for each url.
         for reference in result["references"]:
@@ -147,7 +155,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             SAMPLES_DIR,
             "--output",
             self.output_path,
-            f"--codemod-include={self.codemod_wrapper.name}",
+            f"--codemod-include={self.codemod_instance.name}",
             f"--path-include={self.code_path}",
         ]
 

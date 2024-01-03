@@ -7,74 +7,84 @@ class TestSecureRandom(BaseSemgrepCodemodTest):
     codemod = SecureRandom
 
     def test_name(self):
-        assert self.codemod.name() == "secure-random"
+        assert self.codemod.name == "secure-random"
 
     def test_import_random(self, tmpdir):
-        input_code = """import random
+        input_code = """
+        import random
 
-random.random()
-var = "hello"
-"""
-        expected_output = """import secrets
+        random.random()
+        var = "hello"
+        """
+        expected_output = """
+        import secrets
 
-secrets.SystemRandom().random()
-var = "hello"
-"""
+        secrets.SystemRandom().random()
+        var = "hello"
+        """
 
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_from_random(self, tmpdir):
-        input_code = """from random import random
+        input_code = """
+        from random import random
 
-random()
-var = "hello"
-"""
-        expected_output = """import secrets
+        random()
+        var = "hello"
+        """
+        expected_output = """
+        import secrets
 
-secrets.SystemRandom().random()
-var = "hello"
-"""
+        secrets.SystemRandom().random()
+        var = "hello"
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_random_alias(self, tmpdir):
-        input_code = """import random as alleatory
+        input_code = """
+        import random as alleatory
 
-alleatory.random()
-var = "hello"
-"""
-        expected_output = """import secrets
+        alleatory.random()
+        var = "hello"
+        """
+        expected_output = """
+        import secrets
 
-secrets.SystemRandom().random()
-var = "hello"
-"""
+        secrets.SystemRandom().random()
+        var = "hello"
+        """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize(
         "input_code,expected_output",
         [
             (
-                """import random
+                """
+                import random
 
-random.randint(0, 10)
-var = "hello"
-""",
-                """import secrets
+                random.randint(0, 10)
+                var = "hello"
+                """,
+                """
+                import secrets
 
-secrets.SystemRandom().randint(0, 10)
-var = "hello"
-""",
+                secrets.SystemRandom().randint(0, 10)
+                var = "hello"
+                """,
             ),
             (
-                """from random import randint
+                """
+                from random import randint
 
-randint(0, 10)
-var = "hello"
-""",
-                """import secrets
+                randint(0, 10)
+                var = "hello"
+                """,
+                """
+                import secrets
 
-secrets.SystemRandom().randint(0, 10)
-var = "hello"
-""",
+                secrets.SystemRandom().randint(0, 10)
+                var = "hello"
+                """,
             ),
         ],
     )
@@ -82,48 +92,54 @@ var = "hello"
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_multiple_calls(self, tmpdir):
-        input_code = """import random
+        input_code = """
+        import random
 
-random.random()
-random.randint()
-var = "hello"
-"""
-        expected_output = """import secrets
+        random.random()
+        random.randint()
+        var = "hello"
+        """
+        expected_output = """
+        import secrets
 
-secrets.SystemRandom().random()
-secrets.SystemRandom().randint()
-var = "hello"
-"""
-        self.run_and_assert(tmpdir, input_code, expected_output)
+        secrets.SystemRandom().random()
+        secrets.SystemRandom().randint()
+        var = "hello"
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
 
     @pytest.mark.parametrize(
         "input_code,expected_output",
         [
             (
-                """import random
-import csv
-random.random()
-csv.excel
-""",
-                """import csv
-import secrets
+                """
+                import random
+                import csv
+                random.random()
+                csv.excel
+                """,
+                """
+                import csv
+                import secrets
 
-secrets.SystemRandom().random()
-csv.excel
-""",
+                secrets.SystemRandom().random()
+                csv.excel
+                """,
             ),
             (
-                """import random
-from csv import excel
-random.random()
-excel
-""",
-                """from csv import excel
-import secrets
+                """
+                import random
+                from csv import excel
+                random.random()
+                excel
+                """,
+                """
+                from csv import excel
+                import secrets
 
-secrets.SystemRandom().random()
-excel
-""",
+                secrets.SystemRandom().random()
+                excel
+                """,
             ),
         ],
     )
@@ -131,9 +147,10 @@ excel
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_random_nameerror(self, tmpdir):
-        input_code = """random.random()
+        input_code = """
+        random.random()
 
-import random"""
+        import random"""
         expected_output = input_code
         self.run_and_assert(tmpdir, input_code, expected_output)
 
@@ -141,17 +158,19 @@ import random"""
         # Test that `random` import isn't removed if code uses part of the random
         # library that isn't part of our codemods. If we add the function as one of
         # our codemods, this test would change.
-        input_code = """import random
+        input_code = """
+        import random
 
-random.random()
-random.__all__
-"""
+        random.random()
+        random.__all__
+        """
 
-        expected_output = """import random
-import secrets
+        expected_output = """
+        import random
+        import secrets
 
-secrets.SystemRandom().random()
-random.__all__
-"""
+        secrets.SystemRandom().random()
+        random.__all__
+        """
 
         self.run_and_assert(tmpdir, input_code, expected_output)

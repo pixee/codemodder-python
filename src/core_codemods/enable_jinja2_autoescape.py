@@ -1,24 +1,28 @@
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
-from codemodder.codemods.api.helpers import NewArg
+from codemodder.codemods.libcst_transformer import NewArg
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class EnableJinja2Autoescape(SemgrepCodemod):
-    NAME = "enable-jinja2-autoescape"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Enable Jinja2 Autoescape"
-    DESCRIPTION = "Sets the `autoescape` parameter in jinja2.Environment to `True`."
-    REFERENCES = [
-        {"url": "https://owasp.org/www-community/attacks/xss/", "description": ""},
-        {
-            "url": "https://jinja.palletsprojects.com/en/3.1.x/api/#autoescaping",
-            "description": "",
-        },
-    ]
-
-    @classmethod
-    def rule(cls):
-        return """
+class EnableJinja2Autoescape(SimpleCodemod):
+    metadata = Metadata(
+        name="enable-jinja2-autoescape",
+        summary="Enable Jinja2 Autoescape",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(url="https://owasp.org/www-community/attacks/xss/"),
+            Reference(
+                url="https://jinja.palletsprojects.com/en/3.1.x/api/#autoescaping"
+            ),
+        ],
+    )
+    change_description = (
+        "Sets the `autoescape` parameter in jinja2.Environment to `True`."
+    )
+    detector_pattern = """
             rules:
               - pattern-either:
                 - patterns:

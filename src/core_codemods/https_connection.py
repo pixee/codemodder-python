@@ -3,10 +3,13 @@ from typing import Sequence, Set
 import libcst as cst
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from libcst.metadata import PositionProvider
-
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.imported_call_modifier import ImportedCallModifier
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
 class HTTPSConnectionModifier(ImportedCallModifier[Set[str]]):
@@ -48,20 +51,20 @@ class HTTPSConnectionModifier(ImportedCallModifier[Set[str]]):
         return len(arglist)
 
 
-class HTTPSConnection(BaseCodemod):
-    SUMMARY = "Enforce HTTPS Connection for `urllib3`"
-    NAME = "https-connection"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    REFERENCES = [
-        {
-            "url": "https://owasp.org/www-community/vulnerabilities/Insecure_Transport",
-            "description": "",
-        },
-        {
-            "url": "https://urllib3.readthedocs.io/en/stable/reference/urllib3.connectionpool.html#urllib3.HTTPConnectionPool",
-            "description": "",
-        },
-    ]
+class HTTPSConnection(SimpleCodemod):
+    metadata = Metadata(
+        name="https-connection",
+        summary="Enforce HTTPS Connection for `urllib3`",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://owasp.org/www-community/vulnerabilities/Insecure_Transport"
+            ),
+            Reference(
+                url="https://urllib3.readthedocs.io/en/stable/reference/urllib3.connectionpool.html#urllib3.HTTPConnectionPool"
+            ),
+        ],
+    )
 
     METADATA_DEPENDENCIES = (PositionProvider,)
 
@@ -75,7 +78,7 @@ class HTTPSConnection(BaseCodemod):
             self.context,
             self.file_context,
             self.matching_functions,
-            self.CHANGE_DESCRIPTION,
+            self.change_description,
         )
         result_tree = visitor.transform_module(tree)
         self.file_context.codemod_changes.extend(visitor.changes_in_file)

@@ -1,30 +1,31 @@
 import libcst as cst
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class WithThreadingLock(SemgrepCodemod, NameResolutionMixin):
-    NAME = "bad-lock-with-statement"
-    SUMMARY = "Separate Lock Instantiation from `with` Call"
-    DESCRIPTION = (
+class WithThreadingLock(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="bad-lock-with-statement",
+        summary="Separate Lock Instantiation from `with` Call",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://pylint.pycqa.org/en/latest/user_guide/messages/warning/useless-with-lock."
+            ),
+            Reference(
+                url="https://docs.python.org/3/library/threading.html#using-locks-conditions-and-semaphores-in-the-with-statement"
+            ),
+        ],
+    )
+    change_description = (
         "Replace deprecated usage of threading lock classes as context managers."
     )
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    REFERENCES = [
-        {
-            "url": "https://pylint.pycqa.org/en/latest/user_guide/messages/warning/useless-with-lock.",
-            "description": "",
-        },
-        {
-            "url": "https://docs.python.org/3/library/threading.html#using-locks-conditions-and-semaphores-in-the-with-statement",
-            "description": "",
-        },
-    ]
-
-    @classmethod
-    def rule(cls):
-        return """
+    detector_pattern = """
         rules:
           - patterns:
             - pattern: |
@@ -45,8 +46,8 @@ class WithThreadingLock(SemgrepCodemod, NameResolutionMixin):
             - focus-metavariable: $BODY
         """
 
-    def __init__(self, *args):
-        SemgrepCodemod.__init__(self, *args)
+    def __init__(self, *args, **kwargs):
+        SimpleCodemod.__init__(self, *args, **kwargs)
         NameResolutionMixin.__init__(self)
         self.names_in_module = self.find_used_names_in_module()
 
@@ -82,7 +83,7 @@ class WithThreadingLock(SemgrepCodemod, NameResolutionMixin):
                     )
                 ]
             )
-            # TODO: add result
+            self.add_change(original_node, self.change_description)
             return cst.FlattenSentinel(
                 [
                     assign,

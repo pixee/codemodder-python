@@ -1,14 +1,17 @@
 import libcst as cst
 from typing import Union
-from codemodder.codemods.api import BaseCodemod, ReviewGuidance
 from codemodder.codemods.utils_mixin import NameResolutionMixin, AncestorPatternsMixin
+from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 
 
-class RemoveDebugBreakpoint(BaseCodemod, NameResolutionMixin, AncestorPatternsMixin):
-    NAME = "remove-debug-breakpoint"
-    SUMMARY = "Remove Calls to `builtin` `breakpoint` and `pdb.set_trace"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "Remove breakpoint call"
+class RemoveDebugBreakpoint(SimpleCodemod, NameResolutionMixin, AncestorPatternsMixin):
+    metadata = Metadata(
+        name="remove-debug-breakpoint",
+        summary="Remove Calls to `builtin` `breakpoint` and `pdb.set_trace",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[],
+    )
+    change_description = "Remove breakpoint call"
     REFERENCES: list = []
 
     def leave_Expr(

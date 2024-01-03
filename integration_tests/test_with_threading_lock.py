@@ -18,4 +18,4 @@ class TestWithThreadingLock(BaseIntegrationTest):
     )
     expected_diff = '--- \n+++ \n@@ -1,3 +1,4 @@\n import threading\n-with threading.Lock():\n+lock = threading.Lock()\n+with lock:\n     print("Hello")\n'
     expected_line_change = "2"
-    change_description = WithThreadingLock.CHANGE_DESCRIPTION
+    change_description = WithThreadingLock.change_description

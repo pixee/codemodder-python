@@ -7,7 +7,7 @@ class TestFlaskEnableCSRFProtection(BaseCodemodTest):
     codemod = FlaskEnableCSRFProtection
 
     def test_name(self):
-        assert self.codemod.name() == "flask-enable-csrf-protection"
+        assert self.codemod.name == "flask-enable-csrf-protection"
 
     def test_simple(self, tmpdir):
         input_code = """\
@@ -22,7 +22,6 @@ class TestFlaskEnableCSRFProtection(BaseCodemodTest):
         csrf_app = CSRFProtect(app)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_alias(self, tmpdir):
         input_code = """\
@@ -37,7 +36,6 @@ class TestFlaskEnableCSRFProtection(BaseCodemodTest):
         csrf_app = CSRFProtect(app)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_multiple(self, tmpdir):
         input_code = """\
@@ -54,8 +52,7 @@ class TestFlaskEnableCSRFProtection(BaseCodemodTest):
         app2 = Flask(__name__)
         csrf_app2 = CSRFProtect(app2)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 2
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected), num_changes=2)
 
     def test_multiple_inline(self, tmpdir):
         input_code = """\
@@ -69,7 +66,6 @@ class TestFlaskEnableCSRFProtection(BaseCodemodTest):
         app = Flask(__name__); app2 = Flask(__name__); csrf_app = CSRFProtect(app); csrf_app2 = CSRFProtect(app2)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_multiple_inline_suite(self, tmpdir):
         input_code = """\
@@ -83,7 +79,6 @@ class TestFlaskEnableCSRFProtection(BaseCodemodTest):
         if True: app = Flask(__name__); app2 = Flask(__name__); csrf_app = CSRFProtect(app); csrf_app2 = CSRFProtect(app2)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_protected(self, tmpdir):
         input_code = """\
@@ -94,4 +89,3 @@ class TestFlaskEnableCSRFProtection(BaseCodemodTest):
         csrf_app = CSRFProtect(app)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0

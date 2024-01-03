@@ -1,20 +1,27 @@
 import libcst as cst
-
-from codemodder.codemods.api import BaseCodemod, ReviewGuidance
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class FixDeprecatedAbstractproperty(BaseCodemod, NameResolutionMixin):
-    NAME = "fix-deprecated-abstractproperty"
-    SUMMARY = "Replace deprecated abstractproperty"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "Replace deprecated abstractproperty with property and abstractmethod"
-    REFERENCES = [
-        {
-            "url": "https://docs.python.org/3/library/abc.html#abc.abstractproperty",
-            "description": "",
-        },
-    ]
+class FixDeprecatedAbstractproperty(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="fix-deprecated-abstractproperty",
+        summary="Replace deprecated abstractproperty",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/library/abc.html#abc.abstractproperty"
+            ),
+        ],
+    )
+    change_description = (
+        "Replace deprecated abstractproperty with property and abstractmethod"
+    )
 
     def leave_Decorator(
         self, original_node: cst.Decorator, updated_node: cst.Decorator

@@ -35,7 +35,7 @@ et = defusedxml.ElementTree.parse(xml)
 """
 
     expected_line_change = "5"
-    change_description = UseDefusedXml.CHANGE_DESCRIPTION
+    change_description = UseDefusedXml.change_description
 
     requirements_path = "tests/samples/requirements.txt"
     original_requirements = "# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"

@@ -1,27 +1,25 @@
-import libcst as cst
 from typing import Optional
-from codemodder.codemods.api import BaseCodemod
-from codemodder.codemods.base_codemod import ReviewGuidance
+
+import libcst as cst
+
+from core_codemods.api import SimpleCodemod, Metadata, Reference, ReviewGuidance
 from codemodder.codemods.utils import BaseType, infer_expression_type
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 from codemodder.utils.utils import positional_to_keyword
 
 
-class ReplaceFlaskSendFile(BaseCodemod, NameAndAncestorResolutionMixin):
-    NAME = "replace-flask-send-file"
-    SUMMARY = "Replace unsafe usage of `flask.send_file`"
-    DESCRIPTION = SUMMARY
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    REFERENCES = [
-        {
-            "url": "https://flask.palletsprojects.com/en/3.0.x/api/#flask.send_from_directory",
-            "description": "",
-        },
-        {
-            "url": "https://owasp.org/www-community/attacks/Path_Traversal",
-            "description": "",
-        },
-    ]
+class ReplaceFlaskSendFile(SimpleCodemod, NameAndAncestorResolutionMixin):
+    metadata = Metadata(
+        name="replace-flask-send-file",
+        summary="Replace unsafe usage of `flask.send_file`",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://flask.palletsprojects.com/en/3.0.x/api/#flask.send_from_directory"
+            ),
+            Reference(url="https://owasp.org/www-community/attacks/Path_Traversal"),
+        ],
+    )
 
     pos_to_key_map: list[str | None] = [
         "mimetype",

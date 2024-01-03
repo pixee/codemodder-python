@@ -132,6 +132,9 @@ class TestFixDeprecatedAbstractproperty(BaseCodemodTest):
                 pass
         """
         lines_to_exclude = [4]
-        self.assert_no_change_line_excluded(
-            tmpdir, input_code, expected, lines_to_exclude
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            lines_to_exclude=lines_to_exclude,
         )

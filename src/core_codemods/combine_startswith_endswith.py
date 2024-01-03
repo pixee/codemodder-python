@@ -1,14 +1,17 @@
 import libcst as cst
 from libcst import matchers as m
-from codemodder.codemods.api import BaseCodemod, ReviewGuidance
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 
 
-class CombineStartswithEndswith(BaseCodemod, NameResolutionMixin):
-    NAME = "combine-startswith-endswith"
-    SUMMARY = "Simplify Boolean Expressions Using `startswith` and `endswith`"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "Use tuple of matches instead of boolean expression"
+class CombineStartswithEndswith(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="combine-startswith-endswith",
+        summary="Simplify Boolean Expressions Using `startswith` and `endswith`",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[],
+    )
+    change_description = "Use tuple of matches instead of boolean expression"
     REFERENCES: list = []
 
     def leave_BooleanOperation(

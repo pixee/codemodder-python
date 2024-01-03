@@ -5,6 +5,7 @@ from libcst.metadata import PositionProvider
 from codemodder.result import Result
 
 
+# TODO: this should just be part of BaseTransformer and BaseVisitor?
 class UtilsMixin:
     results: list[Result]
 

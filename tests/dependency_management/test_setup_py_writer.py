@@ -85,7 +85,7 @@ def test_update_setuppy_comma_single_element_inline(tmpdir):
 
     store = PackageStore(
         type=FileType.SETUP_PY,
-        file=str(dependency_file),
+        file=dependency_file,
         dependencies=set(),
         py_versions=[">=3.6"],
     )

@@ -30,5 +30,5 @@ class TestNumpyNanEquality(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "4"
-    change_description = NumpyNanEquality.CHANGE_DESCRIPTION
+    change_description = NumpyNanEquality.change_description
     num_changed_files = 1

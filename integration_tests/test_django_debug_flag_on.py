@@ -14,4 +14,4 @@ class TestDjangoDebugFlagFlip(BaseIntegrationTest):
     )
     expected_diff = '--- \n+++ \n@@ -23,7 +23,7 @@\n SECRET_KEY = "django-insecure-t*rrda&qd4^#q+50^%q^rrsp-t$##&u5_#=9)&@ei^ppl6$*c*"\n \n # SECURITY WARNING: don\'t run with debug turned on in production!\n-DEBUG = True\n+DEBUG = False\n \n ALLOWED_HOSTS = []\n \n'
     expected_line_change = "26"
-    change_description = DjangoDebugFlagOn.CHANGE_DESCRIPTION
+    change_description = DjangoDebugFlagOn.change_description

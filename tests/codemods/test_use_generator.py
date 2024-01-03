@@ -35,6 +35,9 @@ class TestUseGenerator(BaseCodemodTest):
         x = any([i for i in range(10)])
         """
         lines_to_exclude = [1]
-        self.assert_no_change_line_excluded(
-            tmpdir, input_code, expected, lines_to_exclude
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            lines_to_exclude=lines_to_exclude,
         )

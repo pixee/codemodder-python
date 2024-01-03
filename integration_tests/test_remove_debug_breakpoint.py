@@ -17,4 +17,4 @@ print("world")
         '--- \n+++ \n@@ -1,3 +1,2 @@\n print("hello")\n-breakpoint()\n print("world")\n'
     )
     expected_line_change = "2"
-    change_description = RemoveDebugBreakpoint.CHANGE_DESCRIPTION
+    change_description = RemoveDebugBreakpoint.change_description

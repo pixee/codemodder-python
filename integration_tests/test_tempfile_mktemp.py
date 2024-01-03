@@ -13,4 +13,4 @@ class TestTempfileMktemp(BaseIntegrationTest):
     )
     expected_diff = '--- \n+++ \n@@ -1,4 +1,4 @@\n import tempfile\n \n-tempfile.mktemp()\n+tempfile.mkstemp()\n var = "hello"\n'
     expected_line_change = "3"
-    change_description = TempfileMktemp.CHANGE_DESCRIPTION
+    change_description = TempfileMktemp.change_description

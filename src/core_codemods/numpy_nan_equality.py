@@ -1,23 +1,27 @@
 import libcst as cst
 from libcst import UnaryOperation
-from codemodder.codemods.api import BaseCodemod
-from codemodder.codemods.base_codemod import ReviewGuidance
 
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class NumpyNanEquality(BaseCodemod, NameResolutionMixin):
-    NAME = "numpy-nan-equality"
-    SUMMARY = "Replace == comparison with numpy.isnan()"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = SUMMARY
-    REFERENCES = [
-        {
-            "url": "https://numpy.org/doc/stable/reference/constants.html#numpy.nan",
-            "description": "",
-        },
-    ]
-    CHANGE_DESCRIPTION = "Replaces == check with numpy.isnan()."
+class NumpyNanEquality(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="numpy-nan-equality",
+        summary="Replace == comparison with numpy.isnan()",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://numpy.org/doc/stable/reference/constants.html#numpy.nan"
+            ),
+        ],
+    )
+    change_description = "Replaces == check with numpy.isnan()."
 
     np_nan = "numpy.nan"
 

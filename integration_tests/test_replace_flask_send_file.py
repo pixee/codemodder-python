@@ -49,5 +49,5 @@ class TestReplaceFlaskSendFile(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "7"
-    change_description = ReplaceFlaskSendFile.CHANGE_DESCRIPTION
+    change_description = ReplaceFlaskSendFile.change_description
     num_changed_files = 1

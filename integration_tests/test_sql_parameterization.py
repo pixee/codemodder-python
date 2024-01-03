@@ -37,5 +37,5 @@ class TestSQLQueryParameterization(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "12"
-    change_description = SQLQueryParameterization.CHANGE_DESCRIPTION
+    change_description = SQLQueryParameterization.change_description
     num_changed_files = 1

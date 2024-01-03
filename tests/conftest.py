@@ -1,56 +1,38 @@
 import pytest
-import mock
 
 
-@pytest.fixture(autouse=True, scope="module")
-def disable_write_report():
+@pytest.fixture(autouse=True)
+def disable_write_report(mocker):
     """
     Unit tests should not write analysis report or update any source files.
     """
-    patch_write_report = mock.patch(
-        "codemodder.report.codetf_reporter.CodeTF.write_report"
-    )
-
-    patch_write_report.start()
-    yield
-    patch_write_report.stop()
+    mocker.patch("codemodder.report.codetf_reporter.CodeTF.write_report")
 
 
-@pytest.fixture(autouse=True, scope="module")
-def disable_update_code():
+@pytest.fixture(autouse=True)
+def disable_update_code(mocker):
     """
     Unit tests should not write analysis report or update any source files.
     """
-    patch_update_code = mock.patch("codemodder.codemodder.update_code")
-    patch_update_code.start()
-    yield
-    patch_update_code.stop()
+    mocker.patch("codemodder.codemods.libcst_transformer.update_code")
 
 
-@pytest.fixture(autouse=True, scope="module")
-def disable_semgrep_run():
+@pytest.fixture(autouse=True)
+def disable_semgrep_run(mocker):
     """
     Semgrep run is slow so we mock them or pass hardcoded results when possible.
     """
-    semgrep_run = mock.patch("codemodder.codemods.base_codemod.semgrep_run")
-
-    semgrep_run.start()
-    yield
-    semgrep_run.stop()
+    mocker.patch("codemodder.codemods.semgrep.semgrep_run")
 
 
-@pytest.fixture(autouse=True, scope="module")
-def disable_write_dependencies():
+@pytest.fixture(autouse=True)
+def disable_write_dependencies(mocker):
     """
     Unit tests should not write any dependency files
     """
-    dm_write = mock.patch(
+    mocker.patch(
         "codemodder.dependency_management.dependency_manager.DependencyManager.write"
     )
-
-    dm_write.start()
-    yield
-    dm_write.stop()
 
 
 @pytest.fixture(scope="module")

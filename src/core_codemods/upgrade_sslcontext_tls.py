@@ -1,25 +1,27 @@
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
-from codemodder.codemods.api.helpers import NewArg
+from codemodder.codemods.libcst_transformer import NewArg
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class UpgradeSSLContextTLS(SemgrepCodemod):
-    NAME = "upgrade-sslcontext-tls"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Upgrade TLS Version In SSLContext"
-    DESCRIPTION = "Replaces known insecure TLS/SSL protocol versions in SSLContext with secure ones."
-    CHANGE_DESCRIPTION = "Upgrade to use a safe version of TLS in SSLContext"
-    REFERENCES = [
-        {
-            "url": "https://docs.python.org/3/library/ssl.html#security-considerations",
-            "description": "",
-        },
-        {"url": "https://datatracker.ietf.org/doc/rfc8996/", "description": ""},
-        {
-            "url": "https://www.digicert.com/blog/depreciating-tls-1-0-and-1-1",
-            "description": "",
-        },
-    ]
+class UpgradeSSLContextTLS(SimpleCodemod):
+    metadata = Metadata(
+        name="upgrade-sslcontext-tls",
+        summary="Upgrade TLS Version In SSLContext",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/library/ssl.html#security-considerations"
+            ),
+            Reference(url="https://datatracker.ietf.org/doc/rfc8996/"),
+            Reference(url="https://www.digicert.com/blog/depreciating-tls-1-0-and-1-1"),
+        ],
+    )
+    change_description = "Replaces known insecure TLS/SSL protocol versions in SSLContext with secure ones."
+    change_description = "Upgrade to use a safe version of TLS in SSLContext"
 
     # TODO: in the majority of cases, using PROTOCOL_TLS_CLIENT will be the
     # right fix. However in some cases it will be appropriate to use
@@ -27,10 +29,7 @@ class UpgradeSSLContextTLS(SemgrepCodemod):
     # this. Eventually, when the platform supports parameters, we want to
     # revisit this to provide PROTOCOL_TLS_SERVER as an alternative fix.
     SAFE_TLS_PROTOCOL_VERSION = "ssl.PROTOCOL_TLS_CLIENT"
-
-    @classmethod
-    def rule(cls):
-        return """
+    detector_pattern = """
             rules:
               - patterns:
                 - pattern-inside: |

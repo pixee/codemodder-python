@@ -1,26 +1,28 @@
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
-from codemodder.codemods.api.helpers import NewArg
+from codemodder.codemods.libcst_transformer import NewArg
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class RequestsVerify(SemgrepCodemod):
-    NAME = "requests-verify"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Verify SSL Certificates for Requests."
-    DESCRIPTION = (
+class RequestsVerify(SimpleCodemod):
+    metadata = Metadata(
+        name="requests-verify",
+        summary="Verify SSL Certificates for Requests.",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        references=[
+            Reference(url="https://requests.readthedocs.io/en/latest/api/"),
+            Reference(
+                url="https://owasp.org/www-community/attacks/Manipulator-in-the-middle_attack"
+            ),
+        ],
+    )
+    change_description = (
         "Makes any calls to requests.{func} with `verify=False` to `verify=True`."
     )
-    REFERENCES = [
-        {"url": "https://requests.readthedocs.io/en/latest/api/", "description": ""},
-        {
-            "url": "https://owasp.org/www-community/attacks/Manipulator-in-the-middle_attack",
-            "description": "",
-        },
-    ]
-
-    @classmethod
-    def rule(cls):
-        return """
+    detector_pattern = """
         rules:
           - patterns:
             - pattern: requests.$F(..., verify=False, ...)

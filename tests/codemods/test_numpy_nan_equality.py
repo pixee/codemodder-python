@@ -7,7 +7,7 @@ class TestNumpyNanEquality(BaseCodemodTest):
     codemod = NumpyNanEquality
 
     def test_name(self):
-        assert self.codemod.name() == "numpy-nan-equality"
+        assert self.codemod.name == "numpy-nan-equality"
 
     def test_simple(self, tmpdir):
         input_code = """\
@@ -21,7 +21,6 @@ class TestNumpyNanEquality(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_inequality(self, tmpdir):
         input_code = """\
@@ -35,7 +34,6 @@ class TestNumpyNanEquality(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_inequality_2(self, tmpdir):
         input_code = """\
@@ -49,7 +47,6 @@ class TestNumpyNanEquality(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_parenthesis(self, tmpdir):
         input_code = """\
@@ -63,7 +60,6 @@ class TestNumpyNanEquality(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_conjunction(self, tmpdir):
         input_code = """\
@@ -76,8 +72,7 @@ class TestNumpyNanEquality(BaseCodemodTest):
         if not numpy.isnan(a) and not numpy.isnan(b):
             pass
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 2
+        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected), num_changes=2)
 
     def test_from_numpy(self, tmpdir):
         input_code = """\
@@ -92,7 +87,6 @@ class TestNumpyNanEquality(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_simple_left(self, tmpdir):
         input_code = """\
@@ -106,7 +100,6 @@ class TestNumpyNanEquality(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_alias(self, tmpdir):
         input_code = """\
@@ -120,7 +113,6 @@ class TestNumpyNanEquality(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_multiple_comparisons(self, tmpdir):
         input_code = """\
@@ -129,7 +121,6 @@ class TestNumpyNanEquality(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_not_numpy(self, tmpdir):
         input_code = """\
@@ -138,7 +129,6 @@ class TestNumpyNanEquality(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_numpy_other_operator(self, tmpdir):
         input_code = """\
@@ -147,4 +137,3 @@ class TestNumpyNanEquality(BaseCodemodTest):
             pass
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0

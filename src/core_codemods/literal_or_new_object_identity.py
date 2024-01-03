@@ -1,22 +1,26 @@
 import libcst as cst
-from codemodder.codemods.api import BaseCodemod
-from codemodder.codemods.base_codemod import ReviewGuidance
 
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class LiteralOrNewObjectIdentity(BaseCodemod, NameAndAncestorResolutionMixin):
-    NAME = "literal-or-new-object-identity"
-    SUMMARY = "Replaces is operator with == for literal or new object comparisons"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = SUMMARY
-    REFERENCES = [
-        {
-            "url": "https://docs.python.org/3/library/stdtypes.html#comparisons",
-            "description": "",
-        },
-    ]
-    CHANGE_DESCRIPTION = "Replaces is operator with =="
+class LiteralOrNewObjectIdentity(SimpleCodemod, NameAndAncestorResolutionMixin):
+    metadata = Metadata(
+        name="literal-or-new-object-identity",
+        summary="Replaces is operator with == for literal or new object comparisons",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/library/stdtypes.html#comparisons"
+            ),
+        ],
+    )
+    change_description = "Replaces is operator with =="
 
     def _is_object_creation_or_literal(self, node: cst.BaseExpression):
         match node:

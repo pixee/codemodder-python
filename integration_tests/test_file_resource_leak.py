@@ -33,5 +33,5 @@ class TestFileResourceLeak(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "3"
-    change_description = FileResourceLeak.CHANGE_DESCRIPTION
+    change_description = FileResourceLeak.change_description
     num_changed_files = 1

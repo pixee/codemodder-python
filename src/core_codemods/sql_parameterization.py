@@ -1,6 +1,7 @@
 import re
 from typing import Any, Optional, Tuple
 import itertools
+
 import libcst as cst
 from libcst import (
     FormattedString,
@@ -10,7 +11,6 @@ from libcst import (
     matchers,
 )
 from libcst.codemod import (
-    Codemod,
     CodemodContext,
     ContextAwareTransformer,
     ContextAwareVisitor,
@@ -22,13 +22,14 @@ from libcst.metadata import (
     PositionProvider,
     ScopeProvider,
 )
-from codemodder.change import Change
 
-from codemodder.codemods.base_codemod import (
-    BaseCodemod,
-    CodemodMetadata,
+from core_codemods.api import (
+    SimpleCodemod,
+    Metadata,
+    Reference,
     ReviewGuidance,
 )
+from codemodder.change import Change
 from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.transformations.remove_empty_string_concatenation import (
     RemoveEmptyStringConcatenation,
@@ -41,7 +42,6 @@ from codemodder.codemods.utils import (
     infer_expression_type,
 )
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from codemodder.file_context import FileContext
 
 parameter_token = "?"
 
@@ -49,24 +49,17 @@ quote_pattern = re.compile(r"(?<!\\)\\'|(?<!\\)'")
 raw_quote_pattern = re.compile(r"(?<!\\)'")
 
 
-class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
-    SUMMARY = "Parameterize SQL Queries"
-    METADATA = CodemodMetadata(
-        DESCRIPTION=SUMMARY,
-        NAME="sql-parameterization",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
-        REFERENCES=[
-            {
-                "url": "https://cwe.mitre.org/data/definitions/89.html",
-                "description": "",
-            },
-            {
-                "url": "https://owasp.org/www-community/attacks/SQL_Injection",
-                "description": "",
-            },
+class SQLQueryParameterization(SimpleCodemod, UtilsMixin):
+    metadata = Metadata(
+        name="sql-parameterization",
+        summary="Parameterize SQL Queries",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        references=[
+            Reference(url="https://cwe.mitre.org/data/definitions/89.html"),
+            Reference(url="https://owasp.org/www-community/attacks/SQL_Injection"),
         ],
     )
-    CHANGE_DESCRIPTION = "Parameterized SQL query execution."
+    change_description = "Parameterized SQL query execution."
 
     METADATA_DEPENDENCIES = (
         PositionProvider,
@@ -76,17 +69,15 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
 
     def __init__(
         self,
-        context: CodemodContext,
-        file_context: FileContext,
         *codemod_args,
+        **codemod_kwargs,
     ) -> None:
         self.changed_nodes: dict[
             cst.CSTNode,
             cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel | dict[str, Any],
         ] = {}
-        BaseCodemod.__init__(self, file_context, *codemod_args)
+        SimpleCodemod.__init__(self, *codemod_args, **codemod_kwargs)
         UtilsMixin.__init__(self, [])
-        Codemod.__init__(self, context)
 
     def _build_param_element(self, prepend, middle, append):
         new_middle = (
@@ -166,7 +157,7 @@ class SQLQueryParameterization(BaseCodemod, UtilsMixin, Codemod):
                 self.changed_nodes = {}
                 line_number = self.get_metadata(PositionProvider, call).start.line
                 self.file_context.codemod_changes.append(
-                    Change(line_number, SQLQueryParameterization.CHANGE_DESCRIPTION)
+                    Change(line_number, SQLQueryParameterization.change_description)
                 )
                 # Normalization and cleanup
                 result = result.visit(RemoveEmptyStringConcatenation())

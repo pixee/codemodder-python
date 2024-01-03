@@ -1,30 +1,37 @@
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
+from core_codemods.api import (
+    SimpleCodemod,
+    Metadata,
+    Reference,
+    ReviewGuidance,
+)
 
 
-class SecureRandom(SemgrepCodemod):
-    NAME = "secure-random"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    SUMMARY = "Secure Source of Randomness"
-    DESCRIPTION = "Replaces random.{func} with more secure secrets library functions."
-    REFERENCES = [
-        {
-            "url": "https://owasp.org/www-community/vulnerabilities/Insecure_Randomness",
-            "description": "",
-        },
-        {"url": "https://docs.python.org/3/library/random.html", "description": ""},
-    ]
+class SecureRandom(SimpleCodemod):
+    metadata = Metadata(
+        name="secure-random",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        summary="Secure Source of Randomness",
+        references=[
+            Reference(
+                url="https://owasp.org/www-community/vulnerabilities/Insecure_Randomness",
+            ),
+            Reference(
+                url="https://docs.python.org/3/library/random.html",
+            ),
+        ],
+    )
 
-    @classmethod
-    def rule(cls):
-        return """
-        rules:
-          - patterns:
-            - pattern: random.$F(...)
-            - pattern-inside: |
-                import random
-                ...
-        """
+    detector_pattern = """
+        - patterns:
+          - pattern: random.$F(...)
+          - pattern-inside: |
+              import random
+              ...
+    """
+
+    change_description = (
+        "Replace random.{func} with more secure secrets library functions."
+    )
 
     def on_result_found(self, original_node, updated_node):
         self.remove_unused_import(original_node)

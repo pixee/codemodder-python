@@ -7,7 +7,7 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
     codemod = DjangoJsonResponseType
 
     def test_name(self):
-        assert self.codemod.name() == "django-json-response-type"
+        assert self.codemod.name == "django-json-response-type"
 
     def test_simple(self, tmpdir):
         input_code = """\
@@ -27,7 +27,6 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
             return HttpResponse(json_response, content_type="application/json")
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_alias(self, tmpdir):
         input_code = """\
@@ -47,7 +46,6 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
             return response(json_response, content_type="application/json")
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_direct(self, tmpdir):
         input_code = """\
@@ -65,7 +63,6 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
             return HttpResponse(json.dumps({ "user_input": request.GET.get("input") }), content_type="application/json")
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
-        assert len(self.file_context.codemod_changes) == 1
 
     def test_content_type_set(self, tmpdir):
         input_code = """\
@@ -77,7 +74,6 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
             return HttpResponse(json_response, content_type='application/json')
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_no_json_input(self, tmpdir):
         input_code = """\
@@ -89,4 +85,3 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
             return HttpResponse(dict_response)
         """
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0

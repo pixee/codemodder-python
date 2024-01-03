@@ -1,31 +1,31 @@
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
-from codemodder.codemods.api.helpers import NewArg
+from codemodder.codemods.libcst_transformer import NewArg
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class LxmlSafeParserDefaults(SemgrepCodemod):
-    NAME = "safe-lxml-parser-defaults"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Use Safe Defaults for `lxml` Parsers"
-    DESCRIPTION = "Replace `lxml` parser parameters with safe defaults."
-    REFERENCES = [
-        {
-            "url": "https://lxml.de/apidoc/lxml.etree.html#lxml.etree.XMLParser",
-            "description": "",
-        },
-        {
-            "url": "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing",
-            "description": "",
-        },
-        {
-            "url": "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
-            "description": "",
-        },
-    ]
-
-    @classmethod
-    def rule(cls):
-        return """
+class LxmlSafeParserDefaults(SimpleCodemod):
+    metadata = Metadata(
+        name="safe-lxml-parser-defaults",
+        summary="Use Safe Defaults for `lxml` Parsers",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://lxml.de/apidoc/lxml.etree.html#lxml.etree.XMLParser"
+            ),
+            Reference(
+                url="https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing"
+            ),
+            Reference(
+                url="https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
+            ),
+        ],
+    )
+    change_description = "Replace `lxml` parser parameters with safe defaults."
+    detector_pattern = """
             rules:
                 - patterns:
                   - pattern: lxml.etree.$CLASS(...)

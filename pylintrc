@@ -7,7 +7,8 @@ jobs=0
 # Add files or directories matching the regex patterns to the ignore-list. The
 # regex matches against paths and can be in Posix or Windows format.
 ignore-paths=
-    tests/samples,
+    tests/samples/,
+    .*/core_codemods/refactor/.*py$
 
 # Specify a score threshold under which the program will exit with error.
 fail-under=10.0

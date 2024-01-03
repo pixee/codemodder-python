@@ -2,14 +2,15 @@ from typing import List, Optional, Union
 
 import libcst as cst
 from libcst import CSTNode, matchers
-from libcst.codemod import Codemod, CodemodContext
+from libcst.codemod import CodemodContext
 from libcst.metadata import PositionProvider, ScopeProvider
 
 from libcst.codemod.visitors import AddImportsVisitor, ImportItem
 from codemodder.change import Change
-from codemodder.codemods.base_codemod import (
-    SemgrepCodemod,
-    CodemodMetadata,
+from core_codemods.api import (
+    SimpleCodemod,
+    Metadata,
+    Reference,
     ReviewGuidance,
 )
 from codemodder.codemods.base_visitor import BaseVisitor
@@ -24,46 +25,46 @@ from codemodder.file_context import FileContext
 replacement_import = "safe_requests"
 
 
-class UrlSandbox(SemgrepCodemod, Codemod):
-    METADATA = CodemodMetadata(
-        DESCRIPTION=(
-            "Replaces request.{func} with more secure safe_request library functions."
-        ),
-        NAME="url-sandbox",
-        REVIEW_GUIDANCE=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
-        REFERENCES=[
-            {
-                "url": "https://github.com/pixee/python-security/blob/main/src/security/safe_requests/api.py",
-                "description": "",
-            },
-            {"url": "https://portswigger.net/web-security/ssrf", "description": ""},
-            {
-                "url": "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html",
-                "description": "",
-            },
-            {
-                "url": "https://www.rapid7.com/blog/post/2021/11/23/owasp-top-10-deep-dive-defending-against-server-side-request-forgery/",
-                "description": "",
-            },
-            {
-                "url": "https://blog.assetnote.io/2021/01/13/blind-ssrf-chains/",
-                "description": "",
-            },
+class UrlSandbox(SimpleCodemod):
+    metadata = Metadata(
+        name="url-sandbox",
+        summary="Sandbox URL Creation",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        references=[
+            Reference(
+                url="https://github.com/pixee/python-security/blob/main/src/security/safe_requests/api.py"
+            ),
+            Reference(url="https://portswigger.net/web-security/ssrf"),
+            Reference(
+                url="https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html"
+            ),
+            Reference(
+                url="https://www.rapid7.com/blog/post/2021/11/23/owasp-top-10-deep-dive-defending-against-server-side-request-forgery/"
+            ),
+            Reference(url="https://blog.assetnote.io/2021/01/13/blind-ssrf-chains/"),
         ],
     )
-    SUMMARY = "Sandbox URL Creation"
-    CHANGE_DESCRIPTION = "Switch use of requests for security.safe_requests"
-    YAML_FILES = [
-        "sandbox_url_creation.yaml",
-    ]
+    change_description = "Switch use of requests for security.safe_requests"
+
+    detector_pattern = """
+    rules:
+      - id: url-sandbox
+        message: Unbounded URL creation
+        severity: WARNING
+        languages:
+          - python
+        pattern-either:
+          - patterns:
+            - pattern: requests.get(...)
+            - pattern-not: requests.get("...")
+            - pattern-inside: |
+                import requests
+                ...
+            """
 
     METADATA_DEPENDENCIES = (PositionProvider, ScopeProvider)
 
     adds_dependency = True
-
-    def __init__(self, codemod_context: CodemodContext, *args):
-        Codemod.__init__(self, codemod_context)
-        SemgrepCodemod.__init__(self, *args)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         # we first gather all the nodes we want to change together with their replacements
@@ -142,7 +143,7 @@ class FindRequestCallsAndImports(BaseVisitor):
                             }
                         )
                         self.changes_in_file.append(
-                            Change(line_number, UrlSandbox.CHANGE_DESCRIPTION)
+                            Change(line_number, UrlSandbox.change_description)
                         )
 
             # case req.get(...)
@@ -156,7 +157,7 @@ class FindRequestCallsAndImports(BaseVisitor):
                     }
                 )
                 self.changes_in_file.append(
-                    Change(line_number, UrlSandbox.CHANGE_DESCRIPTION)
+                    Change(line_number, UrlSandbox.change_description)
                 )
 
     def _find_assignments(self, node: CSTNode):

@@ -22,7 +22,7 @@ class TestProcessSandbox(BaseIntegrationTest):
     expected_line_change = "3"
     num_changes = 4
     num_changed_files = 2
-    change_description = ProcessSandbox.CHANGE_DESCRIPTION
+    change_description = ProcessSandbox.change_description
 
     requirements_path = "tests/samples/requirements.txt"
     original_requirements = "# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"

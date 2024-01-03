@@ -1,25 +1,27 @@
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import SemgrepCodemod
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class TempfileMktemp(SemgrepCodemod, NameResolutionMixin):
-    NAME = "secure-tempfile"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    SUMMARY = "Upgrade and Secure Temp File Creation"
-    DESCRIPTION = "Replaces `tempfile.mktemp` with `tempfile.mkstemp`."
-    REFERENCES = [
-        {
-            "url": "https://docs.python.org/3/library/tempfile.html#tempfile.mktemp",
-            "description": "",
-        }
-    ]
+class TempfileMktemp(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="secure-tempfile",
+        summary="Upgrade and Secure Temp File Creation",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/library/tempfile.html#tempfile.mktemp"
+            ),
+        ],
+    )
+    change_description = "Replaces `tempfile.mktemp` with `tempfile.mkstemp`."
 
     _module_name = "tempfile"
-
-    @classmethod
-    def rule(cls):
-        return """
+    detector_pattern = """
         rules:
           - patterns:
             - pattern: tempfile.mktemp(...)

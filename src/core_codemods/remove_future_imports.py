@@ -1,6 +1,10 @@
 import libcst as cst
-
-from codemodder.codemods.api import BaseCodemod, ReviewGuidance
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
 DEPRECATED_NAMES = [
@@ -18,17 +22,16 @@ CURRENT_NAMES = [
 ]
 
 
-class RemoveFutureImports(BaseCodemod):
-    NAME = "remove-future-imports"
-    SUMMARY = "Remove deprecated `__future__` imports"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "Remove deprecated `__future__` imports"
-    REFERENCES = [
-        {
-            "url": "https://docs.python.org/3/library/__future__.html",
-            "description": "",
-        },
-    ]
+class RemoveFutureImports(SimpleCodemod):
+    metadata = Metadata(
+        name="remove-future-imports",
+        summary="Remove deprecated `__future__` imports",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(url="https://docs.python.org/3/library/__future__.html"),
+        ],
+    )
+    change_description = "Remove deprecated `__future__` imports"
 
     def leave_ImportFrom(
         self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
@@ -41,7 +44,7 @@ class RemoveFutureImports(BaseCodemod):
                             cst.ImportAlias(name=cst.Name(value=name))
                             for name in CURRENT_NAMES
                         ]
-                        self.add_change(original_node, self.CHANGE_DESCRIPTION)
+                        self.add_change(original_node, self.change_description)
                         return original_node.with_changes(names=names)
 
                 updated_names: list[cst.ImportAlias] = [
@@ -49,7 +52,7 @@ class RemoveFutureImports(BaseCodemod):
                     for name in original_node.names
                     if name.name.value not in DEPRECATED_NAMES
                 ]
-                self.add_change(original_node, self.CHANGE_DESCRIPTION)
+                self.add_change(original_node, self.change_description)
                 return (
                     updated_node.with_changes(names=updated_names)
                     if updated_names

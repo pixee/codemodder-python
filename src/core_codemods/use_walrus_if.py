@@ -6,9 +6,12 @@ import libcst as cst
 from libcst._position import CodeRange
 from libcst import matchers as m
 from libcst.metadata import ParentNodeProvider, ScopeProvider
-
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import BaseCodemod
+from core_codemods.api import (
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
 FoundAssign = namedtuple("FoundAssign", ["assign", "target", "value"])
@@ -20,23 +23,24 @@ def pairwise(iterable):
     return zip(a, b)
 
 
-class UseWalrusIf(BaseCodemod):
-    METADATA_DEPENDENCIES = BaseCodemod.METADATA_DEPENDENCIES + (
+class UseWalrusIf(SimpleCodemod):
+    metadata = Metadata(
+        name="use-walrus-if",
+        summary="Use Assignment Expression (Walrus) In Conditional",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions"
+            ),
+        ],
+    )
+    change_description = (
+        "Replaces multiple expressions involving `if` operator with 'walrus' operator."
+    )
+    METADATA_DEPENDENCIES = SimpleCodemod.METADATA_DEPENDENCIES + (
         ParentNodeProvider,
         ScopeProvider,
     )
-    NAME = "use-walrus-if"
-    SUMMARY = "Use Assignment Expression (Walrus) In Conditional"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
-    DESCRIPTION = (
-        "Replaces multiple expressions involving `if` operator with 'walrus' operator."
-    )
-    REFERENCES = [
-        {
-            "url": "https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions",
-            "description": "",
-        }
-    ]
 
     _modify_next_if: List[Tuple[CodeRange, cst.NamedExpr]]
     _if_stack: List[Optional[Tuple[CodeRange, cst.NamedExpr]]]
@@ -123,7 +127,7 @@ class UseWalrusIf(BaseCodemod):
         if (result := self._if_stack.pop()) is not None:
             position, named_expr = result
             is_name = m.matches(updated_node.test, m.Name())
-            self.add_change_from_position(position, self.CHANGE_DESCRIPTION)
+            self.add_change_from_position(position, self.change_description)
             return (
                 updated_node.with_changes(test=named_expr)
                 if is_name

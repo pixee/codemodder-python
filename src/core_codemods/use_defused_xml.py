@@ -3,9 +3,12 @@ from typing import Mapping
 
 import libcst as cst
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
-
-from codemodder.codemods.base_codemod import ReviewGuidance
-from codemodder.codemods.api import BaseCodemod
+from core_codemods.api import (
+    SimpleCodemod,
+    Metadata,
+    Reference,
+    ReviewGuidance,
+)
 from codemodder.codemods.imported_call_modifier import ImportedCallModifier
 from codemodder.dependency import DefusedXML
 
@@ -42,31 +45,26 @@ DOM_METHODS = ["parse", "parseString"]
 # TODO: add expat methods?
 
 
-class UseDefusedXml(BaseCodemod):
-    NAME = "use-defusedxml"
-    SUMMARY = "Use `defusedxml` for Parsing XML"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_REVIEW
-    DESCRIPTION = "Replace builtin xml method with safe defusedxml method"
-    REFERENCES = [
-        {
-            "url": "https://docs.python.org/3/library/xml.html#xml-vulnerabilities",
-            "description": "",
-        },
-        {
-            "url": "https://docs.python.org/3/library/xml.html#the-defusedxml-package",
-            "description": "",
-        },
-        {
-            "url": "https://pypi.org/project/defusedxml/",
-            "description": "",
-        },
-        {
-            "url": "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
-            "description": "",
-        },
-    ]
+class UseDefusedXml(SimpleCodemod):
+    metadata = Metadata(
+        name="use-defusedxml",
+        summary="Use `defusedxml` for Parsing XML",
+        review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/library/xml.html#xml-vulnerabilities"
+            ),
+            Reference(
+                url="https://docs.python.org/3/library/xml.html#the-defusedxml-package"
+            ),
+            Reference(url="https://pypi.org/project/defusedxml/"),
+            Reference(
+                url="https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
+            ),
+        ],
+    )
 
-    adds_dependency = True
+    change_description = "Replace builtin XML method with safe `defusedxml` method"
 
     @cached_property
     def matching_functions(self) -> dict[str, str]:
@@ -89,7 +87,7 @@ class UseDefusedXml(BaseCodemod):
             self.context,
             self.file_context,
             self.matching_functions,
-            self.CHANGE_DESCRIPTION,
+            self.change_description,
         )
         result_tree = visitor.transform_module(tree)
         self.file_context.codemod_changes.extend(visitor.changes_in_file)
