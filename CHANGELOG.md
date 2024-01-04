@@ -1,8 +1,32 @@
 # CHANGELOG
 
-## 0.68.0 (unreleased)
+## 0.69.0 (2024-01-04)
 
 ### New
+
+* `use-set-literal` codemod
+* `remove-module-global` codemod
+* `subprocess-shell-false` codemod
+* Better formatting for dependency updates to `setup.py`
+* Add expression propagation to `literal-or-new-object-identity`
+
+### Fixed
+
+## 0.68.1 (2023-12-22)
+
+### Fixed
+* Fix regression in dependency manager: do not re-add existing dependency
+
+## 0.68.0 (2023-12-21)
+
+### New
+
+* `literal-or-new-object-identity` codemod
+* `remove-future-imports` codemod
+* `add-requests-timeout` codemod
+* `exception-without-raise` codemod
+* Better heuristic for detecting which dependency files to update
+* Add detailed description to CodeTF about dependency update (or failure)
 
 ### Fixed
 
