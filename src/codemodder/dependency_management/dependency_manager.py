@@ -8,6 +8,7 @@ from codemodder.dependency_management.pyproject_writer import PyprojectWriter
 from codemodder.dependency_management.setup_py_writer import (
     SetupPyWriter,
 )
+from codemodder.dependency_management.setupcfg_writer import SetupCfgWriter
 
 from codemodder.project_analysis.file_parsers.package_store import (
     PackageStore,
@@ -41,6 +42,10 @@ class DependencyManager:
                 ).write(dependencies, dry_run)
             case FileType.SETUP_PY:
                 return SetupPyWriter(
+                    self.dependencies_store, self.parent_directory
+                ).write(dependencies, dry_run)
+            case FileType.SETUP_CFG:
+                return SetupCfgWriter(
                     self.dependencies_store, self.parent_directory
                 ).write(dependencies, dry_run)
         return None

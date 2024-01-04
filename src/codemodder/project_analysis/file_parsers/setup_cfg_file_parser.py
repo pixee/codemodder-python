@@ -6,6 +6,7 @@ from pathlib import Path
 import configparser
 
 from .base_parser import BaseParser
+from codemodder.logging import logger
 
 
 class SetupCfgParser(BaseParser):
@@ -15,13 +16,17 @@ class SetupCfgParser(BaseParser):
 
     def _parse_file(self, file: Path) -> PackageStore | None:
         config = configparser.ConfigParser()
-        config.read(file)
-
-        if not (options := config["options"]):
+        try:
+            config.read(file)
+        except configparser.ParsingError:
+            logger.debug("Unable to parse setup.cfg file.")
             return None
 
-        dependency_lines = options.get("install_requires", "").split("\n")
-        python_requires = options.get("python_requires", "")
+        if "options" not in config:
+            return None
+
+        dependency_lines = config["options"].get("install_requires", "").split("\n")
+        python_requires = config["options"].get("python_requires", "")
 
         return PackageStore(
             type=self.file_type,
