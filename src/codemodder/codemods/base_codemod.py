@@ -47,27 +47,33 @@ class BaseCodemod:
     is_semgrep: bool = False
     adds_dependency: bool = False
     file_context: FileContext
+    RULES_REQUESTED: list[str] = []
 
     def __init__(self, file_context: FileContext):
         self.file_context = file_context
 
     @classmethod
-    def apply_rule(cls, context, *args, **kwargs) -> ResultSet:
+    def apply_rule(cls, context, results, *args, **kwargs) -> ResultSet:
         """
-        Apply rule associated with this codemod and gather results
-
-        Does nothing by default. Subclasses may override for custom rule logic.
+        Gather the results relevant to the codemod.
         """
-        del context, args, kwargs
-        return ResultSet()
+        return ResultSet(
+            {
+                r: results[r]
+                for r in [*cls.RULES_REQUESTED, cls.name()]
+                if r in results.keys()
+            }
+        )
 
     @classmethod
-    def name(cls):
+    def name(cls) -> str:
         # pylint: disable=no-member
         return cls.METADATA.NAME
 
     @property
     def should_transform(self):
+        if self.RULES_REQUESTED:
+            return bool(self.file_context.findings)
         return True
 
     def node_position(self, node):
@@ -110,12 +116,19 @@ class SemgrepCodemod(BaseCodemod):
     is_semgrep = True
 
     @classmethod
-    def apply_rule(cls, context, *args, **kwargs) -> ResultSet:
+    def apply_rule(cls, context, results, *args, **kwargs) -> ResultSet:
         """
         Apply semgrep to gather rule results
         """
+        filtered_results = super().apply_rule(context, results, *args, **kwargs)
+        files_to_analyze = set(filtered_results.get(cls.name(), {}).keys())
+        # only analyze files in rules_requested
+        if cls.RULES_REQUESTED:
+            for r in cls.RULES_REQUESTED:
+                r_paths = set(filtered_results.get(r, {}).keys())
+                files_to_analyze = files_to_analyze.intersection(r_paths)
+
         yaml_files = kwargs.get("yaml_files") or args[0]
-        files_to_analyze = kwargs.get("files_to_analyze") or args[1]
         with context.timer.measure("semgrep"):
             return semgrep_run(context, yaml_files, files_to_analyze)
 

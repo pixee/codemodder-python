@@ -23,7 +23,9 @@ from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default
 from codemodder.result import ResultSet
+from codemodder.sarifs import SarifResult
 from codemodder.semgrep import run as run_semgrep
+from codemodder.sonar_results import SonarResultSet
 
 
 def update_code(file_path, new_code):
@@ -100,10 +102,9 @@ def process_file(
 
     line_exclude = file_line_patterns(file_path, cli_args.path_exclude)
     line_include = file_line_patterns(file_path, cli_args.path_include)
-    findings_for_rule = results.results_for_rule_and_file(
-        codemod.name,  # TODO: should be full ID
-        file_path,
-    )
+    findings_for_rule = []
+    for k in results.keys():
+        findings_for_rule.extend(results.get(k, {}).get(file_path, []))
 
     file_context = FileContext(
         base_directory,
@@ -186,7 +187,7 @@ def log_report(context, argv, elapsed_ms, files_to_analyze):
 def apply_codemods(
     context: CodemodExecutionContext,
     codemods_to_run: list[CodemodExecutorWrapper],
-    semgrep_results: ResultSet,
+    all_results: ResultSet,
     files_to_analyze: list[Path],
     argv,
 ):
@@ -200,7 +201,11 @@ def apply_codemods(
         logger.info("no codemods to run")
         return
 
-    semgrep_finding_ids = semgrep_results.all_rule_ids()
+    semgrep_finding_ids = []
+    for key_id in all_results.keys():
+        first_value = next(iter(next(iter(all_results.get(key_id, {}).values()))))
+        if isinstance(first_value, SarifResult):
+            semgrep_finding_ids.append(key_id)
 
     # run codemods one at a time making sure to respect the given sequence
     for codemod in codemods_to_run:
@@ -216,9 +221,8 @@ def apply_codemods(
             )
             continue
 
-        semgrep_files = semgrep_results.files_for_rule(codemod.name)
-        # Non-semgrep codemods ignore the semgrep results
-        results = codemod.apply(context, semgrep_files)
+        # Grab the relevant results to the codemod
+        results = codemod.apply(context, all_results)
         analyze_files(
             context,
             files_to_analyze,
@@ -248,6 +252,13 @@ def record_dependency_update(dependency_results: dict[Dependency, PackageStore |
             )
         else:
             logger.debug("The following dependencies could not be added: %s", str_list)
+
+
+def process_sonar_findings(sonar_json_files: list[str]) -> SonarResultSet:
+    combined_result_set = SonarResultSet()
+    for file in sonar_json_files or []:
+        combined_result_set |= SonarResultSet.from_json(file)
+    return combined_result_set
 
 
 def run(original_args) -> int:
@@ -298,11 +309,15 @@ def run(original_args) -> int:
     log_list(logging.DEBUG, "matched files", full_names)
 
     semgrep_results: ResultSet = find_semgrep_results(context, codemods_to_run)
+    sonar_results: ResultSet = process_sonar_findings(argv.sonar_issues_json)
+    # TODO unlikelly, but may have key collisions here
+    # should probably perpend the rule_id with the sast tool name
+    all_results: ResultSet = semgrep_results | sonar_results
 
     apply_codemods(
         context,
         codemods_to_run,
-        semgrep_results,
+        all_results,
         files_to_analyze,
         argv,
     )

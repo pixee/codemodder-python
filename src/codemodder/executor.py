@@ -1,7 +1,7 @@
 from importlib.abc import Traversable
-from pathlib import Path
-
 from wrapt import CallableObjectProxy
+
+from codemodder.result import ResultSet
 
 
 class CodemodExecutorWrapper(CallableObjectProxy):
@@ -23,7 +23,7 @@ class CodemodExecutorWrapper(CallableObjectProxy):
         self.docs_module = docs_module
         self.semgrep_config_module = semgrep_config_module
 
-    def apply(self, context, files: list[Path]):
+    def apply(self, context, results: ResultSet):
         """
         Wraps the codemod's apply method to inject additional arguments.
 
@@ -31,8 +31,8 @@ class CodemodExecutorWrapper(CallableObjectProxy):
         """
         return self.apply_rule(
             context,
+            results,
             yaml_files=self.yaml_files,
-            files_to_analyze=files,
         )
 
     @property

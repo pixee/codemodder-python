@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing_extensions import Self
 
 from .utils.abc_dataclass import ABCDataclass
 
@@ -42,8 +43,11 @@ class ResultSet(dict[str, dict[Path, list[Result]]]):
     def results_for_rule_and_file(self, rule_id: str, file: Path) -> list[Result]:
         return self.get(rule_id, {}).get(file, [])
 
-    def files_for_rule(self, rule_id: str) -> list[Path]:
-        return list(self.get(rule_id, {}).keys())
+    def files_for_rule(self, rule_id: str) -> set[Path]:
+        return set(self.get(rule_id, {}).keys())
 
     def all_rule_ids(self) -> list[str]:
         return list(self.keys())
+
+    def __or__(self, other):
+        return ResultSet(super().__or__(other))

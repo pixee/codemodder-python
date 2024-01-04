@@ -87,7 +87,7 @@ class BaseCodemod(
 ):
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
         _BaseCodemod.__init__(self, file_context)
-        BaseTransformer.__init__(self, codemod_context, [])
+        BaseTransformer.__init__(self, codemod_context, file_context.findings)
 
     def report_change(self, original_node):
         line_number = self.lineno_for_node(original_node)
