@@ -169,6 +169,7 @@ def test_dont_add_existing_dependency(tmpdir):
             "libcst~=1.1.0",
             "pylint~=3.0.0",
             "PyYAML~=6.0.0",
+            "security~=1.2.0",
         ]
     """
 
