@@ -6,6 +6,7 @@ import subprocess
 import pytest
 
 from .base_test import SAMPLES_DIR
+from security import safe_command
 
 
 class TestMultipleCodemods:
@@ -31,8 +32,7 @@ class TestMultipleCodemods:
             f"**/{source_file_name}",
         ]
 
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
             shell=False,
         )
