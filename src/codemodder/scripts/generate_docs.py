@@ -198,6 +198,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="Simplifying expressions involving `startswith` or `endswith` calls is safe.",
     ),
+    "fix-deprecated-logging-warn": DocMetadata(
+        importance="Low",
+        guidance_explained="This change fixes deprecated uses and is safe.",
+    ),
 }
 
 

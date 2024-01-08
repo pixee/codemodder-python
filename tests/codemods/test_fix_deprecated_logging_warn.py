@@ -1,0 +1,87 @@
+import pytest
+from core_codemods.fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
+from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+
+
+class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):
+    codemod = FixDeprecatedLoggingWarn
+
+    @pytest.mark.parametrize(
+        "code",
+        [
+            """
+            import logging
+            logging.{}('something')
+        """,
+            """
+        import logging
+        log = logging.getLogger('anything')
+        log.{}('something')
+        """,
+        ],
+    )
+    def test_import(self, tmpdir, code):
+        original_code = code.format("warn")
+        new_code = code.format("warning")
+        self.run_and_assert(tmpdir, original_code, new_code)
+        assert len(self.file_context.codemod_changes) == 1
+
+    @pytest.mark.parametrize(
+        "code",
+        [
+            """
+        from logging import {0}
+        {0}('something')
+        """,
+            """
+        from logging import getLogger
+        getLogger('anything').{0}('something')
+        """,
+        ],
+    )
+    def test_from_import(self, tmpdir, code):
+        original_code = code.format("warn")
+        new_code = code.format("warning")
+        self.run_and_assert(tmpdir, original_code, new_code)
+        assert len(self.file_context.codemod_changes) == 1
+
+    @pytest.mark.parametrize(
+        "input_code,expected_output",
+        [
+            (
+                """from logging import warn as warn_func
+warn_func('something')""",
+                """from logging import warning
+warning('something')""",
+            ),
+            (
+                """from logging import getLogger as make_logger
+logger = make_logger('anything')
+logger.warn('something')""",
+                """from logging import getLogger as make_logger
+logger = make_logger('anything')
+logger.warning('something')""",
+            ),
+        ],
+    )
+    def test_import_alias(self, tmpdir, input_code, expected_output):
+        self.run_and_assert(tmpdir, input_code, expected_output)
+        assert len(self.file_context.codemod_changes) == 1
+
+    @pytest.mark.parametrize(
+        "code",
+        [
+            """
+        import xyz
+        xyz.warn('something')
+        """,
+            """
+        import my_logging
+        log = my_logging.getLogger('anything')
+        log.warn('something')
+        """,
+        ],
+    )
+    def test_different_warn(self, tmpdir, code):
+        self.run_and_assert(tmpdir, code, code)
+        assert len(self.file_context.codemod_changes) == 0
