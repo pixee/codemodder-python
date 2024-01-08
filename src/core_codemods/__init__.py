@@ -42,7 +42,7 @@ from .literal_or_new_object_identity import LiteralOrNewObjectIdentity
 from .subprocess_shell_false import SubprocessShellFalse
 from .remove_module_global import RemoveModuleGlobal
 from .remove_debug_breakpoint import RemoveDebugBreakpoint
-
+from .fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 
 registry = CodemodCollection(
     origin="pixee",
@@ -91,5 +91,6 @@ registry = CodemodCollection(
         LiteralOrNewObjectIdentity,
         RemoveModuleGlobal,
         RemoveDebugBreakpoint,
+        FixDeprecatedLoggingWarn,
     ],
 )
