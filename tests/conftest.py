@@ -79,3 +79,25 @@ def pkg_with_reqs_txt_unknown_encoding(tmp_path_factory):
     reqs = "\xf0\x28\x8c\xbc"
     req_file.write_text(reqs)
     return base_dir
+
+
+@pytest.fixture(scope="module")
+def pkg_with_setup_cfg(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp("foo")
+    req_file = base_dir / "setup.cfg"
+    reqs = """\
+        [metadata]
+        name = my_package
+        version = attr: my_package.VERSION
+
+        # some other stuff
+
+        [options]
+        include_package_data = True
+        python_requires = >=3.7
+        install_requires =
+            requests
+            importlib-metadata; python_version<"3.8"
+    """
+    req_file.write_text(reqs)
+    return base_dir

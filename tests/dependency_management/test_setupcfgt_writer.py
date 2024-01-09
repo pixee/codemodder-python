@@ -1,4 +1,5 @@
 from textwrap import dedent
+import mock
 import pytest
 
 from codemodder.dependency_management.setupcfg_writer import SetupCfgWriter
@@ -219,6 +220,42 @@ def test_cfg_bad_formatting(tmpdir):
         install_requires =
         requests
         importlib-metadata; python_version<"3.8"
+    """
+
+    setup_cfg = tmpdir.join("setup.cfg")
+    setup_cfg.write(dedent(orig_setupcfg))
+
+    store = PackageStore(
+        type=FileType.SETUP_CFG,
+        file=str(setup_cfg),
+        dependencies=set(),
+        py_versions=[">=3.7"],
+    )
+
+    writer = SetupCfgWriter(store, tmpdir)
+    dependencies = [Security, Security]
+    writer.write(dependencies)
+    assert setup_cfg.read() == dedent(orig_setupcfg)
+
+
+@mock.patch(
+    "codemodder.dependency_management.setupcfg_writer.SetupCfgWriter.build_new_lines",
+    return_value=None,
+)
+def test_cfg_cant_build_newlines(_, tmpdir):
+    orig_setupcfg = """\
+        [metadata]
+        name = my_package
+        version = attr: my_package.VERSION
+
+        # some other stuff
+
+        [options]
+        include_package_data = True
+        python_requires = >=3.7
+        install_requires =
+            requests
+            importlib-metadata; python_version<"3.8"
     """
 
     setup_cfg = tmpdir.join("setup.cfg")
