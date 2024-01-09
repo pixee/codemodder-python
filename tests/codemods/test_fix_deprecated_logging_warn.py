@@ -10,8 +10,12 @@ class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):
         "code",
         [
             """
-            import logging
-            logging.{}('something')
+        import logging
+        logging.{}('something')
+        """,
+            """
+        import logging
+        logging.{}("something %s and %s", "foo", "bar")
         """,
             """
         import logging
@@ -49,18 +53,22 @@ class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):
         "input_code,expected_output",
         [
             (
-                """from logging import warn as warn_func
-warn_func('something')""",
-                """from logging import warning
-warning('something')""",
+                """\
+                from logging import warn as warn_func
+                warn_func('something')""",
+                """\
+                from logging import warning
+                warning('something')""",
             ),
             (
-                """from logging import getLogger as make_logger
-logger = make_logger('anything')
-logger.warn('something')""",
-                """from logging import getLogger as make_logger
-logger = make_logger('anything')
-logger.warning('something')""",
+                """\
+                from logging import getLogger as make_logger
+                logger = make_logger('anything')
+                logger.warn('something')""",
+                """\
+                from logging import getLogger as make_logger
+                logger = make_logger('anything')
+                logger.warning('something')""",
             ),
         ],
     )
@@ -85,3 +93,17 @@ logger.warning('something')""",
     def test_different_warn(self, tmpdir, code):
         self.run_and_assert(tmpdir, code, code)
         assert len(self.file_context.codemod_changes) == 0
+
+    @pytest.mark.xfail(reason="Not currently supported")
+    def test_log_as_arg(self, tmpdir):
+        code = """\
+        import logging
+        log = logging.getLogger('foo')
+        def some_function(logger):
+            logger.{}("hi")
+        some_function(log)
+        """
+        original_code = code.format("warn")
+        new_code = code.format("warning")
+        self.run_and_assert(tmpdir, original_code, new_code)
+        assert len(self.file_context.codemod_changes) == 1
