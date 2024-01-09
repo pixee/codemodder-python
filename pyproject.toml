@@ -49,7 +49,7 @@ test = [
     "Flask<4",
     "GitPython<4",
     "Jinja2~=3.1.2",
-    "lxml>=4.9.3,<5.1.0",
+    "lxml>=4.9.3,<5.2.0",
     "mock==5.1.*",
     "pre-commit<4",
     "Pyjwt~=2.8.0",
