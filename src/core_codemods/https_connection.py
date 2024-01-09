@@ -24,7 +24,12 @@ class HTTPSConnectionModifier(ImportedCallModifier[Set[str]]):
         return new_args
 
     def update_attribute(self, true_name, original_node, updated_node, new_args):
-        del true_name, original_node
+        del true_name
+        if not self.filter_by_path_includes_or_excludes(
+            self.node_position(original_node)
+        ):
+            return original_node
+
         return updated_node.with_changes(
             args=new_args,
             func=updated_node.func.with_changes(
@@ -34,6 +39,11 @@ class HTTPSConnectionModifier(ImportedCallModifier[Set[str]]):
 
     def update_simple_name(self, true_name, original_node, updated_node, new_args):
         del true_name
+        if not self.filter_by_path_includes_or_excludes(
+            self.node_position(original_node)
+        ):
+            return original_node
+
         AddImportsVisitor.add_needed_import(self.context, "urllib3")
         RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
         return updated_node.with_changes(

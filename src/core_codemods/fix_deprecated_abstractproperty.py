@@ -19,6 +19,11 @@ class FixDeprecatedAbstractproperty(BaseCodemod, NameResolutionMixin):
     def leave_Decorator(
         self, original_node: cst.Decorator, updated_node: cst.Decorator
     ):
+        if not self.filter_by_path_includes_or_excludes(
+            self.node_position(original_node)
+        ):
+            return original_node
+
         if (
             base_name := self.find_base_name(original_node.decorator)
         ) and base_name == "abc.abstractproperty":

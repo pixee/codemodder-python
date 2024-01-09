@@ -25,6 +25,11 @@ class UseGenerator(BaseCodemod, NameResolutionMixin):
     ]
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
+        if not self.filter_by_path_includes_or_excludes(
+            self.node_position(original_node)
+        ):
+            return original_node
+
         match original_node.func:
             # NOTE: could also support things like `list` and `tuple`
             # but it's a less compelling use case
