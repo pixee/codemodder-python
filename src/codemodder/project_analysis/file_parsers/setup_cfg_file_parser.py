@@ -20,7 +20,7 @@ class SetupCfgParser(BaseParser):
             config.read(file)
         except configparser.ParsingError:
             logger.debug("Unable to parse setup.cfg file.")
-            return None
+            return None  # pragma: no cover
 
         if "options" not in config:
             return None

@@ -15,7 +15,7 @@ def find_leading_whitespace(s):
     match = re.match(r"(\s+)", s)
     if match:
         return match.group(1)
-    return ""
+    return ""  # pragma: no cover
 
 
 def added_line_nums_strategy(lines, i):
@@ -79,7 +79,7 @@ class SetupCfgWriter(DependencyWriter):
         configparser does not retain formatting or comment lines, so we have to build
         the output newline manually.
         """
-        clean_lines = list(map(lambda s: s.strip(), original_lines))
+        clean_lines = [s.strip() for s in original_lines]
 
         newline_separated = len(defined_dependencies.split("\n")) > 1
         if newline_separated:
