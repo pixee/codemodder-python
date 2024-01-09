@@ -154,6 +154,10 @@ class FixMutableParams(BaseCodemod):
         updated_node: cst.FunctionDef,
     ):
         """Transforms function definitions with mutable default parameters"""
+        if not self.filter_by_path_includes_or_excludes(
+            self.node_position(original_node)
+        ):
+            return original_node
         (
             updated_params,
             new_var_decls,

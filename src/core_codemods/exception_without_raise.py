@@ -27,6 +27,11 @@ class ExceptionWithoutRaise(BaseCodemod, NameResolutionMixin):
     ) -> Union[
         cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel
     ]:
+        if not self.filter_by_path_includes_or_excludes(
+            self.node_position(original_node)
+        ):
+            return original_node
+
         match original_node:
             case cst.SimpleStatementLine(
                 body=[cst.Expr(cst.Name() | cst.Attribute() as name)]
