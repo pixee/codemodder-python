@@ -14,8 +14,6 @@ def list_subclasses(base_kls) -> set[str]:
 
 
 def full_qualified_name_from_class(cls) -> str:
-    if cls.__module__ == "builtins":
-        return cls.__qualname__
     return f"{cls.__module__}.{cls.__qualname__}"
 
 

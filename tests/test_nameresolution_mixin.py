@@ -92,12 +92,12 @@ class TestNameResolutionMixin:
                 node = expr.value
 
                 maybe_name = self.find_base_name(node.func)
-                assert maybe_name == "exec.capitalize"
+                assert maybe_name == "builtins.print"
                 return tree
 
         input_code = dedent(
             """\
-        exec.capitalize()
+        print('hello world')
         """
         )
         tree = cst.parse_module(input_code)
