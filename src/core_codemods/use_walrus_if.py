@@ -139,11 +139,6 @@ class UseWalrusIf(BaseCodemod):
 
     def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign):
         del updated_node
-        if not self.filter_by_path_includes_or_excludes(
-            self.node_position(original_node)
-        ):
-            return original_node
-
         if named_expr := self.assigns.get(original_node):
             position = self.node_position(original_node)
             self._modify_next_if.append((position, named_expr))
@@ -157,11 +152,6 @@ class UseWalrusIf(BaseCodemod):
 
         This feels like a bug in libCST but we'll work around it for now.
         """
-        if not self.filter_by_path_includes_or_excludes(
-            self.node_position(original_node)
-        ):
-            return original_node
-
         if not updated_node.body:
             trailing_whitespace = (
                 (

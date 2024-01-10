@@ -34,12 +34,12 @@ class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
         _original_node: cst.FormattedString,
         updated_node: cst.FormattedString,
     ):
-        transformed_node = super()._check_formatted_string(_original_node, updated_node)
         if not self.filter_by_path_includes_or_excludes(
-            self.node_position(transformed_node)
+            self.node_position(_original_node)
         ):
-            return transformed_node
+            return _original_node
 
+        transformed_node = super()._check_formatted_string(_original_node, updated_node)
         if not _original_node.deep_equals(transformed_node):
             self.report_change(_original_node)
         return transformed_node
