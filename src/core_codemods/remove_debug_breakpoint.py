@@ -21,9 +21,7 @@ class RemoveDebugBreakpoint(BaseCodemod, NameResolutionMixin, AncestorPatternsMi
 
         match call_node := original_node.value:
             case cst.Call():
-                if self.find_base_name(
-                    call_node
-                ) == "breakpoint" and self.is_builtin_function(call_node):
+                if self.find_base_name(call_node) == "builtins.breakpoint":
                     self.report_change(original_node)
                     return cst.RemovalSentinel.REMOVE
                 if self.find_base_name(call_node) == "pdb.set_trace":

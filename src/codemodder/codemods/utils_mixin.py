@@ -35,6 +35,9 @@ class NameResolutionMixin(MetadataDependent):
                         alias.evaluated_name,
                     ):
                         return self.base_name_for_import(import_node, alias)
+            case BuiltinAssignment():
+                return "builtins." + node.value
+
         return node.value
 
     def find_base_name(self, node):
