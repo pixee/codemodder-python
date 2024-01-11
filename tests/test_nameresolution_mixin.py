@@ -84,7 +84,26 @@ class TestNameResolutionMixin:
         tree = cst.parse_module(input_code)
         TestCodemod(CodemodContext()).transform_module(tree)
 
-    def test_get_base_name_no_import(self):
+    def test_get_base_name_no_assignment(self):
+        class TestCodemod(Codemod, NameResolutionMixin):
+            def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+                stmt = cst.ensure_type(tree.body[-1], cst.SimpleStatementLine)
+                expr = cst.ensure_type(stmt.body[0], cst.Expr)
+                node = expr.value
+
+                maybe_name = self.find_base_name(node.func)
+                assert maybe_name == "foo"
+                return tree
+
+        input_code = dedent(
+            """\
+        foo('hello world')
+        """
+        )
+        tree = cst.parse_module(input_code)
+        TestCodemod(CodemodContext()).transform_module(tree)
+
+    def test_get_base_name_built_in(self):
         class TestCodemod(Codemod, NameResolutionMixin):
             def transform_module_impl(self, tree: cst.Module) -> cst.Module:
                 stmt = cst.ensure_type(tree.body[-1], cst.SimpleStatementLine)
