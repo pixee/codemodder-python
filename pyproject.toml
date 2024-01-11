@@ -61,6 +61,7 @@ test = [
     "types-mock==5.1.*",
     "django>=4,<6",
     "numpy~=1.26.0",
+    "flask_wtf~=1.2.0",
 ]
 complexity = [
     "radon==6.0.*",
