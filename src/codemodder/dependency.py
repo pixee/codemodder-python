@@ -37,6 +37,19 @@ License: [{self._license.name}]({self._license.url}) ✅ \
         return hash(self.requirement)
 
 
+FLaskWTF = Dependency(
+    Requirement("flask-wtf~=1.2.0"),
+    description="""\
+            This package integrates WTForms into Flask. WTForms provides data validation and and CSRF protection which helps harden applications.
+""",
+    _license=License(
+        "BSD-3-Clause",
+        "https://opensource.org/license/BSD-3-clause/",
+    ),
+    oss_link="https://github.com/wtforms/flask-wtf/",
+    package_link="https://pypi.org/project/Flask-WTF/",
+)
+
 DefusedXML = Dependency(
     Requirement("defusedxml~=0.7.1"),
     description="""\
