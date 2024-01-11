@@ -204,7 +204,7 @@ def _lines_from_codepath(code_path):
 def _replace_lines_with(lines, replacements):
     total_lines = len(lines)
     for lineno, replacement in replacements:
-        if lineno > total_lines:
+        if lineno >= total_lines:
             lines.extend(replacement)
             continue
         lines[lineno] = replacement
