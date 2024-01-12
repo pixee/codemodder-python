@@ -12,12 +12,14 @@ class RemoveDebugBreakpoint(BaseCodemod, NameResolutionMixin, AncestorPatternsMi
     REFERENCES: list = []
 
     def leave_Expr(
-        self, original_node: cst.Expr, _
+        self,
+        original_node: cst.Expr,
+        updated_node: cst.Expr,
     ) -> Union[cst.Expr, cst.RemovalSentinel]:
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)
         ):
-            return original_node
+            return updated_node
 
         match call_node := original_node.value:
             case cst.Call():
@@ -29,4 +31,4 @@ class RemoveDebugBreakpoint(BaseCodemod, NameResolutionMixin, AncestorPatternsMi
                     self.report_change(original_node)
                     return cst.RemovalSentinel.REMOVE
 
-        return original_node
+        return updated_node

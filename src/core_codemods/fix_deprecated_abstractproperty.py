@@ -22,7 +22,7 @@ class FixDeprecatedAbstractproperty(BaseCodemod, NameResolutionMixin):
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)
         ):
-            return original_node
+            return updated_node
 
         if (
             base_name := self.find_base_name(original_node.decorator)
