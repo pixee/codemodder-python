@@ -227,6 +227,198 @@ class TestFixEmptySequenceComparisonIfStatements(BaseCodemodTest):
         assert len(self.file_context.codemod_changes) == 0
 
 
+class TestFixEmptySequenceComparisonAssertStatements(BaseCodemodTest):
+    codemod = FixEmptySequenceComparison
+
+    @pytest.mark.parametrize(
+        "input_code,expected_output",
+        [
+            (
+                """
+            x = [1]
+            assert x != []
+            """,
+                """
+            x = [1]
+            assert x
+            """,
+            ),
+            (
+                """
+            x = [1]
+            assert [] != x
+            """,
+                """
+            x = [1]
+            assert x
+            """,
+            ),
+            (
+                """
+            x = [1]
+            assert x == []
+            """,
+                """
+            x = [1]
+            assert not x
+            """,
+            ),
+            (
+                """
+            x = [1]
+            assert [] == x
+            """,
+                """
+            x = [1]
+            assert not x
+            """,
+            ),
+            (
+                """
+            assert [1, 2] == []
+            """,
+                """
+            assert not [1, 2]
+            """,
+            ),
+        ],
+    )
+    def test_change_list(self, tmpdir, input_code, expected_output):
+        self.run_and_assert(tmpdir, input_code, expected_output)
+        assert len(self.file_context.codemod_changes) == 1
+
+    @pytest.mark.parametrize(
+        "input_code,expected_output",
+        [
+            (
+                """
+            x = {1: "one", 2: "two"}
+            assert x != {}
+            """,
+                """
+            x = {1: "one", 2: "two"}
+            assert x
+            """,
+            ),
+            (
+                """
+            x = {1: "one", 2: "two"}
+            assert {} != x
+            """,
+                """
+            x = {1: "one", 2: "two"}
+            assert x
+            """,
+            ),
+            (
+                """
+            x = {1: "one", 2: "two"}
+            assert x == {}
+            """,
+                """
+            x = {1: "one", 2: "two"}
+            assert not x
+            """,
+            ),
+            (
+                """
+            x = {1: "one", 2: "two"}
+            assert {} == x
+            """,
+                """
+            x = {1: "one", 2: "two"}
+            assert not x
+            """,
+            ),
+            (
+                """
+            assert {1: "one", 2: "two"} == {}
+            """,
+                """
+            assert not {1: "one", 2: "two"}
+            """,
+            ),
+        ],
+    )
+    def test_change_dict(self, tmpdir, input_code, expected_output):
+        self.run_and_assert(tmpdir, input_code, expected_output)
+        assert len(self.file_context.codemod_changes) == 1
+
+    @pytest.mark.parametrize(
+        "input_code,expected_output",
+        [
+            (
+                """
+            x = (1, 2, 3)
+            assert x != ()
+            """,
+                """
+            x = (1, 2, 3)
+            assert x
+            """,
+            ),
+            (
+                """
+            x = (1, 2, 3)
+            assert () != x
+            """,
+                """
+            x = (1, 2, 3)
+            assert x
+            """,
+            ),
+            (
+                """
+            x = (1, 2, 3)
+            assert x == ()
+            """,
+                """
+            x = (1, 2, 3)
+            assert not x
+            """,
+            ),
+            (
+                """
+            x = (1, 2, 3)
+            assert () == x
+            """,
+                """
+            x = (1, 2, 3)
+            assert not x
+            """,
+            ),
+            (
+                """
+            assert (1, 2, 3) == ()
+            """,
+                """
+            assert not (1, 2, 3)
+            """,
+            ),
+        ],
+    )
+    def test_change_tuple(self, tmpdir, input_code, expected_output):
+        self.run_and_assert(tmpdir, input_code, expected_output)
+        assert len(self.file_context.codemod_changes) == 1
+
+    @pytest.mark.parametrize(
+        "code",
+        [
+            """
+            x = [1]
+            assert x == "hi"
+            """,
+            """
+            x = [1]
+            assert x is [1]
+            """,
+        ],
+    )
+    def test_no_change(self, tmpdir, code):
+        self.run_and_assert(tmpdir, code, code)
+        assert len(self.file_context.codemod_changes) == 0
+
+
 @pytest.mark.xfail(
     reason="Not yet support changing multiple comparisons in a statement"
 )
