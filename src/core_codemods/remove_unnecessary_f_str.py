@@ -37,7 +37,7 @@ class RemoveUnnecessaryFStr(BaseCodemod, UnnecessaryFormatString):
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(_original_node)
         ):
-            return _original_node
+            return updated_node
 
         transformed_node = super()._check_formatted_string(_original_node, updated_node)
         if not _original_node.deep_equals(transformed_node):

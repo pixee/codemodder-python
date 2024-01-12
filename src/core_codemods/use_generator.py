@@ -28,7 +28,7 @@ class UseGenerator(BaseCodemod, NameResolutionMixin):
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)
         ):
-            return original_node
+            return updated_node
 
         match original_node.func:
             # NOTE: could also support things like `list` and `tuple`

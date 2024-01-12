@@ -17,7 +17,7 @@ class CombineStartswithEndswith(BaseCodemod, NameResolutionMixin):
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)
         ):
-            return original_node
+            return updated_node
 
         if self.matches_startswith_endswith_or_pattern(original_node):
             left_call = cst.ensure_type(updated_node.left, cst.Call)

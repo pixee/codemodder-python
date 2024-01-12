@@ -33,7 +33,7 @@ class SubprocessShellFalse(BaseCodemod, NameResolutionMixin):
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)
         ):
-            return original_node
+            return updated_node
 
         if self.find_base_name(original_node.func) in self.SUBPROCESS_FUNCS:
             for arg in original_node.args:
