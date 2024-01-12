@@ -3,18 +3,19 @@ import libcst as cst
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.base_codemod import ReviewGuidance
 from codemodder.codemods.utils_mixin import AncestorPatternsMixin, NameResolutionMixin
-from codemodder.dependency import FLaskWTF
+from codemodder.dependency import FlaskWTF
 
 
 class FlaskEnableCSRFProtection(
     BaseCodemod, NameResolutionMixin, AncestorPatternsMixin
 ):
     NAME = "flask-enable-csrf-protection"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW
+    REVIEW_GUIDANCE = ReviewGuidance.MERGE_AFTER_REVIEW
     DESCRIPTION = "Uses CSRFProtect module to harden the app."
     SUMMARY = "Enable CSRF protection globally for a Flask app."
     REFERENCES = [
         {"url": "https://owasp.org/www-community/attacks/csrf", "description": ""},
+        {"url": "https://flask-wtf.readthedocs.io/en/1.2.x/csrf/", "description": ""},
     ]
 
     def leave_SimpleStatementSuite(
@@ -26,7 +27,7 @@ class FlaskEnableCSRFProtection(
             new_stmts = self._get_new_stmts(original_node)
             if new_stmts:
                 self.add_needed_import("flask_wtf.csrf", "CSRFProtect")
-                self.add_dependency(FLaskWTF)
+                self.add_dependency(FlaskWTF)
                 self.report_change(original_node)
                 return updated_node.with_changes(body=[*original_node.body, *new_stmts])
         return updated_node
@@ -42,7 +43,7 @@ class FlaskEnableCSRFProtection(
             new_stmts = self._get_new_stmts(original_node)
             if new_stmts:
                 self.add_needed_import("flask_wtf.csrf", "CSRFProtect")
-                self.add_dependency(FLaskWTF)
+                self.add_dependency(FlaskWTF)
                 self.report_change(original_node)
                 if len(original_node.body) > 1:
                     return updated_node.with_changes(
