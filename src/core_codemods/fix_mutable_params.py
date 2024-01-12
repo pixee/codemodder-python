@@ -154,10 +154,8 @@ class FixMutableParams(BaseCodemod):
         updated_node: cst.FunctionDef,
     ):
         """Transforms function definitions with mutable default parameters"""
-        if not self.filter_by_path_includes_or_excludes(
-            self.node_position(original_node)
-        ):
-            return original_node
+        # TODO: add filter by include or exclude that works for nodes
+        # that that have different start/end numbers.
         (
             updated_params,
             new_var_decls,

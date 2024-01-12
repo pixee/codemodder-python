@@ -32,3 +32,12 @@ bad: str = r'bad\d+'
 """
         self.run_and_assert(tmpdir, before, after)
         assert len(self.file_context.codemod_changes) == 3
+
+    def test_exclude_line(self, tmpdir):
+        input_code = expected = """\
+        bad: str = f"bad" + "bad"
+        """
+        lines_to_exclude = [1]
+        self.assert_no_change_line_excluded(
+            tmpdir, input_code, expected, lines_to_exclude
+        )

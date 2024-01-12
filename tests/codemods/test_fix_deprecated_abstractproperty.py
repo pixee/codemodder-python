@@ -121,3 +121,17 @@ class TestFixDeprecatedAbstractproperty(BaseCodemodTest):
                 pass
         """
         self.run_and_assert(tmpdir, original_code, new_code)
+
+    def test_exclude_line(self, tmpdir):
+        input_code = expected = """\
+        import abc
+
+        class A:
+            @abc.abstractproperty
+            def foo(self):
+                pass
+        """
+        lines_to_exclude = [4]
+        self.assert_no_change_line_excluded(
+            tmpdir, input_code, expected, lines_to_exclude
+        )

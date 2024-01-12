@@ -33,6 +33,32 @@ class BaseCodemodTest:
         tmp_file_path = Path(tmpdir / "code.py")
         self.run_and_assert_filepath(tmpdir, tmp_file_path, input_code, expected)
 
+    def assert_no_change_line_excluded(
+        self, tmpdir, input_code, expected, lines_to_exclude
+    ):
+        tmp_file_path = Path(tmpdir / "code.py")
+        input_tree = cst.parse_module(dedent(input_code))
+        self.execution_context = CodemodExecutionContext(
+            directory=tmpdir,
+            dry_run=True,
+            verbose=False,
+            registry=mock.MagicMock(),
+            repo_manager=mock.MagicMock(),
+        )
+
+        self.file_context = FileContext(
+            tmpdir,
+            tmp_file_path,
+            lines_to_exclude,
+            [],
+            [],
+        )
+        codemod_instance = self.initialize_codemod(input_tree)
+        output_tree = codemod_instance.transform_module(input_tree)
+
+        assert output_tree.code == dedent(expected)
+        assert len(self.file_context.codemod_changes) == 0
+
     def run_and_assert_filepath(self, root, file_path, input_code, expected):
         input_tree = cst.parse_module(dedent(input_code))
         self.execution_context = CodemodExecutionContext(
