@@ -37,7 +37,7 @@ License: [{self._license.name}]({self._license.url}) ✅ \
         return hash(self.requirement)
 
 
-FLaskWTF = Dependency(
+FlaskWTF = Dependency(
     Requirement("flask-wtf~=1.2.0"),
     description="""\
             This package integrates WTForms into Flask. WTForms provides data validation and and CSRF protection which helps harden applications.
