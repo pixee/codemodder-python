@@ -118,11 +118,8 @@ class UseWalrusIf(BaseCodemod):
         )
 
     def leave_If(self, original_node, updated_node):
-        if not self.filter_by_path_includes_or_excludes(
-            self.node_position(original_node)
-        ):
-            return original_node
-
+        # TODO: add filter by include or exclude that works for nodes
+        # that that have different start/end numbers.
         if (result := self._if_stack.pop()) is not None:
             position, named_expr = result
             is_name = m.matches(updated_node.test, m.Name())

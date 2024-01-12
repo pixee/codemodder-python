@@ -23,11 +23,8 @@ class DjangoReceiverOnTop(BaseCodemod, NameResolutionMixin):
     ) -> Union[
         cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel
     ]:
-        if not self.filter_by_path_includes_or_excludes(
-            self.node_position(original_node)
-        ):
-            return original_node
-
+        # TODO: add filter by include or exclude that works for nodes
+        # that that have different start/end numbers.
         maybe_receiver_with_index = None
         for i, decorator in enumerate(original_node.decorators):
             true_name = self.find_base_name(decorator.decorator)
