@@ -1,5 +1,4 @@
 import libcst as cst
-from typing import Union
 from codemodder.codemods.api import BaseCodemod, ReviewGuidance
 from codemodder.codemods.utils_mixin import NameResolutionMixin, AncestorPatternsMixin
 
@@ -8,9 +7,11 @@ class FixEmptySequenceComparison(
     BaseCodemod, NameResolutionMixin, AncestorPatternsMixin
 ):
     NAME = "fix-empty-sequence-comparison"
-    SUMMARY = "TODO"
+    SUMMARY = "Replace Comparisons to Empty Sequence with Implicit Boolean Comparison"
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "TODO"
+    DESCRIPTION = (
+        "Replace comparisons to empty sequence with implicit boolean comparison."
+    )
     REFERENCES: list = []
 
     def leave_Comparison(

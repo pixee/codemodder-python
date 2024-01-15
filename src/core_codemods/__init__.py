@@ -44,8 +44,12 @@ from .remove_module_global import RemoveModuleGlobal
 from .remove_debug_breakpoint import RemoveDebugBreakpoint
 from .combine_startswith_endswith import CombineStartswithEndswith
 from .fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
+<<<<<<< HEAD
 from .flask_enable_csrf_protection import FlaskEnableCSRFProtection
 from .replace_flask_send_file import ReplaceFlaskSendFile
+=======
+from .fix_empty_sequence_comparison import FixEmptySequenceComparison
+>>>>>>> 00f4616 (document and fully test empty sequence comparison)
 
 registry = CodemodCollection(
     origin="pixee",
@@ -98,5 +102,6 @@ registry = CodemodCollection(
         FixDeprecatedLoggingWarn,
         FlaskEnableCSRFProtection,
         ReplaceFlaskSendFile,
+        FixEmptySequenceComparison,
     ],
 )

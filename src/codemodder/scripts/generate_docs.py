@@ -210,6 +210,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="We believe this change is safe and will not cause any issues.",
     ),
+    "fix-empty-sequence-comparison": DocMetadata(
+        importance="Low",
+        guidance_explained="Simplifying comparison expressions to empty sequences is safe.",
+    ),
 }
 
 
