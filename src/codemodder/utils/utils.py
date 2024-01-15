@@ -1,3 +1,4 @@
+from typing import Sequence
 import libcst as cst
 from functools import cache
 
@@ -52,3 +53,18 @@ def extract_targets_of_assignment(
             if assignment.asname:
                 return [assignment.asname.name]
     return []
+
+
+def positional_to_keyword(
+    args: Sequence[cst.Arg], pos_to_keyword: list[str | None]
+) -> list[cst.Arg]:
+    """
+    Given a sequence of Args, converts all the positional arguments into keyword arguments according to a given map.
+    """
+    new_args = []
+    for i, arg in enumerate(args):
+        if arg.keyword == None and pos_to_keyword[i] != None:
+            new_args.append(arg.with_changes(keyword=cst.Name(pos_to_keyword[i])))
+        else:
+            new_args.append(arg)
+    return new_args
