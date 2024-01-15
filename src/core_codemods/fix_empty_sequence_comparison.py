@@ -23,6 +23,7 @@ class FixEmptySequenceComparison(
             return original_node
 
         maybe_parent = self.get_parent(original_node)
+
         match original_node:
             case cst.Comparison(
                 left=left, comparisons=[cst.ComparisonTarget() as target]

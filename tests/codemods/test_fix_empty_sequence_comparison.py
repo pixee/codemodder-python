@@ -424,7 +424,6 @@ class TestFixEmptySequenceComparisonAssertStatements(BaseCodemodTest):
         assert len(self.file_context.codemod_changes) == 0
 
 
-# TODO:
 @pytest.mark.xfail(
     reason="Not yet support changing multiple comparisons in a statement"
 )
@@ -446,11 +445,35 @@ class TestFixEmptySequenceComparisonMultipleStatements(BaseCodemodTest):
                 pass
             """,
             ),
+            (
+                """
+            x = [1, 2]
+            y = [3, 4]
+            assert x != [] and y == []
+            """,
+                """
+            x = [1, 2]
+            y = [3, 4]
+            assert x and not y
+            """,
+            ),
+            (
+                """
+            x = [1, 2]
+            y = [3, 4]
+            x != [] or y == []
+            """,
+                """
+            x = [1, 2]
+            y = [3, 4]
+            bool(x) or not y
+            """,
+            ),
         ],
     )
     def test_change(self, tmpdir, input_code, expected_output):
         self.run_and_assert(tmpdir, input_code, expected_output)
-        assert len(self.file_context.codemod_changes) == 1
+        assert len(self.file_context.codemod_changes) == 2
 
 
 class TestFixEmptySequenceComparisonAssignmentStatements(BaseCodemodTest):
