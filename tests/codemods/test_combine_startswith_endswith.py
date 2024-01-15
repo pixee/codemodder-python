@@ -38,3 +38,13 @@ class TestCombineStartswithEndswith(BaseCodemodTest):
     def test_no_change(self, tmpdir, code):
         self.run_and_assert(tmpdir, code, code)
         assert len(self.file_context.codemod_changes) == 0
+
+    def test_exclude_line(self, tmpdir):
+        input_code = expected = """\
+        x = "foo"
+        x.startswith("foo") or x.startswith("f")
+        """
+        lines_to_exclude = [2]
+        self.assert_no_change_line_excluded(
+            tmpdir, input_code, expected, lines_to_exclude
+        )

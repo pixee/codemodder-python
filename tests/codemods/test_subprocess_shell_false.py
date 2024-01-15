@@ -56,3 +56,13 @@ class TestSubprocessShellFalse(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, input_code)
         assert len(self.file_context.codemod_changes) == 0
+
+    def test_exclude_line(self, tmpdir):
+        input_code = expected = """\
+        import subprocess
+        subprocess.run(args, shell=True)
+        """
+        lines_to_exclude = [2]
+        self.assert_no_change_line_excluded(
+            tmpdir, input_code, expected, lines_to_exclude
+        )
