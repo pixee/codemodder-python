@@ -13,25 +13,17 @@ class FixEmptySequenceComparison(
     DESCRIPTION = "TODO"
     REFERENCES: list = []
 
-    def leave_If(self, original_node: cst.If, updated_node: cst.If) -> cst.If:
-        return self._simplify_empty_check(original_node, updated_node)
-
-    def leave_Assert(
-        self, original_node: cst.Assert, updated_node: cst.Assert
-    ) -> cst.Assert:
-        return self._simplify_empty_check(original_node, updated_node)
-
-    def _simplify_empty_check(
-        self,
-        original_node: Union[cst.Assert, cst.If],
-        updated_node: Union[cst.Assert, cst.If],
-    ) -> Union[cst.Assert, cst.If]:
+    def leave_Comparison(
+        self, original_node: cst.Comparison, updated_node: cst.Comparison
+    ):
+        del updated_node
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)
         ):
             return original_node
 
-        match original_node.test:
+        maybe_parent = self.get_parent(original_node)
+        match original_node:
             case cst.Comparison(
                 left=left, comparisons=[cst.ComparisonTarget() as target]
             ):
@@ -43,16 +35,27 @@ class FixEmptySequenceComparison(
                         empty_left := self._is_empty_sequence(left)
                     ) or self._is_empty_sequence(right):
                         self.report_change(original_node)
-                        if isinstance(target.operator, cst.NotEqual):
-                            return updated_node.with_changes(
-                                test=right if empty_left else left,
-                            )
-                        return updated_node.with_changes(
-                            test=cst.UnaryOperation(
-                                operator=cst.Not(),
-                                expression=right if empty_left else left,
-                            )
-                        )
+                        comp_var = right if empty_left else left
+                        match maybe_parent:
+                            case cst.If() | cst.Assert():
+                                return (
+                                    comp_var
+                                    if isinstance(target.operator, cst.NotEqual)
+                                    else cst.UnaryOperation(
+                                        operator=cst.Not(),
+                                        expression=comp_var,
+                                    )
+                                )
+                            case _:
+                                return (
+                                    cst.parse_expression(f"bool({comp_var.value})")
+                                    if isinstance(target.operator, cst.NotEqual)
+                                    else cst.UnaryOperation(
+                                        operator=cst.Not(),
+                                        expression=comp_var,
+                                    )
+                                )
+
         return original_node
 
     def _is_empty_sequence(self, node: cst.BaseExpression):
