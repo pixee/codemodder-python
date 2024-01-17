@@ -49,12 +49,15 @@ class FlaskSendFilePathParameterization(BaseCodemod, NameAndAncestorResolutionMi
                         ),
                     ]
                     self.report_change(original_node)
+                    self.add_needed_import("flask")
+                    self.remove_unused_import(original_node)
                     new_func = cst.parse_expression("flask.send_from_directory")
                     return updated_node.with_changes(func=new_func, args=new_args)
 
         return updated_node
 
     def _wrap_in_path(self, expr) -> cst.Call:
+        self.add_needed_import("pathlib", "Path")
         return cst.Call(func=cst.Name(value="Path"), args=[cst.Arg(expr)])
 
     def _attribute_reference(self, expr, attribute: str) -> cst.Attribute:
