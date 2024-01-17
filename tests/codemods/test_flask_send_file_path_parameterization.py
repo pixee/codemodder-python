@@ -2,7 +2,6 @@ from core_codemods.flask_send_file_path_parameterization import (
     FlaskSendFilePathParameterization,
 )
 from tests.codemods.base_codemod_test import BaseCodemodTest
-from textwrap import dedent
 
 
 class TestFlaskSendFilePathParameterization(BaseCodemodTest):
@@ -32,7 +31,31 @@ class TestFlaskSendFilePathParameterization(BaseCodemodTest):
         def download_file(name):
             return flask.send_from_directory((p := Path(f'path/to/{name}.txt')).parent, p.name)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
+        assert len(self.file_context.codemod_changes) == 1
+
+    def test_direct_simple_string(self, tmpdir):
+        input_code = """\
+        from flask import Flask, send_file
+
+        app = Flask(__name__)
+
+        @app.route("/uploads/<path:name>")
+        def download_file(name):
+            return send_file('path/to/file.txt')
+        """
+        expected = """\
+        from flask import Flask
+        import flask
+        from pathlib import Path
+
+        app = Flask(__name__)
+
+        @app.route("/uploads/<path:name>")
+        def download_file(name):
+            return flask.send_from_directory((p := Path('path/to/file.txt')).parent, p.name)
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
         assert len(self.file_context.codemod_changes) == 1
 
     def test_direct_string_convert_arguments(self, tmpdir):
@@ -56,7 +79,7 @@ class TestFlaskSendFilePathParameterization(BaseCodemodTest):
         def download_file(name):
             return flask.send_from_directory((p := Path(f'path/to/{name}.txt')).parent, p.name, mimetype = None, as_attachment = False, download_name = True)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
         assert len(self.file_context.codemod_changes) == 1
 
     def test_direct_path(self, tmpdir):
@@ -81,7 +104,7 @@ class TestFlaskSendFilePathParameterization(BaseCodemodTest):
         def download_file(name):
             return flask.send_from_directory((p := Path(f'path/to/{name}.txt')).parent, p.name)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
         assert len(self.file_context.codemod_changes) == 1
 
     def test_indirect_path(self, tmpdir):
@@ -108,7 +131,7 @@ class TestFlaskSendFilePathParameterization(BaseCodemodTest):
             path = Path(f'path/to/{name}.txt')
             return flask.send_from_directory(path.parent, path.name)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
         assert len(self.file_context.codemod_changes) == 1
 
     def test_indirect_path_alias(self, tmpdir):
@@ -135,7 +158,7 @@ class TestFlaskSendFilePathParameterization(BaseCodemodTest):
             path = Path(f'path/to/{name}.txt')
             return flask.send_from_directory(path.parent, path.name)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
         assert len(self.file_context.codemod_changes) == 1
 
     def test_indirect_string(self, tmpdir):
@@ -161,7 +184,7 @@ class TestFlaskSendFilePathParameterization(BaseCodemodTest):
             path = f'path/to/{name}.txt'
             return flask.send_from_directory((p := Path(path)).parent, p.name)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
         assert len(self.file_context.codemod_changes) == 1
 
     def test_unknown_type(self, tmpdir):
@@ -174,5 +197,5 @@ class TestFlaskSendFilePathParameterization(BaseCodemodTest):
         def download_file(name):
             return send_file(name)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)
         assert len(self.file_context.codemod_changes) == 0

@@ -9,7 +9,7 @@ from codemodder.utils.utils import positional_to_keyword
 
 class FlaskSendFilePathParameterization(BaseCodemod, NameAndAncestorResolutionMixin):
     NAME = "flask-send-file-path-parameterization"
-    SUMMARY = "Replaces `send_file` with `send_from_directory`"
+    SUMMARY = "Replace unsafe usage of `flask.send_file`"
     DESCRIPTION = SUMMARY
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     REFERENCES = [
