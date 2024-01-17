@@ -1,5 +1,5 @@
-from core_codemods.flask_send_file_path_parameterization import (
-    FlaskSendFilePathParameterization,
+from core_codemods.replace_flask_send_file import (
+    ReplaceFlaskSendFile,
 )
 from integration_tests.base_test import (
     BaseIntegrationTest,
@@ -7,9 +7,9 @@ from integration_tests.base_test import (
 )
 
 
-class TestFlaskSendFilePathParameterization(BaseIntegrationTest):
-    codemod = FlaskSendFilePathParameterization
-    code_path = "tests/samples/flask_send_file_path_parameterization.py"
+class TestReplaceFlaskSendFile(BaseIntegrationTest):
+    codemod = ReplaceFlaskSendFile
+    code_path = "tests/samples/replace_flask_send_file.py"
     original_code, expected_new_code = original_and_expected_from_code_path(
         code_path,
         [
@@ -49,5 +49,5 @@ class TestFlaskSendFilePathParameterization(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "7"
-    change_description = FlaskSendFilePathParameterization.CHANGE_DESCRIPTION
+    change_description = ReplaceFlaskSendFile.CHANGE_DESCRIPTION
     num_changed_files = 1
