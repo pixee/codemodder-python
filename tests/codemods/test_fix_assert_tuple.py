@@ -52,6 +52,24 @@ class TestFixAssertTuple(BaseCodemodTest):
         for idx, change in enumerate(changes):
             assert change.lineNumber == idx + first_assert_line
 
+    def test_change_with_message(self, tmpdir):
+        input_code = """\
+        print(1)
+        assert (1, 2, ), "some message"
+        print(2)
+        """
+        expected_output = """\
+        print(1)
+        assert 1, "some message"
+        assert 2, "some message"
+        print(2)
+        """
+
+        self.run_and_assert(tmpdir, input_code, expected_output)
+        # todo: update assert change after new API change
+
+        assert len(changes := self.file_context.codemod_changes) == 2
+
     @pytest.mark.parametrize(
         "code",
         [
