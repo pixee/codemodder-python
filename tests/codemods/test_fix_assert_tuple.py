@@ -10,34 +10,47 @@ class TestFixAssertTuple(BaseCodemodTest):
         assert self.codemod.name() == "fix-assert-tuple"
 
     @pytest.mark.parametrize(
-        "input_code,expected_output",
+        "input_code,expected_output,change_count",
         [
-            (
-                """\
-            print(1)
-            assert (1, 2, )
-            print(2)
-            """,
-                """\
-            print(1)
-            assert 1
-            assert 2
-            print(2)
-            """,
-            ),
-            ("""assert (1,)""", """assert 1"""),
+            ("""assert (1,)""", """assert 1""", 1),
             (
                 """assert ("one", Exception, [])""",
                 """\
             assert "one"
             assert Exception
             assert []""",
+                3,
             ),
         ],
     )
-    def test_change(self, tmpdir, input_code, expected_output):
+    def test_change(self, tmpdir, input_code, expected_output, change_count):
         self.run_and_assert(tmpdir, input_code, expected_output)
-        # assert len(self.file_context.codemod_changes) == 1
+        # todo: update assert change after new API change
+
+        assert len(changes := self.file_context.codemod_changes) == change_count
+        for idx, change in enumerate(changes):
+            assert change.lineNumber == idx + 1
+
+    def test_change_line_pos(self, tmpdir):
+        input_code = """\
+        print(1)
+        assert (1, 2, )
+        print(2)
+        """
+        expected_output = """\
+        print(1)
+        assert 1
+        assert 2
+        print(2)
+        """
+
+        self.run_and_assert(tmpdir, input_code, expected_output)
+        # todo: update assert change after new API change
+
+        assert len(changes := self.file_context.codemod_changes) == 2
+        first_assert_line = 2
+        for idx, change in enumerate(changes):
+            assert change.lineNumber == idx + first_assert_line
 
     @pytest.mark.parametrize(
         "code",
