@@ -1,14 +1,14 @@
-from core_codemods.flask_send_file_path_parameterization import (
-    FlaskSendFilePathParameterization,
+from core_codemods.replace_flask_send_file import (
+    ReplaceFlaskSendFile,
 )
 from tests.codemods.base_codemod_test import BaseCodemodTest
 
 
-class TestFlaskSendFilePathParameterization(BaseCodemodTest):
-    codemod = FlaskSendFilePathParameterization
+class TestReplaceFlaskSendFile(BaseCodemodTest):
+    codemod = ReplaceFlaskSendFile
 
     def test_name(self):
-        assert self.codemod.name() == "flask-send-file-path-parameterization"
+        assert self.codemod.name() == "replace-flask-send-file"
 
     def test_direct_string(self, tmpdir):
         input_code = """\

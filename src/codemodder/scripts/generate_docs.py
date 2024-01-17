@@ -206,7 +206,7 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="High",
         guidance_explained="Flask views may require proper handling of CSRF to function as expected and thus this change may break some views.",
     ),
-    "flask-send-file-path-parameterization": DocMetadata(
+    "replace-flask-send-file": DocMetadata(
         importance="Medium",
         guidance_explained="We believe this change is safe and will not cause any issues.",
     ),
