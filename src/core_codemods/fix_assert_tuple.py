@@ -1,6 +1,7 @@
 import libcst as cst
-from typing import List
+from typing import List, Union
 from codemodder.codemods.api import BaseCodemod, ReviewGuidance
+from codemodder.change import Change
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 
 
@@ -15,7 +16,7 @@ class FixAssertTuple(BaseCodemod, NameResolutionMixin):
         self,
         original_node: cst.SimpleStatementLine,
         updated_node: cst.SimpleStatementLine,
-    ) -> cst.FlattenSentinel:  # todo update
+    ) -> Union[cst.FlattenSentinel, cst.SimpleStatementLine]:
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)
         ):
@@ -29,7 +30,7 @@ class FixAssertTuple(BaseCodemod, NameResolutionMixin):
                     if not assert_test.elements:
                         return updated_node
                     new_asserts = self._make_asserts(assert_node)
-                    # todo: report change for each added line
+                    self._report_new_lines(original_node, len(new_asserts))
                     return cst.FlattenSentinel(new_asserts)
         return updated_node
 
@@ -38,3 +39,15 @@ class FixAssertTuple(BaseCodemod, NameResolutionMixin):
             cst.SimpleStatementLine(body=[cst.Assert(test=element.value, msg=node.msg)])
             for element in node.test.elements
         ]
+
+    def _report_new_lines(
+        self, original_node: cst.SimpleStatementLine, newlines_count: int
+    ):
+        start_line = self.node_position(original_node).start.line
+        for idx in range(newlines_count):
+            self.file_context.codemod_changes.append(
+                Change(
+                    lineNumber=start_line + idx,
+                    description=self.CHANGE_DESCRIPTION,
+                )
+            )
