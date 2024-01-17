@@ -121,3 +121,65 @@ class TestNameResolutionMixin:
         )
         tree = cst.parse_module(input_code)
         TestCodemod(CodemodContext()).transform_module(tree)
+
+    def test_find_names_within_scope(self):
+        class TestCodemod(Codemod, NameResolutionMixin):
+            def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+                node = cst.ensure_type(tree.body[-2].body.body[1], cst.FunctionDef)
+
+                names = self.find_used_names_within_nodes_scope(node)
+                assert names == {
+                    "a",
+                    "b",
+                    "c",
+                    "d",
+                    "e",
+                    "f",
+                    "one",
+                    "two",
+                    "three",
+                    "four",
+                    "five",
+                }
+                return tree
+
+        input_code = dedent(
+            """\
+        import a
+        b = 1
+        def one():
+            c = 2
+            def two():
+                d = 3
+            def three():
+                e = 4
+                def four():
+                    f = 5
+        def five():
+            g = 6
+            def six():
+                h = 7
+        """
+        )
+        tree = cst.parse_module(input_code)
+        TestCodemod(CodemodContext()).transform_module(tree)
+
+    def test_generate_available_name(self):
+        class TestCodemod(Codemod, NameResolutionMixin):
+            def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+                node = cst.ensure_type(tree.body[-1], cst.SimpleStatementLine)
+
+                name = self.generate_available_name(node, ["a", "b", "c"])
+                assert name == "a_2"
+                return tree
+
+        input_code = dedent(
+            """\
+        import a
+        import b
+        import c
+        a_1 = 1
+        """
+        )
+        tree = cst.parse_module(input_code)
+        TestCodemod(CodemodContext()).transform_module(tree)

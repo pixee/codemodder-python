@@ -45,6 +45,7 @@ from .remove_debug_breakpoint import RemoveDebugBreakpoint
 from .combine_startswith_endswith import CombineStartswithEndswith
 from .fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 from .flask_enable_csrf_protection import FlaskEnableCSRFProtection
+from .flask_send_file_path_parameterization import FlaskSendFilePathParameterization
 
 registry = CodemodCollection(
     origin="pixee",
@@ -96,5 +97,6 @@ registry = CodemodCollection(
         CombineStartswithEndswith,
         FixDeprecatedLoggingWarn,
         FlaskEnableCSRFProtection,
+        FlaskSendFilePathParameterization,
     ],
 )

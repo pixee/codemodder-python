@@ -46,6 +46,8 @@ def infer_expression_type(node: cst.BaseExpression) -> Optional[BaseType]:
             return infer_expression_type(node.left)
         case cst.BinaryOperation(operator=cst.Add()):
             return infer_expression_type(node.left) or infer_expression_type(node.right)
+        case cst.BinaryOperation(operator=cst.Modulo()):
+            return infer_expression_type(node.left) or infer_expression_type(node.right)
         case cst.IfExp():
             if_true = infer_expression_type(node.body)
             or_else = infer_expression_type(node.orelse)

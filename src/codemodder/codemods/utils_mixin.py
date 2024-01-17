@@ -1,3 +1,4 @@
+import itertools
 from typing import Any, Collection, Optional, Tuple, Union
 import libcst as cst
 from libcst import MetadataDependent, matchers
@@ -9,6 +10,7 @@ from libcst.metadata import (
     BuiltinAssignment,
     ImportAssignment,
     ParentNodeProvider,
+    Scope,
     ScopeProvider,
 )
 from libcst.metadata.scope_provider import GlobalScope
@@ -17,7 +19,7 @@ from libcst.metadata.scope_provider import GlobalScope
 class NameResolutionMixin(MetadataDependent):
     METADATA_DEPENDENCIES: Tuple[Any, ...] = (ScopeProvider,)
 
-    def _find_imported_name(self, node: cst.Name):
+    def _find_imported_name(self, node: cst.Name) -> Optional[str]:
         match self.find_single_assignment(node):
             case ImportAssignment(
                 name=node.value,
@@ -40,7 +42,7 @@ class NameResolutionMixin(MetadataDependent):
 
         return node.value
 
-    def find_base_name(self, node):
+    def find_base_name(self, node) -> Optional[str]:
         """
         Given a node, resolve its name to its basest form.
 
@@ -160,6 +162,21 @@ class NameResolutionMixin(MetadataDependent):
             return set(next(iter(scope.accesses[node])).referents)
         return set()
 
+    def generate_available_name(self, node, preference: list[str]) -> str:
+        """
+        Generate an available name within node's scope. It will check for availability the names of a given list in order. If the list is exausted, returns the first name of the form {name}_{count} such that name is the first name in the preference list.
+        """
+        used_names = self.find_used_names_within_nodes_scope(node)
+        for name in preference:
+            if name not in used_names:
+                return name
+        count = 1
+        name = preference[0] + f"_{count}"
+        while name in used_names:
+            count += 1
+            name = preference[0] + f"_{count}"
+        return name
+
     def find_used_names_in_module(self):
         """
         Find all the used names in the scope of a libcst Module.
@@ -175,6 +192,59 @@ class NameResolutionMixin(MetadataDependent):
             other_nodes.visit(visitor)
             names.extend(visitor.names)
         return names
+
+    def find_used_names_within_nodes_scope(self, node: cst.CSTNode) -> set[str]:
+        """
+        Find all the names used within all the ancestor and descendent scopes of a given node's scope.
+        """
+        # TODO support for global and nonlocal statements
+        scope = self.get_metadata(ScopeProvider, node, None)
+        return self.find_used_names_within_scope(scope) if scope else set()
+
+    def find_used_names_within_scope(self, scope: Scope) -> set[str]:
+        """
+        Find all the names used within all the ancestor and descendent scopes for a given scope.
+        """
+        related = itertools.chain(
+            self._find_ancestor_scopes(scope), self._find_descendent_scopes(scope)
+        )
+        names: set[str] = set()
+        for s in related:
+            names.update(self._find_used_names_scope_only(s))
+        return names
+
+    def _find_ancestor_scopes(self, scope: Scope) -> set[Scope]:
+        ancestors: set[Scope] = {scope}
+        current = scope
+        while not isinstance(current, GlobalScope):
+            current = current.parent
+            ancestors.add(current)
+        return ancestors
+
+    def _build_scopes_child_tree(self) -> dict[Scope, list[Scope]]:
+        all_scopes = {
+            scope
+            for scope in self.context.wrapper.resolve(ScopeProvider).values()
+            if scope
+        }
+        tree: dict[Scope, list[Scope]] = {k: [] for k in all_scopes if k}
+        for s in all_scopes:
+            if not isinstance(s, GlobalScope):
+                tree.get(s.parent, []).append(s)
+        return tree
+
+    def _find_descendent_scopes(self, scope: Scope):
+        tree = self._build_scopes_child_tree()
+        descendents = set()
+        stack = [scope]
+        while stack:
+            current = stack.pop()
+            descendents.update(tree[current])
+            stack.extend(tree[current])
+        return descendents
+
+    def _find_used_names_scope_only(self, scope: Scope) -> set[str]:
+        return {ass.name for ass in scope.assignments}
 
     def find_global_scope(self):
         """Find the global scope for a libcst Module node."""
