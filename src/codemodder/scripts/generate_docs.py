@@ -220,7 +220,7 @@ def generate_docs(codemod):
         raise KeyError(f"Must add {codemod.name} to METADATA") from exc
 
     formatted_references = [
-        f"* [{ref['description']}]({ref['url']})" for ref in codemod.references
+        f"* [{ref.description or ref.url}]({ref.url})" for ref in codemod.references
     ]
     markdown_references = "\n".join(formatted_references) or "N/A"
 
