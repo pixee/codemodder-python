@@ -212,7 +212,7 @@ If you want to allow those protocols, change the incoming PR to look more like t
     ),
     "fix-empty-sequence-comparison": DocMetadata(
         importance="Low",
-        guidance_explained="Simplifying comparison expressions to empty sequences is safe.",
+        guidance_explained="Values compared to empty sequences should be verified in case they are falsy values that are not a sequence.",
     ),
 }
 
