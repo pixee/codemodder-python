@@ -48,6 +48,7 @@ from .flask_enable_csrf_protection import FlaskEnableCSRFProtection
 from .replace_flask_send_file import ReplaceFlaskSendFile
 from .fix_empty_sequence_comparison import FixEmptySequenceComparison
 from .remove_assertion_in_pytest_raises import RemoveAssertionInPytestRaises
+from .fix_assert_tuple import FixAssertTuple
 
 registry = CodemodCollection(
     origin="pixee",
@@ -102,5 +103,6 @@ registry = CodemodCollection(
         ReplaceFlaskSendFile,
         FixEmptySequenceComparison,
         RemoveAssertionInPytestRaises,
+        FixAssertTuple,
     ],
 )

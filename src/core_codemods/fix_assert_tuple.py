@@ -15,7 +15,6 @@ class FixAssertTuple(SimpleCodemod, NameResolutionMixin):
     change_description = (
         "Separate assertion on a populated tuple into multiple assert statements."
     )
-    REFERENCES: list = ["#TODO"]
 
     def leave_SimpleStatementLine(
         self,
