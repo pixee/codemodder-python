@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 DEFAULT_EXCLUDED_CODEMODS = [
     "pixee:python/order-imports",
     "pixee:python/unused-imports",
+    # See https://github.com/pixee/codemodder-python/pull/212 for concerns regarding this codemod.
+    "pixee:python/fix-empty-sequence-comparison",
 ]
 
 
