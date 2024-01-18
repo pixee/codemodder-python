@@ -11,7 +11,6 @@ class UseSetLiteral(SimpleCodemod, NameResolutionMixin):
         references=[],
     )
     change_description = "Replace sets from lists with set literals"
-    REFERENCES: list = []
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         if not self.filter_by_path_includes_or_excludes(

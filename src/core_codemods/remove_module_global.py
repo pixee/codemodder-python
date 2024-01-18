@@ -13,7 +13,6 @@ class RemoveModuleGlobal(SimpleCodemod, NameResolutionMixin):
         references=[],
     )
     change_description = "Remove `global` usage at module level."
-    REFERENCES: list = []
 
     def leave_Global(
         self,

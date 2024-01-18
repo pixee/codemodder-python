@@ -12,7 +12,6 @@ class RemoveDebugBreakpoint(SimpleCodemod, NameResolutionMixin, AncestorPatterns
         references=[],
     )
     change_description = "Remove breakpoint call"
-    REFERENCES: list = []
 
     def leave_Expr(
         self,

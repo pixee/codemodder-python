@@ -11,7 +11,7 @@ class FixMutableParams(SimpleCodemod):
         references=[],
     )
     change_description = "Replace mutable parameter with `None`."
-    REFERENCES: list = []
+
     _BUILTIN_TO_LITERAL = {
         "list": cst.List(elements=[]),
         "dict": cst.Dict(elements=[]),
