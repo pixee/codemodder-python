@@ -7,7 +7,7 @@ class TestFixAssertTuple(BaseCodemodTest):
     codemod = FixAssertTuple
 
     def test_name(self):
-        assert self.codemod.name() == "fix-assert-tuple"
+        assert self.codemod.name == "fix-assert-tuple"
 
     @pytest.mark.parametrize(
         "input_code,expected_output,change_count",
@@ -24,11 +24,10 @@ class TestFixAssertTuple(BaseCodemodTest):
         ],
     )
     def test_change(self, tmpdir, input_code, expected_output, change_count):
-        self.run_and_assert(tmpdir, input_code, expected_output)
-        # todo: update assert change after new API change
-
-        assert len(changes := self.file_context.codemod_changes) == change_count
-        for idx, change in enumerate(changes):
+        self.run_and_assert(
+            tmpdir, input_code, expected_output, num_changes=change_count
+        )
+        for idx, change in enumerate(self.changeset[0].changes):
             assert change.lineNumber == idx + 1
 
     def test_change_line_pos(self, tmpdir):
@@ -44,12 +43,9 @@ class TestFixAssertTuple(BaseCodemodTest):
         print(2)
         """
 
-        self.run_and_assert(tmpdir, input_code, expected_output)
-        # todo: update assert change after new API change
-
-        assert len(changes := self.file_context.codemod_changes) == 2
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
         first_assert_line = 2
-        for idx, change in enumerate(changes):
+        for idx, change in enumerate(self.changeset[0].changes):
             assert change.lineNumber == idx + first_assert_line
 
     def test_change_with_message(self, tmpdir):
@@ -65,10 +61,7 @@ class TestFixAssertTuple(BaseCodemodTest):
         print(2)
         """
 
-        self.run_and_assert(tmpdir, input_code, expected_output)
-        # todo: update assert change after new API change
-
-        assert len(changes := self.file_context.codemod_changes) == 2
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
 
     @pytest.mark.parametrize(
         "code",
@@ -82,13 +75,15 @@ class TestFixAssertTuple(BaseCodemodTest):
     )
     def test_no_change(self, tmpdir, code):
         self.run_and_assert(tmpdir, code, code)
-        assert len(self.file_context.codemod_changes) == 0
 
     def test_exclude_line(self, tmpdir):
         input_code = expected = """\
         assert (1, 2)
         """
         lines_to_exclude = [1]
-        self.assert_no_change_line_excluded(
-            tmpdir, input_code, expected, lines_to_exclude
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            lines_to_exclude=lines_to_exclude,
         )

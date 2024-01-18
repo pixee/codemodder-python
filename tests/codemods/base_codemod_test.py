@@ -18,8 +18,7 @@ class BaseCodemodTest:
     def setup_method(self):
         if isinstance(self.codemod, type):
             self.codemod = self.codemod()
-
-        self.file_context = None
+        self.changeset = []
 
     def run_and_assert(  # pylint: disable=too-many-arguments
         self,
@@ -51,6 +50,8 @@ class BaseCodemodTest:
 
         self.codemod.apply(self.execution_context, files_to_check)
         changes = self.execution_context.get_results(self.codemod.id)
+
+        self.changeset = changes
 
         if input_code == expected:
             assert not changes
