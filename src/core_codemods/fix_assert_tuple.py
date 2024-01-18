@@ -1,16 +1,21 @@
 import libcst as cst
 from typing import List, Union
-from codemodder.codemods.api import BaseCodemod, ReviewGuidance
+from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 from codemodder.change import Change
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 
 
-class FixAssertTuple(BaseCodemod, NameResolutionMixin):
-    NAME = "fix-assert-tuple"
-    SUMMARY = "TODISimplify Boolean Expressions Using `startswith` and `endswith`"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = "TODOUse tuple of matches instead of boolean expression"
-    REFERENCES: list = []
+class FixAssertTuple(SimpleCodemod, NameResolutionMixin):
+    metadata = Metadata(
+        name="fix-assert-tuple",
+        summary="Fix Assert on Populated Tuple",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[],
+    )
+    change_description = (
+        "Separate assertion on a populated tuple into multiple assert statements."
+    )
+    REFERENCES: list = ["#TODO"]
 
     def leave_SimpleStatementLine(
         self,
@@ -48,6 +53,6 @@ class FixAssertTuple(BaseCodemod, NameResolutionMixin):
             self.file_context.codemod_changes.append(
                 Change(
                     lineNumber=start_line + idx,
-                    description=self.CHANGE_DESCRIPTION,
+                    description=self.change_description,
                 )
             )
