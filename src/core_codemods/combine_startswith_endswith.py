@@ -12,7 +12,6 @@ class CombineStartswithEndswith(SimpleCodemod, NameResolutionMixin):
         references=[],
     )
     change_description = "Use tuple of matches instead of boolean expression"
-    REFERENCES: list = []
 
     def leave_BooleanOperation(
         self, original_node: cst.BooleanOperation, updated_node: cst.BooleanOperation
