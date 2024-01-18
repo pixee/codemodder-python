@@ -1,18 +1,24 @@
 import libcst as cst
-from codemodder.codemods.api import BaseCodemod, ReviewGuidance
+from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod, Reference
 from codemodder.codemods.utils_mixin import NameResolutionMixin, AncestorPatternsMixin
 
 
 class FixEmptySequenceComparison(
-    BaseCodemod, NameResolutionMixin, AncestorPatternsMixin
+    SimpleCodemod, NameResolutionMixin, AncestorPatternsMixin
 ):
-    NAME = "fix-empty-sequence-comparison"
-    SUMMARY = "Replace Comparisons to Empty Sequence with Implicit Boolean Comparison"
-    REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
-    DESCRIPTION = (
+    metadata = Metadata(
+        name="fix-empty-sequence-comparison",
+        summary="Replace Comparisons to Empty Sequence with Implicit Boolean Comparison",
+        review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/library/stdtypes.html#truth-value-testing"
+            ),
+        ],
+    )
+    change_description = (
         "Replace comparisons to empty sequence with implicit boolean comparison."
     )
-    REFERENCES: list = []
 
     def leave_Comparison(
         self, original_node: cst.Comparison, updated_node: cst.Comparison
