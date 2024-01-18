@@ -227,6 +227,20 @@ class TestFixEmptySequenceComparisonIfStatements(BaseCodemodTest):
     def test_no_change(self, tmpdir, code):
         self.run_and_assert(tmpdir, code, code)
 
+    def test_exclude_line(self, tmpdir):
+        input_code = expected = """\
+        x = [1]
+        if x != []:
+            pass
+        """
+        lines_to_exclude = [2]
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            lines_to_exclude=lines_to_exclude,
+        )
+
 
 class TestFixEmptySequenceComparisonAssertStatements(BaseCodemodTest):
     codemod = FixEmptySequenceComparison

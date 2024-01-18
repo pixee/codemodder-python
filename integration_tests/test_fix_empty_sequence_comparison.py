@@ -15,4 +15,4 @@ class TestFixEmptySequenceComparison(BaseIntegrationTest):
         "--- \n+++ \n@@ -1,3 +1,3 @@\n x = [1]\n-if x != []:\n+if x:\n     pass\n"
     )
     expected_line_change = "2"
-    change_description = FixEmptySequenceComparison.CHANGE_DESCRIPTION
+    change_description = FixEmptySequenceComparison.change_description
