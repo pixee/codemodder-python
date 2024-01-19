@@ -47,6 +47,7 @@ from .fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 from .flask_enable_csrf_protection import FlaskEnableCSRFProtection
 from .replace_flask_send_file import ReplaceFlaskSendFile
 from .fix_empty_sequence_comparison import FixEmptySequenceComparison
+from .remove_assertion_in_pytest_raises import RemoveAssertionInPytestRaises
 
 registry = CodemodCollection(
     origin="pixee",
@@ -100,5 +101,6 @@ registry = CodemodCollection(
         FlaskEnableCSRFProtection,
         ReplaceFlaskSendFile,
         FixEmptySequenceComparison,
+        RemoveAssertionInPytestRaises,
     ],
 )
