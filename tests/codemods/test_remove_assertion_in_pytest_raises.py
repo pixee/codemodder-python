@@ -27,6 +27,23 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected)
 
+    def test_all_asserts(self, tmpdir):
+        # this is more of an edge case
+        input_code = """\
+        import pytest
+        def foo():
+            with pytest.raises(ZeroDivisionError):
+                assert True
+        """
+        expected = """\
+        import pytest
+        def foo():
+            with pytest.raises(ZeroDivisionError):
+                pass
+            assert True
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
+
     def test_multiple_raises(self, tmpdir):
         input_code = """\
         import pytest
@@ -54,6 +71,41 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
                 1/0
                 assert 1
                 assert 2
+        """
+        expected = """\
+        import pytest
+        def foo():
+            with pytest.raises(ZeroDivisionError):
+                1/0
+            assert 1
+            assert 2
+        """
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=2)
+
+    def test_multiple_asserts_mixed_early(self, tmpdir):
+        input_code = """\
+        import pytest
+        def foo():
+            with pytest.raises(ZeroDivisionError):
+                1/0; assert 1; assert 2
+        """
+        expected = """\
+        import pytest
+        def foo():
+            with pytest.raises(ZeroDivisionError):
+                1/0
+            assert 1
+            assert 2
+        """
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=2)
+
+    def test_multiple_asserts_mixed(self, tmpdir):
+        input_code = """\
+        import pytest
+        def foo():
+            with pytest.raises(ZeroDivisionError):
+                1/0
+                assert 1; assert 2
         """
         expected = """\
         import pytest
