@@ -214,6 +214,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="Values compared to empty sequences should be verified in case they are falsy values that are not a sequence.",
     ),
+    "remove-assertion-in-pytest-raises": DocMetadata(
+        importance="Low",
+        guidance_explained="We believe this change is safe and will not cause any issues.",
+    ),
 }
 
 
