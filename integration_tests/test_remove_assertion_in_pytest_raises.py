@@ -34,7 +34,7 @@ class TestRemoveAssertionInPytestRaises(BaseIntegrationTest):
     )
     # fmt: on
 
-    expected_line_change = "7"
+    expected_line_change = "4"
     change_description = RemoveAssertionInPytestRaisesTransformer.change_description
     num_changed_files = 1
-    num_changes = 2
+    num_changes = 1
