@@ -43,7 +43,6 @@ class RemoveAssertionInPytestRaisesTransformer(
                 case cst.Assert():
                     assert_position = assert_position - 1
                     assert_stmts.append(self._build_simple_statement_line(stmt))
-                    self.report_change(stmt)
                 case _:
                     break
         if assert_position > 0:
@@ -78,7 +77,6 @@ class RemoveAssertionInPytestRaisesTransformer(
                             break
                     else:
                         assert_stmts.append(simple_stmt)
-                        self.report_change(simple_stmt)
                     if new_statement_before_asserts:
                         break
                 case _:
@@ -93,7 +91,9 @@ class RemoveAssertionInPytestRaisesTransformer(
     ) -> Union[
         cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel
     ]:
-        if not self.filter_by_path_includes_or_excludes(original_node):
+        if not self.filter_by_path_includes_or_excludes(
+            self.node_position(original_node)
+        ):
             return updated_node
 
         # Are all items pytest.raises?
@@ -135,6 +135,7 @@ class RemoveAssertionInPytestRaisesTransformer(
                         body=[cst.SimpleStatementLine(body=[cst.Pass()])]
                     )
                 )
+            self.report_change(original_node)
             return cst.FlattenSentinel([new_with, *assert_stmts])
 
         return updated_node
@@ -143,7 +144,7 @@ class RemoveAssertionInPytestRaisesTransformer(
 RemoveAssertionInPytestRaises = CoreCodemod(
     metadata=Metadata(
         name="remove-assertion-in-pytest-raises",
-        summary="Moves assertions out of with statement body",
+        summary="Moves assertions out of `pytest.raises` scope",
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[
             Reference(
