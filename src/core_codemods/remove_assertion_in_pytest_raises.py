@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Sequence, Union
 import libcst as cst
 from codemodder.codemods.base_codemod import Metadata, Reference, ReviewGuidance
 from codemodder.codemods.libcst_transformer import (
@@ -14,6 +14,80 @@ class RemoveAssertionInPytestRaisesTransformer(
 ):
     change_description = "Moved assertion out of with statement body"
 
+    def _all_pytest_raises(self, node: cst.With):
+        for item in node.items:
+            match item:
+                case cst.WithItem(item=cst.Call() as call):
+                    maybe_call_base_name = self.find_base_name(call)
+                    if (
+                        not maybe_call_base_name
+                        or maybe_call_base_name != "pytest.raises"
+                    ):
+                        return False
+
+                case _:
+                    return False
+        return True
+
+    def _build_simple_statement_line(self, node: cst.BaseSmallStatement):
+        return cst.SimpleStatementLine(
+            body=[node.with_changes(semicolon=cst.MaybeSentinel.DEFAULT)]
+        )
+
+    def _remove_last_asserts_from_suite(self, node: Sequence[cst.BaseSmallStatement]):
+        assert_position = len(node)
+        assert_stmts = []
+        new_statement_before_asserts = None
+        for stmt in reversed(node):
+            match stmt:
+                case cst.Assert():
+                    assert_position = assert_position - 1
+                    assert_stmts.append(self._build_simple_statement_line(stmt))
+                    self.report_change(stmt)
+                case _:
+                    break
+        if assert_position > 0:
+            new_statement_before_asserts = node[assert_position - 1].with_changes(
+                semicolon=cst.MaybeSentinel.DEFAULT
+            )
+        return assert_stmts, assert_position, new_statement_before_asserts
+
+    def _remove_last_asserts_from_IndentedBlock(self, node: cst.IndentedBlock):
+        assert_position = len(node.body)
+        assert_stmts = []
+        new_statement_before_asserts = None
+        for simple_stmt in reversed(node.body):
+            match simple_stmt:
+                case cst.SimpleStatementLine(body=[*head, cst.Assert()] as body):
+                    assert_position = assert_position - 1
+                    if head:
+                        sstmts, s_pos, new_stmt = self._remove_last_asserts_from_suite(
+                            body
+                        )
+                        assert_stmts.extend(sstmts)
+                        if new_stmt:
+                            new_statement_before_asserts = new_stmt
+                            new_statement_before_asserts = simple_stmt.with_changes(
+                                body=[
+                                    *body[: s_pos - 1],
+                                    body[s_pos - 1].with_changes(
+                                        semicolon=cst.MaybeSentinel.DEFAULT
+                                    ),
+                                ]
+                            )
+                            break
+                    else:
+                        assert_stmts.append(simple_stmt)
+                        self.report_change(simple_stmt)
+                    if new_statement_before_asserts:
+                        break
+                case _:
+                    if assert_position > 0:
+                        new_statement_before_asserts = node.body[assert_position - 1]
+                    break
+        assert_stmts.reverse()
+        return assert_stmts, assert_position, new_statement_before_asserts
+
     def leave_With(
         self, original_node: cst.With, updated_node: cst.With
     ) -> Union[
@@ -23,71 +97,44 @@ class RemoveAssertionInPytestRaisesTransformer(
             return updated_node
 
         # Are all items pytest.raises?
-        for item in original_node.items:
-            match item:
-                case cst.WithItem(item=cst.Call() as call):
-                    maybe_call_base_name = self.find_base_name(call)
-                    if (
-                        not maybe_call_base_name
-                        or maybe_call_base_name != "pytest.raises"
-                    ):
-                        return updated_node
-
-                case _:
-                    return updated_node
+        if not self._all_pytest_raises(original_node):
+            return updated_node
 
         assert_stmts: list[cst.SimpleStatementLine] = []
         assert_position = len(original_node.body.body)
         new_statement_before_asserts = None
         match original_node.body:
             case cst.SimpleStatementSuite():
-                for stmt in reversed(original_node.body.body):
-                    match stmt:
-                        case cst.Assert():
-                            assert_position = assert_position - 1
-                            assert_stmts.append(
-                                cst.SimpleStatementLine(
-                                    body=[
-                                        stmt.with_changes(
-                                            semicolon=cst.MaybeSentinel.DEFAULT
-                                        )
-                                    ]
-                                )
-                            )
-                            self.report_change(stmt)
-                        case _:
-                            break
-                new_statement_before_asserts = original_node.body.body[
-                    assert_position - 1
-                ].with_changes(semicolon=cst.MaybeSentinel.DEFAULT)
-
+                (
+                    assert_stmts,
+                    assert_position,
+                    new_statement_before_asserts,
+                ) = self._remove_last_asserts_from_suite(original_node.body.body)
+                assert_stmts.reverse()
             case cst.IndentedBlock():
-                for simple_stmt in reversed(original_node.body.body):
-                    match simple_stmt:
-                        case cst.SimpleStatementLine(body=[*head, cst.Assert() as ast]):
-                            assert_position = assert_position - 1
-                            self.report_change(ast)
-                            if head:
-                                # TODO foo(); assert 1; assert 2
-                                pass
-                            else:
-                                assert_stmts.append(simple_stmt)
-                        case _:
-                            break
-                new_statement_before_asserts = original_node.body.body[
-                    assert_position - 1
-                ]
+                (
+                    assert_stmts,
+                    assert_position,
+                    new_statement_before_asserts,
+                ) = self._remove_last_asserts_from_IndentedBlock(original_node.body)
 
         if assert_stmts:
-            assert_stmts.reverse()
-            new_with = updated_node.with_changes(
-                body=updated_node.body.with_changes(
-                    body=[
-                        *updated_node.body.body[: assert_position - 1],
-                        new_statement_before_asserts,
-                    ]
+            # this means all the statements are asserts
+            if new_statement_before_asserts:
+                new_with = updated_node.with_changes(
+                    body=updated_node.body.with_changes(
+                        body=[
+                            *updated_node.body.body[: assert_position - 1],
+                            new_statement_before_asserts,
+                        ]
+                    )
                 )
-            )
+            else:
+                new_with = updated_node.with_changes(
+                    body=updated_node.body.with_changes(
+                        body=[cst.SimpleStatementLine(body=[cst.Pass()])]
+                    )
+                )
             return cst.FlattenSentinel([new_with, *assert_stmts])
 
         return updated_node
