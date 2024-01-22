@@ -139,30 +139,81 @@ class TestLazyLogging(BaseSemgrepCodemodTest):
     def test_different_log_func(self, tmpdir, code):
         self.run_and_assert(tmpdir, code, code)
 
-    # @pytest.mark.xfail(reason="Not currently supported")
-    # def test_log_as_arg(self, tmpdir):
-    #     code = """\
-    #     import logging
-    #     log = logging.getLogger('foo')
-    #     def some_function(logger):
-    #         logger.{}("hi")
-    #     some_function(log)
-    #     """
-    #     original_code = code.format("warn")
-    #     new_code = code.format("warning")
-    #     self.run_and_assert(tmpdir, original_code, new_code)
+    @pytest.mark.xfail(reason="Not currently supported")
+    def test_log_as_arg(self, tmpdir):
+        input_code = """\
+        import logging
+        log = logging.getLogger('foo')
+        def some_function(logger):
+            logger.debug("hi: %s" % 'hello')
+        some_function(log)
+        """
+        expected_code = """\
+        import logging
+        log = logging.getLogger('foo')
+        def some_function(logger):
+            logger.debug("hi: %s", 'hello')
+        some_function(log)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_code)
 
-    # @pytest.mark.parametrize(
-    #     "code",
-    #     [
-    #         "x.startswith('foo')",
-    #         "x.startswith(('f', 'foo'))",
-    #         "x.startswith('foo') and x.startswith('f')",
-    #         "x.startswith('foo') and x.startswith('f') or True",
-    #         "x.startswith('foo') or x.endswith('f')",
-    #         "x.startswith('foo') or y.startswith('f')",
-    #     ],
-    # )
-    # def test_no_change(self, tmpdir, code):
-    #     self.run_and_assert(tmpdir, code, code)
-    #
+    def test_log_format_specifiers(self, tmpdir):
+        input_code = """\
+        import logging
+        name = "Alice"
+        age = 30
+        height = 1.68
+        balance = 12345.67
+        hex_id = 255
+        octal_num = 8
+        scientific_val = 1234.56789
+        logging.info("User Info - Name: %s, Age: %d, Height: %.2f, Balance: %.2f, ID (hex): %x, Number (octal): %o, Scientific Value: %.2e" % (name, age, height, balance, hex_id, octal_num, scientific_val))
+        """
+        expected_code = """\
+        import logging
+        name = "Alice"
+        age = 30
+        height = 1.68
+        balance = 12345.67
+        hex_id = 255
+        octal_num = 8
+        scientific_val = 1234.56789
+        logging.info("User Info - Name: %s, Age: %d, Height: %.2f, Balance: %.2f, ID (hex): %x, Number (octal): %o, Scientific Value: %.2e", name, age, height, balance, hex_id, octal_num, scientific_val)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_code)
+
+    def test_log_kwargs(self, tmpdir):
+        input_code = """\
+        import logging
+        logging.info("Name: %s" % "Alice", exc_info=True, extra={'custom_info': 'extra details'}, stacklevel=2)
+        """
+        expected_code = """\
+        import logging
+        logging.info("Name: %s", "Alice", exc_info=True, extra={'custom_info': 'extra details'}, stacklevel=2)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_code)
+
+    @pytest.mark.parametrize(
+        "code",
+        [
+            """\
+            import logging
+            logging.info("something")
+            """,
+            """\
+            import logging
+            logging.info("% something", "hi")
+            """,
+            """\
+            import logging
+            logging.info("% something", "hi")
+            """,
+            """\
+            import logging
+            var = "3"
+            logging.info("var %s" + var)
+            """,
+        ],
+    )
+    def test_no_change(self, tmpdir, code):
+        self.run_and_assert(tmpdir, code, code)
