@@ -199,19 +199,3 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
                 1/0
         """
         self.run_and_assert(tmpdir, input_code, input_code)
-
-    def test_exclude_line(self, tmpdir):
-        input_code = expected = """\
-        import pytest
-        def foo():
-            with pytest.raises(ZeroDivisionError), open('') as file:
-                1/0
-                assert True
-        """
-        lines_to_exclude = [2]
-        self.run_and_assert(
-            tmpdir,
-            input_code,
-            expected,
-            lines_to_exclude=lines_to_exclude,
-        )
