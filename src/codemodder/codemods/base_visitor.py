@@ -35,6 +35,7 @@ class UtilsMixin:
             return False
 
         pos_to_match = self.node_position(node)
+        print(pos_to_match)
         return self.filter_by_result(
             pos_to_match
         ) and self.filter_by_path_includes_or_excludes(pos_to_match)

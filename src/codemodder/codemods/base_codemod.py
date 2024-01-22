@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import cached_property
+import functools
 import importlib.resources
 from importlib.abc import Traversable
 from pathlib import Path
@@ -129,6 +130,30 @@ class BaseCodemod(metaclass=ABCMeta):
             "references": [ref.to_json() for ref in self.references],
         }
 
+    def _apply(
+        self,
+        context: CodemodExecutionContext,
+        files_to_analyze: list[Path],
+        rules: list[str],
+    ) -> None:
+        results = (
+            # It seems like semgrep doesn't like our fully-specified id format
+            self.detector.apply(self.name, context, files_to_analyze)
+            if self.detector
+            else ResultSet()
+        )
+
+        process_file = functools.partial(
+            self._process_file, context=context, results=results, rules=rules
+        )
+
+        with ThreadPoolExecutor() as executor:
+            logger.debug("using executor with %s workers", context.max_workers)
+            contexts = executor.map(process_file, files_to_analyze)
+            executor.shutdown(wait=True)
+
+        context.process_results(self.id, contexts)
+
     def apply(
         self,
         context: CodemodExecutionContext,
@@ -150,36 +175,32 @@ class BaseCodemod(metaclass=ABCMeta):
         :param context: The codemod execution context
         :param files_to_analyze: The list of files to analyze
         """
-        results = (
-            # It seems like semgrep doesn't like our fully-specified id format
-            self.detector.apply(self.name, context, files_to_analyze)
-            if self.detector
-            else ResultSet()
+        self._apply(context, files_to_analyze, [self.name])
+
+    def _process_file(
+        self,
+        filename: Path,
+        context: CodemodExecutionContext,
+        results: ResultSet,
+        rules: list[str],
+    ):
+        line_exclude = file_line_patterns(filename, context.path_exclude)
+        line_include = file_line_patterns(filename, context.path_include)
+        findings_for_rule = []
+        for rule in rules:
+            findings_for_rule.extend(results.results_for_rule_and_file(rule, filename))
+
+        file_context = FileContext(
+            context.directory,
+            filename,
+            line_exclude,
+            line_include,
+            findings_for_rule,
         )
 
-        def process_file(filename: Path):
-            line_exclude = file_line_patterns(filename, context.path_exclude)
-            line_include = file_line_patterns(filename, context.path_include)
-            findings_for_rule = results.results_for_rule_and_file(self.name, filename)
+        if change_set := self.transformer.apply(
+            context, file_context, findings_for_rule
+        ):
+            file_context.add_result(change_set)
 
-            file_context = FileContext(
-                context.directory,
-                filename,
-                line_exclude,
-                line_include,
-                findings_for_rule,
-            )
-
-            if change_set := self.transformer.apply(
-                context, file_context, findings_for_rule
-            ):
-                file_context.add_result(change_set)
-
-            return file_context
-
-        with ThreadPoolExecutor() as executor:
-            logger.debug("using executor with %s workers", context.max_workers)
-            contexts = executor.map(process_file, files_to_analyze)
-            executor.shutdown(wait=True)
-
-        context.process_results(self.id, contexts)
+        return file_context

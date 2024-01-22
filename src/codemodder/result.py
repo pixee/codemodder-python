@@ -47,3 +47,6 @@ class ResultSet(dict[str, dict[Path, list[Result]]]):
 
     def all_rule_ids(self) -> list[str]:
         return list(self.keys())
+
+    def __or__(self, other):
+        return ResultSet(super().__or__(other))

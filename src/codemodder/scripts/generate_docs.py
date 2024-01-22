@@ -14,7 +14,7 @@ class DocMetadata:
 
 
 # codemod-specific metadata that's used only for docs, not for codemod API
-METADATA = {
+CORE_METADATA = {
     "add-requests-timeouts": DocMetadata(
         importance="Medium",
         guidance_explained="This change makes your code safer but in some cases it may be necessary to adjust the timeout value for your particular application.",
@@ -222,6 +222,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="An `assert` statement on a non-empty tuple is likely unintended and should be rewritten. However, the new change may result in assertion failures that should be reviewed.",
     ),
+}
+
+METADATA = CORE_METADATA | {
+    "numpy-nan-equality-S6725": CORE_METADATA["numpy-nan-equality"]
 }
 
 

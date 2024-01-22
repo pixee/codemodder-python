@@ -1,4 +1,9 @@
+from pathlib import Path
 from codemodder.codemods.api import BaseCodemod, SimpleCodemod as _SimpleCodemod
+from codemodder.codemods.base_codemod import Metadata
+from codemodder.codemods.base_detector import BaseDetector
+from codemodder.codemods.base_transformer import BaseTransformerPipeline
+from codemodder.context import CodemodExecutionContext
 
 
 class CoreCodemod(BaseCodemod):
@@ -13,6 +18,30 @@ class CoreCodemod(BaseCodemod):
     @property
     def docs_module_path(self):
         return "core_codemods.docs"
+
+
+class SASTCodemod(CoreCodemod):
+    requested_rules: list[str]
+
+    def __init__(
+        self,
+        *,
+        metadata: Metadata,
+        detector: BaseDetector | None = None,
+        transformer: BaseTransformerPipeline,
+        requested_rules: list[str] | None = None,
+    ):
+        super().__init__(metadata=metadata, detector=detector, transformer=transformer)
+        self.requested_rules = [self.name]
+        if requested_rules:
+            self.requested_rules.extend(requested_rules)
+
+    def apply(
+        self,
+        context: CodemodExecutionContext,
+        files_to_analyze: list[Path],
+    ) -> None:
+        self._apply(context, files_to_analyze, self.requested_rules)
 
 
 class SimpleCodemod(_SimpleCodemod):
