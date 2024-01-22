@@ -1,4 +1,7 @@
-from core_codemods.numpy_nan_equality import NumpyNanEquality
+from core_codemods.numpy_nan_equality import (
+    NumpyNanEquality,
+    NumpyNanEqualityTransformer,
+)
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
@@ -30,5 +33,5 @@ class TestNumpyNanEquality(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "4"
-    change_description = NumpyNanEquality.change_description
+    change_description = NumpyNanEqualityTransformer.change_description
     num_changed_files = 1

@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
 
 from codemodder.change import Change, ChangeSet
 from codemodder.dependency import Dependency
@@ -16,13 +15,13 @@ class FileContext:  # pylint: disable=too-many-instance-attributes
 
     base_directory: Path
     file_path: Path
-    line_exclude: List[int] = field(default_factory=list)
-    line_include: List[int] = field(default_factory=list)
-    findings: List[Result] = field(default_factory=list)
+    line_exclude: list[int] = field(default_factory=list)
+    line_include: list[int] = field(default_factory=list)
+    findings: list[Result] = field(default_factory=list)
     dependencies: set[Dependency] = field(default_factory=set)
-    codemod_changes: List[Change] = field(default_factory=list)
-    results: List[ChangeSet] = field(default_factory=list)
-    failures: List[Path] = field(default_factory=list)
+    codemod_changes: list[Change] = field(default_factory=list)
+    results: list[ChangeSet] = field(default_factory=list)
+    failures: list[Path] = field(default_factory=list)
     timer: Timer = field(default_factory=Timer)
 
     def add_dependency(self, dependency: Dependency):

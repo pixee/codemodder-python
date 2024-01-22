@@ -50,6 +50,8 @@ from .fix_empty_sequence_comparison import FixEmptySequenceComparison
 from .remove_assertion_in_pytest_raises import RemoveAssertionInPytestRaises
 from .fix_assert_tuple import FixAssertTuple
 
+from .sonar_numpy_nan_equality import SonarNumpyNanEquality
+
 registry = CodemodCollection(
     origin="pixee",
     docs_module="core_codemods.docs",
@@ -104,5 +106,14 @@ registry = CodemodCollection(
         FixEmptySequenceComparison,
         RemoveAssertionInPytestRaises,
         FixAssertTuple,
+    ],
+)
+
+sonar_registry = CodemodCollection(
+    origin="sonar",
+    docs_module="core_codemods.docs",
+    semgrep_config_module="core_codemods.semgrep",
+    codemods=[
+        SonarNumpyNanEquality,
     ],
 )

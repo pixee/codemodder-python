@@ -74,6 +74,7 @@ all = [
 
 [project.entry-points.codemods]
 core = "core_codemods:registry"
+sonar = "core_codemods:sonar_registry"
 
 [tool.setuptools]
 
