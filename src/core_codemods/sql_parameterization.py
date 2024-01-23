@@ -311,8 +311,7 @@ class LinearizeQuery(ContextAwareVisitor, NameResolutionMixin):
         return False
 
     def recurse_Name(self, node: cst.Name) -> list[cst.CSTNode]:
-        assignment = self.find_single_assignment(node)
-        if assignment:
+        if assignment := self.find_single_assignment(node):
             base_scope = assignment.scope
             # TODO make this check in detect injection, to be more precise
 

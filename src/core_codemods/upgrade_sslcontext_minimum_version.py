@@ -50,8 +50,7 @@ class UpgradeSSLContextMinimumVersion(SimpleCodemod, NameResolutionMixin):
         maybe_name = self.get_aliased_prefix_name(
             original_node.value, self._module_name
         )
-        maybe_name = maybe_name or self._module_name
-        if maybe_name == self._module_name:
+        if (maybe_name := maybe_name or self._module_name) == self._module_name:
             self.add_needed_import(self._module_name)
         self.remove_unused_import(original_node)
         return self.update_assign_rhs(updated_node, f"{maybe_name}.TLSVersion.TLSv1_2")

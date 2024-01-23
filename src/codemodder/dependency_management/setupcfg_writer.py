@@ -12,8 +12,7 @@ import re
 
 
 def find_leading_whitespace(s):
-    match = re.match(r"(\s+)", s)
-    if match:
+    if match := re.match(r"(\s+)", s):
         return match.group(1)
     return ""  # pragma: no cover
 
@@ -81,8 +80,7 @@ class SetupCfgWriter(DependencyWriter):
         """
         clean_lines = [s.strip() for s in original_lines]
 
-        newline_separated = len(defined_dependencies.split("\n")) > 1
-        if newline_separated:
+        if newline_separated := len(defined_dependencies.split("\n")) > 1:
             last_dep_line = defined_dependencies.split("\n")[-1]
             dep_sep = "\n"
         else:

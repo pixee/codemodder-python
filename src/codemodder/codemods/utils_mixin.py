@@ -59,8 +59,7 @@ class NameResolutionMixin(MetadataDependent):
                 return self._find_imported_name(node)
 
             case cst.Attribute():
-                maybe_name = self.find_base_name(node.value)
-                if maybe_name:
+                if maybe_name := self.find_base_name(node.value):
                     return maybe_name + "." + node.attr.value
 
             case cst.Call():
@@ -182,8 +181,7 @@ class NameResolutionMixin(MetadataDependent):
         Find all the used names in the scope of a libcst Module.
         """
         names = []
-        scope = self.find_global_scope()
-        if scope is None:
+        if (scope := self.find_global_scope()) is None:
             return []  # pragma: no cover
 
         nodes = [x.node for x in scope.assignments]
@@ -276,8 +274,7 @@ class NameResolutionMixin(MetadataDependent):
         return False
 
     def find_accesses(self, node) -> Collection[Access]:
-        scope = self.get_metadata(ScopeProvider, node, None)
-        if scope:
+        if scope := self.get_metadata(ScopeProvider, node, None):
             return scope.accesses[node]
         return {}
 
@@ -465,8 +462,7 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
         maybe_expr = None
         match node:
             case cst.Name():
-                maybe_expr = self._resolve_name_transitive(node)
-                if maybe_expr:
+                if maybe_expr := self._resolve_name_transitive(node):
                     return maybe_expr
         return node
 

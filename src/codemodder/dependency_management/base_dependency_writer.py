@@ -25,8 +25,7 @@ class DependencyWriter(metaclass=ABCMeta):
     def write(
         self, dependencies: list[Dependency], dry_run: bool = False
     ) -> Optional[ChangeSet]:
-        new_dependencies = self.add(dependencies)
-        if new_dependencies:
+        if new_dependencies := self.add(dependencies):
             return self.add_to_file(new_dependencies, dry_run)
         return None
 
