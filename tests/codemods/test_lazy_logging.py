@@ -2,7 +2,8 @@ import pytest
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 from core_codemods.lazy_logging import LazyLogging
 
-each_func = pytest.mark.parametrize("func", LazyLogging.logging_funcs)
+logging_funcs = {"debug", "info", "warning", "error", "critical"}
+each_func = pytest.mark.parametrize("func", logging_funcs)
 
 
 class TestLazyLogging(BaseSemgrepCodemodTest):
@@ -55,6 +56,70 @@ class TestLazyLogging(BaseSemgrepCodemodTest):
         self.run_and_assert(
             tmpdir, input_code.format(func), expected_output.format(func)
         )
+
+    @pytest.mark.parametrize(
+        "input_code,expected_output",
+        [
+            (
+                """\
+            import logging
+            e = "error"
+            logging.log(logging.ERROR, "Error occurred: %s" % e)
+            """,
+                """\
+            import logging
+            e = "error"
+            logging.log(logging.ERROR, "Error occurred: %s", e)
+            """,
+            ),
+            (
+                """\
+            import logging
+            logging.log(logging.ERROR, "Error occurred: %s" % ("one",))
+            """,
+                """\
+            import logging
+            logging.log(logging.ERROR, "Error occurred: %s", "one")
+            """,
+            ),
+            (
+                """\
+            import logging
+            log = logging.getLogger('anything')
+            log.log(logging.INFO, "one: %s, two: %s" % ("one", "two"))
+            """,
+                """\
+            import logging
+            log = logging.getLogger('anything')
+            log.log(logging.INFO, "one: %s, two: %s", "one", "two")
+            """,
+            ),
+            (
+                """\
+            from logging import log, INFO
+            e = "error"
+            log(INFO, "Error occurred: %s" % e)
+            """,
+                """\
+            from logging import log, INFO
+            e = "error"
+            log(INFO, "Error occurred: %s", e)
+            """,
+            ),
+            (
+                """\
+            from logging import getLogger, ERROR
+            getLogger('anything').log(ERROR, "one: %s, two: %s" % ("one", "two"))
+            """,
+                """\
+            from logging import getLogger, ERROR
+            getLogger('anything').log(ERROR, "one: %s, two: %s", "one", "two")
+            """,
+            ),
+        ],
+    )
+    def test_log_func(self, tmpdir, input_code, expected_output):
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     @each_func
     @pytest.mark.parametrize(
