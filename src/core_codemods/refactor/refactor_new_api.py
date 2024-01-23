@@ -9,7 +9,7 @@ class RefactorNewApi(SimpleCodemod, NameResolutionMixin):
         name="refactor-new-api",
         summary="Refactor to use thew new simplified API",
         review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
-        has_description=False,
+        description="",
     )
 
     new_api_module = "codemodder.codemods.new_api"

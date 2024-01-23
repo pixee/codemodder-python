@@ -14,7 +14,7 @@ class OrderImports(SimpleCodemod):
         name="order-imports",
         summary="Order Imports",
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        has_description=False,
+        description="",
     )
     change_description = "Ordered and formatted import block below this line"
 

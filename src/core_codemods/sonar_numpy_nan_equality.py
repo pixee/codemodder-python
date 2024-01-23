@@ -1,4 +1,5 @@
 import libcst as cst
+from codemodder.codemods.base_codemod import Reference
 from codemodder.codemods.libcst_transformer import (
     LibcstTransformerPipeline,
 )
@@ -21,14 +22,21 @@ class SonarNumpyNanEqualityTransformer(NumpyNanEqualityTransformer):
         return updated_node
 
 
+rules = ["python:S6725"]
+
 SonarNumpyNanEquality = SonarCodemod(
     metadata=Metadata(
         name="numpy-nan-equality-S6725",
-        summary=NumpyNanEquality.summary,
+        summary="Sonar: " + NumpyNanEquality.summary,
         review_guidance=NumpyNanEquality._metadata.review_guidance,  # pylint: disable=protected-access
-        references=NumpyNanEquality.references,
+        references=NumpyNanEquality.references
+        + [
+            Reference(url="https://rules.sonarsource.com/python/type/Bug/RSPEC-6725/"),
+        ],
+        description=f"This codemod acts upon the following Sonar rules: {str(rules)[1:-1]}.\n\n"
+        + NumpyNanEquality.description,
     ),
     transformer=LibcstTransformerPipeline(SonarNumpyNanEqualityTransformer),
     detector=SonarDetector(),
-    requested_rules=["python:S6725"],
+    requested_rules=rules,
 )
