@@ -225,7 +225,11 @@ If you want to allow those protocols, change the incoming PR to look more like t
 }
 
 METADATA = CORE_METADATA | {
-    "numpy-nan-equality-S6725": CORE_METADATA["numpy-nan-equality"]
+    "numpy-nan-equality-S6725": DocMetadata(
+        importance=CORE_METADATA["numpy-nan-equality"].importance,
+        guidance_explained=CORE_METADATA["numpy-nan-equality"].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 

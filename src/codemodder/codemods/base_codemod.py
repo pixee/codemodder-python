@@ -41,7 +41,7 @@ class Metadata:
     summary: str
     review_guidance: ReviewGuidance
     references: list[Reference] = field(default_factory=list)
-    has_description: bool = True
+    description: str | None = None
 
 
 class BaseCodemod(metaclass=ABCMeta):
@@ -108,11 +108,10 @@ class BaseCodemod(metaclass=ABCMeta):
 
     @cached_property
     def description(self) -> str:
-        if not self._metadata.has_description:
-            return ""
-
-        doc_path = self.docs_module / f"{self.origin}_python_{self.name}.md"
-        return doc_path.read_text()
+        if not self._metadata.description:
+            doc_path = self.docs_module / f"{self.origin}_python_{self.name}.md"
+            return doc_path.read_text()
+        return self._metadata.description
 
     @property
     def review_guidance(self):

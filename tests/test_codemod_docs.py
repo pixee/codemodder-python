@@ -12,10 +12,11 @@ def pytest_generate_tests(metafunc):
 
 
 def test_load_codemod_docs_info(codemod: BaseCodemod):
-    if codemod.name in ["order-imports", "refactor-new-api"]:
+    print(codemod.name)
+    if codemod.name in ["order-imports"]:
         pytest.xfail(reason=f"{codemod.name} has no description")
 
-    assert codemod.description is not None  # pylint: disable=protected-access
+    assert codemod.description
     assert codemod.review_guidance in (
         "Merge After Review",
         "Merge After Cursory Review",
