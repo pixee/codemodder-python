@@ -12,56 +12,43 @@ class LazyLogging(SimpleCodemod, NameResolutionMixin):
         references=[],
     )
     change_description = "Use lazy logging"
-    detector_pattern = """
-        rules:
-            - pattern-either:
-              - patterns:
-                - pattern: logging.$FUNC(..., ... % ..., ...)
-                - pattern-inside: |
-                    import logging
-                    ...
-                - metavariable-pattern:
-                      metavariable: $FUNC
-                      patterns:
-                        - pattern-either:
-                          - pattern: debug
-                          - pattern: info
-                          - pattern: warning
-                          - pattern: error
-                          - pattern: critical
-                          - pattern: log
-              - patterns:
-                - pattern: logging.getLogger(...).$FUNC(..., ... % ..., ...)
-                - pattern-inside: |
-                    import logging
-                    ...
-                - metavariable-pattern:
-                      metavariable: $FUNC
-                      patterns:
-                        - pattern-either:
-                          - pattern: debug
-                          - pattern: info
-                          - pattern: warning
-                          - pattern: error
-                          - pattern: critical
-                          - pattern: log
-              - patterns:
-                - pattern: $VAR.$FUNC(..., ... % ..., ...)
-                - pattern-inside: |
-                    import logging
-                    ...
-                    $VAR = logging.getLogger(...)
-                    ...
-                - metavariable-pattern:
-                      metavariable: $FUNC
-                      patterns:
-                        - pattern-either:
-                          - pattern: debug
-                          - pattern: info
-                          - pattern: warning
-                          - pattern: error
-                          - pattern: critical
-                          - pattern: log
+    # Weird-looking indentation is required for semgrep to run correctly.
+    _pattern_inside = """\
+- pattern-inside: |
+                import logging
+                ...
+"""
+    _log_funcs = """\
+- metavariable-pattern:
+                  metavariable: $FUNC
+                  patterns:
+                    - pattern-either:
+                      - pattern: debug
+                      - pattern: info
+                      - pattern: warning
+                      - pattern: error
+                      - pattern: critical
+                      - pattern: log
+"""
+    detector_pattern = f"""
+    rules:
+        - pattern-either:
+          - patterns:
+            - pattern: logging.$FUNC(..., ... % ..., ...)
+            {_pattern_inside}
+            {_log_funcs}
+          - patterns:
+            - pattern: logging.getLogger(...).$FUNC(..., ... % ..., ...)
+            {_pattern_inside}
+            {_log_funcs}
+          - patterns:
+            - pattern: $VAR.$FUNC(..., ... % ..., ...)
+            - pattern-inside: |
+                import logging
+                ...
+                $VAR = logging.getLogger(...)
+                ...
+            {_log_funcs}
         """
 
     def on_result_found(self, original_node, updated_node):
