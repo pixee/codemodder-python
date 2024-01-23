@@ -136,8 +136,7 @@ class FindResources(ContextAwareVisitor, NameResolutionMixin, AncestorPatternsMi
         return None
 
     def _is_resource(self, call: cst.Call) -> bool:
-        maybe_assignment = self.find_single_assignment(call)
-        if maybe_assignment:
+        if maybe_assignment := self.find_single_assignment(call):
             # is open call
             if isinstance(maybe_assignment, BuiltinAssignment) and matchers.matches(
                 call.func, matchers.Name(value="open")
@@ -242,8 +241,7 @@ class ResourceLeakFixer(
         name_targets = []
         accesses = self.find_accesses(name)
         for node in (access.node for access in accesses):
-            maybe_assigned = self.is_value_of_assignment(node)
-            if maybe_assigned:
+            if maybe_assigned := self.is_value_of_assignment(node):
                 targets = extract_targets_of_assignment(maybe_assigned)
                 name_targets.extend(targets)
         return name_targets
@@ -277,8 +275,7 @@ class ResourceLeakFixer(
     def _find_transitive_assignment_targets(
         self, expr
     ) -> tuple[list[cst.Name], list[cst.BaseAssignTargetExpression]]:
-        maybe_assigned = self.is_value_of_assignment(expr)
-        if maybe_assigned:
+        if maybe_assigned := self.is_value_of_assignment(expr):
             named_targets, other_targets = self._sieve_targets(
                 extract_targets_of_assignment(maybe_assigned)
             )

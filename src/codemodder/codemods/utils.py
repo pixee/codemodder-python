@@ -121,10 +121,8 @@ class MetadataPreservingTransformer(
         MetadataDependent.__init__(self)
         MatcherDecoratableTransformer.__init__(self)
         self.context = context
-        dependencies = self.get_inherited_dependencies()
-        if dependencies:
-            wrapper = self.context.wrapper
-            if wrapper is None:
+        if dependencies := self.get_inherited_dependencies():
+            if (wrapper := self.context.wrapper) is None:
                 raise ValueError(
                     f"Attempting to instantiate {self.__class__.__name__} outside of "
                     + "an active transform. This means that metadata hasn't been "

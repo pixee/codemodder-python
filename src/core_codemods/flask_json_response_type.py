@@ -113,10 +113,9 @@ class FlaskJsonResponseTypeVisitor(ContextAwareVisitor, NameAndAncestorResolutio
             case cst.Tuple():
                 elements = node.elements
                 first = elements[0].value
-                maybe_vuln = self._is_json_dumps_call(
+                if maybe_vuln := self._is_json_dumps_call(
                     first
-                ) or self._is_make_response_with_json(first)
-                if maybe_vuln:
+                ) or self._is_make_response_with_json(first):
                     return node
         return None
 
@@ -153,8 +152,7 @@ class FlaskJsonResponseTypeVisitor(ContextAwareVisitor, NameAndAncestorResolutio
         expr = self.resolve_expression(node)
         match expr:
             case cst.Call():
-                true_name = self.find_base_name(expr)
-                if true_name == "json.dumps":
+                if (true_name := self.find_base_name(expr)) == "json.dumps":
                     return expr
         return None
 
@@ -164,8 +162,7 @@ class FlaskJsonResponseTypeVisitor(ContextAwareVisitor, NameAndAncestorResolutio
         expr = self.resolve_expression(node)
         match expr:
             case cst.Call(args=[cst.Arg(first_arg), *_]):
-                true_name = self.find_base_name(expr)
-                if true_name != "flask.make_response":
+                if (true_name := self.find_base_name(expr)) != "flask.make_response":
                     return None
                 match first_arg:
                     case cst.Tuple():

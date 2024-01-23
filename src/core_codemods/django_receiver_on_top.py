@@ -29,8 +29,7 @@ class DjangoReceiverOnTop(SimpleCodemod, NameResolutionMixin):
         # that that have different start/end numbers.
         maybe_receiver_with_index = None
         for i, decorator in enumerate(original_node.decorators):
-            true_name = self.find_base_name(decorator.decorator)
-            if true_name == "django.dispatch.receiver":
+            if (true_name := self.find_base_name(decorator.decorator)) == "django.dispatch.receiver":
                 maybe_receiver_with_index = (i, decorator)
 
         if maybe_receiver_with_index:

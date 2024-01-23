@@ -89,11 +89,10 @@ def build_codemod_validator(codemod_registry: CodemodRegistry):
 
         def validate_items(self, items):
             potential_names = ids + names
-            unrecognized_codemods = [
-                name for name in items if name not in potential_names
-            ]
 
-            if unrecognized_codemods:
+            if unrecognized_codemods := [
+                name for name in items if name not in potential_names
+            ]:
                 args = {
                     "values": unrecognized_codemods,
                     "choices": ", ".join(map(repr, names)),
