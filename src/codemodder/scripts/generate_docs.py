@@ -216,10 +216,11 @@ If you want to allow those protocols, change the incoming PR to look more like t
     ),
     "remove-assertion-in-pytest-raises": DocMetadata(
         importance="Low",
+        guidance_explained="We believe this change is safe and will not cause any issues.",
     ),
     "fix-assert-tuple": DocMetadata(
         importance="Medium",
-        guidance_explained="We believe this change is safe and will not cause any issues.",
+        guidance_explained="An `assert` statement on a non-empty tuple is likely unintended and should be rewritten. However, the new change may result in assertion failures that should be reviewed.",
     ),
 }
 

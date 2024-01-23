@@ -8,13 +8,11 @@ from codemodder.codemods.utils_mixin import NameResolutionMixin
 class FixAssertTuple(SimpleCodemod, NameResolutionMixin):
     metadata = Metadata(
         name="fix-assert-tuple",
-        summary="Fix Assert on Populated Tuple",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        summary="Fix `assert` on Non-Empty Tuple Literal",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         references=[],
     )
-    change_description = (
-        "Separate assertion on a populated tuple into multiple assert statements."
-    )
+    change_description = "Separate assertion on a non-empty tuple literal into multiple assert statements."
 
     def leave_SimpleStatementLine(
         self,
