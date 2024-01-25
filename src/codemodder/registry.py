@@ -59,14 +59,24 @@ class CodemodRegistry:
         self,
         codemod_include: Optional[list] = None,
         codemod_exclude: Optional[list] = None,
+        sast_only=False,
     ) -> list[BaseCodemod]:
         codemod_include = codemod_include or []
         codemod_exclude = codemod_exclude or DEFAULT_EXCLUDED_CODEMODS
 
+        if sast_only:
+            base_list = [
+                codemod for codemod in self.codemods if codemod.origin != "pixee"
+            ]
+        else:
+            base_list = [
+                codemod for codemod in self.codemods if codemod.origin == "pixee"
+            ]
+
         if codemod_exclude and not codemod_include:
             return [
                 codemod
-                for codemod in self.codemods
+                for codemod in base_list
                 if codemod.name not in codemod_exclude
                 and codemod.id not in codemod_exclude
             ]

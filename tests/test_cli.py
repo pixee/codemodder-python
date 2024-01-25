@@ -6,6 +6,7 @@ import pytest
 from codemodder.cli import parse_args
 from codemodder import __version__
 from codemodder.registry import DEFAULT_EXCLUDED_CODEMODS, load_registered_codemods
+from core_codemods import registry as core_registry
 
 
 class TestParseArgs:
@@ -102,7 +103,7 @@ class TestParseArgs:
         assert mock_print.call_count == 1
 
         results = json.loads(mock_print.call_args_list[0][0][0])
-        assert len(results["results"]) == len(self.registry.codemods) - len(
+        assert len(results["results"]) == len(core_registry.codemods) - len(
             DEFAULT_EXCLUDED_CODEMODS
         )
 

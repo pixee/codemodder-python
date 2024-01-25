@@ -184,7 +184,9 @@ def run(original_args) -> int:
 
     # TODO: this should be a method of CodemodExecutionContext
     codemods_to_run = codemod_registry.match_codemods(
-        argv.codemod_include, argv.codemod_exclude
+        argv.codemod_include,
+        argv.codemod_exclude,
+        sast_only=argv.sonar_issues_json or argv.sarif,
     )
 
     log_section("setup")
