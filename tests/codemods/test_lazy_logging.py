@@ -557,6 +557,10 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
             """,
             """\
             import logging
+            logging.info(2+2)
+            """,
+            """\
+            import logging
             var = 2
             logging.info(var + var)
             """,
@@ -576,5 +580,19 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
         import logging
         var = "three"
         logging.info("one %s %s four", 'two', var)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_code)
+
+    @pytest.mark.xfail(reason="Not currently supported")
+    def test_log_bytes(self, tmpdir):
+        input_code = """\
+        import logging
+        var = b"three"
+        logging.info(b"one " + var)
+        """
+        expected_code = """\
+        import logging
+        var = "three"
+        logging.info(b"one %s", var)
         """
         self.run_and_assert(tmpdir, input_code, expected_code)
