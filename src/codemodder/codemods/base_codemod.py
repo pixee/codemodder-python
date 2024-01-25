@@ -108,10 +108,10 @@ class BaseCodemod(metaclass=ABCMeta):
 
     @cached_property
     def description(self) -> str:
-        if not self._metadata.description:
+        if self._metadata.description == None:
             doc_path = self.docs_module / f"{self.origin}_python_{self.name}.md"
             return doc_path.read_text()
-        return self._metadata.description
+        return self._metadata.description  # type: ignore
 
     @property
     def review_guidance(self):
