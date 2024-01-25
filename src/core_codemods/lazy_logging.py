@@ -1,10 +1,11 @@
 import libcst as cst
 from libcst import matchers as m
-from codemodder.codemods.utils_mixin import NameResolutionMixin
+from codemodder.codemods.utils import BaseType, infer_expression_type
+from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 
 
-class LazyLogging(SimpleCodemod, NameResolutionMixin):
+class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
     metadata = Metadata(
         name="lazy-logging",
         summary="Simplify Boolean Expressions Using `startswith` and `endswith`",
@@ -68,18 +69,16 @@ class LazyLogging(SimpleCodemod, NameResolutionMixin):
         """
 
     def on_result_found(self, original_node, updated_node):
-        del original_node
-
         match updated_node.func:
             case cst.Name(value="log") | cst.Attribute(attr=cst.Name(value="log")):
                 # logging.log(INFO, ...), log(INFO, ...)
-                first_arg = [updated_node.args[0]]
-                remaining_args = list(updated_node.args[2:])
-                binop = updated_node.args[1].value
+                first_arg = [original_node.args[0]]
+                remaining_args = list(original_node.args[2:])
+                binop = original_node.args[1].value
             case _:
                 first_arg = []
-                remaining_args = list(updated_node.args[1:])
-                binop = updated_node.args[0].value
+                remaining_args = list(original_node.args[1:])
+                binop = original_node.args[0].value
 
         if set(self.all_operators(binop)) == {cst.Add, cst.Modulo}:
             # TODO: handle more complex case of str concat that uses both `%` and `+` operators
@@ -96,6 +95,10 @@ class LazyLogging(SimpleCodemod, NameResolutionMixin):
                 else:
                     new_args.append(cst.Arg(value=format_args))
             case cst.Add():
+                left_type = infer_expression_type(self.resolve_expression(binop.left))
+                right_type = infer_expression_type(self.resolve_expression(binop.right))
+                if set((left_type, right_type)) != {BaseType.STRING}:
+                    return updated_node
                 if self.has_non_literal(binop):
                     format_string, format_args = self.process_concat(binop)
                     combined_format_string = cst.SimpleString(
