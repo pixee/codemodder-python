@@ -279,7 +279,6 @@ class TestLazyLoggingModulo(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, code, code)
 
 
-@pytest.mark.skip("Need to add support")
 class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
     codemod = LazyLogging
 
@@ -302,13 +301,13 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
             (
                 """\
             import logging
-            e = "error"
-            logging.{}("Error occurred: %s" + e)
+            num = 2
+            logging.{}("Num:" + str(num))
             """,
                 """\
             import logging
-            e = "error"
-            logging.{}("Error occurred: %s", e)
+            num = 2
+            logging.{}("Num:%s", str(num))
             """,
             ),
             (
@@ -322,7 +321,7 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
             import logging
             log = logging.getLogger('anything')
             one = "1"
-            log.{}("one %s two %s", one, "2")
+            log.{}("one %s two 2", one)
             """,
             ),
         ],
@@ -352,13 +351,13 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
             import logging
             log = logging.getLogger('anything')
             one = "1"
-            log.log(logging.INFO, "one %s" + one + " two " + "2")
+            log.log(logging.INFO, "one " + one + " two " + "2")
             """,
                 """\
             import logging
             log = logging.getLogger('anything')
             one = "1"
-            log.log(logging.INFO, "one %s two %s", one, "2")
+            log.log(logging.INFO, "one %s two 2", one)
             """,
             ),
             (
@@ -382,7 +381,7 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
                 """\
             from logging import getLogger, ERROR
             one = "1"
-            getLogger('anything').log(ERROR, "one %s two %s", one, "2")
+            getLogger('anything').log(ERROR, "one %s two 2", one)
             """,
             ),
         ],
@@ -410,12 +409,12 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
                 """\
             from logging import getLogger
             one = "1"
-            getLogger('anything').{}("one " + one + " two %s" + "2")
+            getLogger('anything').{}("one " + one + " two" + "2")
             """,
                 """\
             from logging import getLogger
             one = "1"
-            getLogger('anything').{}("one %s two %s", one, "2")
+            getLogger('anything').{}("one %s two2", one)
             """,
             ),
         ],
@@ -450,7 +449,7 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
                 """\
             from logging import getLogger as make_logger
             one = "1"
-            make_logger('anything').{}("one %s two %s", one, "2")
+            make_logger('anything').{}("one %s two 2", one)
             """,
             ),
         ],
@@ -524,7 +523,7 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
         hex_id = 255
         octal_num = 8
         scientific_val = 1234.56789
-        logging.info("User Info - Name: %s, Age: %d, Height: %.2f, Balance: %.2f, ID (hex): %x, Number (octal): %o, Scientific Value: %.2e", name, age, height, balance, hex_id, octal_num, scientific_val)
+        logging.info("User Info - Name: %s, Age: %s, Height: %s, Balance: %s, ID (hex): %s, Number (octal): %s, Scientific Value: %s", name, str(age), str(round(height, 2)), str(round(balance, 2)), format(hex_id, 'x'), format(octal_num, 'o'), format(scientific_val, '.2e'))
         """
         self.run_and_assert(tmpdir, input_code, expected_code)
 
@@ -556,7 +555,26 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
             import logging
             logging.info("one" + "%s" + "three %s")
             """,
+            """\
+            import logging
+            var = 2
+            logging.info(var + var)
+            """,
         ],
     )
     def test_no_change(self, tmpdir, code):
         self.run_and_assert(tmpdir, code, code)
+
+    @pytest.mark.xfail(reason="Not currently supported")
+    def test_modulo_and_plus(self, tmpdir):
+        input_code = """\
+        import logging
+        var = "three"
+        logging.info("one %s" % 'two ' + var + ' four')
+        """
+        expected_code = """\
+        import logging
+        var = "three"
+        logging.info("one %s %s four", 'two', var)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_code)
