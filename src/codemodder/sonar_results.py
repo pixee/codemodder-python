@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing_extensions import Self
 from codemodder.result import LineInfo, Location, Result, ResultSet
+from codemodder.logging import logger
 
 
 class SonarLocation(Location):
@@ -17,7 +18,7 @@ class SonarLocation(Location):
 class SonarResult(Result):
     @classmethod
     def from_issue(cls, issue) -> Self:
-        rule_id = issue.get("rule")
+        rule_id = issue.get("rule", None)
         if not rule_id:
             raise ValueError("Could not extract rule id from sarif result.")
 
@@ -28,11 +29,15 @@ class SonarResult(Result):
 class SonarResultSet(ResultSet):
     @classmethod
     def from_json(cls, json_file: str | Path) -> Self:
-        with open(json_file, "r", encoding="utf-8") as file:
-            data = json.load(file)
+        try:
+            with open(json_file, "r", encoding="utf-8") as file:
+                data = json.load(file)
 
-        result_set = cls()
-        for issue in data.get("issues"):
-            result_set.add_result(SonarResult.from_issue(issue))
+            result_set = cls()
+            for issue in data.get("issues"):
+                result_set.add_result(SonarResult.from_issue(issue))
 
-        return result_set
+            return result_set
+        except Exception:
+            logger.debug("Could not parse sonar json %s", json_file)
+        return cls()

@@ -55,6 +55,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     _lines = []
     num_changed_files = 1
     allowed_exceptions = ()
+    sonar_issues_json: str | None = None
 
     @classmethod
     def setup_class(cls):
@@ -82,10 +83,16 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert run["tool"] == "codemodder-python"
         assert run["version"] == __version__
         assert run["elapsed"] != ""
-        assert (
-            run["commandLine"]
-            == f'codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_instance.name} --path-include={code_path} --path-exclude=""'
-        )
+        if self.sonar_issues_json:
+            assert (
+                run["commandLine"]
+                == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_instance.name} --path-include={code_path} --sonar-issues-json={self.sonar_issues_json}"
+            )
+        else:
+            assert (
+                run["commandLine"]
+                == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_instance.name} --path-include={code_path}"
+            )
         assert run["directory"] == os.path.abspath(SAMPLES_DIR)
         assert run["sarifs"] == []
 
@@ -160,6 +167,9 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             f"--path-include={code_path}",
             '--path-exclude=""',
         ]
+
+        if self.sonar_issues_json:
+            command.append(f"--sonar-issues-json={self.sonar_issues_json}")
 
         self.check_code_before()
         self.check_dependencies_before()
