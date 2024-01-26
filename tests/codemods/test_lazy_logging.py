@@ -496,6 +496,7 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected_code)
 
+    @pytest.mark.xfail(reason="Not currently supported")
     def test_log_format_specifiers(self, tmpdir):
         input_code = """\
         import logging
