@@ -47,7 +47,7 @@ class DependencyTestMixin:
 
 class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     codemod = NotImplementedError
-    code_path = NotImplementedError
+    code_path: str = NotImplementedError
     original_code = NotImplementedError
     expected_new_code = NotImplementedError
     output_path = "test-codetf.txt"
@@ -71,13 +71,14 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             ) from exc
 
     def _assert_run_fields(self, run, output_path):
+        code_path = os.path.relpath(self.code_path, SAMPLES_DIR)
         assert run["vendor"] == "pixee"
         assert run["tool"] == "codemodder-python"
         assert run["version"] == __version__
         assert run["elapsed"] != ""
         assert (
             run["commandLine"]
-            == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_wrapper.name} --path-include={self.code_path}"
+            == f'codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_wrapper.name} --path-include={code_path} --path-exclude=""'
         )
         assert run["directory"] == os.path.abspath(SAMPLES_DIR)
         assert run["sarifs"] == []
@@ -141,14 +142,15 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         Mocks won't work when making a subprocess call so make sure to delete all
         output files
         """
-
+        code_path = os.path.relpath(self.code_path, SAMPLES_DIR)
         command = [
             "codemodder",
             SAMPLES_DIR,
             "--output",
             self.output_path,
             f"--codemod-include={self.codemod_wrapper.name}",
-            f"--path-include={self.code_path}",
+            f"--path-include={code_path}",
+            '--path-exclude=""',
         ]
 
         self.check_code_before()

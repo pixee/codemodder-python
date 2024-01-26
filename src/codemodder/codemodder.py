@@ -268,6 +268,7 @@ def run(original_args) -> int:
 
     log_section("startup")
     logger.info("codemodder: python/%s", __version__)
+    logger.info("command: %s %s", Path(sys.argv[0]).name, " ".join(original_args))
 
     repo_manager = PythonRepoManager(Path(argv.directory))
     context = CodemodExecutionContext(
