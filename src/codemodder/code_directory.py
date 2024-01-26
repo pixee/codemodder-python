@@ -6,21 +6,23 @@ from pathlib import Path
 
 DEFAULT_INCLUDED_PATHS = ["**.py", "**/*.py"]
 DEFAULT_EXCLUDED_PATHS = [
-    "**/test/**",
-    "**/tests/**",
-    "**/conftest.py",
-    "**/build/**",
-    "**/dist/**",
-    "**/venv/**",
-    "**/.venv/**",
-    "**/.tox/**",
-    "**/.nox/**",
-    "**/.eggs/**",
-    "**/.git/**",
-    "**/.mypy_cache/**",
-    "**/.pytest_cache/**",
-    "**/.hypothesis/**",
-    "**/.coverage*",
+    # TODO: test code should eventually only be excluded on a per-codemod basis
+    # Some codemods represent fixes that should be applied to test code
+    "test/**",
+    "tests/**",
+    "conftest.py",
+    "build/**",
+    "dist/**",
+    "venv/**",
+    ".venv/**",
+    ".tox/**",
+    ".nox/**",
+    ".eggs/**",
+    ".git/**",
+    ".mypy_cache/**",
+    ".pytest_cache/**",
+    ".hypothesis/**",
+    ".coverage*",
 ]
 
 
@@ -64,7 +66,10 @@ def match_files(
     :return: list of <pathlib.PosixPath> files found within (including recursively) the parent directory
     that match the criteria of both exclude and include patterns.
     """
-    all_files = [str(path) for path in Path(parent_path).rglob("*")]
+    all_files = [
+        str(Path(path).relative_to(parent_path))
+        for path in Path(parent_path).rglob("*")
+    ]
     included_files = set(
         filter_files(
             all_files,
@@ -82,5 +87,5 @@ def match_files(
     return [
         path
         for p in sorted(list(included_files - excluded_files))
-        if (path := Path(p)).is_file() and path.suffix == ".py"
+        if (path := Path(parent_path).joinpath(p)).is_file() and path.suffix == ".py"
     ]

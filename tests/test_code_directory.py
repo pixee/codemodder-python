@@ -42,7 +42,7 @@ class TestMatchFiles:
 
     def test_match_excluded(self, dir_structure):
         expected = ["empty_for_testing.py", "insecure_random.py"]
-        files = match_files(dir_structure, ["**/tests/**", "*request.py"])
+        files = match_files(dir_structure, ["tests/**", "*request.py"])
         self._assert_expected(files, expected)
 
     def test_match_included_file_with_line(self, dir_structure):
@@ -53,7 +53,7 @@ class TestMatchFiles:
     def test_match_excluded_line(self, dir_structure):
         expected = ["empty_for_testing.py", "insecure_random.py", "make_request.py"]
         files = match_files(
-            dir_structure, exclude_paths=["**/tests/**", "**/insecure_random.py:2"]
+            dir_structure, exclude_paths=["tests/**", "**/insecure_random.py:2"]
         )
         self._assert_expected(files, expected)
 
@@ -65,26 +65,26 @@ class TestMatchFiles:
     def test_match_excluded_line_and_glob(self, dir_structure):
         expected = ["empty_for_testing.py", "insecure_random.py", "make_request.py"]
         files = match_files(
-            dir_structure, exclude_paths=["**/tests/**", "**/insecure*.py:3"]
+            dir_structure, exclude_paths=["tests/**", "**/insecure*.py:3"]
         )
         self._assert_expected(files, expected)
 
     def test_match_excluded_dir_incorrect_glob(self, dir_structure):
         incorrect_glob = "more_samples"
         expected = ["empty_for_testing.py", "insecure_random.py", "make_request.py"]
-        files = match_files(dir_structure, ["**/tests/**", incorrect_glob])
+        files = match_files(dir_structure, ["tests/**", incorrect_glob])
         self._assert_expected(files, expected)
 
     def test_match_excluded_dir_correct_glob(self, dir_structure):
         correct_globs = ["**/more_samples/**", "*/more_samples/*"]
         for correct_glob in correct_globs:
             expected = ["insecure_random.py", "make_request.py"]
-            files = match_files(dir_structure, ["**/tests/**", correct_glob])
+            files = match_files(dir_structure, ["tests/**", correct_glob])
             self._assert_expected(files, expected)
 
     def test_match_excluded_multiple(self, dir_structure):
         expected = ["insecure_random.py"]
-        files = match_files(dir_structure, ["**/tests/**", "*request.py", "*empty*"])
+        files = match_files(dir_structure, ["tests/**", "*request.py", "*empty*"])
         self._assert_expected(files, expected)
 
     def test_match_included(self, dir_structure):
@@ -96,7 +96,7 @@ class TestMatchFiles:
         expected = ["empty_for_testing.py", "insecure_random.py"]
         files = match_files(
             dir_structure,
-            exclude_paths=["**/tests/**", "*request.py"],
+            exclude_paths=["tests/**", "*request.py"],
             include_paths=["*request.py", "*empty*.py", "*random.py"],
         )
         self._assert_expected(files, expected)
@@ -104,7 +104,7 @@ class TestMatchFiles:
     def test_test_directory_not_excluded(self, dir_structure):
         expected = ["test_insecure_random.py", "test_make_request.py"]
         files = match_files(
-            dir_structure, exclude_paths=["**/samples/**", "**/more_samples/**"]
+            dir_structure, exclude_paths=["samples/**", "**/more_samples/**"]
         )
         self._assert_expected(files, expected)
 
@@ -120,7 +120,7 @@ class TestMatchFiles:
             "codemodder.code_directory.Path.is_file",
             return_value=True,
         )
-        files = match_files(Path("."), include_paths=["**/tests/**"])
+        files = match_files(Path("."), include_paths=["tests/**"])
         self._assert_expected(files, [])
 
     def test_include_test_without_default_includes(self, mocker):
