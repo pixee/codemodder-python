@@ -97,12 +97,20 @@ class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
             case cst.Add():
                 left_type = infer_expression_type(self.resolve_expression(binop.left))
                 right_type = infer_expression_type(self.resolve_expression(binop.right))
-                if set((left_type, right_type)) != {BaseType.STRING}:
+                if left_type != right_type or (type_both_sides := left_type) not in {
+                    BaseType.STRING,
+                    BaseType.BYTES,
+                }:
+                    # Cannot concat different types.
+                    # Skip logging ints, etc. Eg: `logging.info(2+2)`
                     return updated_node
+
                 if self.has_non_literal(binop):
                     format_string, format_args = self.process_concat(binop)
                     combined_format_string = cst.SimpleString(
-                        value='"' + "".join(format_string) + '"'
+                        value=('"' if type_both_sides == BaseType.STRING else "")
+                        + "".join(format_string)
+                        + '"'
                     )
                     new_args = [cst.Arg(value=combined_format_string)] + format_args
                 else:
@@ -127,13 +135,11 @@ class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
         if format_args is None:
             format_args = []
 
-        # Recursive case: process the left and right sides
         # todo: change to match/ case
         if isinstance(node, cst.BinaryOperation) and m.matches(node.operator, m.Add()):
             self.process_concat(node.left, format_string, format_args)
             self.process_concat(node.right, format_string, format_args)
         else:
-            # Check if the node is a string literal
             if isinstance(node, cst.SimpleString):
                 format_string.append(node.value.strip("\"'"))
             else:
