@@ -1,5 +1,5 @@
 import libcst as cst
-from libcst import matchers as m
+from typing import Optional
 from codemodder.codemods.utils import BaseType, infer_expression_type
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
@@ -86,64 +86,72 @@ class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
 
         match binop.operator:
             case cst.Modulo():
-                format_string = binop.left
-                format_args = binop.right
-                new_args = [cst.Arg(value=format_string)]
-                if isinstance(format_args, cst.Tuple):
-                    for element in format_args.elements:
-                        new_args.append(cst.Arg(value=element.value))
-                else:
-                    new_args.append(cst.Arg(value=format_args))
+                new_args = self.make_args_for_modulo(binop)
             case cst.Add():
-                left_type = infer_expression_type(self.resolve_expression(binop.left))
-                right_type = infer_expression_type(self.resolve_expression(binop.right))
-                if left_type != right_type or (type_both_sides := left_type) not in {
-                    BaseType.STRING,
-                    BaseType.BYTES,
-                }:
-                    # Cannot concat different types.
-                    # Skip logging ints, etc. Eg: `logging.info(2+2)`
-                    return updated_node
-
-                if self.has_non_literal(binop):
-                    format_string, format_args = self.process_concat(binop)
-                    combined_format_string = cst.SimpleString(
-                        value=('"' if type_both_sides == BaseType.STRING else "")
-                        + "".join(format_string)
-                        + '"'
-                    )
-                    new_args = [cst.Arg(value=combined_format_string)] + format_args
-                else:
+                if (new_args := self.make_args_for_plus(binop)) is None:
                     return updated_node
         return updated_node.with_changes(args=first_arg + new_args + remaining_args)
+
+    def make_args_for_plus(self, binop: cst.BinaryOperation) -> Optional[list[cst.Arg]]:
+        if self.is_str_concat(binop):
+            # Do not change explicit str concat, e.g.: `logging.info("one" + "two")
+            return None
+
+        left_type = infer_expression_type(self.resolve_expression(binop.left))
+        right_type = infer_expression_type(self.resolve_expression(binop.right))
+        if left_type != right_type or (type_both_sides := left_type) not in {
+            BaseType.STRING,
+            BaseType.BYTES,
+        }:
+            # Cannot concat different types.
+            # Skip logging ints, etc. Eg: `logging.info(2+2)`
+            return None
+
+        format_strings, format_args = self.process_concat(binop)
+        combined_format_string = cst.SimpleString(
+            value=f"""{'"' if type_both_sides == BaseType.STRING else ""}{"".join(format_strings)}\""""
+        )
+        return [cst.Arg(value=combined_format_string)] + format_args
+
+    def make_args_for_modulo(self, binop: cst.BinaryOperation) -> list[cst.Arg]:
+        format_string = binop.left
+        format_args = binop.right
+        new_args = [cst.Arg(value=format_string)]
+        match format_args:
+            case cst.Tuple():
+                for element in format_args.elements:
+                    new_args.append(cst.Arg(value=element.value))
+            case _:
+                new_args.append(cst.Arg(value=format_args))
+        return new_args
 
     def all_operators(self, node: cst.BinaryOperation):
         if not isinstance(node.left, cst.BinaryOperation):
             return [node.operator.__class__]
         return [node.operator.__class__] + self.all_operators(node.left)
 
-    def has_non_literal(self, node):
-        # Check if the node is a binary operation
-        if isinstance(node, cst.BinaryOperation) and m.matches(node.operator, m.Add()):
-            return self.has_non_literal(node.left) or self.has_non_literal(node.right)
-        # Return True if the node is not a string literal
-        return not isinstance(node, cst.SimpleString)
+    def is_str_concat(self, node: cst.CSTNode) -> bool:
+        match node:
+            case cst.BinaryOperation(operator=cst.Add()):
+                return self.is_str_concat(node.left) and self.is_str_concat(node.right)
+        return isinstance(node, cst.SimpleString)
 
-    def process_concat(self, node: cst.CSTNode, format_string=None, format_args=None):
-        if format_string is None:
-            format_string = []
+    def process_concat(
+        self, node: cst.CSTNode, format_strings=None, format_args=None
+    ) -> tuple[list[str], list[cst.Arg]]:
+        if format_strings is None:
+            format_strings = []
         if format_args is None:
             format_args = []
 
-        # todo: change to match/ case
-        if isinstance(node, cst.BinaryOperation) and m.matches(node.operator, m.Add()):
-            self.process_concat(node.left, format_string, format_args)
-            self.process_concat(node.right, format_string, format_args)
-        else:
-            if isinstance(node, cst.SimpleString):
-                format_string.append(node.value.strip("\"'"))
-            else:
-                format_string.append("%s")
+        match node:
+            case cst.BinaryOperation(operator=cst.Add()):
+                self.process_concat(node.left, format_strings, format_args)
+                self.process_concat(node.right, format_strings, format_args)
+            case cst.SimpleString():
+                format_strings.append(node.value.strip("\"'"))
+            case _:
+                format_strings.append("%s")
                 format_args.append(cst.Arg(value=node))
 
-        return format_string, format_args
+        return format_strings, format_args
