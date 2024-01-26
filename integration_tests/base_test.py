@@ -83,16 +83,13 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert run["tool"] == "codemodder-python"
         assert run["version"] == __version__
         assert run["elapsed"] != ""
-        if self.sonar_issues_json:
-            assert (
-                run["commandLine"]
-                == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_instance.name} --path-include={code_path} --sonar-issues-json={self.sonar_issues_json}"
-            )
-        else:
-            assert (
-                run["commandLine"]
-                == f"codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_instance.name} --path-include={code_path}"
-            )
+        assert run[
+            "commandLine"
+        ] == f'codemodder {SAMPLES_DIR} --output {output_path} --codemod-include={self.codemod_instance.name} --path-include={code_path} --path-exclude=""' + (
+            f" --sonar-issues-json={self.sonar_issues_json}"
+            if self.sonar_issues_json
+            else ""
+        )
         assert run["directory"] == os.path.abspath(SAMPLES_DIR)
         assert run["sarifs"] == []
 
