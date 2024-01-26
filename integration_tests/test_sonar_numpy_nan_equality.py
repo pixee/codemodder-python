@@ -1,4 +1,4 @@
-from core_codemods.sonar_numpy_nan_equality import (
+from core_codemods.sonar.sonar_numpy_nan_equality import (
     SonarNumpyNanEquality,
     SonarNumpyNanEqualityTransformer,
 )

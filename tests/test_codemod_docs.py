@@ -12,7 +12,6 @@ def pytest_generate_tests(metafunc):
 
 
 def test_load_codemod_docs_info(codemod: BaseCodemod):
-    print(codemod.name)
     if codemod.name in ["order-imports"]:
         pytest.xfail(reason=f"{codemod.name} has no description")
 

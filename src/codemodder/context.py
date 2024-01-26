@@ -63,10 +63,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         self.path_include = path_include
         self.path_exclude = path_exclude
         self.max_workers = max_workers
-        if tool_result_files_map:
-            self.tool_result_files_map = tool_result_files_map
-        else:
-            self.tool_result_files_map = {}
+        self.tool_result_files_map = tool_result_files_map or {}
 
     def add_results(self, codemod_name: str, change_sets: List[ChangeSet]):
         self._results_by_codemod.setdefault(codemod_name, []).extend(change_sets)

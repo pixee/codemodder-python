@@ -20,7 +20,6 @@ from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default
 from codemodder.result import ResultSet
 from codemodder.semgrep import run as run_semgrep
-from codemodder.sonar_results import SonarResultSet
 
 
 def update_code(file_path, new_code):
@@ -135,13 +134,6 @@ def record_dependency_update(dependency_results: dict[Dependency, PackageStore |
             )
         else:
             logger.debug("The following dependencies could not be added: %s", str_list)
-
-
-def process_sonar_findings(sonar_json_files: list[str]) -> SonarResultSet:
-    combined_result_set = SonarResultSet()
-    for file in sonar_json_files or []:
-        combined_result_set |= SonarResultSet.from_json(file)
-    return combined_result_set
 
 
 def run(original_args) -> int:
