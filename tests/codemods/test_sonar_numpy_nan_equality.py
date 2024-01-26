@@ -1,5 +1,5 @@
 import json
-from core_codemods.sonar_numpy_nan_equality import SonarNumpyNanEquality
+from core_codemods.sonar.sonar_numpy_nan_equality import SonarNumpyNanEquality
 from tests.codemods.base_codemod_test import BaseSASTCodemodTest
 from textwrap import dedent
 
