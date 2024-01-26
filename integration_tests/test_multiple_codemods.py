@@ -28,7 +28,8 @@ class TestMultipleCodemods:
             str(codetf_path),
             f"--codemod-include={codemods}",
             "--path-include",
-            f"**/{source_file_name}",
+            f"{source_file_name}",
+            '--path-exclude=""',
         ]
 
         completed_process = subprocess.run(
