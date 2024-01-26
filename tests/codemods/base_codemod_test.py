@@ -128,3 +128,60 @@ class BaseDjangoCodemodTest(BaseCodemodTest):
         settings_folder = django_root / "mysite"
         os.makedirs(settings_folder)
         return (django_root, settings_folder)
+
+
+class BaseSASTCodemodTest(BaseCodemodTest):
+    tool: ClassVar = NotImplemented
+
+    def run_and_assert(  # pylint: disable=too-many-arguments
+        self,
+        tmpdir,
+        input_code,
+        expected,
+        num_changes: int = 1,
+        root: Path | None = None,
+        files: list[Path] | None = None,
+        lines_to_exclude: list[int] | None = None,
+        results: str = "",
+    ):
+        root = root or tmpdir
+        tmp_file_path = files[0] if files else Path(tmpdir) / "code.py"
+        tmp_file_path.write_text(dedent(input_code))
+
+        tmp_results_file_path = Path(tmpdir) / "sast_results"
+
+        with open(tmp_results_file_path, "w", encoding="utf-8") as results_file:
+            results_file.write(results)
+
+        files_to_check = files or [tmp_file_path]
+
+        path_exclude = [f"{tmp_file_path}:{line}" for line in lines_to_exclude or []]
+
+        self.execution_context = CodemodExecutionContext(
+            directory=root,
+            dry_run=False,
+            verbose=False,
+            tool_result_files_map={self.tool: [str(tmp_results_file_path)]},
+            registry=mock.MagicMock(),
+            repo_manager=mock.MagicMock(),
+            path_include=[f.name for f in files_to_check],
+            path_exclude=path_exclude,
+        )
+
+        self.codemod.apply(self.execution_context, files_to_check)
+        changes = self.execution_context.get_results(self.codemod.id)
+
+        if input_code == expected:
+            assert not changes
+            return
+
+        assert len(changes) == 1
+        assert len(changes[0].changes) == num_changes
+
+        self.assert_changes(
+            tmpdir,
+            tmp_file_path,
+            input_code,
+            expected,
+            changes[0],
+        )
