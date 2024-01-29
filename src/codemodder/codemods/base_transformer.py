@@ -30,7 +30,7 @@ class BaseTransformerPipeline(metaclass=ABCMeta):
         self,
         context: CodemodExecutionContext,
         file_context: FileContext,
-        results: list[Result],
+        results: list[Result] | None,
     ) -> ChangeSet | None:
         """
         Apply the pipeline to the given file context

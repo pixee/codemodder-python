@@ -45,7 +45,7 @@ class LibcstResultTransformer(
     def __init__(
         self,
         context: CodemodContext,
-        results: list[Result],
+        results: list[Result] | None,
         file_context: FileContext,
         _transformer: bool = False,
     ):
@@ -56,7 +56,7 @@ class LibcstResultTransformer(
 
     @classmethod
     def transform(
-        cls, module: cst.Module, results: list[Result], file_context: FileContext
+        cls, module: cst.Module, results: list[Result] | None, file_context: FileContext
     ) -> cst.Module:
         wrapper = cst.MetadataWrapper(module)
         codemod = cls(
@@ -260,7 +260,7 @@ class LibcstTransformerPipeline(BaseTransformerPipeline):
         self,
         context: CodemodExecutionContext,
         file_context: FileContext,
-        results: list[Result],
+        results: list[Result] | None,
     ) -> ChangeSet | None:
         file_path = file_context.file_path
 

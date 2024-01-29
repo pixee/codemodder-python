@@ -1,6 +1,6 @@
+from core_codemods.numpy_nan_equality import NumpyNanEqualityTransformer
 from core_codemods.sonar.sonar_numpy_nan_equality import (
     SonarNumpyNanEquality,
-    SonarNumpyNanEqualityTransformer,
 )
 from integration_tests.base_test import (
     BaseIntegrationTest,
@@ -34,5 +34,5 @@ class TestNumpyNanEquality(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "4"
-    change_description = SonarNumpyNanEqualityTransformer.change_description
+    change_description = NumpyNanEqualityTransformer.change_description
     num_changed_files = 1
