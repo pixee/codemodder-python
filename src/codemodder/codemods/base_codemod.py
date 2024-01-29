@@ -139,7 +139,7 @@ class BaseCodemod(metaclass=ABCMeta):
             # It seems like semgrep doesn't like our fully-specified id format
             self.detector.apply(self.name, context, files_to_analyze)
             if self.detector
-            else ResultSet()
+            else None
         )
 
         process_file = functools.partial(
@@ -180,14 +180,18 @@ class BaseCodemod(metaclass=ABCMeta):
         self,
         filename: Path,
         context: CodemodExecutionContext,
-        results: ResultSet,
+        results: ResultSet | None,
         rules: list[str],
     ):
         line_exclude = file_line_patterns(filename, context.path_exclude)
         line_include = file_line_patterns(filename, context.path_include)
-        findings_for_rule = []
-        for rule in rules:
-            findings_for_rule.extend(results.results_for_rule_and_file(rule, filename))
+        findings_for_rule = None
+        if results is not None:
+            findings_for_rule = []
+            for rule in rules:
+                findings_for_rule.extend(
+                    results.results_for_rule_and_file(rule, filename)
+                )
 
         file_context = FileContext(
             context.directory,

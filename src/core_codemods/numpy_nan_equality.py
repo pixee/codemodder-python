@@ -50,7 +50,7 @@ class NumpyNanEqualityTransformer(LibcstResultTransformer, NameResolutionMixin):
     def leave_Comparison(
         self, original_node: cst.Comparison, updated_node: cst.Comparison
     ) -> cst.BaseExpression:
-        if self.filter_by_path_includes_or_excludes(self.node_position(original_node)):
+        if self.node_is_selected(original_node):
             match original_node:
                 case cst.Comparison(comparisons=[cst.ComparisonTarget() as target]):
                     maybe_nan_eq = self._is_np_nan_eq(original_node.left, target)

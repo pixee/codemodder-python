@@ -17,7 +17,7 @@ class FileContext:  # pylint: disable=too-many-instance-attributes
     file_path: Path
     line_exclude: list[int] = field(default_factory=list)
     line_include: list[int] = field(default_factory=list)
-    findings: list[Result] = field(default_factory=list)
+    findings: list[Result] | None = field(default_factory=list)
     dependencies: set[Dependency] = field(default_factory=set)
     codemod_changes: list[Change] = field(default_factory=list)
     results: list[ChangeSet] = field(default_factory=list)

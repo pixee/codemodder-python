@@ -7,12 +7,14 @@ from codemodder.result import Result
 
 # TODO: this should just be part of BaseTransformer and BaseVisitor?
 class UtilsMixin:
-    results: list[Result]
+    results: list[Result] | None
 
-    def __init__(self, results: list[Result]):
+    def __init__(self, results: list[Result] | None):
         self.results = results
 
     def filter_by_result(self, pos_to_match):
+        if self.results is None:
+            return True
         return any(
             location.match(pos_to_match)
             for result in self.results
@@ -31,9 +33,6 @@ class UtilsMixin:
         return True
 
     def node_is_selected(self, node) -> bool:
-        if not self.results:
-            return False
-
         pos_to_match = self.node_position(node)
         return self.filter_by_result(
             pos_to_match
@@ -50,7 +49,7 @@ class UtilsMixin:
 class BaseTransformer(VisitorBasedCodemodCommand, UtilsMixin):
     METADATA_DEPENDENCIES: Tuple[Any, ...] = (PositionProvider,)
 
-    def __init__(self, context, results: list[Result]):
+    def __init__(self, context, results: list[Result] | None):
         super().__init__(context)
         UtilsMixin.__init__(self, results)
 
