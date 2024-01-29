@@ -89,12 +89,14 @@ class FixMutableParams(SimpleCodemod):
             )
             add_annotation = add_annotation or annotation is not None
             updated_params.append(
-                updated.with_changes(
-                    default=cst.Name("None"),
-                    annotation=annotation,
-                )
-                if needs_update
-                else updated,
+                (
+                    updated.with_changes(
+                        default=cst.Name("None"),
+                        annotation=annotation,
+                    )
+                    if needs_update
+                    else updated
+                ),
             )
 
         return updated_params, new_var_decls, add_annotation

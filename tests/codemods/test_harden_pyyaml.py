@@ -63,7 +63,9 @@ deserialized_data = yam.load(data, Loader=yam.SafeLoader)
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_preserve_custom_loader(self, tmpdir):
-        expected = input_code = """
+        expected = (
+            input_code
+        ) = """
         import yaml
         from custom import CustomLoader
 
@@ -73,7 +75,9 @@ deserialized_data = yam.load(data, Loader=yam.SafeLoader)
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_preserve_custom_loader_kwarg(self, tmpdir):
-        expected = input_code = """
+        expected = (
+            input_code
+        ) = """
         import yaml
         from custom import CustomLoader
 

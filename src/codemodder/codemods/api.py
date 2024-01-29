@@ -44,9 +44,11 @@ class SimpleCodemod(LibcstResultTransformer, metaclass=ABCMeta):
 
         return cls.codemod_base(
             metadata=cls.metadata,
-            detector=SemgrepRuleDetector(cls.detector_pattern)
-            if getattr(cls, "detector_pattern", None)
-            else None,
+            detector=(
+                SemgrepRuleDetector(cls.detector_pattern)
+                if getattr(cls, "detector_pattern", None)
+                else None
+            ),
             # This allows the transformer to inherit all the methods of the class itself
             transformer=LibcstTransformerPipeline(cls),
         )

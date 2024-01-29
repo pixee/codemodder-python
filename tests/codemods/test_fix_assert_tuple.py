@@ -77,7 +77,9 @@ class TestFixAssertTuple(BaseCodemodTest):
         self.run_and_assert(tmpdir, code, code)
 
     def test_exclude_line(self, tmpdir):
-        input_code = expected = """\
+        input_code = (
+            expected
+        ) = """\
         assert (1, 2)
         """
         lines_to_exclude = [1]

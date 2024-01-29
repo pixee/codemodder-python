@@ -24,7 +24,18 @@ class LiteralOrNewObjectIdentity(SimpleCodemod, NameAndAncestorResolutionMixin):
 
     def _is_object_creation_or_literal(self, node: cst.BaseExpression):
         match node:
-            case cst.List() | cst.Dict() | cst.Tuple() | cst.Set() | cst.Integer() | cst.Float() | cst.Imaginary() | cst.SimpleString() | cst.ConcatenatedString() | cst.FormattedString():
+            case (
+                cst.List()
+                | cst.Dict()
+                | cst.Tuple()
+                | cst.Set()
+                | cst.Integer()
+                | cst.Float()
+                | cst.Imaginary()
+                | cst.SimpleString()
+                | cst.ConcatenatedString()
+                | cst.FormattedString()
+            ):
                 return True
             case cst.Call(func=cst.Name() as name):
                 return self.is_builtin_function(node) and name.value in (

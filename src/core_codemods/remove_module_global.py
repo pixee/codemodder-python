@@ -18,7 +18,10 @@ class RemoveModuleGlobal(SimpleCodemod, NameResolutionMixin):
         self,
         original_node: cst.Global,
         updated_node: cst.Global,
-    ) -> Union[cst.Global, cst.RemovalSentinel,]:
+    ) -> Union[
+        cst.Global,
+        cst.RemovalSentinel,
+    ]:
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)
         ):

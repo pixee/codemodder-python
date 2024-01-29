@@ -293,10 +293,11 @@ class AncestorPatternsMixin(MetadataDependent):
         """
         parent = self.get_metadata(ParentNodeProvider, expr)
         match parent:
-            case cst.AnnAssign(value=value) | cst.Assign(value=value) | cst.WithItem(
-                item=value
-            ) | cst.NamedExpr(
-                value=value
+            case (
+                cst.AnnAssign(value=value)
+                | cst.Assign(value=value)
+                | cst.WithItem(item=value)
+                | cst.NamedExpr(value=value)
             ) if expr == value:  # type: ignore
                 return parent
         return None
@@ -448,9 +449,12 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
 
     def extract_value(self, node: cst.AnnAssign | cst.Assign | cst.WithItem):
         match node:
-            case cst.AnnAssign(value=value) | cst.Assign(value=value) | cst.WithItem(
-                item=value
-            ) | cst.NamedExpr(value=value):
+            case (
+                cst.AnnAssign(value=value)
+                | cst.Assign(value=value)
+                | cst.WithItem(item=value)
+                | cst.NamedExpr(value=value)
+            ):
                 return value
         return None
 

@@ -51,7 +51,9 @@ class TestExceptionWithoutRaise(BaseCodemodTest):
         self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
 
     def test_exclude_line(self, tmpdir):
-        input_code = expected = """\
+        input_code = (
+            expected
+        ) = """\
         print(1)
         ValueError("Bad value!")
         """

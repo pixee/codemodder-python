@@ -82,13 +82,11 @@ class BaseCodemod(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def origin(self) -> str:
-        ...
+    def origin(self) -> str: ...
 
     @property
     @abstractmethod
-    def docs_module_path(self) -> str:
-        ...
+    def docs_module_path(self) -> str: ...
 
     @property
     def name(self) -> str:
