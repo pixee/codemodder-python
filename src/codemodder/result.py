@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from .utils.abc_dataclass import ABCDataclass
 
@@ -49,4 +50,16 @@ class ResultSet(dict[str, dict[Path, list[Result]]]):
         return list(self.keys())
 
     def __or__(self, other):
-        return ResultSet(super().__or__(other))
+        result = ResultSet(super().__or__(other))
+        for k in self.keys() | other.keys():
+            result[k] = list_dict_or(self[k], other[k])
+        return result
+
+
+def list_dict_or(
+    dictionary: dict[Any, list[Any]], other: dict[Any, list[Any]]
+) -> dict[Path, list[Any]]:
+    result_dict = other | dictionary
+    for k in other.keys() | dictionary.keys():
+        result_dict[k] = dictionary[k] + other[k]
+    return result_dict
