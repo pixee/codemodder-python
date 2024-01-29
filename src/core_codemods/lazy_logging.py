@@ -8,7 +8,7 @@ from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
     metadata = Metadata(
         name="lazy-logging",
-        summary="Simplify Boolean Expressions Using `startswith` and `endswith`",
+        summary="Convert Eager Logging to Lazy Logging",
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[],
     )

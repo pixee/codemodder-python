@@ -222,6 +222,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="An `assert` statement on a non-empty tuple is likely unintended and should be rewritten. However, the new change may result in assertion failures that should be reviewed.",
     ),
+    "lazy-logging": DocMetadata(
+        importance="Medium",
+        guidance_explained="We believe this change is safe and will not cause any issues.",
+    ),
 }
 
 METADATA = CORE_METADATA | {
