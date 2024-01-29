@@ -83,7 +83,7 @@ class SetupPyAddDependencies(SimpleCodemod, NameResolutionMixin):
         return is_setup_py_file(self.filename)
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
-        if (true_name := self.find_base_name(original_node.func)) != "setuptools.setup":
+        if self.find_base_name(original_node.func) != "setuptools.setup":
             return original_node
 
         new_args = self.replace_arg(original_node)

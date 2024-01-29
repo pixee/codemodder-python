@@ -129,7 +129,7 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
         return bool(self.flask_app_name)
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
-        if (true_name := self.find_base_name(original_node.func)) == "flask.Flask":
+        if self.find_base_name(original_node.func) == "flask.Flask":
             self._store_flask_app(original_node)
 
         if self.flask_app_is_assigned and self._is_config_update_call(original_node):
