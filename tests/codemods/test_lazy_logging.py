@@ -271,6 +271,21 @@ class TestLazyLoggingModulo(BaseSemgrepCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected_code)
 
+    def test_var_assignments(self, tmpdir):
+        input_code = """\
+        import logging
+        msg = "something %s"
+        e = "error"
+        logging.info(msg % e)
+        """
+        expected_code = """\
+        import logging
+        msg = "something %s"
+        e = "error"
+        logging.info(msg, e)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_code)
+
     @pytest.mark.parametrize(
         "code",
         [
@@ -591,6 +606,13 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
             var = 2
             logging.info(var + var)
             """,
+            """\
+            import logging
+            msg = "one"
+            var = "two"
+            res = msg + var
+            logging.info(res)
+            """,
         ],
     )
     def test_no_change(self, tmpdir, code):
@@ -609,3 +631,39 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
         logging.info("one %s %s four", 'two', var)
         """
         self.run_and_assert(tmpdir, input_code, expected_code)
+
+    @pytest.mark.parametrize(
+        "input_code,expected_output",
+        [
+            (
+                """\
+            import logging
+            e = "error"
+            msg = "something %s"
+            logging.info(msg + e)
+            """,
+                """\
+            import logging
+            msg = "something %s"
+            e = "error"
+            logging.info(msg, e)
+            """,
+            ),
+            (
+                """\
+            import logging
+            one = "one"
+            two = "two"
+            logging.info(one + two)
+            """,
+                """\
+            import logging
+            one = "one%s"
+            two = "two"
+            logging.info(one, two)
+            """,
+            ),
+        ],
+    )
+    def test_var_assignments(self, tmpdir, input_code, expected_output):
+        self.run_and_assert(tmpdir, input_code, expected_output)
