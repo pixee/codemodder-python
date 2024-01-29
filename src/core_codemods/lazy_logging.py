@@ -97,6 +97,9 @@ class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
             # Do not change explicit str concat, e.g.: `logging.info("one" + "two")
             return None
 
+        if isinstance(binop.left, cst.SimpleString) and "%" in binop.left.value:
+            # Do no change `logging.info("Something: %s " + var)` since intention is unclear
+            return None
         left_type = infer_expression_type(self.resolve_expression(binop.left))
         right_type = infer_expression_type(self.resolve_expression(binop.right))
         if left_type != right_type or (type_both_sides := left_type) not in {
