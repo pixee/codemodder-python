@@ -66,7 +66,9 @@ class TestFixDeprecatedAbstractproperty(BaseCodemodTest):
         self.run_and_assert(tmpdir, original_code, new_code)
 
     def test_different_abstractproperty(self, tmpdir):
-        new_code = original_code = """
+        new_code = (
+            original_code
+        ) = """
         from xyz import abstractproperty
 
         class A:
@@ -123,7 +125,9 @@ class TestFixDeprecatedAbstractproperty(BaseCodemodTest):
         self.run_and_assert(tmpdir, original_code, new_code)
 
     def test_exclude_line(self, tmpdir):
-        input_code = expected = """\
+        input_code = (
+            expected
+        ) = """\
         import abc
 
         class A:

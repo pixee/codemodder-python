@@ -12,5 +12,4 @@ class BaseDetector(metaclass=ABCMeta):
         codemod_id: str,
         context: CodemodExecutionContext,
         files_to_analyze: list[Path],
-    ) -> ResultSet:
-        ...
+    ) -> ResultSet: ...

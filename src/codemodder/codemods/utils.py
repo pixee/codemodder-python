@@ -26,12 +26,14 @@ def infer_expression_type(node: cst.BaseExpression) -> Optional[BaseType]:
     """
     # The current implementation covers some common cases and is in no way complete
     match node:
-        case cst.Integer() | cst.Imaginary() | cst.Float() | cst.Call(
-            func=cst.Name("int")
-        ) | cst.Call(func=cst.Name("float")) | cst.Call(
-            func=cst.Name("abs")
-        ) | cst.Call(
-            func=cst.Name("len")
+        case (
+            cst.Integer()
+            | cst.Imaginary()
+            | cst.Float()
+            | cst.Call(func=cst.Name("int"))
+            | cst.Call(func=cst.Name("float"))
+            | cst.Call(func=cst.Name("abs"))
+            | cst.Call(func=cst.Name("len"))
         ):
             return BaseType.NUMBER
         case cst.Call(name=cst.Name("list")) | cst.List() | cst.ListComp():

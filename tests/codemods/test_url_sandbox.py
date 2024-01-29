@@ -188,7 +188,9 @@ class TestUrlSandbox(BaseSemgrepCodemodTest):
         add_dependency.assert_called_once_with(Security)
 
     def test_ignore_hardcoded(self, _, tmpdir):
-        expected = input_code = """
+        expected = (
+            input_code
+        ) = """
         import requests
 
         requests.get("www.google.com")
@@ -197,7 +199,9 @@ class TestUrlSandbox(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_ignore_hardcoded_from_global_variable(self, _, tmpdir):
-        expected = input_code = """
+        expected = (
+            input_code
+        ) = """
         import requests
 
         URL = "www.google.com"
@@ -207,7 +211,9 @@ class TestUrlSandbox(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_ignore_hardcoded_from_local_variable(self, _, tmpdir):
-        expected = input_code = """
+        expected = (
+            input_code
+        ) = """
         import requests
 
         def foo():
@@ -218,7 +224,9 @@ class TestUrlSandbox(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_ignore_hardcoded_from_local_variable_transitive(self, _, tmpdir):
-        expected = input_code = """
+        expected = (
+            input_code
+        ) = """
         import requests
 
         def foo():

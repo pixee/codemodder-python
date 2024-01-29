@@ -133,7 +133,9 @@ class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_aiohttp_import_alias_no_change(self, tmpdir):
-        expected_output = input_code = """
+        expected_output = (
+            input_code
+        ) = """
         from aiohttp_jinja2 import foo as setup
         setup_jinja2(app)
         """

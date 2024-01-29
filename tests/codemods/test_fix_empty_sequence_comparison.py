@@ -228,7 +228,9 @@ class TestFixEmptySequenceComparisonIfStatements(BaseCodemodTest):
         self.run_and_assert(tmpdir, code, code)
 
     def test_exclude_line(self, tmpdir):
-        input_code = expected = """\
+        input_code = (
+            expected
+        ) = """\
         x = [1]
         if x != []:
             pass

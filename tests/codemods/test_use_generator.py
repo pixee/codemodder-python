@@ -18,20 +18,26 @@ class TestUseGenerator(BaseCodemodTest):
         self.run_and_assert(tmpdir, original_code, new_code)
 
     def test_not_special_builtin(self, tmpdir):
-        expected = original_code = """
+        expected = (
+            original_code
+        ) = """
         x = some([i for i in range(10)])
         """
         self.run_and_assert(tmpdir, original_code, expected)
 
     def test_not_global_function(self, tmpdir):
-        expected = original_code = """
+        expected = (
+            original_code
+        ) = """
         from foo import any
         x = any([i for i in range(10)])
         """
         self.run_and_assert(tmpdir, original_code, expected)
 
     def test_exclude_line(self, tmpdir):
-        input_code = expected = """\
+        input_code = (
+            expected
+        ) = """\
         x = any([i for i in range(10)])
         """
         lines_to_exclude = [1]

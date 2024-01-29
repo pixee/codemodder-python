@@ -172,13 +172,15 @@ class RefactorNewApi(SimpleCodemod, NameResolutionMixin):
 
     def leave_ClassDef(self, original: cst.ClassDef, new: cst.ClassDef) -> cst.ClassDef:
         new_bases: list[cst.Arg] = [
-            base.with_changes(value=cst.Name(self.new_api_class))
-            if self.find_base_name(base.value)
-            in (
-                "codemodder.codemods.api.BaseCodemod",
-                "codemodder.codemods.api.SemgrepCodemod",
+            (
+                base.with_changes(value=cst.Name(self.new_api_class))
+                if self.find_base_name(base.value)
+                in (
+                    "codemodder.codemods.api.BaseCodemod",
+                    "codemodder.codemods.api.SemgrepCodemod",
+                )
+                else base
             )
-            else base
             for base in original.bases
         ]
 

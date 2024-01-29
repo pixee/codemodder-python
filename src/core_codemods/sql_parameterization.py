@@ -492,9 +492,9 @@ class FindQueryCalls(ContextAwareVisitor):
                     first_arg.value.visit(query_visitor)
                     for expr in query_visitor.leaves:
                         match expr:
-                            case cst.SimpleString() | cst.FormattedStringText() if self._has_keyword(
-                                expr.value
-                            ):
+                            case (
+                                cst.SimpleString() | cst.FormattedStringText()
+                            ) if self._has_keyword(expr.value):
                                 self.calls[original_node] = query_visitor.leaves
 
 

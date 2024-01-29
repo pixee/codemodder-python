@@ -82,7 +82,9 @@ class TestRemoveDebugBreakpoint(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_exclude_line(self, tmpdir):
-        input_code = expected = """\
+        input_code = (
+            expected
+        ) = """\
         x = "foo"
         breakpoint()
         """
