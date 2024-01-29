@@ -613,6 +613,20 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
             res = msg + var
             logging.info(res)
             """,
+            # User intention is unclear here, did they
+            # Want a `%s` literal or no?
+            """\
+            import logging
+            var = "something"
+            logging.info("Something occurred: %s " + var)
+            """,
+            # There are more `%` operators than there are variables so
+            # We will not attempt to change the code.
+            """\
+            import logging
+            e = "error"
+            logging.error("Error %s occurred: %s " + e)
+            """,
         ],
     )
     def test_no_change(self, tmpdir, code):
@@ -644,9 +658,9 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
             """,
                 """\
             import logging
-            msg = "something %s"
             e = "error"
-            logging.info(msg, e)
+            msg = "something %s"
+            logging.info("%s%s", msg, e)
             """,
             ),
             (
@@ -658,12 +672,12 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
             """,
                 """\
             import logging
-            one = "one%s"
+            one = "one"
             two = "two"
-            logging.info(one, two)
+            logging.info("%s%s", one, two)
             """,
             ),
         ],
     )
-    def test_var_assignments(self, tmpdir, input_code, expected_output):
+    def test_var_assignments_with_modulo(self, tmpdir, input_code, expected_output):
         self.run_and_assert(tmpdir, input_code, expected_output)
