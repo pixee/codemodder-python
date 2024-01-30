@@ -24,6 +24,7 @@ class SecureRandom(SimpleCodemod):
     detector_pattern = """
         - patterns:
           - pattern: random.$F(...)
+          - pattern-not: random.SystemRandom()
           - pattern-inside: |
               import random
               ...
