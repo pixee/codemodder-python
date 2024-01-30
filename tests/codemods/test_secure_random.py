@@ -155,3 +155,27 @@ random.__all__
 """
 
         self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_random_systemrandom(self, tmpdir):
+        input_code = """
+        import random
+
+        rand = random.SystemRandom()
+        """
+        self.run_and_assert(tmpdir, input_code, input_code)
+
+    def test_random_systemrandom_importfrom(self, tmpdir):
+        input_code = """
+        from random import SystemRandom
+
+        rand = SystemRandom()
+        """
+        self.run_and_assert(tmpdir, input_code, input_code)
+
+    def test_random_systemrandom_import_alias(self, tmpdir):
+        input_code = """
+        import random as domran
+
+        rand = domran.SystemRandom()
+        """
+        self.run_and_assert(tmpdir, input_code, input_code)
