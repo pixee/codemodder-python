@@ -1,23 +1,19 @@
 from typing import Union
 import libcst as cst
+from codemodder.codemods.libcst_transformer import (
+    LibcstResultTransformer,
+    LibcstTransformerPipeline,
+)
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from core_codemods.api import (
     Metadata,
     Reference,
     ReviewGuidance,
-    SimpleCodemod,
 )
+from core_codemods.api.core_codemod import CoreCodemod
 
 
-class DjangoReceiverOnTop(SimpleCodemod, NameResolutionMixin):
-    metadata = Metadata(
-        name="django-receiver-on-top",
-        summary="Ensure Django @receiver is the first decorator",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        references=[
-            Reference(url="https://docs.djangoproject.com/en/4.1/topics/signals/"),
-        ],
-    )
+class DjangoReceiverOnTopTransformer(LibcstResultTransformer, NameResolutionMixin):
     change_description = "Moved @receiver to the top."
 
     def leave_FunctionDef(
@@ -32,7 +28,9 @@ class DjangoReceiverOnTop(SimpleCodemod, NameResolutionMixin):
             if self.find_base_name(decorator.decorator) == "django.dispatch.receiver":
                 maybe_receiver_with_index = (i, decorator)
 
-        if maybe_receiver_with_index:
+        if maybe_receiver_with_index and self.node_is_selected(
+            maybe_receiver_with_index[1]
+        ):
             index, receiver = maybe_receiver_with_index
             if index > 0:
                 new_decorators = [receiver]
@@ -42,3 +40,17 @@ class DjangoReceiverOnTop(SimpleCodemod, NameResolutionMixin):
                 self.report_change(original_node)
                 return updated_node.with_changes(decorators=new_decorators)
         return updated_node
+
+
+DjangoReceiverOnTop = CoreCodemod(
+    metadata=Metadata(
+        name="django-receiver-on-top",
+        summary="Ensure Django @receiver is the first decorator",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(url="https://docs.djangoproject.com/en/4.1/topics/signals/"),
+        ],
+    ),
+    transformer=LibcstTransformerPipeline(DjangoReceiverOnTopTransformer),
+    detector=None,
+)
