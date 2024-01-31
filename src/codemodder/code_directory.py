@@ -10,6 +10,8 @@ DEFAULT_EXCLUDED_PATHS = [
     # Some codemods represent fixes that should be applied to test code
     "test/**",
     "tests/**",
+    "**/__test__/**",
+    "**/__tests__/**",
     "conftest.py",
     "build/**",
     "dist/**",
