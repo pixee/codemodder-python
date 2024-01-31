@@ -49,6 +49,7 @@ from .replace_flask_send_file import ReplaceFlaskSendFile
 from .fix_empty_sequence_comparison import FixEmptySequenceComparison
 from .remove_assertion_in_pytest_raises import RemoveAssertionInPytestRaises
 from .fix_assert_tuple import FixAssertTuple
+from .sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
 
 from .sonar.sonar_numpy_nan_equality import SonarNumpyNanEquality
 from .sonar.sonar_literal_or_new_object_identity import SonarLiteralOrNewObjectIdentity
@@ -117,5 +118,6 @@ sonar_registry = CodemodCollection(
     codemods=[
         SonarNumpyNanEquality,
         SonarLiteralOrNewObjectIdentity,
+        SonarDjangoReceiverOnTop,
     ],
 )

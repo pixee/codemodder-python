@@ -1,7 +1,5 @@
-from core_codemods.django_receiver_on_top import (
-    DjangoReceiverOnTop,
-    DjangoReceiverOnTopTransformer,
-)
+from core_codemods.django_receiver_on_top import DjangoReceiverOnTopTransformer
+from core_codemods.sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
@@ -9,7 +7,7 @@ from integration_tests.base_test import (
 
 
 class TestDjangoReceiverOnTop(BaseIntegrationTest):
-    codemod = DjangoReceiverOnTop
+    codemod = SonarDjangoReceiverOnTop
     code_path = "tests/samples/django_receiver_on_top.py"
     original_code, expected_new_code = original_and_expected_from_code_path(
         code_path,
@@ -18,6 +16,7 @@ class TestDjangoReceiverOnTop(BaseIntegrationTest):
             (5, """@csrf_exempt\n"""),
         ],
     )
+    sonar_issues_json = "tests/samples/sonar_issues.json"
 
     # fmt: off
     expected_diff =(

@@ -237,6 +237,11 @@ METADATA = CORE_METADATA | {
         ].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
+    "django-receiver-on-top-S6552": DocMetadata(
+        importance=CORE_METADATA["django-receiver-on-top"].importance,
+        guidance_explained=CORE_METADATA["django-receiver-on-top"].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 
