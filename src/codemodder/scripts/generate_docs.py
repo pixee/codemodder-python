@@ -242,6 +242,11 @@ METADATA = CORE_METADATA | {
         guidance_explained=CORE_METADATA["django-receiver-on-top"].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
+    "exception-without-raise-S3984": DocMetadata(
+        importance=CORE_METADATA["exception-without-raise"].importance,
+        guidance_explained=CORE_METADATA["exception-without-raise"].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 

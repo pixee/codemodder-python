@@ -8,7 +8,7 @@ from integration_tests.base_test import (
 )
 
 
-class TestExceptionWithoutRaise(BaseIntegrationTest):
+class TestSonarExceptionWithoutRaise(BaseIntegrationTest):
     codemod = ExceptionWithoutRaise
     code_path = "tests/samples/exception_without_raise.py"
     original_code, expected_new_code = original_and_expected_from_code_path(
@@ -17,6 +17,7 @@ class TestExceptionWithoutRaise(BaseIntegrationTest):
             (1, """    raise ValueError\n"""),
         ],
     )
+    sonar_issues_json = "tests/samples/sonar_issues.json"
 
     # fmt: off
     expected_diff =(
