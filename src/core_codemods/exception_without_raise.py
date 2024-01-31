@@ -1,5 +1,9 @@
 from typing import Union
 import libcst as cst
+from codemodder.codemods.libcst_transformer import (
+    LibcstResultTransformer,
+    LibcstTransformerPipeline,
+)
 
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.utils.utils import full_qualified_name_from_class, list_subclasses
@@ -7,21 +11,11 @@ from core_codemods.api import (
     Metadata,
     Reference,
     ReviewGuidance,
-    SimpleCodemod,
 )
+from core_codemods.api.core_codemod import CoreCodemod
 
 
-class ExceptionWithoutRaise(SimpleCodemod, NameResolutionMixin):
-    metadata = Metadata(
-        name="exception-without-raise",
-        summary="Ensure bare exception statements are raised",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        references=[
-            Reference(
-                url="https://docs.python.org/3/tutorial/errors.html#raising-exceptions"
-            ),
-        ],
-    )
+class ExceptionWithoutRaiseTransformer(LibcstResultTransformer, NameResolutionMixin):
     change_description = "Raised bare exception statement"
 
     def leave_SimpleStatementLine(
@@ -31,9 +25,7 @@ class ExceptionWithoutRaise(SimpleCodemod, NameResolutionMixin):
     ) -> Union[
         cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel
     ]:
-        if not self.filter_by_path_includes_or_excludes(
-            self.node_position(original_node)
-        ):
+        if not self.node_is_selected(original_node):
             return updated_node
 
         match original_node:
@@ -64,3 +56,19 @@ class ExceptionWithoutRaise(SimpleCodemod, NameResolutionMixin):
         if true_name in all_exceptions:
             return True
         return False
+
+
+ExceptionWithoutRaise = CoreCodemod(
+    metadata=Metadata(
+        name="exception-without-raise",
+        summary="Ensure bare exception statements are raised",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/tutorial/errors.html#raising-exceptions"
+            ),
+        ],
+    ),
+    transformer=LibcstTransformerPipeline(ExceptionWithoutRaiseTransformer),
+    detector=None,
+)
