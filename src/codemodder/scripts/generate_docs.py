@@ -230,6 +230,13 @@ METADATA = CORE_METADATA | {
         guidance_explained=CORE_METADATA["numpy-nan-equality"].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
+    "literal-or-new-object-identity-S5796": DocMetadata(
+        importance=CORE_METADATA["literal-or-new-object-identity"].importance,
+        guidance_explained=CORE_METADATA[
+            "literal-or-new-object-identity"
+        ].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 
