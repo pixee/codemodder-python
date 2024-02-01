@@ -113,14 +113,10 @@ class FindRequestCallsAndImports(BaseVisitor):
         self.changes_in_file: List[Change] = []
 
     def leave_Call(self, original_node: cst.Call):
-        pos_to_match = self.node_position(original_node)
-        if not (
-            self.filter_by_result(pos_to_match)
-            and self.filter_by_path_includes_or_excludes(pos_to_match)
-        ):
+        if not (self.node_is_selected(original_node)):
             return
 
-        line_number = pos_to_match.start.line
+        line_number = self.node_position(original_node).start.line
         match original_node.args[0].value:
             case cst.SimpleString():
                 return

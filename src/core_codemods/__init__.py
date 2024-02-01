@@ -54,6 +54,7 @@ from .sonar.sonar_numpy_nan_equality import SonarNumpyNanEquality
 from .sonar.sonar_literal_or_new_object_identity import SonarLiteralOrNewObjectIdentity
 from .sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
 from .sonar.sonar_exception_without_raise import SonarExceptionWithoutRaise
+from .sonar.sonar_fix_assert_tuple import SonarFixAssertTuple
 
 registry = CodemodCollection(
     origin="pixee",
@@ -121,5 +122,6 @@ sonar_registry = CodemodCollection(
         SonarLiteralOrNewObjectIdentity,
         SonarDjangoReceiverOnTop,
         SonarExceptionWithoutRaise,
+        SonarFixAssertTuple,
     ],
 )

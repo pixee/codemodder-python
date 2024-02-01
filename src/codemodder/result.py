@@ -18,21 +18,22 @@ class Location(ABCDataclass):
     start: LineInfo
     end: LineInfo
 
-    def match(self, pos):
-        start_column = self.start.column
-        end_column = self.end.column
-        return (
-            pos.start.line == self.start.line
-            and (pos.start.column in (start_column - 1, start_column))
-            and pos.end.line == self.end.line
-            and (pos.end.column in (end_column - 1, end_column))
-        )
-
 
 @dataclass
 class Result(ABCDataclass):
     rule_id: str
     locations: list[Location]
+
+    def match_location(self, pos, node):  # pylint: disable=unused-argument
+        for location in self.locations:
+            start_column = location.start.column
+            end_column = location.end.column
+            return (
+                pos.start.line == location.start.line
+                and (pos.start.column in (start_column - 1, start_column))
+                and pos.end.line == location.end.line
+                and (pos.end.column in (end_column - 1, end_column))
+            )
 
 
 class ResultSet(dict[str, dict[Path, list[Result]]]):

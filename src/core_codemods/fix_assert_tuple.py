@@ -1,17 +1,16 @@
 import libcst as cst
 from typing import List, Union
-from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
+from codemodder.codemods.libcst_transformer import (
+    LibcstResultTransformer,
+    LibcstTransformerPipeline,
+)
+from core_codemods.api import Metadata, ReviewGuidance
 from codemodder.change import Change
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api.core_codemod import CoreCodemod
 
 
-class FixAssertTuple(SimpleCodemod, NameResolutionMixin):
-    metadata = Metadata(
-        name="fix-assert-tuple",
-        summary="Fix `assert` on Non-Empty Tuple Literal",
-        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
-        references=[],
-    )
+class FixAssertTupleTransform(LibcstResultTransformer, NameResolutionMixin):
     change_description = "Separate assertion on a non-empty tuple literal into multiple assert statements."
 
     def leave_SimpleStatementLine(
@@ -19,16 +18,15 @@ class FixAssertTuple(SimpleCodemod, NameResolutionMixin):
         original_node: cst.SimpleStatementLine,
         updated_node: cst.SimpleStatementLine,
     ) -> Union[cst.FlattenSentinel, cst.SimpleStatementLine]:
-        if not self.filter_by_path_includes_or_excludes(
-            self.node_position(original_node)
-        ):
-            return updated_node
 
-        if len(updated_node.body) == 1 and isinstance(
-            assert_node := updated_node.body[0], cst.Assert
+        if len(original_node.body) == 1 and isinstance(
+            assert_node := original_node.body[0], cst.Assert
         ):
             match assert_test := assert_node.test:
                 case cst.Tuple():
+                    if not self.node_is_selected(assert_test):
+                        return updated_node
+
                     if not assert_test.elements:
                         return updated_node
                     new_asserts = self._make_asserts(assert_node)
@@ -53,3 +51,15 @@ class FixAssertTuple(SimpleCodemod, NameResolutionMixin):
                     description=self.change_description,
                 )
             )
+
+
+FixAssertTuple = CoreCodemod(
+    metadata=Metadata(
+        name="fix-assert-tuple",
+        summary="Fix `assert` on Non-Empty Tuple Literal",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        references=[],
+    ),
+    transformer=LibcstTransformerPipeline(FixAssertTupleTransform),
+    detector=None,
+)

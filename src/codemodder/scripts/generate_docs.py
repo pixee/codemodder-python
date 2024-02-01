@@ -247,6 +247,11 @@ METADATA = CORE_METADATA | {
         guidance_explained=CORE_METADATA["exception-without-raise"].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
+    "fix-assert-tuple-S5905": DocMetadata(
+        importance=CORE_METADATA["fix-assert-tuple"].importance,
+        guidance_explained=CORE_METADATA["fix-assert-tuple"].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 

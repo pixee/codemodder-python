@@ -1,8 +1,11 @@
+import libcst as cst
 import json
 from pathlib import Path
 from typing_extensions import Self
+
 from codemodder.result import LineInfo, Location, Result, ResultSet
 from codemodder.logging import logger
+from dataclasses import replace
 
 
 class SonarLocation(Location):
@@ -16,6 +19,7 @@ class SonarLocation(Location):
 
 
 class SonarResult(Result):
+
     @classmethod
     def from_issue(cls, issue) -> Self:
         rule_id = issue.get("rule", None)
@@ -24,6 +28,17 @@ class SonarResult(Result):
 
         locations: list[Location] = [SonarLocation.from_issue(issue)]
         return cls(rule_id=rule_id, locations=locations)
+
+    def match_location(self, pos, node):
+        match node:
+            case cst.Tuple():
+                new_pos = replace(
+                    pos,
+                    start=replace(pos.start, column=pos.start.column - 1),
+                    end=replace(pos.end, column=pos.end.column + 1),
+                )
+                return super().match_location(new_pos, node)
+        return super().match_location(pos, node)
 
 
 class SonarResultSet(ResultSet):
