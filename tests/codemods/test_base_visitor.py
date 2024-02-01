@@ -14,7 +14,7 @@ class DeleteStatementLinesCodemod(BaseTransformer):
         self.line_exclude = line_exclude or []
         self.line_include = line_include or []
 
-    def filter_by_result(self, pos_to_match):
+    def filter_by_result(self, node):
         return True
 
     def leave_SimpleStatementLine(
@@ -22,7 +22,7 @@ class DeleteStatementLinesCodemod(BaseTransformer):
     ):
         pos_to_match = self.node_position(original_node)
         if self.filter_by_result(
-            pos_to_match
+            original_node
         ) and self.filter_by_path_includes_or_excludes(pos_to_match):
             return cst.RemovalSentinel.REMOVE
         return original_node

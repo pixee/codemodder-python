@@ -12,14 +12,11 @@ class UtilsMixin:
     def __init__(self, results: list[Result] | None):
         self.results = results
 
-    def filter_by_result(self, pos_to_match):
+    def filter_by_result(self, node):
+        pos_to_match = self.node_position(node)
         if self.results is None:
             return True
-        return any(
-            location.match(pos_to_match)
-            for result in self.results
-            for location in result.locations
-        )
+        return any(result.match_location(pos_to_match, node) for result in self.results)
 
     def filter_by_path_includes_or_excludes(self, pos_to_match):
         """
@@ -34,9 +31,9 @@ class UtilsMixin:
 
     def node_is_selected(self, node) -> bool:
         pos_to_match = self.node_position(node)
-        return self.filter_by_result(
+        return self.filter_by_result(node) and self.filter_by_path_includes_or_excludes(
             pos_to_match
-        ) and self.filter_by_path_includes_or_excludes(pos_to_match)
+        )
 
     def node_position(self, node):
         # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
