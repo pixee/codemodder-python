@@ -16,8 +16,7 @@ from core_codemods.api.core_codemod import CoreCodemod
 class LiteralOrNewObjectIdentityTransformer(
     LibcstResultTransformer, NameAndAncestorResolutionMixin
 ):
-
-    change_description = "Replaces is operator with =="
+    change_description = "Replace `is` operator with `==`"
 
     def _is_object_creation_or_literal(self, node: cst.BaseExpression):
         match node:
@@ -80,7 +79,7 @@ class LiteralOrNewObjectIdentityTransformer(
 LiteralOrNewObjectIdentity = CoreCodemod(
     metadata=Metadata(
         name="literal-or-new-object-identity",
-        summary="Replaces is operator with == for literal or new object comparisons",
+        summary="Replace `is` with `==` for literal or new object comparisons",
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[
             Reference(
