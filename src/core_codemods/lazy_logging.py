@@ -96,7 +96,8 @@ class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
         if self.is_str_concat(binop):
             # Do not change explicit str concat, e.g.: `logging.info("one" + "two")
             return None
-
+        # todo: if mixed prefixes, skip
+        breakpoint()
         if isinstance(binop.left, cst.SimpleString) and "%" in binop.left.value:
             # Do no change `logging.info("Something: %s " + var)` since intention is unclear
             return None
@@ -152,7 +153,11 @@ class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
                 self.process_concat(node.left, format_strings, format_args)
                 self.process_concat(node.right, format_strings, format_args)
             case cst.SimpleString():
-                format_strings.append(node.value.strip("\"'"))
+                if node.prefix:
+                    # todo: handle "r"
+                    breakpoint()
+                else:
+                    format_strings.append(node.value.strip("\"'"))
             case _:
                 format_strings.append("%s")
                 format_args.append(cst.Arg(value=node))
