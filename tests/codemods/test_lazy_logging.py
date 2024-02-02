@@ -569,16 +569,62 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected_code)
 
-    def test_log_bytes(self, tmpdir):
+    @pytest.mark.parametrize(
+        "input_code,expected_output",
+        [
+            (
+                """\
+            import logging
+            var = b"three"
+            logging.info(b"one " + var)
+            """,
+                """\
+            import logging
+            var = b"three"
+            logging.info(b"one %s", var)
+            """,
+            ),
+            (
+                """\
+            import logging
+            var = "three"
+            logging.info("one " + "two " + var)
+            """,
+                """\
+            import logging
+            var = "three"
+            logging.info("one two %s", var)
+            """,
+            ),
+            (
+                """\
+            import logging
+            four = r" four"
+            logging.info(r"two \\n" +  four)
+            """,
+                """\
+            import logging
+            four = r" four"
+            logging.info(r"two \\n %s",  four)
+            """,
+            ),
+            # todo: unicode, f-str, add tests to modulo TOO
+        ],
+    )
+    def test_log_prefix_types(self, tmpdir, input_code, expected_output):
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    @pytest.mark.xfail(reason="Not currently supported")
+    def test_log_mixed_prefixes(self, tmpdir):
         input_code = """\
         import logging
-        var = b"three"
-        logging.info(b"one " + var)
+        four = u" four"
+        logging.info("one: " + r"two \\n" + u'three '+  four)
         """
         expected_code = """\
         import logging
-        var = b"three"
-        logging.info(b"one %s", var)
+        four = u" four"
+        logging.info("one: " + r"two \\n" + u'three %s' , four)
         """
         self.run_and_assert(tmpdir, input_code, expected_code)
 
