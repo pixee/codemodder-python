@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from enum import Enum
 import logging
 from pathlib import Path
 import itertools
@@ -11,6 +11,7 @@ from codemodder.dependency import (
     Dependency,
     build_dependency_notification,
     build_failed_dependency_notification,
+    build_dependency_is_present_notification,
 )
 from codemodder.file_context import FileContext
 from codemodder.logging import logger, log_list
@@ -23,10 +24,17 @@ if TYPE_CHECKING:
     from codemodder.codemods.base_codemod import BaseCodemod
 
 
+class Update(Enum):
+    ADD = "add"
+    FAIL = "fail"
+    PRESENT = "present"
+    # REMOVE = "remove" # one day?
+
+
 class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
     _results_by_codemod: dict[str, list[ChangeSet]] = {}
     _failures_by_codemod: dict[str, list[Path]] = {}
-    _dependency_update_by_codemod: dict[str, PackageStore | None] = {}
+    _dependency_update_by_codemod: dict[str, tuple[Update, PackageStore | None]] = {}
     dependencies: dict[str, set[Dependency]] = {}
     directory: Path
     dry_run: bool = False
@@ -115,7 +123,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
                 "unable to write dependencies for %s: no dependency file found",
                 codemod_id,
             )
-            self._dependency_update_by_codemod[codemod_id] = None
+            self._dependency_update_by_codemod[codemod_id] = (Update.FAIL, None)
             return record
 
         # pylint: disable-next=cyclic-import
@@ -123,24 +131,41 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
 
         for package_store in store_list:
             dm = DependencyManager(package_store, self.directory)
+            # TODO: handle multiple dependencies, some added, some not.
             if (changeset := dm.write(list(dependencies), self.dry_run)) is not None:
                 self.add_results(codemod_id, [changeset])
-                self._dependency_update_by_codemod[codemod_id] = package_store
+                self._dependency_update_by_codemod[codemod_id] = (
+                    Update.ADD,
+                    package_store,
+                )
                 for dep in dependencies:
                     record[dep] = package_store
                 break
-
+            else:
+                self._dependency_update_by_codemod[codemod_id] = (
+                    Update.PRESENT,
+                    package_store,
+                )
         return record
 
     def add_description(self, codemod: BaseCodemod):
         description = codemod.description
-        if dependencies := list(self.dependencies.get(codemod.id, [])):
-            if pkg_store := self._dependency_update_by_codemod.get(codemod.id):
-                description += build_dependency_notification(
-                    pkg_store.type.value, dependencies[0]
-                )
-            else:
+        if (dependencies := list(self.dependencies.get(codemod.id, []))) and (
+            update := self._dependency_update_by_codemod.get(codemod.id)
+        ):
+            # TODO: handle multiple dependencies, some added, some not.
+            status, pkg_store = update
+            if pkg_store is None or status == Update.FAIL:
                 description += build_failed_dependency_notification(dependencies[0])
+                return description
+
+            match status:
+                case Update.ADD:
+                    func_for_status = build_dependency_notification
+                case Update.PRESENT:
+                    func_for_status = build_dependency_is_present_notification
+
+            description += func_for_status(pkg_store.type.value, dependencies[0])
 
         return description
 
