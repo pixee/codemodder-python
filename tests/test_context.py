@@ -42,7 +42,7 @@ class TestContext:
             f"We have automatically added this dependency to your project's `{pkg_store.type.value}` file."
             in description
         )
-        assert Security.description in description
+        assert f"- `{Security.requirement.name}`: {Security.description}" in description
         assert "### Manual Installation\n" not in description
 
     def test_failed_dependency_description(self, mocker):
@@ -63,7 +63,7 @@ class TestContext:
 
         assert description.startswith(codemod.description)
         assert "## Dependency Updates\n" in description
-        assert Security.description in description
+        assert f"- `{Security.requirement.name}`: {Security.description}" in description
         assert "### Manual Installation\n" in description
         assert (
             f"""For `setup.py`:
@@ -109,5 +109,5 @@ class TestContext:
             f"We have detected that this dependency already exists in your project's `{pkg_store.type.value}` file."
             in description
         )
-        assert Security.description in description
+        assert f"- `{Security.requirement.name}`: {Security.description}" in description
         assert "### Manual Installation\n" not in description

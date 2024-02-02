@@ -81,7 +81,7 @@ DEPENDENCY_NOTIFICATION = """
 
 This codemod relies on an external dependency. We have automatically added this dependency to your project's `{filename}` file. 
 
-{description} 
+- `{name}`: {description} 
 
 There are a number of places where Python project dependencies can be expressed, including `setup.py`, `pyproject.toml`, `setup.cfg`, and `requirements.txt` files. If this change is incorrect, or if you are using another packaging system such as `poetry`, it may be necessary for you to manually add the dependency to the proper location in your project.
 """
@@ -91,7 +91,7 @@ DEPENDENCY_IS_PRESENT_NOTIFICATION = """
 
 This codemod relies on an external dependency. We have detected that this dependency already exists in your project's `{filename}` file. 
 
-{description} 
+- `{name}`: {description} 
 """
 
 FAILED_DEPENDENCY_NOTIFICATION = """
@@ -99,7 +99,7 @@ FAILED_DEPENDENCY_NOTIFICATION = """
 
 This codemod relies on an external dependency. However, we were unable to automatically add the dependency to your project. 
 
-{description} 
+- `{name}`: {description} 
 
 There are a number of places where Python project dependencies can be expressed, including `setup.py`, `pyproject.toml`, `setup.cfg`, and `requirements.txt` files. You may need to manually add this dependency to the proper location in your project.
 
@@ -142,6 +142,7 @@ def build_dependency_notification(filename: str, dependency: Dependency) -> str:
     return DEPENDENCY_NOTIFICATION.format(
         filename=filename,
         description=dependency.description,
+        name=dependency.requirement.name,
     )
 
 
@@ -151,6 +152,7 @@ def build_dependency_is_present_notification(
     return DEPENDENCY_IS_PRESENT_NOTIFICATION.format(
         filename=filename,
         description=dependency.description,
+        name=dependency.requirement.name,
     )
 
 
@@ -158,4 +160,5 @@ def build_failed_dependency_notification(dependency: Dependency) -> str:
     return FAILED_DEPENDENCY_NOTIFICATION.format(
         description=dependency.description,
         requirement=dependency.requirement,
+        name=dependency.requirement.name,
     )
