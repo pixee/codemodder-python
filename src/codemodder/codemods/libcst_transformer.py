@@ -51,7 +51,12 @@ class LibcstResultTransformer(
     ):
         del _transformer
 
-        super().__init__(context, results)
+        super().__init__(
+            context,
+            results,
+            line_include=file_context.line_include,
+            line_exclude=file_context.line_exclude,
+        )
         self.file_context = file_context
 
     @classmethod
@@ -118,14 +123,6 @@ class LibcstResultTransformer(
 
     def lineno_for_node(self, node):
         return self.node_position(node).start.line
-
-    @property
-    def line_exclude(self):
-        return self.file_context.line_exclude
-
-    @property
-    def line_include(self):
-        return self.file_context.line_include
 
     def add_dependency(self, dependency: Dependency):
         self.file_context.add_dependency(dependency)

@@ -1,37 +1,35 @@
 from typing import Optional, Tuple
 import libcst as cst
 from libcst.codemod import CodemodContext, ContextAwareVisitor
+from codemodder.codemods.base_visitor import UtilsMixin
+from codemodder.codemods.libcst_transformer import (
+    LibcstResultTransformer,
+    LibcstTransformerPipeline,
+)
 
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from codemodder.file_context import FileContext
+from codemodder.result import Result
 from core_codemods.api import (
     Metadata,
     Reference,
     ReviewGuidance,
-    SimpleCodemod,
 )
+from core_codemods.api.core_codemod import CoreCodemod
 
 
-class FlaskJsonResponseType(SimpleCodemod, NameAndAncestorResolutionMixin):
-    metadata = Metadata(
-        name="flask-json-response-type",
-        summary="Set content type to `application/json` for `flask.make_response` with JSON data",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        references=[
-            Reference(
-                url="https://flask.palletsprojects.com/en/2.3.x/patterns/javascript/#return-json-from-views"
-            ),
-            Reference(
-                url="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#output-encoding-for-javascript-contexts"
-            ),
-        ],
-    )
+class FlaskJsonResponseTypeTransformer(
+    LibcstResultTransformer, NameAndAncestorResolutionMixin
+):
     change_description = "Sets `mimetype` to `application/json`."
 
     content_type_key = "Content-Type"
     json_content_type = "application/json"
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        visitor = FlaskJsonResponseTypeVisitor(self.context)
+        visitor = FlaskJsonResponseTypeVisitor(
+            self.context, file_context=self.file_context, results=self.results
+        )
         tree.visit(visitor)
         if visitor.node_and_replacement:
             node, replacement = visitor.node_and_replacement
@@ -40,16 +38,30 @@ class FlaskJsonResponseType(SimpleCodemod, NameAndAncestorResolutionMixin):
         return tree
 
 
-class FlaskJsonResponseTypeVisitor(ContextAwareVisitor, NameAndAncestorResolutionMixin):
+class FlaskJsonResponseTypeVisitor(
+    ContextAwareVisitor, NameAndAncestorResolutionMixin, UtilsMixin
+):
     content_type_key = "Content-Type"
     json_content_type = "application/json"
 
-    def __init__(self, context: CodemodContext) -> None:
+    def __init__(
+        self,
+        context: CodemodContext,
+        file_context: FileContext,
+        results: list[Result] | None,
+    ) -> None:
         self.node_and_replacement: Optional[Tuple[cst.CSTNode, cst.CSTNode]] = None
-        super().__init__(context)
+        self.file_context = file_context
+        ContextAwareVisitor.__init__(self, context)
+        UtilsMixin.__init__(
+            self,
+            results=results,
+            line_include=file_context.line_include,
+            line_exclude=file_context.line_exclude,
+        )
 
     def leave_Return(self, original_node: cst.Return):
-        if original_node.value:
+        if original_node.value and self.node_is_selected(original_node.value):
             # is inside a function def with a route decorator
             maybe_function_def = self.find_immediate_function_def(original_node)
             maybe_has_decorator = (
@@ -224,3 +236,22 @@ class FlaskJsonResponseTypeVisitor(ContextAwareVisitor, NameAndAncestorResolutio
 
     def _fix_json_dumps(self, node: cst.BaseExpression) -> cst.Tuple:
         return cst.Tuple([cst.Element(node), cst.Element(self._build_dict())])
+
+
+FlaskJsonResponseType = CoreCodemod(
+    metadata=Metadata(
+        name="flask-json-response-type",
+        summary="Set content type to `application/json` for `flask.make_response` with JSON data",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://flask.palletsprojects.com/en/2.3.x/patterns/javascript/#return-json-from-views"
+            ),
+            Reference(
+                url="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#output-encoding-for-javascript-contexts"
+            ),
+        ],
+    ),
+    transformer=LibcstTransformerPipeline(FlaskJsonResponseTypeTransformer),
+    detector=None,
+)

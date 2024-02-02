@@ -259,6 +259,11 @@ METADATA = CORE_METADATA | {
         ].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
+    "flask-json-response-type-S5131": DocMetadata(
+        importance=CORE_METADATA["flask-json-response-type"].importance,
+        guidance_explained=CORE_METADATA["flask-json-response-type"].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 

@@ -77,7 +77,12 @@ class SQLQueryParameterization(SimpleCodemod, UtilsMixin):
             cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel | dict[str, Any],
         ] = {}
         SimpleCodemod.__init__(self, *codemod_args, **codemod_kwargs)
-        UtilsMixin.__init__(self, [])
+        UtilsMixin.__init__(
+            self,
+            [],
+            line_exclude=self.file_context.line_exclude,
+            line_include=self.file_context.line_include,
+        )
 
     def _build_param_element(self, prepend, middle, append):
         new_middle = (
