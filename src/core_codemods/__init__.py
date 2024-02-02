@@ -58,6 +58,7 @@ from .sonar.sonar_fix_assert_tuple import SonarFixAssertTuple
 from .sonar.sonar_remove_assertion_in_pytest_raises import (
     SonarRemoveAssertionInPytestRaises,
 )
+from .sonar.sonar_flask_json_response_type import SonarFlaskJsonResponseType
 
 registry = CodemodCollection(
     origin="pixee",
@@ -127,5 +128,6 @@ sonar_registry = CodemodCollection(
         SonarExceptionWithoutRaise,
         SonarFixAssertTuple,
         SonarRemoveAssertionInPytestRaises,
+        SonarFlaskJsonResponseType,
     ],
 )

@@ -1,6 +1,6 @@
-from core_codemods.flask_json_response_type import (
-    FlaskJsonResponseType,
-    FlaskJsonResponseTypeTransformer,
+from core_codemods.flask_json_response_type import FlaskJsonResponseTypeTransformer
+from core_codemods.sonar.sonar_flask_json_response_type import (
+    SonarFlaskJsonResponseType,
 )
 from integration_tests.base_test import (
     BaseIntegrationTest,
@@ -8,8 +8,8 @@ from integration_tests.base_test import (
 )
 
 
-class TestFlaskJsonResponseType(BaseIntegrationTest):
-    codemod = FlaskJsonResponseType
+class TestSonarFlaskJsonResponseType(BaseIntegrationTest):
+    codemod = SonarFlaskJsonResponseType
     code_path = "tests/samples/flask_json_response_type.py"
     original_code, expected_new_code = original_and_expected_from_code_path(
         code_path,
@@ -20,6 +20,7 @@ class TestFlaskJsonResponseType(BaseIntegrationTest):
             ),
         ],
     )
+    sonar_issues_json = "tests/samples/sonar_issues.json"
 
     # fmt: off
     expected_diff =(

@@ -1,0 +1,52 @@
+import json
+from core_codemods.sonar.sonar_flask_json_response_type import (
+    SonarFlaskJsonResponseType,
+)
+from tests.codemods.base_codemod_test import BaseSASTCodemodTest
+
+
+class TestSonarFlaskJsonResponseType(BaseSASTCodemodTest):
+    codemod = SonarFlaskJsonResponseType
+    tool = "sonar"
+
+    def test_name(self):
+        assert self.codemod.name == "flask-json-response-type-S5131"
+
+    def test_simple(self, tmpdir):
+        input_code = """\
+        from flask import make_response, Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            return make_response(json_response)
+        """
+        expected = """\
+        from flask import make_response, Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            return make_response(json_response, {'Content-Type': 'application/json'})
+        """
+        issues = {
+            "issues": [
+                {
+                    "rule": "pythonsecurity:S5131",
+                    "component": f"{tmpdir / 'code.py'}",
+                    "textRange": {
+                        "startLine": 9,
+                        "endLine": 9,
+                        "startOffset": 11,
+                        "endOffset": 39,
+                    },
+                }
+            ]
+        }
+        self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(issues))

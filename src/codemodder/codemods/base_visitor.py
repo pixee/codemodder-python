@@ -1,4 +1,5 @@
 from typing import Any, Tuple
+from libcst import MetadataDependent
 from libcst.codemod import ContextAwareVisitor, VisitorBasedCodemodCommand
 from libcst.metadata import PositionProvider
 
@@ -6,11 +7,18 @@ from codemodder.result import Result
 
 
 # TODO: this should just be part of BaseTransformer and BaseVisitor?
-class UtilsMixin:
-    results: list[Result] | None
+class UtilsMixin(MetadataDependent):
+    METADATA_DEPENDENCIES: Tuple[Any, ...] = (PositionProvider,)
 
-    def __init__(self, results: list[Result] | None):
+    def __init__(
+        self,
+        results: list[Result] | None,
+        line_exclude: list[int],
+        line_include: list[int],
+    ):  # pylint: disable=super-init-not-called
         self.results = results
+        self.line_exclude = line_exclude
+        self.line_include = line_include
 
     def filter_by_result(self, node):
         pos_to_match = self.node_position(node)
@@ -37,26 +45,36 @@ class UtilsMixin:
 
     def node_position(self, node):
         # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
-        return self.get_metadata(self.METADATA_DEPENDENCIES[0], node)
+        return self.get_metadata(PositionProvider, node)
 
     def lineno_for_node(self, node):
         return self.node_position(node).start.line
 
 
 class BaseTransformer(VisitorBasedCodemodCommand, UtilsMixin):
-    METADATA_DEPENDENCIES: Tuple[Any, ...] = (PositionProvider,)
 
-    def __init__(self, context, results: list[Result] | None):
-        super().__init__(context)
-        UtilsMixin.__init__(self, results)
+    def __init__(
+        self,
+        context,
+        results: list[Result] | None,
+        line_include: list[int],
+        line_exclude: list[int],
+    ):
+        VisitorBasedCodemodCommand.__init__(self, context)
+        UtilsMixin.__init__(self, results, line_exclude, line_include)
 
 
 class BaseVisitor(ContextAwareVisitor, UtilsMixin):
-    METADATA_DEPENDENCIES: Tuple[Any, ...] = (PositionProvider,)
 
-    def __init__(self, context, results: list[Result]):
-        super().__init__(context)
-        UtilsMixin.__init__(self, results)
+    def __init__(
+        self,
+        context,
+        results: list[Result] | None,
+        line_include: list[int],
+        line_exclude: list[int],
+    ):
+        ContextAwareVisitor.__init__(self, context)
+        UtilsMixin.__init__(self, results, line_exclude, line_include)
 
 
 def match_line(pos, line):

@@ -97,7 +97,9 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
     }
 
     def __init__(self, codemod_context: CodemodContext, file_context: FileContext):
-        super().__init__(codemod_context, [])
+        super().__init__(
+            codemod_context, [], file_context.line_include, file_context.line_exclude
+        )
         self.flask_app_name = ""
         # Later: if we want to store configs to write later
         # self.configs_to_write = self.SECURE_SESSION_CONFIGS.copy()

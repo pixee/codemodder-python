@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 
 import libcst as cst
 from libcst import CSTNode, matchers
-from libcst.codemod import CodemodContext
+from libcst.codemod import CodemodContext, ContextAwareVisitor
 from libcst.metadata import PositionProvider, ScopeProvider
 
 from libcst.codemod.visitors import AddImportsVisitor, ImportItem
@@ -13,7 +13,7 @@ from core_codemods.api import (
     Reference,
     ReviewGuidance,
 )
-from codemodder.codemods.base_visitor import BaseVisitor
+from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsCodemod,
 )
@@ -98,19 +98,23 @@ class UrlSandbox(SimpleCodemod):
         return tree
 
 
-class FindRequestCallsAndImports(BaseVisitor):
-    METADATA_DEPENDENCIES = (*BaseVisitor.METADATA_DEPENDENCIES, ScopeProvider)
+class FindRequestCallsAndImports(ContextAwareVisitor, UtilsMixin):
+    METADATA_DEPENDENCIES = (ScopeProvider,)
 
     def __init__(
         self, codemod_context: CodemodContext, file_context: FileContext, results
     ):
-        super().__init__(codemod_context, results)
-        self.line_exclude = file_context.line_exclude
-        self.line_include = file_context.line_include
         self.nodes_to_change: dict[
             cst.CSTNode, Union[cst.CSTNode, cst.FlattenSentinel, cst.RemovalSentinel]
         ] = {}
         self.changes_in_file: List[Change] = []
+        ContextAwareVisitor.__init__(self, codemod_context)
+        UtilsMixin.__init__(
+            self,
+            results=results,
+            line_include=file_context.line_include,
+            line_exclude=file_context.line_exclude,
+        )
 
     def leave_Call(self, original_node: cst.Call):
         if not (self.node_is_selected(original_node)):

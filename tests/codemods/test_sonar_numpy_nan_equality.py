@@ -1,7 +1,6 @@
 import json
 from core_codemods.sonar.sonar_numpy_nan_equality import SonarNumpyNanEquality
 from tests.codemods.base_codemod_test import BaseSASTCodemodTest
-from textwrap import dedent
 
 
 class TestSonarNumpyNanEquality(BaseSASTCodemodTest):
@@ -36,6 +35,4 @@ class TestSonarNumpyNanEquality(BaseSASTCodemodTest):
                 }
             ]
         }
-        self.run_and_assert(
-            tmpdir, dedent(input_code), dedent(expected), results=json.dumps(issues)
-        )
+        self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(issues))
