@@ -55,6 +55,9 @@ from .sonar.sonar_literal_or_new_object_identity import SonarLiteralOrNewObjectI
 from .sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
 from .sonar.sonar_exception_without_raise import SonarExceptionWithoutRaise
 from .sonar.sonar_fix_assert_tuple import SonarFixAssertTuple
+from .sonar.sonar_remove_assertion_in_pytest_raises import (
+    SonarRemoveAssertionInPytestRaises,
+)
 
 registry = CodemodCollection(
     origin="pixee",
@@ -123,5 +126,6 @@ sonar_registry = CodemodCollection(
         SonarDjangoReceiverOnTop,
         SonarExceptionWithoutRaise,
         SonarFixAssertTuple,
+        SonarRemoveAssertionInPytestRaises,
     ],
 )

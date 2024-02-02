@@ -103,6 +103,9 @@ class RemoveAssertionInPytestRaisesTransformer(
         new_statement_before_asserts = None
         match original_node.body:
             case cst.SimpleStatementSuite():
+                last_stmt = original_node.body.body[-1]
+                if not self.node_is_selected(last_stmt):
+                    return updated_node
                 (
                     assert_stmts,
                     assert_position,
@@ -110,6 +113,9 @@ class RemoveAssertionInPytestRaisesTransformer(
                 ) = self._remove_last_asserts_from_suite(original_node.body.body)
                 assert_stmts.reverse()
             case cst.IndentedBlock():
+                last_stmt = original_node.body.body[-1]
+                if not self.node_is_selected(last_stmt):
+                    return updated_node
                 (
                     assert_stmts,
                     assert_position,

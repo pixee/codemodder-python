@@ -252,6 +252,13 @@ METADATA = CORE_METADATA | {
         guidance_explained=CORE_METADATA["fix-assert-tuple"].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
+    "remove-assertion-in-pytest-raises-S5915": DocMetadata(
+        importance=CORE_METADATA["remove-assertion-in-pytest-raises"].importance,
+        guidance_explained=CORE_METADATA[
+            "remove-assertion-in-pytest-raises"
+        ].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 
