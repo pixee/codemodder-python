@@ -1,6 +1,8 @@
 import json
+
 import mock
 import pytest
+
 from codemodder.report.codetf_reporter import CodeTF
 
 

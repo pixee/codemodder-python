@@ -1,5 +1,6 @@
 import json
 from os.path import abspath
+
 from codemodder import __version__
 from codemodder.logging import logger
 
