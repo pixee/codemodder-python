@@ -54,6 +54,10 @@ class DependencyWriter(metaclass=ABCMeta):
                 # Contextual comments should be added to the right side of split diffs
                 properties={
                     "contextual_description": True,
+                    # TODO: `contextual_description_position` is deprecated in
+                    # favor of Change.diffSide.
+                    # We're keeping it here for backwards compatibility but it
+                    # should eventually be removed.
                     "contextual_description_position": "right",
                 },
                 packageActions=[

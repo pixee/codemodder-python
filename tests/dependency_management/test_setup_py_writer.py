@@ -1,5 +1,8 @@
-import pytest
 from textwrap import dedent
+
+import pytest
+
+from codemodder.change import DiffSide
 from codemodder.dependency_management.setup_py_writer import SetupPyWriter
 from codemodder.project_analysis.file_parsers.package_store import (
     PackageStore,
@@ -34,7 +37,7 @@ def test_update_setuppy_comma_single_element_newline(tmpdir):
 
     store = PackageStore(
         type=FileType.SETUP_PY,
-        file=str(dependency_file),
+        file=dependency_file,
         dependencies=set(),
         py_versions=[">=3.6"],
     )
@@ -138,7 +141,7 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
 
     store = PackageStore(
         type=FileType.SETUP_PY,
-        file=str(dependency_file),
+        file=dependency_file,
         dependencies=set(),
         py_versions=[">=3.6"],
     )
@@ -191,6 +194,7 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
 
     assert change_one.lineNumber == 14
     assert change_one.description == DefusedXML.build_description()
+    assert change_one.diffSide == DiffSide.RIGHT
     assert change_one.properties == {
         "contextual_description": True,
         "contextual_description_position": "right",
@@ -198,6 +202,7 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
     change_two = changeset.changes[1]
     assert change_two.lineNumber == 14
     assert change_two.description == Security.build_description()
+    assert change_two.diffSide == DiffSide.RIGHT
     assert change_two.properties == {
         "contextual_description": True,
         "contextual_description_position": "right",
@@ -224,7 +229,7 @@ def test_other_setup_func(tmpdir):
 
     store = PackageStore(
         type=FileType.SETUP_PY,
-        file=str(dependency_file),
+        file=dependency_file,
         dependencies=set(),
         py_versions=[">=3.6"],
     )
@@ -262,7 +267,7 @@ def test_not_setup_file(tmpdir):
 
     store = PackageStore(
         type=FileType.SETUP_PY,
-        file=str(dependency_file),
+        file=dependency_file,
         dependencies=set(),
         py_versions=[">=3.6"],
     )
@@ -293,7 +298,7 @@ def test_setup_call_no_install_requires(tmpdir):
 
     store = PackageStore(
         type=FileType.SETUP_PY,
-        file=str(dependency_file),
+        file=dependency_file,
         dependencies=set(),
         py_versions=[">=3.6"],
     )
@@ -325,7 +330,7 @@ def test_setup_no_existing_requirements(tmpdir):
 
     store = PackageStore(
         type=FileType.SETUP_PY,
-        file=str(dependency_file),
+        file=dependency_file,
         dependencies=set(),
         py_versions=[">=3.6"],
     )
@@ -357,7 +362,7 @@ def test_setup_call_bad_install_requires(tmpdir):
 
     store = PackageStore(
         type=FileType.SETUP_PY,
-        file=str(dependency_file),
+        file=dependency_file,
         dependencies=set(),
         py_versions=[">=3.6"],
     )
@@ -397,7 +402,7 @@ def test_setup_call_requirements_separate(tmpdir):
 
     store = PackageStore(
         type=FileType.SETUP_PY,
-        file=str(dependency_file),
+        file=dependency_file,
         dependencies=set(),
         py_versions=[">=3.6"],
     )
@@ -453,6 +458,7 @@ def test_setup_call_requirements_separate(tmpdir):
 
     assert change_one.lineNumber == 14
     assert change_one.description == DefusedXML.build_description()
+    assert change_one.diffSide == DiffSide.RIGHT
     assert change_one.properties == {
         "contextual_description": True,
         "contextual_description_position": "right",
@@ -460,6 +466,7 @@ def test_setup_call_requirements_separate(tmpdir):
     change_two = changeset.changes[1]
     assert change_two.lineNumber == 14
     assert change_two.description == Security.build_description()
+    assert change_two.diffSide == DiffSide.RIGHT
     assert change_two.properties == {
         "contextual_description": True,
         "contextual_description_position": "right",
