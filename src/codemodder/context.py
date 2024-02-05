@@ -140,7 +140,6 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
                 )
                 for dep in dependencies:
                     record[dep] = package_store
-                break
             else:
                 self._dependency_update_by_codemod[codemod_id] = (
                     Update.PRESENT,
