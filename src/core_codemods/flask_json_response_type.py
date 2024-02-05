@@ -44,7 +44,7 @@ class FlaskJsonResponseTypeVisitor(
     content_type_key = "Content-Type"
     json_content_type = "application/json"
 
-    def __init__(
+    def __init__(  # pylint: disable=super-init-not-called
         self,
         context: CodemodContext,
         file_context: FileContext,
