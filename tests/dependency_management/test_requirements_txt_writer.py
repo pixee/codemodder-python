@@ -1,5 +1,8 @@
-import pytest
 from pathlib import Path
+
+import pytest
+
+from codemodder.change import DiffSide
 from codemodder.dependency_management.requirements_txt_writer import (
     RequirementsTxtWriter,
 )
@@ -48,6 +51,7 @@ class TestRequirementsTxtWriter:
         change_one = changeset.changes[0]
         assert change_one.lineNumber == 4
         assert change_one.description == DefusedXML.build_description()
+        assert change_one.diffSide == DiffSide.RIGHT
         assert change_one.properties == {
             "contextual_description": True,
             "contextual_description_position": "right",
@@ -55,6 +59,7 @@ class TestRequirementsTxtWriter:
         change_two = changeset.changes[1]
         assert change_two.lineNumber == 5
         assert change_two.description == Security.build_description()
+        assert change_two.diffSide == DiffSide.RIGHT
         assert change_two.properties == {
             "contextual_description": True,
             "contextual_description_position": "right",
@@ -123,7 +128,7 @@ class TestRequirementsTxtWriter:
 
         store = PackageStore(
             type=FileType.REQ_TXT,
-            file=str(dependency_file),
+            file=dependency_file,
             dependencies=set(),
             py_versions=[],
         )

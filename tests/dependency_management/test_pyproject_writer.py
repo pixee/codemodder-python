@@ -1,6 +1,7 @@
 from textwrap import dedent
 import pytest
 
+from codemodder.change import DiffSide
 from codemodder.dependency_management.pyproject_writer import PyprojectWriter
 from codemodder.dependency import DefusedXML, Security
 from codemodder.project_analysis.file_parsers.package_store import (
@@ -35,7 +36,7 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
 
     store = PackageStore(
         type=FileType.REQ_TXT,
-        file=str(pyproject_toml),
+        file=pyproject_toml,
         dependencies=set(),
         py_versions=[">=3.10.0"],
     )
@@ -88,6 +89,7 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
 
     assert change_one.lineNumber == 16
     assert change_one.description == DefusedXML.build_description()
+    assert change_one.diffSide == DiffSide.RIGHT
     assert change_one.properties == {
         "contextual_description": True,
         "contextual_description_position": "right",
@@ -95,6 +97,7 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
     change_two = changeset.changes[1]
     assert change_two.lineNumber == 17
     assert change_two.description == Security.build_description()
+    assert change_two.diffSide == DiffSide.RIGHT
     assert change_two.properties == {
         "contextual_description": True,
         "contextual_description_position": "right",
@@ -124,7 +127,7 @@ def test_add_same_dependency_only_once(tmpdir):
 
     store = PackageStore(
         type=FileType.REQ_TXT,
-        file=str(pyproject_toml),
+        file=pyproject_toml,
         dependencies=set(),
         py_versions=[">=3.10.0"],
     )
@@ -178,7 +181,7 @@ def test_dont_add_existing_dependency(tmpdir):
 
     store = PackageStore(
         type=FileType.REQ_TXT,
-        file=str(pyproject_toml),
+        file=pyproject_toml,
         dependencies=set([Security.requirement]),
         py_versions=[">=3.10.0"],
     )
@@ -204,7 +207,7 @@ def test_pyproject_no_dependencies(tmpdir):
 
     store = PackageStore(
         type=FileType.REQ_TXT,
-        file=str(pyproject_toml),
+        file=pyproject_toml,
         dependencies=set(),
         py_versions=[">=3.10.0"],
     )
