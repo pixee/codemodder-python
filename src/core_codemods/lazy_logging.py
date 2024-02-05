@@ -96,8 +96,7 @@ class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
         if self.is_str_concat(binop):
             # Do not change explicit str concat, e.g.: `logging.info("one" + "two")
             return None
-        # todo: if mixed prefixes, skip
-        breakpoint()
+
         if isinstance(binop.left, cst.SimpleString) and "%" in binop.left.value:
             # Do no change `logging.info("Something: %s " + var)` since intention is unclear
             return None
@@ -111,10 +110,19 @@ class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
             # Skip logging ints, etc. Eg: `logging.info(2+2)`
             return None
 
-        format_strings, format_args = self.process_concat(binop)
-        combined_format_string = cst.SimpleString(
-            value=f"""{'"' if type_both_sides == BaseType.STRING else ""}{"".join(format_strings)}\""""
-        )
+        format_strings, format_args, prefixes = self.process_concat(binop)
+        if len(set(prefixes)) > 1:
+            # TODO: handle more complex case of str concat with different prefixes, such as
+            # `logging.info("one: " + r"two \\n" + u'three '+  four)`
+            return None
+        if prefixes:
+            combined_format_string = cst.SimpleString(
+                value=f"""{prefixes[0]}{"".join(format_strings)}\""""
+            )
+        else:
+            combined_format_string = cst.SimpleString(
+                value=f"""{'"' if type_both_sides == BaseType.STRING else ""}{"".join(format_strings)}\""""
+            )
         return [cst.Arg(value=combined_format_string)] + format_args
 
     def make_args_for_modulo(self, binop: cst.BinaryOperation) -> list[cst.Arg]:
@@ -141,25 +149,29 @@ class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
         return isinstance(node, cst.SimpleString)
 
     def process_concat(
-        self, node: cst.CSTNode, format_strings=None, format_args=None
-    ) -> tuple[list[str], list[cst.Arg]]:
+        self,
+        node: cst.CSTNode,
+        format_strings=None,
+        format_args=None,
+        prefixes=None,
+    ) -> tuple[list[str], list[cst.Arg], list[str]]:
         if format_strings is None:
             format_strings = []
         if format_args is None:
             format_args = []
+        if prefixes is None:
+            prefixes = []
 
         match node:
             case cst.BinaryOperation(operator=cst.Add()):
-                self.process_concat(node.left, format_strings, format_args)
-                self.process_concat(node.right, format_strings, format_args)
+                self.process_concat(node.left, format_strings, format_args, prefixes)
+                self.process_concat(node.right, format_strings, format_args, prefixes)
             case cst.SimpleString():
+                format_strings.append(node.raw_value)
                 if node.prefix:
-                    # todo: handle "r"
-                    breakpoint()
-                else:
-                    format_strings.append(node.value.strip("\"'"))
+                    prefixes.append(node.prefix + '"')
             case _:
                 format_strings.append("%s")
                 format_args.append(cst.Arg(value=node))
 
-        return format_strings, format_args
+        return format_strings, format_args, prefixes

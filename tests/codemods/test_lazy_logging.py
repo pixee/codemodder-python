@@ -258,18 +258,37 @@ class TestLazyLoggingModulo(BaseSemgrepCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected_code)
 
-    def test_log_bytes(self, tmpdir):
-        input_code = """\
+    @pytest.mark.parametrize(
+        "input_code,expected_output",
+        [
+            (
+                """\
         import logging
         var = b"three"
         logging.info(b"one %s" % var)
-        """
-        expected_code = """\
+        """,
+                """\
         import logging
         var = b"three"
         logging.info(b"one %s", var)
-        """
-        self.run_and_assert(tmpdir, input_code, expected_code)
+        """,
+            ),
+            (
+                """\
+            import logging
+            four = r" four"
+            logging.info(r"two \\n%s" %  four)
+            """,
+                """\
+            import logging
+            four = r" four"
+            logging.info(r"two \\n%s", four)
+            """,
+            ),
+        ],
+    )
+    def test_log_prefix_types(self, tmpdir, input_code, expected_output):
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     def test_var_assignments(self, tmpdir):
         input_code = """\
@@ -605,10 +624,21 @@ class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
                 """\
             import logging
             four = r" four"
-            logging.info(r"two \\n %s",  four)
+            logging.info(r"two \\n%s", four)
             """,
             ),
-            # todo: unicode, f-str, add tests to modulo TOO
+            (
+                """\
+            import logging
+            var = r"three"
+            logging.info(r"one " + r"two " + var)
+            """,
+                """\
+            import logging
+            var = r"three"
+            logging.info(r"one two %s", var)
+            """,
+            ),
         ],
     )
     def test_log_prefix_types(self, tmpdir, input_code, expected_output):
