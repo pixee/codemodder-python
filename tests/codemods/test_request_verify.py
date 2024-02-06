@@ -145,7 +145,7 @@ class TestHttpxSpecific(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_verify_with_sslcontext(self, tmpdir):
-        input_code = f"""
+        input_code = """
         import ssl
         import httpx
         context = ssl.create_default_context()
@@ -155,7 +155,7 @@ class TestHttpxSpecific(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, input_code)
 
     def test_client_verify(self, tmpdir):
-        input_code = f"""
+        input_code = """
         import httpx
         client = httpx.Client(verify=False)
         try:
@@ -163,7 +163,7 @@ class TestHttpxSpecific(BaseSemgrepCodemodTest):
         finally:
             client.close()
         """
-        expected_code = f"""
+        expected_code = """
         import httpx
         client = httpx.Client(verify=True)
         try:
@@ -174,7 +174,7 @@ class TestHttpxSpecific(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected_code)
 
     def test_client_verify_from_import(self, tmpdir):
-        input_code = f"""
+        input_code = """
         from httpx import Client
         c = Client(verify=False)
         try:
@@ -182,7 +182,7 @@ class TestHttpxSpecific(BaseSemgrepCodemodTest):
         finally:
             c.close()
         """
-        expected_code = f"""
+        expected_code = """
         from httpx import Client
         c = Client(verify=True)
         try:
@@ -193,12 +193,12 @@ class TestHttpxSpecific(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected_code)
 
     def test_client_verify_context_manager(self, tmpdir):
-        input_code = f"""
+        input_code = """
         import httpx
         with httpx.Client(verify=False) as client:
             client.get('https://example.com')
         """
-        expected_code = f"""
+        expected_code = """
         import httpx
         with httpx.Client(verify=True) as client:
             client.get('https://example.com')
@@ -206,7 +206,7 @@ class TestHttpxSpecific(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected_code)
 
     def test_async_client_verify(self, tmpdir):
-        input_code = f"""
+        input_code = """
         import httpx
         client = httpx.AsyncClient(verify=False)
         try:
@@ -214,7 +214,7 @@ class TestHttpxSpecific(BaseSemgrepCodemodTest):
         finally:
             await client.close()
         """
-        expected_code = f"""
+        expected_code = """
         import httpx
         client = httpx.AsyncClient(verify=True)
         try:
@@ -225,12 +225,12 @@ class TestHttpxSpecific(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected_code)
 
     def test_async_client_verify_context_manager(self, tmpdir):
-        input_code = f"""
+        input_code = """
         import httpx
         async with httpx.AsyncClient(verify=False) as client:
             await client.get('https://example.com')
         """
-        expected_code = f"""
+        expected_code = """
         import httpx
         async with httpx.AsyncClient(verify=True) as client:
             await client.get('https://example.com')
