@@ -2,7 +2,7 @@ import pytest
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 from core_codemods.lazy_logging import LazyLogging
 
-logging_funcs = {"debug", "info", "warning", "error", "critical"}
+logging_funcs = {"debug", "info", "warning", "warn", "error", "critical"}
 each_func = pytest.mark.parametrize("func", logging_funcs)
 
 
