@@ -23,12 +23,29 @@ class RequestsVerify(SimpleCodemod):
         "Makes any calls to requests.{func} with `verify=False` to `verify=True`."
     )
     detector_pattern = """
-        rules:
-          - patterns:
-            - pattern: requests.$F(..., verify=False, ...)
-            - pattern-inside: |
-                import requests
-                ...
+            rules:
+              - pattern-either:
+                - patterns:
+                    - pattern: requests.$F(..., verify=False, ...)
+                    - pattern-inside: |
+                        import requests
+                        ...
+                - patterns:
+                    - pattern: httpx.$F(..., verify=False, ...)
+                    - pattern-inside: |
+                        import httpx
+                        ...
+                - patterns:
+                    - pattern: httpx.$CLASS(..., verify=False, ...)
+                    - pattern-inside: |
+                        import httpx
+                        ...
+                    - metavariable-pattern:
+                        metavariable: $CLASS
+                        patterns:
+                          - pattern-either:
+                            - pattern: Client
+                            - pattern: AsyncClient
         """
 
     def on_result_found(self, original_node, updated_node):
