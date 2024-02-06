@@ -11,10 +11,10 @@ class TestSonarFixAssertTuple(BaseSASTCodemodTest):
         assert self.codemod.name == "fix-assert-tuple-S5905"
 
     def test_simple(self, tmpdir):
-        input_code = """\
+        input_code = """
         assert (1,2,3)
         """
-        expected_output = """\
+        expected_output = """
         assert 1
         assert 2
         assert 3
@@ -25,8 +25,8 @@ class TestSonarFixAssertTuple(BaseSASTCodemodTest):
                     "rule": "python:S5905",
                     "component": f"{tmpdir / 'code.py'}",
                     "textRange": {
-                        "startLine": 1,
-                        "endLine": 1,
+                        "startLine": 2,
+                        "endLine": 2,
                         "startOffset": 8,
                         "endOffset": 15,
                     },

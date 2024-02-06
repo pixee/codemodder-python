@@ -1,7 +1,6 @@
 from pathlib import Path
 from core_codemods.remove_unused_imports import RemoveUnusedImports
 from tests.codemods.base_codemod_test import BaseCodemodTest
-from textwrap import dedent
 
 
 class TestRemoveUnusedImports(BaseCodemodTest):
@@ -84,12 +83,10 @@ a.something
         self.run_and_assert(tmpdir, before, before)
 
     def test_dont_remove_if_noqa_trailing_multiline(self, tmpdir):
-        before = dedent(
-            """\
+        before = """
         from _pytest.assertion.util import (  # noqa: F401
             format_explanation as _format_explanation,
         )"""
-        )
 
         self.run_and_assert(tmpdir, before, before)
 

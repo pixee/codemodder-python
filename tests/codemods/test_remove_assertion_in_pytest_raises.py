@@ -11,14 +11,14 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         assert self.codemod.name == "remove-assertion-in-pytest-raises"
 
     def test_simple(self, tmpdir):
-        input_code = """\
+        input_code = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
                 1/0
                 assert True
         """
-        expected = """\
+        expected = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
@@ -28,14 +28,14 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_simple_alias(self, tmpdir):
-        input_code = """\
+        input_code = """
         from pytest import raises as rise
         def foo():
             with rise(ZeroDivisionError):
                 1/0
                 assert True
         """
-        expected = """\
+        expected = """
         from pytest import raises as rise
         def foo():
             with rise(ZeroDivisionError):
@@ -45,14 +45,14 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_simple_from_import(self, tmpdir):
-        input_code = """\
+        input_code = """
         from pytest import raises
         def foo():
             with raises(ZeroDivisionError):
                 1/0
                 assert True
         """
-        expected = """\
+        expected = """
         from pytest import raises
         def foo():
             with raises(ZeroDivisionError):
@@ -63,13 +63,13 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
 
     def test_all_asserts(self, tmpdir):
         # this is more of an edge case
-        input_code = """\
+        input_code = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
                 assert True
         """
-        expected = """\
+        expected = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
@@ -79,7 +79,7 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_multiple_raises(self, tmpdir):
-        input_code = """\
+        input_code = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError), pytest.raises(IndexError):
@@ -87,7 +87,7 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
                 [1,2][3]
                 assert True
         """
-        expected = """\
+        expected = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError), pytest.raises(IndexError):
@@ -98,7 +98,7 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_multiple_asserts(self, tmpdir):
-        input_code = """\
+        input_code = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
@@ -106,7 +106,7 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
                 assert 1
                 assert 2
         """
-        expected = """\
+        expected = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
@@ -117,13 +117,13 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_multiple_asserts_mixed_early(self, tmpdir):
-        input_code = """\
+        input_code = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
                 1/0; assert 1; assert 2
         """
-        expected = """\
+        expected = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
@@ -134,14 +134,14 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_multiple_asserts_mixed(self, tmpdir):
-        input_code = """\
+        input_code = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
                 1/0
                 assert 1; assert 2
         """
-        expected = """\
+        expected = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
@@ -152,12 +152,12 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_simple_suite(self, tmpdir):
-        input_code = """\
+        input_code = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError): 1/0; assert True
         """
-        expected = """\
+        expected = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError): 1/0
@@ -166,12 +166,12 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_multiple_suite(self, tmpdir):
-        input_code = """\
+        input_code = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError): 1/0; assert True; assert False;
         """
-        expected = """\
+        expected = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError): 1/0
@@ -181,7 +181,7 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_with_item_not_raises(self, tmpdir):
-        input_code = """\
+        input_code = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError), open('') as file:
@@ -191,7 +191,7 @@ class TestRemoveAssertionInPytestRaises(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, input_code)
 
     def test_no_assertion_at_end(self, tmpdir):
-        input_code = """\
+        input_code = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError), open('') as file:

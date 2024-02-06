@@ -1,7 +1,6 @@
 import json
 from core_codemods.sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
 from tests.codemods.base_codemod_test import BaseSASTCodemodTest
-from textwrap import dedent
 
 
 class TestSonarDjangoReceiverOnTop(BaseSASTCodemodTest):
@@ -12,7 +11,7 @@ class TestSonarDjangoReceiverOnTop(BaseSASTCodemodTest):
         assert self.codemod.name == "django-receiver-on-top-S6552"
 
     def test_simple(self, tmpdir):
-        input_code = """\
+        input_code = """
         from django.dispatch import receiver
 
         @csrf_exempt
@@ -20,7 +19,7 @@ class TestSonarDjangoReceiverOnTop(BaseSASTCodemodTest):
         def foo():
             pass
         """
-        expected = """\
+        expected = """
         from django.dispatch import receiver
 
         @receiver(request_finished)
@@ -34,14 +33,12 @@ class TestSonarDjangoReceiverOnTop(BaseSASTCodemodTest):
                     "rule": "python:S6552",
                     "component": f"{tmpdir / 'code.py'}",
                     "textRange": {
-                        "startLine": 4,
-                        "endLine": 4,
+                        "startLine": 5,
+                        "endLine": 5,
                         "startOffset": 1,
                         "endOffset": 27,
                     },
                 }
             ]
         }
-        self.run_and_assert(
-            tmpdir, dedent(input_code), dedent(expected), results=json.dumps(issues)
-        )
+        self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(issues))

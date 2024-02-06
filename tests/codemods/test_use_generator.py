@@ -37,10 +37,10 @@ class TestUseGenerator(BaseCodemodTest):
     def test_exclude_line(self, tmpdir):
         input_code = (
             expected
-        ) = """\
+        ) = """
         x = any([i for i in range(10)])
         """
-        lines_to_exclude = [1]
+        lines_to_exclude = [2]
         self.run_and_assert(
             tmpdir,
             input_code,

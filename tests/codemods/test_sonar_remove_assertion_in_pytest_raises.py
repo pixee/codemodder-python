@@ -13,14 +13,14 @@ class TestRemoveAssertionInPytestRaises(BaseSASTCodemodTest):
         assert self.codemod.name == "remove-assertion-in-pytest-raises-S5915"
 
     def test_simple(self, tmpdir):
-        input_code = """\
+        input_code = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
                 1/0
                 assert True
         """
-        expected = """\
+        expected = """
         import pytest
         def foo():
             with pytest.raises(ZeroDivisionError):
@@ -33,8 +33,8 @@ class TestRemoveAssertionInPytestRaises(BaseSASTCodemodTest):
                     "rule": "python:S5915",
                     "component": f"{tmpdir / 'code.py'}",
                     "textRange": {
-                        "startLine": 5,
-                        "endLine": 5,
+                        "startLine": 6,
+                        "endLine": 6,
                         "startOffset": 8,
                         "endOffset": 19,
                     },

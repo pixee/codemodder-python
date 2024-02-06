@@ -13,11 +13,11 @@ class TestCombineStartswithEndswith(BaseCodemodTest):
 
     @each_func
     def test_combine(self, tmpdir, func):
-        input_code = f"""\
+        input_code = f"""
         x = "foo"
         x.{func}("foo") or x.{func}("f")
         """
-        expected = f"""\
+        expected = f"""
         x = "foo"
         x.{func}(("foo", "f"))
         """
@@ -40,11 +40,11 @@ class TestCombineStartswithEndswith(BaseCodemodTest):
     def test_exclude_line(self, tmpdir):
         input_code = (
             expected
-        ) = """\
+        ) = """
         x = "foo"
         x.startswith("foo") or x.startswith("f")
         """
-        lines_to_exclude = [2]
+        lines_to_exclude = [3]
         self.run_and_assert(
             tmpdir,
             input_code,

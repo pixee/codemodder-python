@@ -51,19 +51,19 @@ class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):
         "input_code,expected_output",
         [
             (
-                """\
+                """
                 from logging import warn as warn_func
                 warn_func('something')""",
-                """\
+                """
                 from logging import warning
                 warning('something')""",
             ),
             (
-                """\
+                """
                 from logging import getLogger as make_logger
                 logger = make_logger('anything')
                 logger.warn('something')""",
-                """\
+                """
                 from logging import getLogger as make_logger
                 logger = make_logger('anything')
                 logger.warning('something')""",
@@ -92,7 +92,7 @@ class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):
 
     @pytest.mark.xfail(reason="Not currently supported")
     def test_log_as_arg(self, tmpdir):
-        code = """\
+        code = """
         import logging
         log = logging.getLogger('foo')
         def some_function(logger):

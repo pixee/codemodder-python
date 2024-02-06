@@ -3,7 +3,6 @@ from core_codemods.sonar.sonar_literal_or_new_object_identity import (
     SonarLiteralOrNewObjectIdentity,
 )
 from tests.codemods.base_codemod_test import BaseSASTCodemodTest
-from textwrap import dedent
 
 
 class TestSonarLiteralOrNewObjectIdentity(BaseSASTCodemodTest):
@@ -14,10 +13,10 @@ class TestSonarLiteralOrNewObjectIdentity(BaseSASTCodemodTest):
         assert self.codemod.name == "literal-or-new-object-identity-S5796"
 
     def test_list(self, tmpdir):
-        input_code = """\
+        input_code = """
         l is [1,2,3]
         """
-        expected = """\
+        expected = """
         l == [1,2,3]
         """
         issues = {
@@ -26,14 +25,12 @@ class TestSonarLiteralOrNewObjectIdentity(BaseSASTCodemodTest):
                     "rule": "python:S5796",
                     "component": f"{tmpdir / 'code.py'}",
                     "textRange": {
-                        "startLine": 1,
-                        "endLine": 1,
+                        "startLine": 2,
+                        "endLine": 2,
                         "startOffset": 2,
                         "endOffset": 4,
                     },
                 }
             ]
         }
-        self.run_and_assert(
-            tmpdir, dedent(input_code), dedent(expected), results=json.dumps(issues)
-        )
+        self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(issues))

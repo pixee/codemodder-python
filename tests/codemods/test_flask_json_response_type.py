@@ -1,6 +1,5 @@
 from core_codemods.flask_json_response_type import FlaskJsonResponseType
 from tests.codemods.base_codemod_test import BaseCodemodTest
-from textwrap import dedent
 
 
 class TestFlaskJsonResponseType(BaseCodemodTest):
@@ -10,7 +9,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
         assert self.codemod.name == "flask-json-response-type"
 
     def test_simple(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
 
@@ -21,7 +20,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return make_response(json_response)
         """
-        expected = """\
+        expected = """
         from flask import make_response, Flask
         import json
 
@@ -32,10 +31,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return make_response(json_response, {'Content-Type': 'application/json'})
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_simple_indirect(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
 
@@ -47,7 +46,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             response = make_response(json_response)
             return response
         """
-        expected = """\
+        expected = """
         from flask import make_response, Flask
         import json
 
@@ -59,10 +58,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             response = make_response(json_response, {'Content-Type': 'application/json'})
             return response
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_simple_tuple_arg(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
 
@@ -73,7 +72,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return make_response((json_response, 404))
         """
-        expected = """\
+        expected = """
         from flask import make_response, Flask
         import json
 
@@ -84,10 +83,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return make_response((json_response, 404, {'Content-Type': 'application/json'}))
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_simple_return_json(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import Flask
         import json
 
@@ -98,7 +97,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return json_response
         """
-        expected = """\
+        expected = """
         from flask import Flask
         import json
 
@@ -109,10 +108,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return (json_response, {'Content-Type': 'application/json'})
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_simple_tuple(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import Flask
         import json
 
@@ -123,7 +122,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return (json_response, 404)
         """
-        expected = """\
+        expected = """
         from flask import Flask
         import json
 
@@ -134,10 +133,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return (json_response, 404, {'Content-Type': 'application/json'})
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_alias(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response as response, Flask
         import json
 
@@ -148,7 +147,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return response(json_response)
         """
-        expected = """\
+        expected = """
         from flask import make_response as response, Flask
         import json
 
@@ -159,10 +158,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return response(json_response, {'Content-Type': 'application/json'})
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_indirect_dict(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
 
@@ -174,7 +173,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             headers = {'key': 'value'}
             return make_response(json_response, headers)
         """
-        expected = """\
+        expected = """
         from flask import make_response, Flask
         import json
 
@@ -186,10 +185,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             headers = {'key': 'value', 'Content-Type': 'application/json'}
             return make_response(json_response, headers)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_direct_return(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
 
@@ -199,7 +198,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
         def foo(request):
             return make_response(json.dumps({ "user_input": request.GET.get("input") }))
         """
-        expected = """\
+        expected = """
         from flask import make_response, Flask
         import json
 
@@ -209,10 +208,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
         def foo(request):
             return make_response(json.dumps({ "user_input": request.GET.get("input") }), {'Content-Type': 'application/json'})
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_tuple_dict_no_key(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
 
@@ -223,7 +222,7 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return (make_response(json_response), {})
         """
-        expected = """\
+        expected = """
         from flask import make_response, Flask
         import json
 
@@ -234,10 +233,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return (make_response(json_response), {'Content-Type': 'application/json'})
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_no_route_decorator(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
 
@@ -247,10 +246,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return make_response(json_response)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)
 
     def test_content_type_set(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
 
@@ -261,10 +260,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return (make_response(json_response), {'Content-Type': 'application/json'})
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)
 
     def test_content_type_maybe_set_star(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
         from foo import another_dict
@@ -276,10 +275,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return (make_response(json_response), {**another_dict})
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)
 
     def test_content_type_maybe_set(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
         from foo import key
@@ -291,10 +290,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return (make_response(json_response), {key:'application/json'})
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)
 
     def test_no_json_dumps_input(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
 
@@ -305,10 +304,10 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             dict_response = { "user_input": request.GET.get("input") }
             return make_response(dict_response)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)
 
     def test_unknown_call_response(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
         from foo import bar
@@ -320,4 +319,4 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             dict_response = { "user_input": request.GET.get("input") }
             return bar(dict_response)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)

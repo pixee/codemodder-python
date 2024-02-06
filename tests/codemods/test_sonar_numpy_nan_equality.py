@@ -11,12 +11,12 @@ class TestSonarNumpyNanEquality(BaseSASTCodemodTest):
         assert self.codemod.name == "numpy-nan-equality-S6725"
 
     def test_simple(self, tmpdir):
-        input_code = """\
+        input_code = """
         import numpy
         if a == numpy.nan:
             pass
         """
-        expected = """\
+        expected = """
         import numpy
         if numpy.isnan(a):
             pass
@@ -27,8 +27,8 @@ class TestSonarNumpyNanEquality(BaseSASTCodemodTest):
                     "rule": "python:S6725",
                     "component": f"{tmpdir / 'code.py'}",
                     "textRange": {
-                        "startLine": 2,
-                        "endLine": 2,
+                        "startLine": 3,
+                        "endLine": 3,
                         "startOffset": 3,
                         "endOffset": 17,
                     },

@@ -31,12 +31,12 @@ class TestFixAssertTuple(BaseCodemodTest):
             assert change.lineNumber == idx + 1
 
     def test_change_line_pos(self, tmpdir):
-        input_code = """\
+        input_code = """
         print(1)
         assert (1, 2, )
         print(2)
         """
-        expected_output = """\
+        expected_output = """
         print(1)
         assert 1
         assert 2
@@ -44,17 +44,17 @@ class TestFixAssertTuple(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
-        first_assert_line = 2
+        first_assert_line = 3
         for idx, change in enumerate(self.changeset[0].changes):
             assert change.lineNumber == idx + first_assert_line
 
     def test_change_with_message(self, tmpdir):
-        input_code = """\
+        input_code = """
         print(1)
         assert (1, 2, ), "some message"
         print(2)
         """
-        expected_output = """\
+        expected_output = """
         print(1)
         assert 1, "some message"
         assert 2, "some message"
@@ -79,10 +79,10 @@ class TestFixAssertTuple(BaseCodemodTest):
     def test_exclude_line(self, tmpdir):
         input_code = (
             expected
-        ) = """\
+        ) = """
         assert (1, 2)
         """
-        lines_to_exclude = [1]
+        lines_to_exclude = [2]
         self.run_and_assert(
             tmpdir,
             input_code,
