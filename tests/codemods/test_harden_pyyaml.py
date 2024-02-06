@@ -91,7 +91,7 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
     codemod = HardenPyyaml
 
     def test_safe_loader(self, tmpdir):
-        input_code = """\
+        input_code = """
         import yaml
 
         class MyCustomLoader(yaml.SafeLoader):
@@ -104,14 +104,14 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
 
     @loaders
     def test_unsafe_loaders(self, tmpdir, loader):
-        input_code = f"""\
+        input_code = f"""
         import yaml
 
         class MyCustomLoader(yaml.{loader}):
             def __init__(self, *args, **kwargs):
                 super(MyCustomLoader, self).__init__(*args, **kwargs)
         """
-        expected = """\
+        expected = """
         import yaml
 
         class MyCustomLoader(yaml.SafeLoader):
@@ -121,14 +121,14 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_from_import(self, tmpdir):
-        input_code = """\
+        input_code = """
         from yaml import UnsafeLoader
 
         class MyCustomLoader(UnsafeLoader):
             def __init__(self, *args, **kwargs):
                 super(MyCustomLoader, self).__init__(*args, **kwargs)
         """
-        expected = """\
+        expected = """
         from yaml import SafeLoader
 
         class MyCustomLoader(SafeLoader):
@@ -138,14 +138,14 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_import_alias(self, tmpdir):
-        input_code = """\
+        input_code = """
         import yaml as yam
 
         class MyCustomLoader(yam.UnsafeLoader):
             def __init__(self, *args, **kwargs):
                 super(MyCustomLoader, self).__init__(*args, **kwargs)
         """
-        expected = """\
+        expected = """
         import yaml as yam
 
         class MyCustomLoader(yam.SafeLoader):
@@ -155,7 +155,7 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_multiple_bases(self, tmpdir):
-        input_code = """\
+        input_code = """
         from abc import ABC
         import yaml as yam
         from whatever import Loader
@@ -164,7 +164,7 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
             def __init__(self, *args, **kwargs):
                 super(MyCustomLoader, self).__init__(*args, **kwargs)
         """
-        expected = """\
+        expected = """
         from abc import ABC
         import yaml as yam
         from whatever import Loader
@@ -176,14 +176,14 @@ class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_different_yaml(self, tmpdir):
-        input_code = """\
+        input_code = """
         from yaml import UnsafeLoader
         import whatever as yaml
 
         class MyLoader(UnsafeLoader, yaml.Loader):
             ...
         """
-        expected = """\
+        expected = """
         from yaml import SafeLoader
         import whatever as yaml
 

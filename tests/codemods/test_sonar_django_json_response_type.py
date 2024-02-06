@@ -13,7 +13,7 @@ class TestDjangoJsonResponseType(BaseSASTCodemodTest):
         assert self.codemod.name == "django-json-response-type-S5131"
 
     def test_simple(self, tmpdir):
-        input_code = """\
+        input_code = """
         from django.http import HttpResponse
         import json
 
@@ -21,7 +21,7 @@ class TestDjangoJsonResponseType(BaseSASTCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return HttpResponse(json_response)
         """
-        expected = """\
+        expected = """
         from django.http import HttpResponse
         import json
 
@@ -35,8 +35,8 @@ class TestDjangoJsonResponseType(BaseSASTCodemodTest):
                     "rule": "pythonsecurity:S5131",
                     "component": f"{tmpdir / 'code.py'}",
                     "textRange": {
-                        "startLine": 6,
-                        "endLine": 6,
+                        "startLine": 7,
+                        "endLine": 7,
                         "startOffset": 12,
                         "endOffset": 39,
                     },

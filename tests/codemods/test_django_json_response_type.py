@@ -1,6 +1,5 @@
 from core_codemods.django_json_response_type import DjangoJsonResponseType
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
-from textwrap import dedent
 
 
 class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
@@ -10,7 +9,7 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
         assert self.codemod.name == "django-json-response-type"
 
     def test_simple(self, tmpdir):
-        input_code = """\
+        input_code = """
         from django.http import HttpResponse
         import json
 
@@ -18,7 +17,7 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return HttpResponse(json_response)
         """
-        expected = """\
+        expected = """
         from django.http import HttpResponse
         import json
 
@@ -26,10 +25,10 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return HttpResponse(json_response, content_type="application/json")
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_alias(self, tmpdir):
-        input_code = """\
+        input_code = """
         from django.http import HttpResponse as response
         import json as jsan
 
@@ -37,7 +36,7 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
             json_response = jsan.dumps({ "user_input": request.GET.get("input") })
             return response(json_response)
         """
-        expected = """\
+        expected = """
         from django.http import HttpResponse as response
         import json as jsan
 
@@ -45,27 +44,27 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
             json_response = jsan.dumps({ "user_input": request.GET.get("input") })
             return response(json_response, content_type="application/json")
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_direct(self, tmpdir):
-        input_code = """\
+        input_code = """
         from django.http import HttpResponse
         import json
 
         def foo(request):
             return HttpResponse(json.dumps({ "user_input": request.GET.get("input") }))
         """
-        expected = """\
+        expected = """
         from django.http import HttpResponse
         import json
 
         def foo(request):
             return HttpResponse(json.dumps({ "user_input": request.GET.get("input") }), content_type="application/json")
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_content_type_set(self, tmpdir):
-        input_code = """\
+        input_code = """
         from django.http import HttpResponse
         import json
 
@@ -73,10 +72,10 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return HttpResponse(json_response, content_type='application/json')
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)
 
     def test_no_json_input(self, tmpdir):
-        input_code = """\
+        input_code = """
         from django.http import HttpResponse
         import json
 
@@ -84,4 +83,4 @@ class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
             dict_reponse = { "user_input": request.GET.get("input") }
             return HttpResponse(dict_response)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)

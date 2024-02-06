@@ -13,7 +13,7 @@ class TestSonarFlaskJsonResponseType(BaseSASTCodemodTest):
         assert self.codemod.name == "flask-json-response-type-S5131"
 
     def test_simple(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import make_response, Flask
         import json
 
@@ -24,7 +24,7 @@ class TestSonarFlaskJsonResponseType(BaseSASTCodemodTest):
             json_response = json.dumps({ "user_input": request.GET.get("input") })
             return make_response(json_response)
         """
-        expected = """\
+        expected = """
         from flask import make_response, Flask
         import json
 
@@ -41,8 +41,8 @@ class TestSonarFlaskJsonResponseType(BaseSASTCodemodTest):
                     "rule": "pythonsecurity:S5131",
                     "component": f"{tmpdir / 'code.py'}",
                     "textRange": {
-                        "startLine": 9,
-                        "endLine": 9,
+                        "startLine": 10,
+                        "endLine": 10,
                         "startOffset": 11,
                         "endOffset": 39,
                     },

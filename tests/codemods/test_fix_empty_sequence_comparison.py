@@ -230,12 +230,12 @@ class TestFixEmptySequenceComparisonIfStatements(BaseCodemodTest):
     def test_exclude_line(self, tmpdir):
         input_code = (
             expected
-        ) = """\
+        ) = """
         x = [1]
         if x != []:
             pass
         """
-        lines_to_exclude = [2]
+        lines_to_exclude = [3]
         self.run_and_assert(
             tmpdir,
             input_code,

@@ -1,6 +1,5 @@
 from core_codemods.django_receiver_on_top import DjangoReceiverOnTop
 from tests.codemods.base_codemod_test import BaseCodemodTest
-from textwrap import dedent
 
 
 class TestDjangoReceiverOnTop(BaseCodemodTest):
@@ -10,7 +9,7 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
         assert self.codemod.name == "django-receiver-on-top"
 
     def test_simple(self, tmpdir):
-        input_code = """\
+        input_code = """
         from django.dispatch import receiver
 
         @csrf_exempt
@@ -18,7 +17,7 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
         def foo():
             pass
         """
-        expected = """\
+        expected = """
         from django.dispatch import receiver
 
         @receiver(request_finished)
@@ -26,10 +25,10 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
         def foo():
             pass
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_simple_alias(self, tmpdir):
-        input_code = """\
+        input_code = """
         from django.dispatch import receiver as rec
 
         @csrf_exempt
@@ -37,7 +36,7 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
         def foo():
             pass
         """
-        expected = """\
+        expected = """
         from django.dispatch import receiver as rec
 
         @rec(request_finished)
@@ -45,18 +44,18 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
         def foo():
             pass
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(expected))
+        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_no_receiver(self, tmpdir):
-        input_code = """\
+        input_code = """
         @csrf_exempt
         def foo():
             pass
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)
 
     def test_receiver_but_not_djangos(self, tmpdir):
-        input_code = """\
+        input_code = """
         from not_django import receiver
 
         @csrf_exempt
@@ -64,10 +63,10 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
         def foo():
             pass
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)
 
     def test_receiver_on_top(self, tmpdir):
-        input_code = """\
+        input_code = """
         from django.dispatch import receiver
 
         @receiver(request_finished)
@@ -75,4 +74,4 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
         def foo():
             pass
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
+        self.run_and_assert(tmpdir, input_code, input_code)

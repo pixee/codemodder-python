@@ -34,10 +34,10 @@ class TestFStr(BaseCodemodTest):
     def test_exclude_line(self, tmpdir):
         input_code = (
             expected
-        ) = """\
+        ) = """
         bad: str = f"bad" + "bad"
         """
-        lines_to_exclude = [1]
+        lines_to_exclude = [2]
         self.run_and_assert(
             tmpdir,
             input_code,

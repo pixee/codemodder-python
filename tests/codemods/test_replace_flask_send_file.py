@@ -11,7 +11,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         assert self.codemod.name == "replace-flask-send-file"
 
     def test_direct_string(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import Flask, send_file
 
         app = Flask(__name__)
@@ -20,7 +20,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         def download_file(name):
             return send_file(f'path/to/{name}.txt')
         """
-        expected = """\
+        expected = """
         from flask import Flask
         import flask
         from pathlib import Path
@@ -34,7 +34,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_direct_simple_string(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import Flask, send_file
 
         app = Flask(__name__)
@@ -43,7 +43,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         def download_file(name):
             return send_file('path/to/file.txt')
         """
-        expected = """\
+        expected = """
         from flask import Flask
         import flask
         from pathlib import Path
@@ -57,7 +57,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_direct_string_convert_arguments(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import Flask, send_file
 
         app = Flask(__name__)
@@ -66,7 +66,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         def download_file(name):
             return send_file(f'path/to/{name}.txt', None, False, download_name = True)
         """
-        expected = """\
+        expected = """
         from flask import Flask
         import flask
         from pathlib import Path
@@ -80,7 +80,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_direct_path(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import Flask, send_file
         from pathlib import Path
 
@@ -90,7 +90,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         def download_file(name):
             return send_file(Path(f'path/to/{name}.txt'))
         """
-        expected = """\
+        expected = """
         from flask import Flask
         from pathlib import Path
         import flask
@@ -104,7 +104,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_indirect_path(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import Flask, send_file
         from pathlib import Path
 
@@ -115,7 +115,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
             path = Path(f'path/to/{name}.txt')
             return send_file(path)
         """
-        expected = """\
+        expected = """
         from flask import Flask
         from pathlib import Path
         import flask
@@ -130,7 +130,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_indirect_path_alias(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import Flask, send_file as send
         from pathlib import Path
 
@@ -141,7 +141,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
             path = Path(f'path/to/{name}.txt')
             return send(path)
         """
-        expected = """\
+        expected = """
         from flask import Flask
         from pathlib import Path
         import flask
@@ -156,7 +156,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_indirect_string(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import Flask, send_file
 
         app = Flask(__name__)
@@ -166,7 +166,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
             path = f'path/to/{name}.txt'
             return send_file(path)
         """
-        expected = """\
+        expected = """
         from flask import Flask
         import flask
         from pathlib import Path
@@ -181,7 +181,7 @@ class TestReplaceFlaskSendFile(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_unknown_type(self, tmpdir):
-        input_code = """\
+        input_code = """
         from flask import Flask, send_file
 
         app = Flask(__name__)
