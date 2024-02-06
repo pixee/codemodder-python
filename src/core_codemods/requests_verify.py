@@ -14,13 +14,14 @@ class RequestsVerify(SimpleCodemod):
         review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         references=[
             Reference(url="https://requests.readthedocs.io/en/latest/api/"),
+            Reference(url="https://www.python-httpx.org/"),
             Reference(
                 url="https://owasp.org/www-community/attacks/Manipulator-in-the-middle_attack"
             ),
         ],
     )
     change_description = (
-        "Makes any calls to requests.{func} with `verify=False` to `verify=True`."
+        "Ensures requests using the `requests` or `httpx` library use `verify=True`."
     )
     detector_pattern = """
             rules:
