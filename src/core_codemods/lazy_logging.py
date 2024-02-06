@@ -27,6 +27,7 @@ class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
                       - pattern: debug
                       - pattern: info
                       - pattern: warning
+                      - pattern: warn
                       - pattern: error
                       - pattern: critical
                       - pattern: log
