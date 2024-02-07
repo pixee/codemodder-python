@@ -30,6 +30,35 @@ class TestFileResourceLeak(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected)
 
+    def test_multiple_in_block(self, tmpdir):
+        input_code = """\
+        def foo():
+            si = open('/dev/null', 'r')
+            so = open('/dev/null', 'a+')
+            se = open('/dev/null', 'w+')
+            def foo():
+                f = open('test')
+                f.read()
+            si.read()
+            se.read()
+            so.read()
+            print('stop')
+        """
+        expected = """\
+        def foo():
+            with open('/dev/null', 'r') as si:
+                with open('/dev/null', 'a+') as so:
+                    with open('/dev/null', 'w+') as se:
+                        def foo():
+                            with open('test') as f:
+                                f.read()
+                        si.read()
+                        se.read()
+                    so.read()
+            print('stop')
+        """
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=4)
+
     def test_just_open(self, tmpdir):
         # strange as this change may be, it still leaks if left untouched
         input_code = """
