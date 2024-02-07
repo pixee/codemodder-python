@@ -27,11 +27,12 @@ class FixTaskInstantiation(SimpleCodemod, NameResolutionMixin, AncestorPatternsM
             return updated_node
 
         if self.find_base_name(original_node) == "asyncio.Task":
-            loop_arg = self._find_loop_arg(original_node)
+            self.report_change(original_node)
+            loop_arg, other_args = self._find_loop_arg(original_node)
             if loop_arg:
                 coroutine_arg = original_node.args[0]
                 return self.node_loop_create_task(
-                    original_node, coroutine_arg, loop_arg
+                    original_node, coroutine_arg, loop_arg, other_args
                 )
             return self.node_create_task(original_node, updated_node)
         return updated_node
@@ -43,26 +44,34 @@ class FixTaskInstantiation(SimpleCodemod, NameResolutionMixin, AncestorPatternsM
         if (maybe_name := maybe_name or self._module_name) == self._module_name:
             self.add_needed_import(self._module_name)
         self.remove_unused_import(original_node)
-        self.report_change(original_node)
         return self.update_call_target(updated_node, maybe_name, "create_task")
 
     def node_loop_create_task(
-        self, original_node: cst.Call, coroutine_arg: cst.Arg, loop_arg: cst.Arg
+        self,
+        original_node: cst.Call,
+        coroutine_arg: cst.Arg,
+        loop_arg: cst.Arg,
+        other_args: list[cst.Arg],
     ) -> cst.Call:
         """todo: document"""
-        # todo: keep comma if multiple args
         coroutine_arg = coroutine_arg.with_changes(comma=cst.MaybeSentinel.DEFAULT)
         loop_attr = loop_arg.value
         new_call = cst.Call(
             func=cst.Attribute(value=loop_attr, attr=cst.Name("create_task")),
-            args=[coroutine_arg],
+            args=[coroutine_arg] + other_args,
         )
-        self.report_change(original_node)
+        self.remove_unused_import(original_node)
         return new_call
 
-    def _find_loop_arg(self, node: cst.Call) -> Optional[cst.Arg]:
+    def _find_loop_arg(self, node: cst.Call) -> tuple[Optional[cst.Arg], list[cst.Arg]]:
+        """dcoment args[:1: bc first arg is coroutine"""
+        loop_arg = None
+        other_args = []
         for arg in node.args[1:]:
             match arg:
                 case cst.Arg(keyword=cst.Name(value="loop")):
-                    return arg
-        return None
+                    loop_arg = arg
+                case _:
+                    other_args.append(arg)
+
+        return loop_arg, other_args
