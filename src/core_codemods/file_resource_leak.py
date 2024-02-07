@@ -1,7 +1,12 @@
 from typing import Optional, Sequence
+from codemodder.codemods.libcst_transformer import (
+    LibcstResultTransformer,
+    LibcstTransformerPipeline,
+)
+from codemodder.result import Result
 from codemodder.utils.utils import extract_targets_of_assignment
 import libcst as cst
-from libcst import ensure_type, matchers
+from libcst import SimpleStatementLine, ensure_type, matchers
 from libcst.codemod import (
     CodemodContext,
     ContextAwareVisitor,
@@ -21,24 +26,14 @@ from core_codemods.api import (
     Metadata,
     Reference,
     ReviewGuidance,
-    SimpleCodemod,
 )
+from core_codemods.api.core_codemod import CoreCodemod
 
 
-class FileResourceLeak(SimpleCodemod):
-    metadata = Metadata(
-        name="fix-file-resource-leak",
-        summary="Automatically Close Resources",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        references=[
-            Reference(url="https://cwe.mitre.org/data/definitions/772.html"),
-            Reference(url="https://cwe.mitre.org/data/definitions/404.html"),
-        ],
-    )
+class FileResourceLeakTransformer(LibcstResultTransformer):
     change_description = "Wrapped opened resource in a with statement."
 
     METADATA_DEPENDENCIES = (
-        PositionProvider,
         ScopeProvider,
         ParentNodeProvider,
     )
@@ -46,28 +41,41 @@ class FileResourceLeak(SimpleCodemod):
     def __init__(
         self,
         context: CodemodContext,
+        results: list[Result],
         file_context: FileContext,
-        *codemod_args,
+        *codemod_args,  # pylint: disable=unused-argument
         **codemod_kwargs,
     ) -> None:
         self.changed_nodes: dict[
             cst.CSTNode, cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel
         ] = {}
-        SimpleCodemod.__init__(
-            self, context, file_context, *codemod_args, **codemod_kwargs
-        )
+        super().__init__(context, results, file_context, **codemod_kwargs)
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         fr = FindResources(self.context)
         tree.visit(fr)
-        line_filter = lambda x: self.filter_by_path_includes_or_excludes(x[3])
-        filtered_resources = [
-            resource for resource in fr.assigned_resources if line_filter(resource)
-        ]
-        fixer = ResourceLeakFixer(self.context, filtered_resources)
+        line_filter = lambda x: self.filter_by_path_includes_or_excludes(x[2])
+        for k, v in fr.assigned_resources.items():
+            fr.assigned_resources[k] = [t for t in v if line_filter(t)]
+        fixer = ResourceLeakFixer(self.context, fr.assigned_resources)
         result = tree.visit(fixer)
         self.file_context.codemod_changes.extend(fixer.changes)
         return result
+
+
+FileResourceLeak = CoreCodemod(
+    metadata=Metadata(
+        name="fix-file-resource-leak",
+        summary="Automatically Close Resources",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(url="https://cwe.mitre.org/data/definitions/772.html"),
+            Reference(url="https://cwe.mitre.org/data/definitions/404.html"),
+        ],
+    ),
+    transformer=LibcstTransformerPipeline(FileResourceLeakTransformer),
+    detector=None,
+)
 
 
 class FindResources(ContextAwareVisitor, NameResolutionMixin, AncestorPatternsMixin):
@@ -77,14 +85,16 @@ class FindResources(ContextAwareVisitor, NameResolutionMixin, AncestorPatternsMi
 
     def __init__(self, context: CodemodContext) -> None:
         super().__init__(context)
-        self.assigned_resources: list[
-            tuple[
-                cst.IndentedBlock | cst.Module,
-                cst.SimpleStatementLine,
-                cst.Assign | cst.AnnAssign,
-                cst.Call,
-            ]
-        ] = []
+        self.assigned_resources: dict[
+            cst.IndentedBlock | cst.Module,
+            list[
+                tuple[
+                    cst.SimpleStatementLine,
+                    cst.Assign | cst.AnnAssign,
+                    cst.Call,
+                ]
+            ],
+        ] = {}
 
     def leave_SimpleStatementLine(self, original_node: cst.SimpleStatementLine) -> None:
         # Should be of the form x = resource(...)
@@ -98,9 +108,14 @@ class FindResources(ContextAwareVisitor, NameResolutionMixin, AncestorPatternsMi
                     maybe_tuple = self._is_named_assign_of_resource(bsstmt)  # type: ignore
                     if maybe_tuple:
                         assign, call = maybe_tuple
-                        self.assigned_resources.append(
-                            (block, original_node, assign, call)
-                        )
+                        if block in self.assigned_resources:
+                            self.assigned_resources[block].append(
+                                (original_node, assign, call)
+                            )
+                        else:
+                            self.assigned_resources[block] = [
+                                (original_node, assign, call)
+                            ]
 
     def _has_no_classdef_parent(self, block: cst.CSTNode) -> bool:
         block_parent = self.get_parent(block)
@@ -157,59 +172,117 @@ class ResourceLeakFixer(
     def __init__(
         self,
         context: CodemodContext,
-        leaked_assigned_resources: list[
-            tuple[
-                cst.IndentedBlock | cst.Module,
-                cst.SimpleStatementLine,
-                cst.Assign | cst.AnnAssign,
-                cst.Call,
-            ]
+        leaked_assigned_resources: dict[
+            cst.IndentedBlock | cst.Module,
+            list[
+                tuple[
+                    cst.SimpleStatementLine,
+                    cst.Assign | cst.AnnAssign,
+                    cst.Call,
+                ]
+            ],
         ],
     ):
         super().__init__(context)
         self.leaked_assigned_resources = leaked_assigned_resources
         self.changes: list[Change] = []
 
-    def leave_Module(self, original_node: cst.Module, updated_node) -> cst.Module:
-        result = original_node
-        # TODO for now it assumes no dependent resources, it won't do anything if one exists
-        for (
-            block,
-            stmt,
-            assignment,
-            resource,
-        ) in self.leaked_assigned_resources:
-            index = block.body.index(stmt)
+    def _is_fixable(
+        self, block, index, named_targets, other_targets
+    ) -> bool:  # pylint: disable=too-many-arguments
+        # assigned to something that is not a Name?
+        if other_targets:
+            return False
+        # yield, returned, argument of a call, referenced outside of block
+        name_escapes_partial = partial(
+            self._name_escapes_scope, block=block, index=index
+        )
+        # is closed?
+        name_condition = map(
+            lambda n: not self._is_closed(n) and not name_escapes_partial(n),
+            named_targets,
+        )
+        return all(name_condition)
+
+    def _handle_block(
+        self,
+        original_block: cst.Module | cst.IndentedBlock,
+        updated_block,
+        leak: list[
+            tuple[cst.SimpleStatementLine, cst.Assign | cst.AnnAssign, cst.Call]
+        ],
+    ) -> cst.Module | cst.IndentedBlock:
+        new_stmts = list(updated_block.body)
+        # points to the index of the statement the original statement is now included in
+        # for example, in:
+        # f = open('test')
+        # f.read()
+        # print('stop')
+        # 1 would point to 0 since f.read() would be included in the with statement of 0
+        new_index_of_original_stmt = list(range(len(new_stmts)))
+        for stmt, assignment, resource in reversed(leak):
             named_targets, other_targets = self._find_transitive_assignment_targets(
                 resource
             )
-            # assigned to something that is not a Name?
-            if other_targets:
-                break
-            # yield, returned, argument of a call, referenced outside of block
-            name_escapes_partial = partial(
-                self._name_escapes_scope, block=block, index=index
-            )
-            # is closed?
-            name_condition = map(
-                # pylint: disable-next=cell-var-from-loop
-                lambda n: not self._is_closed(n) and not name_escapes_partial(n),
-                named_targets,
-            )
-            if all(name_condition):
+            index = original_block.body.index(stmt)
+            if self._is_fixable(original_block, index, named_targets, other_targets):
                 line_number = self.get_metadata(PositionProvider, resource).start.line
                 self.changes.append(
-                    Change(line_number, FileResourceLeak.change_description)
+                    Change(line_number, FileResourceLeakTransformer.change_description)
                 )
-                last_index = self._find_last_index_with_access(
-                    named_targets, block, index
-                )
-                new_block = self._wrap_in_with_statement(
-                    block, assignment, resource, index, last_index
-                )
-                result = result.deep_replace(block, new_block)
 
-        return result
+                # grab the index of the last statement with reference to the resource
+                last_index = (
+                    self._find_last_index_with_access(
+                        named_targets, original_block, index
+                    )
+                    or index
+                )
+                # check if the statement in the last_index is now included in some earlier with statement
+                new_last_index = new_index_of_original_stmt[last_index]
+
+                # build the with statement
+                new_with = self._wrap_in_with_statement(
+                    new_stmts,
+                    new_index_of_original_stmt,
+                    assignment,
+                    resource,
+                    index,
+                    new_last_index,
+                )
+                new_stmts[index] = new_with
+
+                # if the statement at i was included in the with statement (at index) then point it
+                for i in range(index, last_index + 1):
+                    new_index_of_original_stmt[i] = index
+
+        new_block_stmts = []
+        # if point != i do not include it since the statement at i is now included in the statement at point
+        for i, point in enumerate(new_index_of_original_stmt):
+            if point == i:
+                new_block_stmts.append(new_stmts[i])
+        new_block = updated_block.with_changes(body=new_block_stmts)
+        return new_block
+
+    def leave_IndentedBlock(
+        self, original_node: cst.IndentedBlock, updated_node: cst.IndentedBlock
+    ) -> cst.BaseSuite:
+        if original_node in self.leaked_assigned_resources:
+            return self._handle_block(
+                original_node,
+                updated_node,
+                self.leaked_assigned_resources[original_node],
+            )
+        return updated_node
+
+    def leave_Module(self, original_node: cst.Module, updated_node) -> cst.Module:
+        if original_node in self.leaked_assigned_resources:
+            return self._handle_block(
+                original_node,
+                updated_node,
+                self.leaked_assigned_resources[original_node],
+            )
+        return updated_node
 
     def _find_last_index_with_access(
         self, named_targets, block, index
@@ -289,22 +362,21 @@ class ResourceLeakFixer(
     # pylint: disable-next=too-many-arguments
     def _wrap_in_with_statement(
         self,
-        block: cst.Module | cst.IndentedBlock,
+        stmts: list[SimpleStatementLine],
+        stmts_index,
         assign: cst.Assign | cst.AnnAssign,
         resource: cst.Call,
         index: int,
-        last_index: Optional[int] = None,
-    ) -> cst.Module | cst.IndentedBlock:
-        block_body = block.body
-        if last_index:
-            with_statements = block_body[index + 1 : last_index + 1]
-            trailing_statements = block_body[last_index + 1 :]
-        else:
-            with_statements = block_body[index + 1 :]
-            trailing_statements = []
-        with_statement = self._build_with_statement(assign, resource, with_statements)
-        new_body = [*block_body[:index], with_statement, *trailing_statements]
-        return block.with_changes(body=new_body)
+        last_index: int,
+    ) -> cst.With:
+        # only include statements that were not moved into another with statement
+        body_stmts = []
+        for i in range(index + 1, last_index + 1):
+            point = stmts_index[i]
+            if i == point:
+                body_stmts.append(stmts[i])
+        with_statement = self._build_with_statement(assign, resource, body_stmts)
+        return with_statement
 
     def _build_with_statement(
         self, assign: cst.Assign | cst.AnnAssign, resource: cst.Call, body

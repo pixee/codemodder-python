@@ -51,13 +51,13 @@ class LibcstResultTransformer(
     ):
         del _transformer
 
+        self.file_context = file_context
         super().__init__(
             context,
             results,
             line_include=file_context.line_include,
             line_exclude=file_context.line_exclude,
         )
-        self.file_context = file_context
 
     @classmethod
     def transform(

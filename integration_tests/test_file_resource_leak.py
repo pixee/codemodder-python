@@ -1,4 +1,7 @@
-from core_codemods.file_resource_leak import FileResourceLeak
+from core_codemods.file_resource_leak import (
+    FileResourceLeak,
+    FileResourceLeakTransformer,
+)
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
@@ -33,5 +36,5 @@ class TestFileResourceLeak(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "3"
-    change_description = FileResourceLeak.change_description
+    change_description = FileResourceLeakTransformer.change_description
     num_changed_files = 1
