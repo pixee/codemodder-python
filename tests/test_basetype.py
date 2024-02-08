@@ -1,4 +1,5 @@
 import libcst as cst
+import pytest
 from codemodder.codemods.utils import BaseType, infer_expression_type
 
 
@@ -34,3 +35,12 @@ class TestBaseType:
     def test_if_numbers2(self):
         e = cst.parse_expression("float(1) if True else len([1,2])")
         assert infer_expression_type(e) == BaseType.NUMBER
+
+    @pytest.mark.parametrize("code", ["True", "False"])
+    def test_bool(self, code):
+        e = cst.parse_expression(code)
+        assert infer_expression_type(e) == BaseType.BOOL
+
+    def test_none(self):
+        e = cst.parse_expression("None")
+        assert infer_expression_type(e) == BaseType.NONE

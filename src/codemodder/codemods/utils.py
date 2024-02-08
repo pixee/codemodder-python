@@ -17,6 +17,8 @@ class BaseType(Enum):
     LIST = 2
     STRING = 3
     BYTES = 4
+    NONE = 5
+    BOOL = 6
 
 
 # pylint: disable-next=R0911
@@ -26,6 +28,10 @@ def infer_expression_type(node: cst.BaseExpression) -> Optional[BaseType]:
     """
     # The current implementation covers some common cases and is in no way complete
     match node:
+        case cst.Name(value="None"):
+            return BaseType.NONE
+        case cst.Name(value="True") | cst.Name(value="False"):
+            return BaseType.BOOL
         case (
             cst.Integer()
             | cst.Imaginary()

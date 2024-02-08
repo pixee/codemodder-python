@@ -143,8 +143,23 @@ class TestFixTaskInstantiation(BaseCodemodTest):
             ),
         ],
     )
-    def test_with_kwargs(self, tmpdir, input_code, expected_output):
+    def test_with_other_kwargs(self, tmpdir, input_code, expected_output):
         self.run_and_assert(tmpdir, input_code, expected_output)
+
+    @pytest.mark.parametrize("loop_value", ["None", "True", '"gibberish"', 10])
+    def test_loop_kwarg_variations(self, tmpdir, loop_value):
+        input_code = (
+            output_code
+        ) = f"""
+        import asyncio
+        asyncio.Task(coro(1, 2), loop={loop_value})
+        """
+        if loop_value == "None":
+            output_code = """
+            import asyncio
+            asyncio.create_task(coro(1, 2), loop=None)
+            """
+        self.run_and_assert(tmpdir, input_code, output_code)
 
     def test_asyncio_script(self, tmpdir):
         input_code = """

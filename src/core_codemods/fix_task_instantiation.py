@@ -1,10 +1,11 @@
 import libcst as cst
-from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod, Reference
-from codemodder.codemods.utils_mixin import NameResolutionMixin, AncestorPatternsMixin
 from typing import Optional
+from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod, Reference
+from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from codemodder.codemods.utils import BaseType, infer_expression_type
 
 
-class FixTaskInstantiation(SimpleCodemod, NameResolutionMixin, AncestorPatternsMixin):
+class FixTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
     metadata = Metadata(
         name="fix-task-instantiation",
         summary="TODOReplace Comparisons to Empty Sequence with Implicit Boolean Comparison",
@@ -27,9 +28,24 @@ class FixTaskInstantiation(SimpleCodemod, NameResolutionMixin, AncestorPatternsM
             return updated_node
 
         if self.find_base_name(original_node) == "asyncio.Task":
-            self.report_change(original_node)
             loop_arg, other_args = self._find_loop_arg(original_node)
             if loop_arg:
+                loop_type = infer_expression_type(
+                    self.resolve_expression(loop_arg.value)
+                )
+                if loop_type == BaseType.NONE:
+                    return self.node_create_task(original_node, updated_node)
+                elif loop_type in (
+                    BaseType.NUMBER,
+                    BaseType.LIST,
+                    BaseType.STRING,
+                    BaseType.BYTES,
+                    BaseType.BOOL,
+                ):
+                    # User incorrectly assigned loop to something that is not a loop.
+                    # We won't do anything.
+                    return updated_node
+
                 coroutine_arg = original_node.args[0]
                 return self.node_loop_create_task(
                     original_node, coroutine_arg, loop_arg, other_args
@@ -40,6 +56,7 @@ class FixTaskInstantiation(SimpleCodemod, NameResolutionMixin, AncestorPatternsM
     def node_create_task(
         self, original_node: cst.Call, updated_node: cst.Call
     ) -> cst.Call:
+        self.report_change(original_node)
         maybe_name = self.get_aliased_prefix_name(original_node, self._module_name)
         if (maybe_name := maybe_name or self._module_name) == self._module_name:
             self.add_needed_import(self._module_name)
@@ -54,6 +71,7 @@ class FixTaskInstantiation(SimpleCodemod, NameResolutionMixin, AncestorPatternsM
         other_args: list[cst.Arg],
     ) -> cst.Call:
         """todo: document"""
+        self.report_change(original_node)
         coroutine_arg = coroutine_arg.with_changes(comma=cst.MaybeSentinel.DEFAULT)
         loop_attr = loop_arg.value
         new_call = cst.Call(
