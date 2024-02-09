@@ -8,17 +8,15 @@ from codemodder.codemods.utils import BaseType, infer_expression_type
 class FixTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
     metadata = Metadata(
         name="fix-task-instantiation",
-        summary="TODOReplace Comparisons to Empty Sequence with Implicit Boolean Comparison",
-        review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
+        summary="Use high-level `asyncio.create_task` API",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[
             Reference(
-                url="todo: https://docs.python.org/3/library/stdtypes.html#truth-value-testing"
+                url="https://docs.python.org/3/library/asyncio-task.html#asyncio.Task"
             ),
         ],
     )
-    change_description = (
-        "TODO: Replace comparisons to empty sequence with implicit boolean comparison."
-    )
+    change_description = "Replace instantiation of `asyncio.Task` with `create_task`"
     _module_name = "asyncio"
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
@@ -35,14 +33,14 @@ class FixTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
                 )
                 if loop_type == BaseType.NONE:
                     return self.node_create_task(original_node, updated_node)
-                elif loop_type in (
+                if loop_type in (
                     BaseType.NUMBER,
                     BaseType.LIST,
                     BaseType.STRING,
                     BaseType.BYTES,
                     BaseType.BOOL,
                 ):
-                    # User incorrectly assigned loop to something that is not a loop.
+                    # incorrectly assigned loop kwarg to something that is not a loop.
                     # We won't do anything.
                     return updated_node
 
@@ -56,6 +54,7 @@ class FixTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
     def node_create_task(
         self, original_node: cst.Call, updated_node: cst.Call
     ) -> cst.Call:
+        """Convert `asyncio.Task(...)` to `asyncio.create_task(...)`"""
         self.report_change(original_node)
         maybe_name = self.get_aliased_prefix_name(original_node, self._module_name)
         if (maybe_name := maybe_name or self._module_name) == self._module_name:
@@ -70,7 +69,7 @@ class FixTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
         loop_arg: cst.Arg,
         other_args: list[cst.Arg],
     ) -> cst.Call:
-        """todo: document"""
+        """Convert `asyncio.Task(..., loop=loop,...)` to `loop.create_task(...)`"""
         self.report_change(original_node)
         coroutine_arg = coroutine_arg.with_changes(comma=cst.MaybeSentinel.DEFAULT)
         loop_attr = loop_arg.value
@@ -82,7 +81,9 @@ class FixTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
         return new_call
 
     def _find_loop_arg(self, node: cst.Call) -> tuple[Optional[cst.Arg], list[cst.Arg]]:
-        """dcoment args[:1: bc first arg is coroutine"""
+        """Find the loop kwarg from a call to `asyncio.Task(...)`
+        First arg is always the coroutine so we ignore it.
+        """
         loop_arg = None
         other_args = []
         for arg in node.args[1:]:

@@ -61,6 +61,7 @@ from .sonar.sonar_flask_json_response_type import SonarFlaskJsonResponseType
 from .sonar.sonar_django_json_response_type import SonarDjangoJsonResponseType
 from .lazy_logging import LazyLogging
 from .str_concat_in_seq_literal import StrConcatInSeqLiteral
+from .fix_task_instantiation import FixTaskInstantiation
 
 registry = CodemodCollection(
     origin="pixee",
@@ -118,6 +119,7 @@ registry = CodemodCollection(
         FixAssertTuple,
         LazyLogging,
         StrConcatInSeqLiteral,
+        FixTaskInstantiation,
     ],
 )
 
