@@ -11,6 +11,7 @@ class FixMutableParams(BaseCodemod):
     REVIEW_GUIDANCE = ReviewGuidance.MERGE_WITHOUT_REVIEW
     DESCRIPTION = "Replace mutable parameter with `None`."
     REFERENCES: list = []
+
     _BUILTIN_TO_LITERAL = {
         "list": cst.List(elements=[]),
         "dict": cst.Dict(elements=[]),
@@ -98,52 +99,65 @@ class FixMutableParams(BaseCodemod):
 
         return updated_params, new_var_decls, add_annotation
 
-    def _build_body_prefix(self, new_var_decls: list[cst.Param]):
+    def _build_body_prefix(self, new_var_decls: list[cst.Param]) -> list[cst.Assign]:
         return [
-            cst.SimpleStatementLine(
-                body=[
-                    cst.Assign(
-                        targets=[cst.AssignTarget(target=var_decl.name)],
-                        value=cst.IfExp(
-                            test=cst.Comparison(
-                                left=var_decl.name,
-                                comparisons=[
-                                    cst.ComparisonTarget(cst.Is(), cst.Name("None"))
-                                ],
-                            ),
-                            # In the case of list() or dict(), this particular
-                            # default value has been updated to use the literal
-                            # instead. This does not affect the default
-                            # argument in the function itself.
-                            body=var_decl.default,
-                            orelse=var_decl.name,
-                        ),
-                    )
-                ]
+            cst.Assign(
+                targets=[cst.AssignTarget(target=var_decl.name)],
+                value=cst.IfExp(
+                    test=cst.Comparison(
+                        left=var_decl.name,
+                        comparisons=[cst.ComparisonTarget(cst.Is(), cst.Name("None"))],
+                    ),
+                    # In the case of list() or dict(), this particular
+                    # default value has been updated to use the literal
+                    # instead. This does not affect the default
+                    # argument in the function itself.
+                    body=var_decl.default,
+                    orelse=var_decl.name,
+                ),
             )
             for var_decl in new_var_decls
         ]
 
-    def _build_new_body(self, new_var_decls, body):
+    def _build_new_body(
+        self, new_var_decls, body: cst.BaseSuite
+    ) -> list[cst.BaseStatement] | list[cst.BaseSmallStatement]:
         offset = 0
         new_body = []
-
         # Preserve placement of docstring
-        if body and m.matches(
-            body[0],
-            m.SimpleStatementLine(body=[m.Expr(value=m.SimpleString())]),
+        if m.matches(
+            body.body[0],
+            m.Expr(value=m.SimpleString())
+            | m.SimpleStatementLine(body=[m.Expr(value=m.SimpleString())]),
         ):
-            new_body.append(body[0])
+            new_body.append(body.body[0])
             offset = 1
-
-        new_body.extend(self._build_body_prefix(new_var_decls))
-        new_body.extend(body[offset:])
+        match body:
+            case cst.SimpleStatementSuite():
+                new_body.extend(self._build_body_prefix(new_var_decls))
+                new_body.extend(body.body[offset:])
+            case cst.IndentedBlock():
+                new_body.extend(
+                    [
+                        cst.SimpleStatementLine(body=[stmt])
+                        for stmt in self._build_body_prefix(new_var_decls)
+                    ]
+                )
+                new_body.extend(body.body[offset:])
         return new_body
 
     def _is_abstractmethod(self, node: cst.FunctionDef) -> bool:
         for decorator in node.decorators:
             match decorator.decorator:
                 case cst.Name("abstractmethod"):
+                    return True
+
+        return False
+
+    def _is_overloaded(self, node: cst.FunctionDef) -> bool:
+        for decorator in node.decorators:
+            match decorator.decorator:
+                case cst.Name("overload"):
                     return True
 
         return False
@@ -156,23 +170,41 @@ class FixMutableParams(BaseCodemod):
         """Transforms function definitions with mutable default parameters"""
         # TODO: add filter by include or exclude that works for nodes
         # that that have different start/end numbers.
+
         (
             updated_params,
             new_var_decls,
             add_annotation,
         ) = self._gather_and_update_params(original_node, updated_node)
-        new_body = (
-            self._build_new_body(new_var_decls, updated_node.body.body)
-            if not self._is_abstractmethod(original_node)
-            else updated_node.body.body
-        )
+
         if new_var_decls:
             # If we're adding statements to the body, we know a change took place
             self.add_change(original_node, self.CHANGE_DESCRIPTION)
         if add_annotation:
             self.add_needed_import("typing", "Optional")
 
+        # overloaded methods with empty bodies should only change signature
+        empty_statement = m.Expr(value=m.Ellipsis()) | m.Pass()
+        if self._is_overloaded(updated_node) and m.matches(
+            original_node.body,
+            m.SimpleStatementSuite(body=[empty_statement])
+            | m.IndentedBlock(body=[m.SimpleStatementLine(body=[empty_statement])]),
+        ):
+            return updated_node.with_changes(
+                params=updated_node.params.with_changes(params=updated_params)
+            )
+
+        new_body = (
+            self._build_new_body(new_var_decls, updated_node.body)
+            if not self._is_abstractmethod(original_node)
+            else updated_node.body.body
+        )
+
         return updated_node.with_changes(
             params=updated_node.params.with_changes(params=updated_params),
-            body=updated_node.body.with_changes(body=new_body),
+            body=(
+                updated_node.body.with_changes(body=new_body)
+                if new_body
+                else updated_node.body
+            ),
         )
