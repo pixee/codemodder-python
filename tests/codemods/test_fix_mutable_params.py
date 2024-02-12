@@ -22,6 +22,16 @@ class TestFixMutableParams(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.parametrize("mutable", ["[]", "{}", "set()"])
+    def test_fix_single_arg_suite(self, tmpdir, mutable):
+        input_code = f"""
+        def foo(bar={mutable}): print(bar)
+        """
+        expected_output = f"""
+        def foo(bar=None): bar = {mutable} if bar is None else bar; print(bar)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    @pytest.mark.parametrize("mutable", ["[]", "{}", "set()"])
     def test_fix_single_arg_method(self, tmpdir, mutable):
         input_code = f"""
         class Whatever:
@@ -89,6 +99,32 @@ class TestFixMutableParams(BaseCodemodTest):
             print(baz)
         """
         self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_fix_overloaded(self, tmpdir):
+        input_code = """
+        from typing import overload
+        @overload
+        def foo(a : list[str] = []) -> str:
+            ...
+        @overload
+        def foo(a : list[int] = []) -> int:
+            ...
+        def foo(a : list[int] | list[str] = []) -> int|str:
+            return 0
+        """
+        expected_output = """
+        from typing import Optional, overload
+        @overload
+        def foo(a : Optional[list[str]] = None) -> str:
+            ...
+        @overload
+        def foo(a : Optional[list[int]] = None) -> int:
+            ...
+        def foo(a : Optional[list[int] | list[str]] = None) -> int|str:
+            a = [] if a is None else a
+            return 0
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=3)
 
     def test_fix_multiple_args_mixed(self, tmpdir):
         input_code = """
