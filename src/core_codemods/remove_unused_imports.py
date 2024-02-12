@@ -1,4 +1,5 @@
-from libcst import CSTVisitor, ensure_type, matchers
+import libcst as cst
+from libcst.codemod import Codemod, CodemodContext
 from libcst.codemod.visitors import GatherUnusedImportsVisitor
 from libcst.metadata import (
     PositionProvider,
@@ -11,16 +12,12 @@ from codemodder.codemods.base_codemod import (
     CodemodMetadata,
     ReviewGuidance,
 )
+
 from codemodder.change import Change
+from codemodder.codemods.check_annotations import is_disabled_by_annotations
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsTransformer,
 )
-import libcst as cst
-from libcst.codemod import Codemod, CodemodContext
-import re
-from pylint.utils.pragma_parser import parse_pragma
-
-NOQA_PATTERN = re.compile(r"^#\s*noqa", re.IGNORECASE)
 
 
 class RemoveUnusedImports(BaseCodemod, Codemod):
@@ -55,7 +52,7 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         for import_alias, importt in gather_unused_visitor.unused_imports:
             pos = self.get_metadata(PositionProvider, import_alias)
             if self.filter_by_path_includes_or_excludes(pos):
-                if not self._is_disabled_by_linter(importt):
+                if not is_disabled_by_annotations(importt, self.metadata):
                     self.file_context.codemod_changes.append(
                         Change(pos.start.line, self.CHANGE_DESCRIPTION)
                     )
@@ -73,88 +70,6 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
             return any(match_line(pos_to_match, line) for line in self.line_include)
         return True
 
-    def _is_disabled_by_linter(self, node: cst.CSTNode) -> bool:
-        """
-        Check if the import has a #noqa or # pylint: disable(-next)=unused_imports comment attached to it.
-        """
-        parent = self.get_metadata(ParentNodeProvider, node)
-        if parent and matchers.matches(parent, matchers.SimpleStatementLine()):
-            stmt = ensure_type(parent, cst.SimpleStatementLine)
-
-            # has a trailing comment string anywhere in the node
-            comments_visitor = GatherCommentNodes()
-            stmt.body[0].visit(comments_visitor)
-            # has a trailing comment string anywhere in the node
-            if stmt.trailing_whitespace.comment:
-                comments_visitor.comments.append(stmt.trailing_whitespace.comment)
-
-            for comment in comments_visitor.comments:
-                trailing_comment_string = comment.value
-                if trailing_comment_string and NOQA_PATTERN.match(
-                    trailing_comment_string
-                ):
-                    return True
-                if trailing_comment_string and _is_pylint_disable_unused_imports(
-                    trailing_comment_string
-                ):
-                    return True
-
-            # has a comment right above it
-            if matchers.matches(
-                stmt,
-                matchers.SimpleStatementLine(
-                    leading_lines=[
-                        matchers.ZeroOrMore(),
-                        matchers.EmptyLine(comment=matchers.Comment()),
-                    ]
-                ),
-            ):
-                comment_string = stmt.leading_lines[-1].comment.value
-                if NOQA_PATTERN.match(comment_string):
-                    return True
-                if comment_string and _is_pylint_disable_next_unused_imports(
-                    comment_string
-                ):
-                    return True
-        return False
-
-
-class GatherCommentNodes(CSTVisitor):
-    def __init__(self) -> None:
-        self.comments: list[cst.Comment] = []
-        super().__init__()
-
-    def leave_Comment(self, original_node: cst.Comment) -> None:
-        self.comments.append(original_node)
-
 
 def match_line(pos, line):
     return pos.start.line == line and pos.end.line == line
-
-
-def _is_pylint_disable_unused_imports(comment: str) -> bool:
-    # If pragma parse fails, ignore
-    try:
-        parsed = parse_pragma(comment)
-        for p in parsed:
-            if p.action == "disable" and (
-                "unused-import" in p.messages or "W0611" in p.messages
-            ):
-                return True
-    except Exception:
-        pass
-    return False
-
-
-def _is_pylint_disable_next_unused_imports(comment: str) -> bool:
-    # If pragma parse fails, ignore
-    try:
-        parsed = parse_pragma(comment)
-        for p in parsed:
-            if p.action == "disable-next" and (
-                "unused-import" in p.messages or "W0611" in p.messages
-            ):
-                return True
-    except Exception:
-        pass
-    return False
