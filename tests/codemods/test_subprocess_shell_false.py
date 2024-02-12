@@ -66,3 +66,13 @@ class TestSubprocessShellFalse(BaseCodemodTest):
         self.assert_no_change_line_excluded(
             tmpdir, input_code, expected, lines_to_exclude
         )
+
+    @each_func
+    def test_has_noqa(self, tmpdir, func):
+        input_code = (
+            expected
+        ) = f"""
+        import subprocess
+        subprocess.{func}(args, shell=True) # noqa: S603
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
