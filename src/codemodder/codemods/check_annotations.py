@@ -2,7 +2,7 @@ import re
 from typing import Mapping
 
 import libcst as cst
-from libcst import CSTVisitor, matchers
+from libcst import CSTVisitor
 from libcst.metadata import ParentNodeProvider
 from libcst.metadata.base_provider import ProviderT  # noqa: F401
 from libcst._nodes.base import CSTNode  # noqa: F401
@@ -52,22 +52,16 @@ class _GatherCommentNodes(CSTVisitor):
                 return True
 
         # has a comment right above it
-        if matchers.matches(
-            stmt,
-            matchers.SimpleStatementLine(
+        match stmt:
+            case cst.SimpleStatementLine(
                 leading_lines=[
-                    matchers.ZeroOrMore(),
-                    matchers.EmptyLine(comment=matchers.Comment()),
+                    *_,
+                    cst.EmptyLine(comment=cst.Comment(value=comment_string)),
                 ]
-            ),
-        ):
-            comment_string = stmt.leading_lines[-1].comment.value
-            if self._noqa_message_match(comment_string):
-                return True
-            if comment_string and self._is_pylint_disable_next_unused_imports(
-                comment_string
             ):
-                return True
+                return self._noqa_message_match(comment_string) or (
+                    self._is_pylint_disable_next_unused_imports(comment_string)
+                )
 
         return False
 
