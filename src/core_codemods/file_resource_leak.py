@@ -43,9 +43,10 @@ class FileResourceLeakTransformer(LibcstResultTransformer):
         context: CodemodContext,
         results: list[Result],
         file_context: FileContext,
-        *codemod_args,  # pylint: disable=unused-argument
+        *codemod_args,
         **codemod_kwargs,
     ) -> None:
+        del codemod_args
         self.changed_nodes: dict[
             cst.CSTNode, cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel
         ] = {}
