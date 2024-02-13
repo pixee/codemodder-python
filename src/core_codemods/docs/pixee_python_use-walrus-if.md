@@ -10,5 +10,3 @@ The changes from this codemod look like this:
 + if (x := foo()) is not None:
       print(x)
 ```
-
-The walrus operator is only supported in Python 3.8 and later.
