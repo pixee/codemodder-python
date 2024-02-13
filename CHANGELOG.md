@@ -1,5 +1,54 @@
 # CHANGELOG
 
+## 0.72.0 (2024-02-13)
+
+### New
+* Respect `#noqa` annotations for `subprocess-shell-false` codemod (#259)
+* Additional checks to prevent false positives in `flask-json-content-type` (#257)
+
+### Fixed
+* Avoid incorrect changes in `requests-timeout` codemod (#256)
+* Enable `fix-mutable-params` codemod to correctly handle single-statement functions (#255)
+
+## 0.71.0 (2024-02-06)
+
+### New
+
+* Add `diffSide` field to change entries in CodeTF
+
+## 0.70.3 (2024-01-31)
+
+### Fixed
+
+* Additional test directory patterns to ignore
+
+## 0.70.2 (2024-01-30)
+
+### Fixed
+
+* Fix `secure-random` codemod: ignore `random.SystemRandom`
+
+## 0.70.1 (2024-01-26)
+
+### Fixed
+
+* Fix path inclusion behavior
+
+## 0.70.0 (2024-01-17)
+
+### New
+
+* `remove-debug-breakpoint` codemod
+* `combine-startswith-endswith` codemod
+* `replace-flask-send-file` codemod
+* `fix-deprecated-logging-warn` codemod
+* `flask-enable-csrf-protection` codemod
+* Update `harden-pyyaml` to fix custom loader classes that inherit unsafe loaders
+
+### Fixed
+
+* Add proper inclusion/exclusion filter to codemods that were missing it
+
 ## 0.69.0 (2024-01-04)
 
 ### New
