@@ -77,3 +77,14 @@ class TestSubprocessShellFalse(BaseCodemodTest):
         subprocess.{func}(args, shell=True) # noqa: S603
         """
         self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_different_noqa_message(self, tmpdir):
+        input_code = """
+        import subprocess
+        subprocess.run(args, shell=True) # noqa: S604
+        """
+        expected = """
+        import subprocess
+        subprocess.run(args, shell=False) # noqa: S604
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
