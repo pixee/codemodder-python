@@ -67,7 +67,7 @@ class _GatherCommentNodes(CSTVisitor):
 
     def is_disabled_by_linter(self, node: cst.CSTNode) -> bool:
         """
-        Check if the import has a #noqa or # pylint: disable(-next)=unused_imports comment attached to it.
+        Check if the import has a #noqa or # pylint: disable(-next) comment attached to it.
         """
         match self.get_metadata(ParentNodeProvider, node):
             case cst.SimpleStatementLine() as stmt:
@@ -120,7 +120,7 @@ def is_disabled_by_annotations(
     messages: list[str],
 ) -> bool:
     """
-    Check if the import has a #noqa or # pylint: disable(-next)=unused_imports comment attached to it.
+    Check if the import has a #noqa or # pylint: disable(-next) comment attached to it.
     """
     visitor = _GatherCommentNodes(metadata, messages)
     node.visit(visitor)

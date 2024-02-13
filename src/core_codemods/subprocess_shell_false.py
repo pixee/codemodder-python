@@ -35,6 +35,7 @@ class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
     ]
 
     METADATA_DEPENDENCIES = SimpleCodemod.METADATA_DEPENDENCIES + (ParentNodeProvider,)
+    IGNORE_ANNOTATIONS = ["S603"]
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         if not self.filter_by_path_includes_or_excludes(
@@ -52,7 +53,7 @@ class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
                 ) and not is_disabled_by_annotations(
                     original_node,
                     self.metadata,  # type: ignore
-                    messages=["S603"],
+                    messages=self.IGNORE_ANNOTATIONS,
                 ):
                     self.report_change(original_node)
                     new_args = self.replace_args(
