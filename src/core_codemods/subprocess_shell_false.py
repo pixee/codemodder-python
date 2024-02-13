@@ -1,6 +1,9 @@
 import libcst as cst
 from libcst import matchers
 from codemodder.codemods.api import BaseCodemod, ReviewGuidance
+from libcst.metadata import ParentNodeProvider
+
+from codemodder.codemods.check_annotations import is_disabled_by_annotations
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.codemods.api.helpers import NewArg
 
@@ -29,6 +32,8 @@ class SubprocessShellFalse(BaseCodemod, NameResolutionMixin):
         for func in {"run", "call", "check_output", "check_call", "Popen"}
     ]
 
+    METADATA_DEPENDENCIES = BaseCodemod.METADATA_DEPENDENCIES + (ParentNodeProvider,)
+
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)
@@ -42,6 +47,10 @@ class SubprocessShellFalse(BaseCodemod, NameResolutionMixin):
                     matchers.Arg(
                         keyword=matchers.Name("shell"), value=matchers.Name("True")
                     ),
+                ) and not is_disabled_by_annotations(
+                    original_node,
+                    self.metadata,  # type: ignore
+                    messages=["S603"],
                 ):
                     self.report_change(original_node)
                     new_args = self.replace_args(

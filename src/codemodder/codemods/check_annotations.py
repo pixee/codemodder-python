@@ -2,14 +2,14 @@ import re
 from typing import Mapping
 
 import libcst as cst
-from libcst import CSTVisitor, ensure_type, matchers
+from libcst import CSTVisitor, matchers
 from libcst.metadata import ParentNodeProvider
 from libcst.metadata.base_provider import ProviderT  # noqa: F401
 from libcst._nodes.base import CSTNode  # noqa: F401
 
 from pylint.utils.pragma_parser import parse_pragma
 
-NOQA_PATTERN = re.compile(r"^#\s*noqa", re.IGNORECASE)
+NOQA_PATTERN = re.compile(r"^#\s*noqa(:\s+[A-Z]+[A-Z0-9]+)?", re.IGNORECASE)
 
 
 __all__ = ["is_disabled_by_annotations"]
@@ -33,52 +33,65 @@ class _GatherCommentNodes(CSTVisitor):
     def leave_Comment(self, original_node: cst.Comment) -> None:
         self.comments.append(original_node)
 
-    def _is_disabled_by_linter(self, node: cst.CSTNode) -> bool:
+    def _process_simple_statement_line(self, stmt: cst.SimpleStatementLine) -> bool:
+        # has a trailing comment string anywhere in the node
+        stmt.body[0].visit(self)
+        # has a trailing comment string anywhere in the node
+        if stmt.trailing_whitespace.comment:
+            self.comments.append(stmt.trailing_whitespace.comment)
+
+        for comment in self.comments:
+            trailing_comment_string = comment.value
+            if trailing_comment_string and self._noqa_message_match(
+                trailing_comment_string
+            ):
+                return True
+            if trailing_comment_string and self._is_pylint_disable_unused_imports(
+                trailing_comment_string
+            ):
+                return True
+
+        # has a comment right above it
+        if matchers.matches(
+            stmt,
+            matchers.SimpleStatementLine(
+                leading_lines=[
+                    matchers.ZeroOrMore(),
+                    matchers.EmptyLine(comment=matchers.Comment()),
+                ]
+            ),
+        ):
+            comment_string = stmt.leading_lines[-1].comment.value
+            if self._noqa_message_match(comment_string):
+                return True
+            if comment_string and self._is_pylint_disable_next_unused_imports(
+                comment_string
+            ):
+                return True
+
+        return False
+
+    def is_disabled_by_linter(self, node: cst.CSTNode) -> bool:
         """
         Check if the import has a #noqa or # pylint: disable(-next)=unused_imports comment attached to it.
         """
         match self.get_metadata(ParentNodeProvider, node):
-            case cst.SimpleStatementLine() as parent:
-                stmt = ensure_type(parent, cst.SimpleStatementLine)
-
-                # has a trailing comment string anywhere in the node
-                stmt.body[0].visit(self)
-                # has a trailing comment string anywhere in the node
-                if stmt.trailing_whitespace.comment:
-                    self.comments.append(stmt.trailing_whitespace.comment)
-
-                for comment in self.comments:
-                    trailing_comment_string = comment.value
-                    if trailing_comment_string and NOQA_PATTERN.match(
-                        trailing_comment_string
-                    ):
-                        return True
-                    if (
-                        trailing_comment_string
-                        and self._is_pylint_disable_unused_imports(
-                            trailing_comment_string
-                        )
-                    ):
-                        return True
-
-                # has a comment right above it
-                if matchers.matches(
-                    stmt,
-                    matchers.SimpleStatementLine(
-                        leading_lines=[
-                            matchers.ZeroOrMore(),
-                            matchers.EmptyLine(comment=matchers.Comment()),
-                        ]
-                    ),
-                ):
-                    comment_string = stmt.leading_lines[-1].comment.value
-                    if NOQA_PATTERN.match(comment_string):
-                        return True
-                    if comment_string and self._is_pylint_disable_next_unused_imports(
-                        comment_string
-                    ):
-                        return True
+            case cst.SimpleStatementLine() as stmt:
+                return self._process_simple_statement_line(stmt)
+            case cst.Expr() as expr:
+                match self.get_metadata(ParentNodeProvider, expr):
+                    case cst.SimpleStatementLine() as stmt:
+                        return self._process_simple_statement_line(stmt)
         return False
+
+    def _noqa_message_match(self, comment: str) -> bool:
+        if not (match := NOQA_PATTERN.match(comment)):
+            return False
+
+        if match.group(1):
+            return match.group(1).strip(":").strip() in self.messages
+
+        return True
 
     def _is_pylint_disable_unused_imports(self, comment: str) -> bool:
         # If pragma parse fails, ignore
@@ -117,4 +130,4 @@ def is_disabled_by_annotations(
     """
     visitor = _GatherCommentNodes(metadata, messages)
     node.visit(visitor)
-    return visitor._is_disabled_by_linter(node)
+    return visitor.is_disabled_by_linter(node)
