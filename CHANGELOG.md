@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 0.80.0 (in progress)
+
+## New
+
+## 0.72.0 (2024-02-13)
+
+### New
+* Respect `#noqa` annotations for `subprocess-shell-false` codemod (#259)
+* Additional checks to prevent false positives in `flask-json-content-type` (#257)
+
+### Fixed
+* Avoid incorrect changes in `requests-timeout` codemod (#256)
+* Enable `fix-mutable-params` codemod to correctly handle single-statement functions (#255)
+
 ## 0.71.0 (2024-02-06)
 
 ### New
