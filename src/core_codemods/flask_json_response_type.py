@@ -77,7 +77,7 @@ class FlaskJsonResponseTypeVisitor(
                         self._fix_json_dumps(original_node.value),
                     )
                 # make_response(...)
-                elif maybe_make_response := self._is_make_response_with_json(
+                elif maybe_make_response := self._is_make_response_with_json_with_unset_ct(
                     original_node.value
                 ):
                     if maybe_dict := self._has_dict_with_headers_mr_call(
@@ -125,9 +125,9 @@ class FlaskJsonResponseTypeVisitor(
             case cst.Tuple():
                 elements = node.elements
                 first = elements[0].value
-                if self._is_json_dumps_call(first) or self._is_make_response_with_json(
+                if self._is_json_dumps_call(
                     first
-                ):
+                ) or self._is_make_response_with_json_with_unset_ct(first):
                     return node
         return None
 
@@ -168,9 +168,44 @@ class FlaskJsonResponseTypeVisitor(
                     return expr
         return None
 
-    def _is_make_response_with_json(
+    def _has_content_type_set(self, node: cst.BaseExpression) -> bool:
+        if not isinstance(node, cst.Name):
+            return False
+        for access in self.find_accesses(node):
+            maybe_attr = self.is_attribute_value(access.node)
+            # is headers attribute? e.g. resp.headers
+            match maybe_attr:
+                case cst.Attribute(attr=cst.Name(value="headers")):
+                    pass
+                case _:
+                    return False
+            maybe_subscript = (
+                self.is_subscript_value(maybe_attr) if maybe_attr else None
+            )
+            maybe_assignment = (
+                self.is_target_of_assignment(maybe_subscript)
+                if maybe_subscript
+                else None
+            )
+            if maybe_assignment:
+                # is subscript content-type?
+                match maybe_subscript:
+                    case cst.Subscript(
+                        slice=[
+                            cst.SubscriptElement(
+                                slice=cst.Index(value=cst.SimpleString() as index)
+                            )
+                        ]
+                    ):
+                        if index.raw_value == "Content-Type":
+                            return True
+        return False
+
+    def _is_make_response_with_json_with_unset_ct(
         self, node: cst.BaseExpression
     ) -> Optional[cst.Call]:
+        if self._has_content_type_set(node):
+            return None
         expr = self.resolve_expression(node)
         match expr:
             case cst.Call(args=[cst.Arg(first_arg), *_]):
