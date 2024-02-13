@@ -30,6 +30,8 @@ class RemoveUnusedImports(SimpleCodemod):
         ParentNodeProvider,
     )
 
+    IGNORE_ANNOTATIONS = ["unused-import", "F401", "W0611"]
+
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         # Do nothing in __init__.py files
         if self.file_context.file_path.name == "__init__.py":
@@ -42,7 +44,9 @@ class RemoveUnusedImports(SimpleCodemod):
             pos = self.get_metadata(PositionProvider, import_alias)
             if self.filter_by_path_includes_or_excludes(pos):
                 if not is_disabled_by_annotations(
-                    importt, self.metadata, messages=["unused-import", "W0611", "F401"]  # type: ignore
+                    importt,
+                    self.metadata,  # type: ignore
+                    messages=self.IGNORE_ANNOTATIONS,
                 ):
                     self.file_context.codemod_changes.append(
                         Change(pos.start.line, self.change_description)
