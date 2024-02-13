@@ -182,12 +182,11 @@ class FlaskJsonResponseTypeVisitor(
             maybe_subscript = (
                 self.is_subscript_value(maybe_attr) if maybe_attr else None
             )
-            maybe_assignment = (
+            if maybe_assignment := (
                 self.is_target_of_assignment(maybe_subscript)
                 if maybe_subscript
                 else None
-            )
-            if maybe_assignment:
+            ):
                 # is subscript content-type?
                 match maybe_subscript:
                     case cst.Subscript(
