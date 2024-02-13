@@ -81,3 +81,15 @@ class TestAddRequestsTimeouts(BaseSemgrepCodemodTest):
             demands.get("https://example.com")
         """
         self.run_and_assert(tmpdir, original, original)
+
+    def test_chaining(self, tmpdir):
+        # See issue https://github.com/pixee/codemodder-python/issues/244
+        original = """
+        import requests
+        requests.get("https://example.com").json()
+        """
+        expected = f"""
+        import requests
+        requests.get("https://example.com", timeout={TIMEOUT}).json()
+        """
+        self.run_and_assert(tmpdir, original, expected)

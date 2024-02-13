@@ -17,24 +17,24 @@ class AddRequestsTimeouts(SemgrepCodemod):
     def rule(cls):
         return """
         rules:
-            - patterns:
-                - pattern-inside: |
-                    import requests
-                    ...
-                - pattern: $CALL(...)
-                - pattern-not: $CALL(..., timeout=$TIMEOUT, ...)
-                - metavariable-pattern:
-                    metavariable: $CALL
-                    patterns:
-                      - pattern-either:
-                        - pattern: requests.get
-                        - pattern: requests.post
-                        - pattern: requests.put
-                        - pattern: requests.delete
-                        - pattern: requests.head
-                        - pattern: requests.options
-                        - pattern: requests.patch
-                        - pattern: requests.request
+        - patterns:
+            - pattern-inside: |
+                import requests
+                ...
+            - pattern: requests.$CALL(...)
+            - pattern-not: requests.$CALL(..., timeout=$TIMEOUT, ...)
+            - metavariable-pattern:
+                metavariable: $CALL
+                patterns:
+                  - pattern-either:
+                    - pattern: get
+                    - pattern: post
+                    - pattern: put
+                    - pattern: delete
+                    - pattern: head
+                    - pattern: options
+                    - pattern: patch
+                    - pattern: request
         """
 
     # Sets an arbitrary default timeout for all requests
