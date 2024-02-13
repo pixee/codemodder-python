@@ -334,5 +334,20 @@ class TestFlaskJsonResponseType(BaseCodemodTest):
             dict_response = { "user_input": request.GET.get("input") }
             return bar(dict_response)
         """
-        self.run_and_assert(tmpdir, dedent(input_code), dedent(input_code))
-        assert len(self.file_context.codemod_changes) == 0
+        self.run_and_assert(tmpdir, input_code, input_code)
+
+    def test_simple_indirect_content_type_set(self, tmpdir):
+        input_code = """
+        from flask import make_response, Flask
+        import json
+
+        app = Flask(__name__)
+
+        @app.route("/test")
+        def foo(request):
+            json_response = json.dumps({ "user_input": request.GET.get("input") })
+            response = make_response(json_response)
+            response.headers['Content-Type'] = 'application/json'
+            return response
+        """
+        self.run_and_assert(tmpdir, input_code, input_code)

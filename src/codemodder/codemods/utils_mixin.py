@@ -385,6 +385,16 @@ class AncestorPatternsMixin(MetadataDependent):
                 return maybe_parent
         return None
 
+    def is_subscript_value(self, node: cst.CSTNode) -> Optional[cst.Subscript]:
+        """
+        Checks if node is the value of an Attribute.
+        """
+        maybe_parent = self.get_parent(node)
+        match maybe_parent:
+            case cst.Subscript(value=node):
+                return maybe_parent
+        return None
+
     def find_immediate_function_def(
         self, node: cst.CSTNode
     ) -> Optional[cst.FunctionDef]:
