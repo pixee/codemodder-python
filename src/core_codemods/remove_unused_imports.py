@@ -52,7 +52,9 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         for import_alias, importt in gather_unused_visitor.unused_imports:
             pos = self.get_metadata(PositionProvider, import_alias)
             if self.filter_by_path_includes_or_excludes(pos):
-                if not is_disabled_by_annotations(importt, self.metadata):
+                if not is_disabled_by_annotations(
+                    importt, self.metadata, messages=["unused-import", "W0611"]  # type: ignore
+                ):
                     self.file_context.codemod_changes.append(
                         Change(pos.start.line, self.CHANGE_DESCRIPTION)
                     )

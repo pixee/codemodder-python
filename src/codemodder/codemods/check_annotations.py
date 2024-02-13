@@ -1,8 +1,11 @@
 import re
+from typing import Mapping
 
 import libcst as cst
 from libcst import CSTVisitor, ensure_type, matchers
 from libcst.metadata import ParentNodeProvider
+from libcst.metadata.base_provider import ProviderT  # noqa: F401
+from libcst._nodes.base import CSTNode  # noqa: F401
 
 from pylint.utils.pragma_parser import parse_pragma
 
@@ -15,10 +18,17 @@ __all__ = ["is_disabled_by_annotations"]
 class _GatherCommentNodes(CSTVisitor):
     METADATA_DEPENDENCIES = (ParentNodeProvider,)
 
-    def __init__(self, metadata) -> None:
+    messages: list[str]
+
+    def __init__(
+        self,
+        metadata: Mapping[ProviderT, Mapping[CSTNode, object]],
+        messages: list[str],
+    ) -> None:
         self.comments: list[cst.Comment] = []
         super().__init__()
         self.metadata = metadata
+        self.messages = messages
 
     def leave_Comment(self, original_node: cst.Comment) -> None:
         self.comments.append(original_node)
@@ -43,8 +53,11 @@ class _GatherCommentNodes(CSTVisitor):
                         trailing_comment_string
                     ):
                         return True
-                    if trailing_comment_string and _is_pylint_disable_unused_imports(
+                    if (
                         trailing_comment_string
+                        and self._is_pylint_disable_unused_imports(
+                            trailing_comment_string
+                        )
                     ):
                         return True
 
@@ -61,45 +74,47 @@ class _GatherCommentNodes(CSTVisitor):
                     comment_string = stmt.leading_lines[-1].comment.value
                     if NOQA_PATTERN.match(comment_string):
                         return True
-                    if comment_string and _is_pylint_disable_next_unused_imports(
+                    if comment_string and self._is_pylint_disable_next_unused_imports(
                         comment_string
                     ):
                         return True
         return False
 
+    def _is_pylint_disable_unused_imports(self, comment: str) -> bool:
+        # If pragma parse fails, ignore
+        try:
+            parsed = parse_pragma(comment)
+            for p in parsed:
+                if p.action == "disable" and any(
+                    message in p.messages for message in self.messages
+                ):
+                    return True
+        except Exception:
+            pass
+        return False
 
-def _is_pylint_disable_unused_imports(comment: str) -> bool:
-    # If pragma parse fails, ignore
-    try:
-        parsed = parse_pragma(comment)
-        for p in parsed:
-            if p.action == "disable" and (
-                "unused-import" in p.messages or "W0611" in p.messages
-            ):
-                return True
-    except Exception:
-        pass
-    return False
-
-
-def _is_pylint_disable_next_unused_imports(comment: str) -> bool:
-    # If pragma parse fails, ignore
-    try:
-        parsed = parse_pragma(comment)
-        for p in parsed:
-            if p.action == "disable-next" and (
-                "unused-import" in p.messages or "W0611" in p.messages
-            ):
-                return True
-    except Exception:
-        pass
-    return False
+    def _is_pylint_disable_next_unused_imports(self, comment: str) -> bool:
+        # If pragma parse fails, ignore
+        try:
+            parsed = parse_pragma(comment)
+            for p in parsed:
+                if p.action == "disable-next" and any(
+                    message in p.messages for message in self.messages
+                ):
+                    return True
+        except Exception:
+            pass
+        return False
 
 
-def is_disabled_by_annotations(node: cst.CSTNode, metadata) -> bool:
+def is_disabled_by_annotations(
+    node: cst.CSTNode,
+    metadata: Mapping[ProviderT, Mapping[CSTNode, object]],
+    messages: list[str],
+) -> bool:
     """
     Check if the import has a #noqa or # pylint: disable(-next)=unused_imports comment attached to it.
     """
-    visitor = _GatherCommentNodes(metadata)
+    visitor = _GatherCommentNodes(metadata, messages)
     node.visit(visitor)
     return visitor._is_disabled_by_linter(node)
