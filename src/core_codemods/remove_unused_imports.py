@@ -36,6 +36,7 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
         QualifiedNameProvider,
         ParentNodeProvider,
     )
+    IGNORE_ANNOTATIONS = ["unused-import", "F401", "W0611"]
 
     def __init__(self, codemod_context: CodemodContext, *codemod_args):
         Codemod.__init__(self, codemod_context)
@@ -53,7 +54,9 @@ class RemoveUnusedImports(BaseCodemod, Codemod):
             pos = self.get_metadata(PositionProvider, import_alias)
             if self.filter_by_path_includes_or_excludes(pos):
                 if not is_disabled_by_annotations(
-                    importt, self.metadata, messages=["unused-import", "W0611", "F401"]  # type: ignore
+                    importt,
+                    self.metadata,  # type: ignore
+                    messages=self.IGNORE_ANNOTATIONS,
                 ):
                     self.file_context.codemod_changes.append(
                         Change(pos.start.line, self.CHANGE_DESCRIPTION)
