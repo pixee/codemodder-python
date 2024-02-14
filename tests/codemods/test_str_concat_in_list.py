@@ -65,23 +65,24 @@ class TestStrConcatInList(BaseCodemodTest):
     def test_change(self, tmpdir, input_code, expected_output):
         self.run_and_assert(tmpdir, input_code, expected_output)
 
-    def test_change_multiple(self, tmpdir):
-        input_code = """
+    @pytest.mark.parametrize("final_comma", ["", ","])
+    def test_change_multiple(self, tmpdir, final_comma):
+        input_code = f"""
         bad = [
             "ab"
             "cd",
             "ef",
             "gh"
-            "ij"
+            "ij"{final_comma}
         ]
         """
-        expected_output = """
+        expected_output = f"""
         bad = [
             "ab",
             "cd",
             "ef",
             "gh",
-            "ij"
+            "ij"{final_comma}
         ]
         """
         self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
