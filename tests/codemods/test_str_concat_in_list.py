@@ -99,25 +99,21 @@ class TestStrConcatInList(BaseCodemodTest):
         """
         expected_output = """
         bad = [
-            "ab",
-            "cd",
-            "ef",
-            "gh",
-            "ij"
+            "ab", "cd", "ef", "gh", "ij"
         ]
         """
-        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=4)
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
-    # def test_exclude_line(self, tmpdir):
-    #     input_code = (
-    #         expected
-    #     ) = """
-    #     bad: str = f"bad" + "bad"
-    #     """
-    #     lines_to_exclude = [2]
-    #     self.run_and_assert(
-    #         tmpdir,
-    #         input_code,
-    #         expected,
-    #         lines_to_exclude=lines_to_exclude,
-    #     )
+    def test_exclude_line(self, tmpdir):
+        input_code = (
+            expected
+        ) = """
+        bad = ["ab" "cd" "ef" "gh" "ij"]
+        """
+        lines_to_exclude = [2]
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            lines_to_exclude=lines_to_exclude,
+        )
