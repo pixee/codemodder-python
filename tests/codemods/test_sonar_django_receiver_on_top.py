@@ -31,6 +31,7 @@ class TestSonarDjangoReceiverOnTop(BaseSASTCodemodTest):
             "issues": [
                 {
                     "rule": "python:S6552",
+                    "status": "OPEN",
                     "component": f"{tmpdir / 'code.py'}",
                     "textRange": {
                         "startLine": 5,

@@ -39,6 +39,7 @@ class TestSonarFlaskJsonResponseType(BaseSASTCodemodTest):
             "issues": [
                 {
                     "rule": "pythonsecurity:S5131",
+                    "status": "OPEN",
                     "component": f"{tmpdir / 'code.py'}",
                     "textRange": {
                         "startLine": 10,
