@@ -9,6 +9,7 @@ class TestResults:
             "issues": [
                 {
                     "rule": "rule",
+                    "status": "OPEN",
                     "component": "code.py",
                     "textRange": {
                         "startLine": 2,
@@ -23,6 +24,7 @@ class TestResults:
             "issues": [
                 {
                     "rule": "rule",
+                    "status": "OPEN",
                     "component": "code.py",
                     "textRange": {
                         "startLine": 1,
@@ -45,6 +47,39 @@ class TestResults:
         assert len(combined["rule"][Path("code.py")]) == 2
         assert result2["rule"][Path("code.py")][0] in combined["rule"][Path("code.py")]
         assert result1["rule"][Path("code.py")][0] in combined["rule"][Path("code.py")]
+
+    def test_sonar_only_open_issues(self, tmpdir):
+        issues = {
+            "issues": [
+                {
+                    "rule": "rule",
+                    "status": "OPEN",
+                    "component": "code.py",
+                    "textRange": {
+                        "startLine": 1,
+                        "endLine": 1,
+                        "startOffset": 1,
+                        "endOffset": 1,
+                    },
+                },
+                {
+                    "rule": "rule",
+                    "status": "RESOLVED",
+                    "component": "code.py",
+                    "textRange": {
+                        "startLine": 1,
+                        "endLine": 1,
+                        "startOffset": 1,
+                        "endOffset": 1,
+                    },
+                },
+            ]
+        }
+        sonar_json1 = Path(tmpdir) / "sonar1.json"
+        sonar_json1.write_text(json.dumps(issues))
+
+        result = SonarResultSet.from_json(sonar_json1)
+        assert len(result["rule"][Path("code.py")]) == 1
 
     def test_sonar_robustness(self, tmpdir):
         sonar_json = Path(tmpdir) / "sonar1.json"

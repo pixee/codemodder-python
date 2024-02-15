@@ -50,7 +50,8 @@ class SonarResultSet(ResultSet):
 
             result_set = cls()
             for issue in data.get("issues"):
-                result_set.add_result(SonarResult.from_issue(issue))
+                if issue["status"].lower() == "open":
+                    result_set.add_result(SonarResult.from_issue(issue))
 
             return result_set
         except Exception:
