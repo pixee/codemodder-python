@@ -3,9 +3,9 @@ from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod, Reference
 from codemodder.codemods.utils_mixin import NameResolutionMixin, AncestorPatternsMixin
 
 
-class StrConcatInList(SimpleCodemod, NameResolutionMixin, AncestorPatternsMixin):
+class StrConcatInSeqLiteral(SimpleCodemod, NameResolutionMixin, AncestorPatternsMixin):
     metadata = Metadata(
-        name="str-concat-in-list",
+        name="str-concat-in-sequence-literals",
         summary="TODOReplace Comparisons to Empty Sequence with Implicit Boolean Comparison",
         review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         references=[
@@ -19,20 +19,33 @@ class StrConcatInList(SimpleCodemod, NameResolutionMixin, AncestorPatternsMixin)
     )
 
     def leave_List(self, original_node: cst.List, updated_node: cst.List) -> cst.List:
+        return self.process_node_elements(original_node, updated_node)
+
+    def leave_Tuple(
+        self, original_node: cst.Tuple, updated_node: cst.Tuple
+    ) -> cst.Tuple:
+        return self.process_node_elements(original_node, updated_node)
+
+    def leave_Set(self, original_node: cst.Set, updated_node: cst.Set) -> cst.Set:
+        return self.process_node_elements(original_node, updated_node)
+
+    def process_node_elements(
+        self, original_node: cst.CSTNode, updated_node: cst.CSTNode
+    ) -> cst.CSTNode:
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)
         ):
             return updated_node
-        return updated_node.with_changes(elements=self.process_elements(original_node))
+        return updated_node.with_changes(elements=self._process_elements(original_node))
 
-    def process_elements(self, original_node: cst.List) -> list[cst.Element]:
+    def _process_elements(self, original_node: cst.List) -> list[cst.Element]:
         new_elements = []
         prev_comma = None
         for element in original_node.elements:
             match element.value:
                 case cst.ConcatenatedString():
                     self.report_change(original_node)
-                    flattened_parts = self.flatten_concatenated_strings(element.value)
+                    flattened_parts = self._flatten_concatenated_strings(element.value)
                     for part in flattened_parts:
                         # the very last element should only have a comma if the last element
                         # of the original list had a comma
@@ -54,7 +67,7 @@ class StrConcatInList(SimpleCodemod, NameResolutionMixin, AncestorPatternsMixin)
                     new_elements.append(element)
         return new_elements
 
-    def flatten_concatenated_strings(
+    def _flatten_concatenated_strings(
         self, concat_node: cst.ConcatenatedString, parts=None
     ):
         if parts is None:
@@ -63,7 +76,7 @@ class StrConcatInList(SimpleCodemod, NameResolutionMixin, AncestorPatternsMixin)
         for node in concat_node.left, concat_node.right:
             match node:
                 case cst.ConcatenatedString():
-                    self.flatten_concatenated_strings(node, parts)
+                    self._flatten_concatenated_strings(node, parts)
                 case _:
                     parts.append(node)
         return parts
