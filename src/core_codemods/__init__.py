@@ -60,6 +60,7 @@ from .sonar.sonar_remove_assertion_in_pytest_raises import (
 from .sonar.sonar_flask_json_response_type import SonarFlaskJsonResponseType
 from .sonar.sonar_django_json_response_type import SonarDjangoJsonResponseType
 from .lazy_logging import LazyLogging
+from .str_concat_in_seq_literal import StrConcatInSeqLiteral
 
 registry = CodemodCollection(
     origin="pixee",
@@ -116,6 +117,7 @@ registry = CodemodCollection(
         RemoveAssertionInPytestRaises,
         FixAssertTuple,
         LazyLogging,
+        StrConcatInSeqLiteral,
     ],
 )
 

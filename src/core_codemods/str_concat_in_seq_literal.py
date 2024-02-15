@@ -1,22 +1,16 @@
 import libcst as cst
-from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod, Reference
+from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 from codemodder.codemods.utils_mixin import NameResolutionMixin, AncestorPatternsMixin
 
 
 class StrConcatInSeqLiteral(SimpleCodemod, NameResolutionMixin, AncestorPatternsMixin):
     metadata = Metadata(
         name="str-concat-in-sequence-literals",
-        summary="TODOReplace Comparisons to Empty Sequence with Implicit Boolean Comparison",
+        summary="Convert Implicit String Concat Inside Sequence into Individual Elements",
         review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
-        references=[
-            Reference(
-                url="TODOhttps://docs.python.org/3/library/stdtypes.html#truth-value-testing"
-            ),
-        ],
+        references=[],
     )
-    change_description = (
-        "todoReplace comparisons to empty sequence with implicit boolean comparison."
-    )
+    change_description = "Convert implicit string concat into individual elements."
 
     def leave_List(self, original_node: cst.List, updated_node: cst.List) -> cst.List:
         return self.process_node_elements(original_node, updated_node)
