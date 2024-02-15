@@ -226,6 +226,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="We believe this change is safe and will not cause any issues.",
     ),
+    "str-concat-in-sequence-literals": DocMetadata(
+        importance="Medium",
+        guidance_explained="While string concatenation inside a sequence iterable is likely a mistake, there are instances when you may choose to use them..",
+    ),
 }
 
 METADATA = CORE_METADATA | {
