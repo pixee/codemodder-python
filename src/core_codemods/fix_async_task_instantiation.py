@@ -17,7 +17,7 @@ class FixAsyncTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
             ),
         ],
     )
-    change_description = "Replace instantiation of `asyncio.Task` higher-level functions to create tasks."
+    change_description = "Replace instantiation of `asyncio.Task` with higher-level functions to create tasks."
     _module_name = "asyncio"
 
     # pylint: disable=too-many-return-statements

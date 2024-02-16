@@ -118,12 +118,8 @@ registry = CodemodCollection(
         RemoveAssertionInPytestRaises,
         FixAssertTuple,
         LazyLogging,
-<<<<<<< HEAD
         StrConcatInSeqLiteral,
-        FixTaskInstantiation,
-=======
         FixAsyncTaskInstantiation,
->>>>>>> 5190758 (change codemod metadata)
     ],
 )
 
