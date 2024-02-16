@@ -44,16 +44,8 @@ class FixTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
         )
 
         if eager_start_type == BaseType.TRUE:
-            if not loop_arg or loop_type in (
-                BaseType.NONE,
-                BaseType.NUMBER,
-                BaseType.LIST,
-                BaseType.STRING,
-                BaseType.BYTES,
-                BaseType.TRUE,
-                BaseType.FALSE,
-            ):
-                # asking for eager_start without a loop or properlly set loop is bad.
+            if not loop_arg or self._is_invalid_loop_value(loop_type):
+                # asking for eager_start without a loop or incorrectly setting loop is bad.
                 # We won't do anything.
                 return updated_node
 
@@ -71,14 +63,7 @@ class FixTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
                     updated_node,
                     replacement_args=[coroutine_arg] + other_args,
                 )
-            if loop_type in (
-                BaseType.NUMBER,
-                BaseType.LIST,
-                BaseType.STRING,
-                BaseType.BYTES,
-                BaseType.TRUE,
-                BaseType.FALSE,
-            ):
+            elif self._is_invalid_loop_value(loop_type):
                 # incorrectly assigned loop kwarg to something that is not a loop.
                 # We won't do anything.
                 return updated_node
@@ -170,3 +155,14 @@ class FixTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
                     other_args.append(arg)
 
         return loop_arg, eager_start_arg, other_args
+
+    def _is_invalid_loop_value(self, loop_type):
+        return loop_type in (
+            BaseType.NONE,
+            BaseType.NUMBER,
+            BaseType.LIST,
+            BaseType.STRING,
+            BaseType.BYTES,
+            BaseType.TRUE,
+            BaseType.FALSE,
+        )
