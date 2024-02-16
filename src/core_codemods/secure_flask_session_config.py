@@ -1,6 +1,6 @@
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
-from libcst.metadata import ParentNodeProvider, PositionProvider
+from libcst.metadata import ParentNodeProvider
 
 from libcst import matchers
 from codemodder.codemods.utils_mixin import NameResolutionMixin
@@ -87,7 +87,10 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
     Visitor to find calls to flask.Flask and related `.config` accesses.
     """
 
-    METADATA_DEPENDENCIES = (PositionProvider, ParentNodeProvider)
+    METADATA_DEPENDENCIES = (
+        *BaseTransformer.METADATA_DEPENDENCIES,
+        ParentNodeProvider,
+    )
     SECURE_SESSION_CONFIGS = {
         # None value indicates unassigned, using default is safe
         # values in order of precedence

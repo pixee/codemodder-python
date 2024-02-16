@@ -34,7 +34,10 @@ class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
         for func in {"run", "call", "check_output", "check_call", "Popen"}
     ]
 
-    METADATA_DEPENDENCIES = SimpleCodemod.METADATA_DEPENDENCIES + (ParentNodeProvider,)
+    METADATA_DEPENDENCIES = (
+        *SimpleCodemod.METADATA_DEPENDENCIES,
+        ParentNodeProvider,
+    )
     IGNORE_ANNOTATIONS = ["S603"]
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):

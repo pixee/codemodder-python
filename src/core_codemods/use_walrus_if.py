@@ -37,7 +37,8 @@ class UseWalrusIf(SimpleCodemod):
     change_description = (
         "Replaces multiple expressions involving `if` operator with 'walrus' operator."
     )
-    METADATA_DEPENDENCIES = SimpleCodemod.METADATA_DEPENDENCIES + (
+    METADATA_DEPENDENCIES = (
+        *SimpleCodemod.METADATA_DEPENDENCIES,
         ParentNodeProvider,
         ScopeProvider,
     )
