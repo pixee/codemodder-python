@@ -1,8 +1,23 @@
 # CHANGELOG
 
-## 0.80.0 (in progress)
+## 0.81.0 (in progress)
 
-## New
+
+## 0.80.0 (2024-02-16)
+
+### New
+
+* Accept Sonar security JSON for detection (#223)
+* New `BaseCodemod` API (#213)
+* New codemod: `fix-assert-tuple`
+* New codemod: `fix-empty-sequence-comparison`
+* New codemod: `lazy-logging`
+* New codemod: `remove-assertion-in-pytest-raises`
+* New codemod: `str-concat-in-sequence-literals`
+* Handle `httpx` in `requests-verify` codemod (#243)
+
+### Fix
+* Handle multiple blocks in `fix-file-resource-leak`
 
 ## 0.72.0 (2024-02-13)
 
