@@ -65,7 +65,7 @@ to protect against XML vulnerabilities.\
 )
 
 Security = Dependency(
-    Requirement("security~=1.2.0"),
+    Requirement("security~=1.2.1"),
     description="""This library holds security tools for protecting Python API calls.""",
     _license=License(
         "MIT",
