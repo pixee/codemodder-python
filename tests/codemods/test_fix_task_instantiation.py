@@ -122,11 +122,11 @@ class TestFixTaskInstantiation(BaseCodemodTest):
             (
                 """
                 import asyncio
-                asyncio.Task(coro(1, 2), name='task', eager_start=True)
+                asyncio.Task(coro(1, 2), name='task')
                 """,
                 """
                 import asyncio
-                asyncio.create_task(coro(1, 2), name='task', eager_start=True)
+                asyncio.create_task(coro(1, 2), name='task')
                 """,
             ),
             (
@@ -139,6 +139,68 @@ class TestFixTaskInstantiation(BaseCodemodTest):
                 import asyncio
                 my_loop = asyncio.get_event_loop()
                 my_loop.create_task(coro(1, 2), name='task', context=None)
+                """,
+            ),
+            (
+                """
+                import asyncio
+                asyncio.Task(coro(1, 2), loop=None, eager_start=None)
+                """,
+                """
+                import asyncio
+                asyncio.create_task(coro(1, 2))
+                """,
+            ),
+            (
+                """
+                import asyncio
+                asyncio.Task(coro(1, 2), loop=None, eager_start=False)
+                """,
+                """
+                import asyncio
+                asyncio.create_task(coro(1, 2))
+                """,
+            ),
+            (
+                """
+                import asyncio
+                asyncio.Task(coro(1, 2), eager_start=False, name='task')
+                """,
+                """
+                import asyncio
+                asyncio.create_task(coro(1, 2), name='task')
+                """,
+            ),
+            (
+                """
+                import asyncio
+                asyncio.Task(coro(1, 2), eager_start=True, name='task')
+                """,
+                """
+                import asyncio
+                asyncio.Task(coro(1, 2), eager_start=True, name='task')
+                """,
+            ),
+            (
+                """
+                import asyncio
+                asyncio.Task(coro(1, 2), eager_start=True, name='task')
+                """,
+                """
+                import asyncio
+                asyncio.Task(coro(1, 2), eager_start=True, name='task')
+                """,
+            ),
+            (
+                """
+                import asyncio
+                my_loop = asyncio.get_event_loop()
+                asyncio.Task(coro(1, 2), loop=my_loop, eager_start=True, name='task')
+                """,
+                """
+                import asyncio
+                my_loop = asyncio.get_event_loop()
+                asyncio.eager_task_factory(my_loop, coro(1, 2), name='task')
                 """,
             ),
         ],
@@ -157,7 +219,7 @@ class TestFixTaskInstantiation(BaseCodemodTest):
         if loop_value == "None":
             output_code = """
             import asyncio
-            asyncio.create_task(coro(1, 2), loop=None)
+            asyncio.create_task(coro(1, 2))
             """
         self.run_and_assert(tmpdir, input_code, output_code)
 

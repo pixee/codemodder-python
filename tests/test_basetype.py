@@ -39,7 +39,10 @@ class TestBaseType:
     @pytest.mark.parametrize("code", ["True", "False"])
     def test_bool(self, code):
         e = cst.parse_expression(code)
-        assert infer_expression_type(e) == BaseType.BOOL
+        if code == "True":
+            assert infer_expression_type(e) == BaseType.TRUE
+        else:
+            assert infer_expression_type(e) == BaseType.FALSE
 
     def test_none(self):
         e = cst.parse_expression("None")

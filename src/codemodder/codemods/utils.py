@@ -18,7 +18,8 @@ class BaseType(Enum):
     STRING = 3
     BYTES = 4
     NONE = 5
-    BOOL = 6
+    TRUE = 6
+    FALSE = 7
 
 
 # pylint: disable-next=R0911
@@ -30,8 +31,10 @@ def infer_expression_type(node: cst.BaseExpression) -> Optional[BaseType]:
     match node:
         case cst.Name(value="None"):
             return BaseType.NONE
-        case cst.Name(value="True") | cst.Name(value="False"):
-            return BaseType.BOOL
+        case cst.Name(value="True"):
+            return BaseType.TRUE
+        case cst.Name(value="False"):
+            return BaseType.FALSE
         case (
             cst.Integer()
             | cst.Imaginary()
