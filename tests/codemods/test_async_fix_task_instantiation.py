@@ -1,10 +1,10 @@
 import pytest
-from core_codemods.fix_task_instantiation import FixTaskInstantiation
+from core_codemods.fix_async_task_instantiation import FixAsyncTaskInstantiation
 from tests.codemods.base_codemod_test import BaseCodemodTest
 
 
-class TestFixTaskInstantiation(BaseCodemodTest):
-    codemod = FixTaskInstantiation
+class TestFixAsyncTaskInstantiation(BaseCodemodTest):
+    codemod = FixAsyncTaskInstantiation
 
     @pytest.mark.parametrize(
         "input_code,expected_output",

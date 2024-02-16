@@ -6,20 +6,21 @@ from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 from codemodder.codemods.utils import BaseType, infer_expression_type
 
 
-class FixTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
+class FixAsyncTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
     metadata = Metadata(
-        name="fix-task-instantiation",
-        summary="Use high-level `asyncio.create_task` API",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        name="fix-async-task-instantiation",
+        summary="Use High-Level `asyncio` API Functions to Create Tasks",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         references=[
             Reference(
                 url="https://docs.python.org/3/library/asyncio-task.html#asyncio.Task"
             ),
         ],
     )
-    change_description = "Replace instantiation of `asyncio.Task` with `create_task`"
+    change_description = "Replace instantiation of `asyncio.Task` higher-level functions to create tasks."
     _module_name = "asyncio"
 
+    # pylint: disable=too-many-return-statements
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)
@@ -63,7 +64,7 @@ class FixTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
                     updated_node,
                     replacement_args=[coroutine_arg] + other_args,
                 )
-            elif self._is_invalid_loop_value(loop_type):
+            if self._is_invalid_loop_value(loop_type):
                 # incorrectly assigned loop kwarg to something that is not a loop.
                 # We won't do anything.
                 return updated_node

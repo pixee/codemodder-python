@@ -1,13 +1,13 @@
-from core_codemods.fix_task_instantiation import FixTaskInstantiation
+from core_codemods.fix_async_task_instantiation import FixAsyncTaskInstantiation
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
 
 
-class TestFixTaskInstantiation(BaseIntegrationTest):
-    codemod = FixTaskInstantiation
-    code_path = "tests/samples/fix_task_instantiation.py"
+class TestFixAsyncTaskInstantiation(BaseIntegrationTest):
+    codemod = FixAsyncTaskInstantiation
+    code_path = "tests/samples/fix_async_task_instantiation.py"
     original_code, expected_new_code = original_and_expected_from_code_path(
         code_path,
         [
@@ -35,5 +35,5 @@ class TestFixTaskInstantiation(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "8"
-    change_description = FixTaskInstantiation.change_description
+    change_description = FixAsyncTaskInstantiation.change_description
     num_changed_files = 1

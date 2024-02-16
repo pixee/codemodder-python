@@ -61,7 +61,7 @@ from .sonar.sonar_flask_json_response_type import SonarFlaskJsonResponseType
 from .sonar.sonar_django_json_response_type import SonarDjangoJsonResponseType
 from .lazy_logging import LazyLogging
 from .str_concat_in_seq_literal import StrConcatInSeqLiteral
-from .fix_task_instantiation import FixTaskInstantiation
+from .fix_async_task_instantiation import FixAsyncTaskInstantiation
 
 registry = CodemodCollection(
     origin="pixee",
@@ -118,8 +118,12 @@ registry = CodemodCollection(
         RemoveAssertionInPytestRaises,
         FixAssertTuple,
         LazyLogging,
+<<<<<<< HEAD
         StrConcatInSeqLiteral,
         FixTaskInstantiation,
+=======
+        FixAsyncTaskInstantiation,
+>>>>>>> 5190758 (change codemod metadata)
     ],
 )
 

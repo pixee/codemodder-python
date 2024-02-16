@@ -230,7 +230,7 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="While string concatenation inside a sequence iterable is likely a mistake, there are instances when you may choose to use them..",
     ),
-    "fix-task-instantiation": DocMetadata(
+    "fix-async-task-instantiation": DocMetadata(
         importance="Low",
         guidance_explained="Manual instantiation of `asyncio.Task` is discouraged. We believe this change is safe and will not cause any issues.",
     ),
