@@ -3,6 +3,7 @@ from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from codemodder.dependency import Security
 
 
 class TestUrlSandbox(BaseIntegrationTest):
@@ -36,4 +37,4 @@ class TestUrlSandbox(BaseIntegrationTest):
 
     requirements_path = "tests/samples/requirements.txt"
     original_requirements = "# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"
-    expected_new_reqs = "# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\nsecurity~=1.2.0\n"
+    expected_new_reqs = f"# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n{Security.requirement}\n"

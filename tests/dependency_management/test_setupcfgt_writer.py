@@ -43,7 +43,7 @@ def test_update_dependencies(tmpdir, dry_run):
     dependencies = [DefusedXML, Security]
     changeset = writer.write(dependencies, dry_run=dry_run)
 
-    updated_setupcfg = """\
+    updated_setupcfg = f"""\
         [metadata]
         name = my_package
         version = attr: my_package.VERSION
@@ -56,8 +56,8 @@ def test_update_dependencies(tmpdir, dry_run):
         install_requires =
             requests
             importlib-metadata; python_version<"3.8"
-            defusedxml~=0.7.1
-            security~=1.2.0
+            {DefusedXML.requirement}
+            {Security.requirement}
     """
 
     assert setup_cfg.read() == (
@@ -73,8 +73,8 @@ def test_update_dependencies(tmpdir, dry_run):
         """ install_requires =\n"""
         """     requests\n"""
         """     importlib-metadata; python_version<"3.8"\n"""
-        """+    defusedxml~=0.7.1\n"""
-        """+    security~=1.2.0\n"""
+        f"""+    {DefusedXML.requirement}\n"""
+        f"""+    {Security.requirement}\n"""
     )
     assert changeset.diff == res
     assert len(changeset.changes) == 2
@@ -127,7 +127,7 @@ def test_add_same_dependency_only_once(tmpdir):
     dependencies = [Security, Security]
     writer.write(dependencies)
 
-    updated_setupcfg = """\
+    updated_setupcfg = f"""\
         [metadata]
         name = my_package
         version = attr: my_package.VERSION
@@ -140,7 +140,7 @@ def test_add_same_dependency_only_once(tmpdir):
         install_requires =
             requests
             importlib-metadata; python_version<"3.8"
-            security~=1.2.0
+            {Security.requirement}
     """
 
     assert setup_cfg.read() == dedent(updated_setupcfg)
@@ -306,7 +306,7 @@ def test_cfg_inline_dependencies(tmpdir):
     dependencies = [Security, Security]
     changeset = writer.write(dependencies)
 
-    updated_setupcfg = """\
+    updated_setupcfg = f"""\
         [metadata]
         name = my_package
         version = attr: my_package.VERSION
@@ -316,7 +316,7 @@ def test_cfg_inline_dependencies(tmpdir):
         [options]
         include_package_data = True
         python_requires = >=3.7
-        install_requires = requests, importlib-metadata; python_version<"3.8", security~=1.2.0,
+        install_requires = requests, importlib-metadata; python_version<"3.8", {Security.requirement},
     """
 
     assert setup_cfg.read() == dedent(updated_setupcfg)
@@ -329,7 +329,7 @@ def test_cfg_inline_dependencies(tmpdir):
         """ include_package_data = True\n"""
         """ python_requires = >=3.7\n"""
         """-install_requires = requests, importlib-metadata; python_version<"3.8"\n"""
-        """+install_requires = requests, importlib-metadata; python_version<"3.8", security~=1.2.0,\n"""
+        f"""+install_requires = requests, importlib-metadata; python_version<"3.8", {Security.requirement},\n"""
     )
     assert changeset.diff == res
     assert len(changeset.changes) == 1
