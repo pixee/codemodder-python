@@ -35,8 +35,7 @@ def main():
             continue
 
         package_name, version = arg.split("==", 1)
-        hashes = get_package_hashes(package_name, version)
-        if hashes:
+        if hashes := get_package_hashes(package_name, version):
             print(f"SHA256 hashes for {package_name}=={version}:")
             for hash_value in hashes:
                 print(hash_value)
