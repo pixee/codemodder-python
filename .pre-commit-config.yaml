@@ -37,4 +37,5 @@ repos:
          "types-mock==5.0.*",
          "types-PyYAML==6.0",
          "types-toml~=0.10",
+         "types-requests~=2.13",
     ]
