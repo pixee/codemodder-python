@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from packaging.requirements import Requirement
 
@@ -16,6 +16,7 @@ class Dependency:
     _license: License
     oss_link: str
     package_link: str
+    hashes: list[str] = field(default_factory=list)
 
     @property
     def name(self) -> str:
@@ -33,12 +34,19 @@ License: [{self._license.name}]({self._license.url}) ✅ \
 [More facts]({self.package_link})
 """
 
+    def build_hashes(self) -> str:
+        return " \\\n".join(f"{' '*4}--hash=sha256:{sha256}" for sha256 in self.hashes)
+
     def __hash__(self):
         return hash(self.requirement)
 
 
 FlaskWTF = Dependency(
-    Requirement("flask-wtf~=1.2.0"),
+    Requirement("flask-wtf==1.2.0"),
+    hashes=[
+        "96e6f091c641c9944ba7dba2957c84797b630006aa926c99507fbd790069772b",
+        "e5dcf9f3cb80ee6ca8bb68de9ea467e7d613a708ebc5e130b9b02996e06c0d54",
+    ],
     description="""\
             This package integrates WTForms into Flask. WTForms provides data validation and and CSRF protection which helps harden applications.
 """,
@@ -51,7 +59,11 @@ FlaskWTF = Dependency(
 )
 
 DefusedXML = Dependency(
-    Requirement("defusedxml~=0.7.1"),
+    Requirement("defusedxml==0.7.1"),
+    hashes=[
+        "a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61",
+        "1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69",
+    ],
     description="""\
 This package is [recommended by the Python community](https://docs.python.org/3/library/xml.html#the-defusedxml-package) \
 to protect against XML vulnerabilities.\
@@ -65,7 +77,11 @@ to protect against XML vulnerabilities.\
 )
 
 Security = Dependency(
-    Requirement("security~=1.2.1"),
+    Requirement("security==1.2.1"),
+    hashes=[
+        "4ca5f8cfc6b836e2192a84bb5a28b72c17f3cd1abbfe3281f917394c6e6c9238",
+        "0a9dc7b457330e6d0f92bdae3603fecb85394beefad0fd3b5058758a58781ded",
+    ],
     description="""This library holds security tools for protecting Python API calls.""",
     _license=License(
         "MIT",

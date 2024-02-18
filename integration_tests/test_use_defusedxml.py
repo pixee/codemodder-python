@@ -40,4 +40,12 @@ et = defusedxml.ElementTree.parse(xml)
 
     requirements_path = "tests/samples/requirements.txt"
     original_requirements = "# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"
-    expected_new_reqs = f"# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n{DefusedXML.requirement}\n"
+    expected_new_reqs = (
+        f"# file used to test dependency management\n"
+        "requests==2.31.0\n"
+        "black==23.7.*\n"
+        "mypy~=1.4\n"
+        "pylint>1\n"
+        f"{DefusedXML.requirement} \\\n"
+        f"{DefusedXML.build_hashes()}"
+    )
