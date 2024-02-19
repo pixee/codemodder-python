@@ -1,3 +1,4 @@
+import pytest
 from core_codemods.enable_jinja2_autoescape import EnableJinja2Autoescape
 from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
 
@@ -98,6 +99,22 @@ class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
         """
         expexted_output = input_code
         self.run_and_assert(tmpdir, input_code, expexted_output)
+
+    @pytest.mark.parametrize(
+        "code",
+        [
+            """
+        import jinja2
+        env = jinja2.Environment(autoescape=jinja2.select_autoescape())
+        """,
+            """
+        import jinja2
+        env = jinja2.Environment(autoescape=jinja2.select_autoescape(disabled_extensions=('txt',), default_for_string=True, default=True))
+        """,
+        ],
+    )
+    def test_autoescape_callable(self, tmpdir, code):
+        self.run_and_assert(tmpdir, code, code)
 
     def test_aiohttp_import_setup(self, tmpdir):
         input_code = """

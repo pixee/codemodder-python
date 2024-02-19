@@ -11,7 +11,7 @@ class EnableJinja2Autoescape(SimpleCodemod):
     metadata = Metadata(
         name="enable-jinja2-autoescape",
         summary="Enable Jinja2 Autoescape",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
         references=[
             Reference(url="https://owasp.org/www-community/attacks/xss/"),
             Reference(
@@ -28,6 +28,7 @@ class EnableJinja2Autoescape(SimpleCodemod):
                 - patterns:
                   - pattern: jinja2.Environment(...)
                   - pattern-not: jinja2.Environment(..., autoescape=True, ...)
+                  - pattern-not: jinja2.Environment(..., autoescape=jinja2.select_autoescape(...), ...)
                   - pattern-inside: |
                       import jinja2
                       ...
