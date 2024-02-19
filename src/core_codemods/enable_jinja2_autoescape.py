@@ -33,8 +33,7 @@ class EnableJinja2Autoescape(SimpleCodemod):
                       import jinja2
                       ...
                 - patterns:
-                  - pattern: aiohttp_jinja2.setup(...)
-                  - pattern-not: aiohttp_jinja2.setup(..., autoescape=True, ...)
+                  - pattern: aiohttp_jinja2.setup(..., autoescape=False, ...)
                   - pattern-inside: |
                       import aiohttp_jinja2
                       ...

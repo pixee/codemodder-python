@@ -119,7 +119,7 @@ class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
     def test_aiohttp_import_setup(self, tmpdir):
         input_code = """
         import aiohttp_jinja2
-        aiohttp_jinja2.setup(app)
+        aiohttp_jinja2.setup(app, autoescape=False)
         """
         expected_output = """
         import aiohttp_jinja2
@@ -130,7 +130,7 @@ class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
     def test_aiohttp_import_from_setup(self, tmpdir):
         input_code = """
         from aiohttp_jinja2 import setup
-        setup(app)
+        setup(app, autoescape=False)
         """
         expected_output = """
         from aiohttp_jinja2 import setup
@@ -141,7 +141,7 @@ class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
     def test_aiohttp_import_alias(self, tmpdir):
         input_code = """
         from aiohttp_jinja2 import setup as setup_jinja2
-        setup_jinja2(app)
+        setup_jinja2(app, autoescape=False)
         """
         expected_output = """
         from aiohttp_jinja2 import setup as setup_jinja2
@@ -158,13 +158,24 @@ class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
-    def test_aiohttp_set_false(self, tmpdir):
+    def test_aiohttp_autoescape_default(self, tmpdir):
         input_code = """
         import aiohttp_jinja2
-        aiohttp_jinja2.setup(app, autoescape=False)
+        aiohttp_jinja2.setup(app)
         """
-        expected_output = """
+        self.run_and_assert(tmpdir, input_code, input_code)
+
+    def test_aiohttp_autoescape_True(self, tmpdir):
+        input_code = """
         import aiohttp_jinja2
         aiohttp_jinja2.setup(app, autoescape=True)
         """
-        self.run_and_assert(tmpdir, input_code, expected_output)
+        self.run_and_assert(tmpdir, input_code, input_code)
+
+    def test_aiohttp_autoescape_callable(self, tmpdir):
+        input_code = """
+        import aiohttp_jinja2
+        import jinja
+        aiohttp_jinja2.setup(app, autoescape=jinja2.select_autoescape())
+        """
+        self.run_and_assert(tmpdir, input_code, input_code)
