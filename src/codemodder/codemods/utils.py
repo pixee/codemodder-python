@@ -22,7 +22,6 @@ class BaseType(Enum):
     FALSE = 7
 
 
-# pylint: disable-next=R0911
 def infer_expression_type(node: cst.BaseExpression) -> Optional[BaseType]:
     """
     Tries to infer if the resulting type of a given expression is one of the base literal types.

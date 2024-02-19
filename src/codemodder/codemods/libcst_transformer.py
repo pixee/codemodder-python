@@ -29,9 +29,7 @@ def update_code(file_path, new_code):
         f.write(new_code)
 
 
-class LibcstResultTransformer(
-    BaseTransformer
-):  # pylint: disable=too-many-public-methods
+class LibcstResultTransformer(BaseTransformer):
     """
     Transformer class that performs libcst-based transformations on a given file
 
@@ -76,7 +74,6 @@ class LibcstResultTransformer(
     def _new_or_updated_node(self, original_node, updated_node):
         if self.node_is_selected(original_node):
             if (attr := getattr(self, "on_result_found", None)) is not None:
-                # pylint: disable=not-callable
                 new_node = attr(original_node, updated_node)
                 self.report_change(original_node)
                 return new_node
@@ -102,7 +99,6 @@ class LibcstResultTransformer(
         return self._new_or_updated_node(original_node, updated_node)
 
     def node_position(self, node):
-        # pylint: disable=no-member
         # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
         return self.get_metadata(self.METADATA_DEPENDENCIES[0], node)
 
@@ -134,14 +130,11 @@ class LibcstResultTransformer(
         )
 
     def remove_unused_import(self, original_node):
-        # pylint: disable=no-member
         RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
 
     def add_needed_import(self, module, obj=None):
         # TODO: do we need to check if this import already exists?
-        AddImportsVisitor.add_needed_import(
-            self.context, module, obj  # pylint: disable=no-member
-        )
+        AddImportsVisitor.add_needed_import(self.context, module, obj)
 
     def update_call_target(
         self,

@@ -191,9 +191,7 @@ class ResourceLeakFixer(
         self.leaked_assigned_resources = leaked_assigned_resources
         self.changes: list[Change] = []
 
-    def _is_fixable(
-        self, block, index, named_targets, other_targets
-    ) -> bool:  # pylint: disable=too-many-arguments
+    def _is_fixable(self, block, index, named_targets, other_targets) -> bool:
         # assigned to something that is not a Name?
         if other_targets:
             return False
@@ -363,7 +361,6 @@ class ResourceLeakFixer(
             return named_targets, other_targets
         return ([], [])
 
-    # pylint: disable-next=too-many-arguments
     def _wrap_in_with_statement(
         self,
         stmts: list[SimpleStatementLine],

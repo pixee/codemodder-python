@@ -165,7 +165,6 @@ class FindRequestCallsAndImports(ContextAwareVisitor, UtilsMixin):
         Given a MetadataWrapper and a CSTNode representing an access, find all the possible assignments that it refers.
         """
         scope = self.get_metadata(ScopeProvider, node)
-        # pylint: disable=protected-access
         return next(iter(scope.accesses[node]))._Access__assignments
 
     def find_single_assignment(self, node: CSTNode) -> Optional[CSTNode]:

@@ -1,4 +1,3 @@
-# pylint: disable=no-member,not-callable,attribute-defined-outside-init
 import os
 from pathlib import Path
 from textwrap import dedent
@@ -20,7 +19,7 @@ class BaseCodemodTest:
             self.codemod = self.codemod()
         self.changeset = []
 
-    def run_and_assert(  # pylint: disable=too-many-arguments
+    def run_and_assert(
         self,
         tmpdir,
         input_code,
@@ -68,9 +67,7 @@ class BaseCodemodTest:
             changes[0],
         )
 
-    def assert_changes(  # pylint: disable=too-many-arguments
-        self, root, file_path, input_code, expected, changes
-    ):
+    def assert_changes(self, root, file_path, input_code, expected, changes):
         expected_diff = create_diff(
             dedent(input_code).splitlines(keepends=True),
             dedent(expected).splitlines(keepends=True),
@@ -84,7 +81,7 @@ class BaseCodemodTest:
 
         assert output_code == dedent(expected)
 
-    def run_and_assert_filepath(  # pylint: disable=too-many-arguments
+    def run_and_assert_filepath(
         self,
         root: Path,
         file_path: Path,
@@ -133,7 +130,7 @@ class BaseDjangoCodemodTest(BaseCodemodTest):
 class BaseSASTCodemodTest(BaseCodemodTest):
     tool: ClassVar = NotImplemented
 
-    def run_and_assert(  # pylint: disable=too-many-arguments
+    def run_and_assert(
         self,
         tmpdir,
         input_code,

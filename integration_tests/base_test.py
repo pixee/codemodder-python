@@ -1,4 +1,3 @@
-# pylint: disable=no-member, protected-access, attribute-defined-outside-init
 import git
 import json
 import os

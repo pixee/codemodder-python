@@ -15,7 +15,7 @@ class UtilsMixin(MetadataDependent):
         results: list[Result] | None,
         line_exclude: list[int],
         line_include: list[int],
-    ):  # pylint: disable=super-init-not-called
+    ):
         self.results = results
         self.line_exclude = line_exclude
         self.line_include = line_include

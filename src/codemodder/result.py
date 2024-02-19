@@ -24,7 +24,7 @@ class Result(ABCDataclass):
     rule_id: str
     locations: list[Location]
 
-    def match_location(self, pos, node):  # pylint: disable=unused-argument
+    def match_location(self, pos, node):
         for location in self.locations:
             start_column = location.start.column
             end_column = location.end.column

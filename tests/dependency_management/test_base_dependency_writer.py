@@ -5,7 +5,7 @@ from codemodder.project_analysis.file_parsers.package_store import PackageStore
 
 
 class FakeDependencyWriter(DependencyWriter):
-    def add_to_file(  # pylint: disable=useless-return
+    def add_to_file(
         self, dependencies: list[Dependency], dry_run: bool = False
     ) -> ChangeSet | None:
         del dependencies, dry_run
