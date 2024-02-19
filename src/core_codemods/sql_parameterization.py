@@ -231,7 +231,6 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
 
         return (prepend, append)
 
-    # pylint: disable-next=too-many-arguments
     def _remove_literal_and_gather_extra(
         self, original_node, updated_node, prefix, new_raw_value, extra_raw_value
     ) -> Optional[cst.SimpleString]:

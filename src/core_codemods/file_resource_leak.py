@@ -188,9 +188,7 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
         self.leaked_assigned_resources = leaked_assigned_resources
         self.changes: list[Change] = []
 
-    def _is_fixable(
-        self, block, index, named_targets, other_targets
-    ) -> bool:  # pylint: disable=too-many-arguments
+    def _is_fixable(self, block, index, named_targets, other_targets) -> bool:
         # assigned to something that is not a Name?
         if other_targets:
             return False
@@ -309,7 +307,57 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
                 last = i
         return last
 
-    # pylint: disable-next=too-many-arguments
+    def _find_direct_name_assignment_targets(
+        self, name: cst.Name
+    ) -> list[cst.BaseAssignTargetExpression]:
+        name_targets = []
+        accesses = self.find_accesses(name)
+        for node in (access.node for access in accesses):
+            if maybe_assigned := self.is_value_of_assignment(node):
+                targets = extract_targets_of_assignment(maybe_assigned)
+                name_targets.extend(targets)
+        return name_targets
+
+    def _find_name_assignment_targets(
+        self, name: cst.Name
+    ) -> tuple[list[cst.Name], list[cst.BaseAssignTargetExpression]]:
+        named_targets, other_targets = self._sieve_targets(
+            self._find_direct_name_assignment_targets(name)
+        )
+
+        for child in named_targets:
+            c_named_targets, c_other_targets = self._find_name_assignment_targets(child)
+            named_targets.extend(c_named_targets)
+            other_targets.extend(c_other_targets)
+        return named_targets, other_targets
+
+    def _sieve_targets(
+        self, targets
+    ) -> tuple[list[cst.Name], list[cst.BaseAssignTargetExpression]]:
+        named_targets = []
+        other_targets = []
+        for t in targets:
+            # TODO maybe consider subscript here for named_targets
+            if isinstance(t, cst.Name):
+                named_targets.append(t)
+            else:
+                other_targets.append(t)
+        return named_targets, other_targets
+
+    def _find_transitive_assignment_targets(
+        self, expr
+    ) -> tuple[list[cst.Name], list[cst.BaseAssignTargetExpression]]:
+        if maybe_assigned := self.is_value_of_assignment(expr):
+            named_targets, other_targets = self._sieve_targets(
+                extract_targets_of_assignment(maybe_assigned)
+            )
+            for n in named_targets:
+                n_named_targets, n_other_targets = self._find_name_assignment_targets(n)
+                named_targets.extend(n_named_targets)
+                other_targets.extend(n_other_targets)
+            return named_targets, other_targets
+        return ([], [])
+
     def _wrap_in_with_statement(
         self,
         stmts: list[SimpleStatementLine],

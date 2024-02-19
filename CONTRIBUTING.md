@@ -2,9 +2,7 @@
 
 ## Pre-commit install
 
-We use [pre-commit](https://pre-commit.com/) to run some quick linting such as `black`.
-While pre-commit isn't configured in CI, `black` is. `pylint` and running tests are not configured
-for pre-commit so commiting is fast.
+We use [pre-commit](https://pre-commit.com/) to run some quick linting such as `black` and `ruff`.
 
 
 ## Local Development
@@ -19,7 +17,7 @@ to specify a specific Python version. If using `bash` or any compatible shell, a
 
 1. Run `pip install ".[all]"` to install packages used for development and testing
 
-1. You should now be able to run `pylint`, `pytest`, etc.
+1. You should now be able to run `ruff`, `pytest`, etc.
 
 
 ## Docker
