@@ -3,7 +3,7 @@ from typing import Callable
 
 import libcst as cst
 
-from codemodder.codemods.base_codemod import (  # pylint: disable=unused-import
+from codemodder.codemods.base_codemod import (  # noqa: F401
     BaseCodemod,
     Metadata,
     Reference,
@@ -13,7 +13,7 @@ from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
 )
-from codemodder.file_context import FileContext  # pylint: disable=unused-import
+from codemodder.file_context import FileContext  # noqa: F401
 from codemodder.codemods.semgrep import SemgrepRuleDetector
 
 

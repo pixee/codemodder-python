@@ -55,7 +55,10 @@ class FileResourceLeakTransformer(LibcstResultTransformer):
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         fr = FindResources(self.context)
         tree.visit(fr)
-        line_filter = lambda x: self.filter_by_path_includes_or_excludes(x[2])
+
+        def line_filter(x):
+            return self.filter_by_path_includes_or_excludes(x[2])
+
         for k, v in fr.assigned_resources.items():
             fr.assigned_resources[k] = [t for t in v if line_filter(t)]
         fixer = ResourceLeakFixer(self.context, fr.assigned_resources)

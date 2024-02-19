@@ -408,7 +408,7 @@ def _natural_key(s):
     """
     Converts a string into a key for natural sorting.
     """
-    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    convert = lambda text: int(text) if text.isdigit() else text.lower()  # noqa: E731
     return [convert(imp) for imp in re.split(r"([0-9]+)", s)]
 
 

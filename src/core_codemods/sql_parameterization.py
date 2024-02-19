@@ -100,7 +100,7 @@ class SQLQueryParameterization(SimpleCodemod, UtilsMixin):
                 t = _extract_prefix_raw_value(self, e)
                 if t:
                     prefix, raw_value = t
-                    if not "b" in prefix and not "r" in prefix and not "u" in prefix:
+                    if all(char not in prefix for char in "bru"):
                         format_pieces.append(raw_value)
                         exception = True
             if not exception:
@@ -428,7 +428,7 @@ class ExtractParameters(ContextAwareVisitor):
             matches = list(quote_pattern.finditer(raw_value))
         # avoid cases like: "where name = 'foo\\\'s name'"
         # don't count \\' as these are escaped in string literals
-        return (matches != None) and len(matches) % 2 == modulo_2
+        return (matches is not None) and len(matches) % 2 == modulo_2
 
     def _is_literal_end(self, node: cst.CSTNode) -> bool:
         t = _extract_prefix_raw_value(self, node)

@@ -1,3 +1,4 @@
+# ruff: noqa: F401
 from codemodder.codemods.api import (
     Metadata,
     Reference,

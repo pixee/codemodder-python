@@ -18,7 +18,7 @@ class TestBaseType:
 
     def test_binary_op_none(self):
         e = cst.parse_expression("foo() + bar()")
-        assert infer_expression_type(e) == None
+        assert infer_expression_type(e) is None
 
     def test_bytes(self):
         e = cst.parse_expression('b"123"')
@@ -26,7 +26,7 @@ class TestBaseType:
 
     def test_if_mixed(self):
         e = cst.parse_expression('1 if True else "a"')
-        assert infer_expression_type(e) == None
+        assert infer_expression_type(e) is None
 
     def test_if_numbers(self):
         e = cst.parse_expression("abs(1) if True else 2")
