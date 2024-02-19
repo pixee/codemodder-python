@@ -19,7 +19,6 @@ class NumpyNanEqualityTransformer(LibcstResultTransformer, NameResolutionMixin):
 
     np_nan = "numpy.nan"
 
-    # pylint: disable-next=too-many-arguments
     def _build_nan_comparison(
         self, nan_node, node, preprend_not, lpar, rpar
     ) -> cst.BaseExpression:

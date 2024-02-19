@@ -38,3 +38,11 @@ repos:
          "types-PyYAML==6.0",
          "types-toml~=0.10",
     ]
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.2.2
+  hooks:
+    - id: ruff
+      exclude: tests/samples/
+    # todo: replace black with this?
+    # Run the formatter.
+    # - id: ruff-format

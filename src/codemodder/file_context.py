@@ -8,7 +8,7 @@ from codemodder.utils.timer import Timer
 
 
 @dataclass
-class FileContext:  # pylint: disable=too-many-instance-attributes
+class FileContext:
     """
     Extra context for running codemods on a given file based on the cli parameters.
     """

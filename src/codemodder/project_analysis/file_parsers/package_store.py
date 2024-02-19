@@ -21,7 +21,7 @@ class PackageStore:
 
     def __init__(
         self,
-        type: FileType,  # pylint: disable=redefined-builtin
+        type: FileType,
         file: Path,
         dependencies: set[str | Requirement],
         py_versions: list[str],

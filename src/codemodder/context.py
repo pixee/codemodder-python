@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from codemodder.codemods.base_codemod import BaseCodemod
 
 
-class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
+class CodemodExecutionContext:
     _results_by_codemod: dict[str, list[ChangeSet]] = {}
     _failures_by_codemod: dict[str, list[Path]] = {}
     _dependency_update_by_codemod: dict[str, PackageStore | None] = {}
