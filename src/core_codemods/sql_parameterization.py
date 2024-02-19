@@ -340,8 +340,7 @@ class LinearizeQuery(ContextAwareVisitor, NameAndAncestorResolutionMixin):
 
     def recurse_Name(self, node: cst.Name) -> list[cst.CSTNode]:
         # if the expression is a name, try to find its single assignment
-        resolved = self.resolve_expression(node)
-        if resolved != node:
+        if (resolved := self.resolve_expression(node)) != node:
             visitor = LinearizeQuery(self.context)
             resolved.visit(visitor)
             if len(visitor.leaves) == 1:
