@@ -58,7 +58,10 @@ class FileResourceLeakTransformer(LibcstResultTransformer):
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         fr = FindResources(self.context)
         tree.visit(fr)
-        line_filter = lambda x: self.filter_by_path_includes_or_excludes(x[2])
+
+        def line_filter(x):
+            return self.filter_by_path_includes_or_excludes(x[2])
+
         for k, v in fr.assigned_resources.items():
             fr.assigned_resources[k] = [t for t in v if line_filter(t)]
         fixer = ResourceLeakFixer(self.context, fr.assigned_resources)
@@ -185,9 +188,7 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
         self.leaked_assigned_resources = leaked_assigned_resources
         self.changes: list[Change] = []
 
-    def _is_fixable(
-        self, block, index, named_targets, other_targets
-    ) -> bool:  # pylint: disable=too-many-arguments
+    def _is_fixable(self, block, index, named_targets, other_targets) -> bool:
         # assigned to something that is not a Name?
         if other_targets:
             return False
@@ -306,7 +307,6 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
                 last = i
         return last
 
-    # pylint: disable-next=too-many-arguments
     def _wrap_in_with_statement(
         self,
         stmts: list[SimpleStatementLine],

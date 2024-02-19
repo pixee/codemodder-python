@@ -21,12 +21,12 @@ class SonarCodemod(SASTCodemod):
         rules: list[str],
         transformer: BaseTransformerPipeline | None = None,
         new_references: list[Reference] | None = None,
-    ):  # pylint: disable=too-many-arguments
+    ):
         return SonarCodemod(
             metadata=Metadata(
                 name=name,
                 summary="Sonar: " + other.summary,
-                review_guidance=other._metadata.review_guidance,  # pylint: disable=protected-access
+                review_guidance=other._metadata.review_guidance,
                 references=(
                     other.references
                     if not new_references

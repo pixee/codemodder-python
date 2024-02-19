@@ -7,9 +7,7 @@ class TestMatchCodemods:
     @classmethod
     def setup_class(cls):
         cls.registry = load_registered_codemods()
-        cls.codemod_map = (
-            cls.registry._codemods_by_name  # pylint: disable=protected-access
-        )
+        cls.codemod_map = cls.registry._codemods_by_name
         cls.default_ids = [
             c().id if isinstance(c, type) else c.id for c in registry.codemods
         ]

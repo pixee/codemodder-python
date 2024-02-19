@@ -20,7 +20,6 @@ class FixAsyncTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
     change_description = "Replace instantiation of `asyncio.Task` with higher-level functions to create tasks."
     _module_name = "asyncio"
 
-    # pylint: disable=too-many-return-statements
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
         if not self.filter_by_path_includes_or_excludes(
             self.node_position(original_node)

@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from codemodder.codemods.base_codemod import BaseCodemod
 
 
-class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
+class CodemodExecutionContext:
     _results_by_codemod: dict[str, list[ChangeSet]] = {}
     _failures_by_codemod: dict[str, list[Path]] = {}
     _dependency_update_by_codemod: dict[str, PackageStore | None] = {}
@@ -50,7 +50,7 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
         path_exclude: list[str],
         tool_result_files_map: dict[str, list[str]] | None = None,
         max_workers: int = 1,
-    ):  # pylint: disable=too-many-arguments
+    ):
         self.directory = directory
         self.dry_run = dry_run
         self.verbose = verbose
@@ -118,7 +118,6 @@ class CodemodExecutionContext:  # pylint: disable=too-many-instance-attributes
             self._dependency_update_by_codemod[codemod_id] = None
             return record
 
-        # pylint: disable-next=cyclic-import
         from codemodder.dependency_management import DependencyManager
 
         for package_store in store_list:
