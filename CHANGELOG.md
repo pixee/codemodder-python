@@ -1,6 +1,16 @@
 # CHANGELOG
 
-## 0.81.0 (in progress)
+## 0.82.0 (in progress)
+
+
+## 0.81.0 (2024-02-19)
+
+### New
+* New codemod: `fix-async-task-instantiation`
+
+### Fix
+* Remove unused fields from `CodemodCollection` API
+* Fix edge case in `sql-parameterization` to remove empty string variable from query
 
 
 ## 0.80.0 (2024-02-16)
