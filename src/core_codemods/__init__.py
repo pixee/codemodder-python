@@ -65,8 +65,6 @@ from .fix_async_task_instantiation import FixAsyncTaskInstantiation
 
 registry = CodemodCollection(
     origin="pixee",
-    docs_module="core_codemods.docs",
-    semgrep_config_module="core_codemods.semgrep",
     codemods=[
         AddRequestsTimeouts,
         DjangoDebugFlagOn,
@@ -125,8 +123,6 @@ registry = CodemodCollection(
 
 sonar_registry = CodemodCollection(
     origin="sonar",
-    docs_module="core_codemods.docs",
-    semgrep_config_module="core_codemods.semgrep",
     codemods=[
         SonarNumpyNanEquality,
         SonarLiteralOrNewObjectIdentity,

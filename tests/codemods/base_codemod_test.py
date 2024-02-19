@@ -107,8 +107,6 @@ class BaseSemgrepCodemodTest(BaseCodemodTest):
         collection = CodemodCollection(
             origin="pixee",
             codemods=[cls.codemod],
-            docs_module="core_codemods.docs",
-            semgrep_config_module="core_codemods.semgrep",
         )
         cls.registry = CodemodRegistry()
         cls.registry.add_codemod_collection(collection)

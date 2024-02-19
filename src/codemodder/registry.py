@@ -24,8 +24,6 @@ class CodemodCollection:
     """A collection of codemods that all share the same origin and documentation."""
 
     origin: str
-    docs_module: str
-    semgrep_config_module: str
     codemods: list
 
 
