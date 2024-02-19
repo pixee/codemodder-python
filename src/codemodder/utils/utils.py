@@ -63,7 +63,7 @@ def positional_to_keyword(
     """
     new_args = []
     for i, arg in enumerate(args):
-        if arg.keyword == None and pos_to_keyword[i] != None:
+        if arg.keyword is None and pos_to_keyword[i] is not None:
             new_args.append(arg.with_changes(keyword=cst.Name(pos_to_keyword[i])))
         else:
             new_args.append(arg)

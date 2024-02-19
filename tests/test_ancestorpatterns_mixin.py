@@ -26,7 +26,7 @@ class TestNameResolutionMixin:
         class TestCodemod(Codemod, AncestorPatternsMixin):
             def transform_module_impl(self, tree: cst.Module) -> cst.Module:
                 maybe_parent = self.get_parent(tree)
-                assert maybe_parent == None
+                assert maybe_parent is None
                 return tree
 
         input_code = dedent(
