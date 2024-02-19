@@ -11,6 +11,9 @@ integration-test:
 pygoat-test:
 	${PYTEST} -v ci_tests/test_pygoat_findings.py
 
+lint:
+	ruff check  src tests integration_tests --exclude tests/samples/
+
 radon:
 	radon cc codemodder --min A --total-average
 
