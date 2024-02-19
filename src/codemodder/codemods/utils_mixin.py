@@ -1,5 +1,5 @@
 import itertools
-from typing import Any, Collection, Optional, Tuple, Union
+from typing import ClassVar, Collection, Optional, Union
 import libcst as cst
 from libcst import MetadataDependent, matchers
 from libcst.helpers import get_full_name_for_node
@@ -10,14 +10,17 @@ from libcst.metadata import (
     BuiltinAssignment,
     ImportAssignment,
     ParentNodeProvider,
+    ProviderT,
     Scope,
     ScopeProvider,
 )
 from libcst.metadata.scope_provider import GlobalScope
 
+from codemodder.utils.utils import extract_targets_of_assignment
+
 
 class NameResolutionMixin(MetadataDependent):
-    METADATA_DEPENDENCIES: Tuple[Any, ...] = (ScopeProvider,)
+    METADATA_DEPENDENCIES: ClassVar[Collection[ProviderT]] = (ScopeProvider,)
 
     def _find_imported_name(self, node: cst.Name) -> Optional[str]:
         match self.find_single_assignment(node):
@@ -280,7 +283,7 @@ class NameResolutionMixin(MetadataDependent):
 
 
 class AncestorPatternsMixin(MetadataDependent):
-    METADATA_DEPENDENCIES: Tuple[Any, ...] = (ParentNodeProvider,)
+    METADATA_DEPENDENCIES: ClassVar[Collection[ProviderT]] = (ParentNodeProvider,)
 
     def is_value_of_assignment(
         self, expr
@@ -449,12 +452,10 @@ class AncestorPatternsMixin(MetadataDependent):
 
 
 class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin):
-    METADATA_DEPENDENCIES: Tuple[Any, ...] = (
-        ScopeProvider,
-        ParentNodeProvider,
-    )
 
-    def extract_value(self, node: cst.AnnAssign | cst.Assign | cst.WithItem):
+    def extract_value(
+        self, node: cst.AnnAssign | cst.Assign | cst.WithItem | cst.NamedExpr
+    ):
         match node:
             case (
                 cst.AnnAssign(value=value)
@@ -467,7 +468,7 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
 
     def resolve_expression(self, node: cst.BaseExpression) -> cst.BaseExpression:
         """
-        If the expression is a Name, transitively resolves the name to another type of expression. Otherwise returns self.
+        If the expression is a Name, transitively resolves the name to another expression through single assignments. Otherwise returns self.
         """
         maybe_expr = None
         match node:
@@ -489,6 +490,60 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
                     case _:
                         return value
         return None
+
+    def _find_direct_name_assignment_targets(
+        self, name: cst.Name
+    ) -> list[cst.BaseAssignTargetExpression]:
+        name_targets = []
+        accesses = self.find_accesses(name)
+        for node in (access.node for access in accesses):
+            if maybe_assigned := self.is_value_of_assignment(node):
+                targets = extract_targets_of_assignment(maybe_assigned)
+                name_targets.extend(targets)
+        return name_targets
+
+    def _find_name_assignment_targets(
+        self, name: cst.Name
+    ) -> tuple[list[cst.Name], list[cst.BaseAssignTargetExpression]]:
+        named_targets, other_targets = self._sieve_targets(
+            self._find_direct_name_assignment_targets(name)
+        )
+
+        for child in named_targets:
+            c_named_targets, c_other_targets = self._find_name_assignment_targets(child)
+            named_targets.extend(c_named_targets)
+            other_targets.extend(c_other_targets)
+        return named_targets, other_targets
+
+    def _sieve_targets(
+        self, targets
+    ) -> tuple[list[cst.Name], list[cst.BaseAssignTargetExpression]]:
+        named_targets = []
+        other_targets = []
+        for t in targets:
+            # TODO maybe consider subscript here for named_targets
+            if isinstance(t, cst.Name):
+                named_targets.append(t)
+            else:
+                other_targets.append(t)
+        return named_targets, other_targets
+
+    def find_transitive_assignment_targets(
+        self, expr
+    ) -> tuple[list[cst.Name], list[cst.BaseAssignTargetExpression]]:
+        """
+        Returns all the targets that an expression can reach. It returns a pair of lists, where the first list contains all targets that are Name, and the second contains all others.
+        """
+        if maybe_assigned := self.is_value_of_assignment(expr):
+            named_targets, other_targets = self._sieve_targets(
+                extract_targets_of_assignment(maybe_assigned)
+            )
+            for n in named_targets:
+                n_named_targets, n_other_targets = self._find_name_assignment_targets(n)
+                named_targets.extend(n_named_targets)
+                other_targets.extend(n_other_targets)
+            return named_targets, other_targets
+        return ([], [])
 
 
 def iterate_left_expressions(node: cst.BaseExpression):

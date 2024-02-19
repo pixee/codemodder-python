@@ -1,4 +1,7 @@
-from core_codemods.sql_parameterization import SQLQueryParameterization
+from core_codemods.sql_parameterization import (
+    SQLQueryParameterization,
+    SQLQueryParameterizationTransformer,
+)
 from integration_tests.base_test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
@@ -37,5 +40,5 @@ class TestSQLQueryParameterization(BaseIntegrationTest):
     # fmt: on
 
     expected_line_change = "12"
-    change_description = SQLQueryParameterization.change_description
+    change_description = SQLQueryParameterizationTransformer.change_description
     num_changed_files = 1

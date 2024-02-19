@@ -173,6 +173,31 @@ class TestSQLQueryParameterizationFormattedString(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected)
 
+    def test_formatted_string_simple_aliased(self, tmpdir):
+        input_code = """
+        import sqlite3
+
+        def foo():
+            table_name = "TABLE"
+            search_vector = input()
+            connection = sqlite3.connect("my_db.db")
+            cursor = connection.cursor()
+            query = f"DELETE FROM {table_name} WHERE embeddings <=> '{search_vector}'"
+            cursor.execute(query)
+        """
+        expected = """
+        import sqlite3
+
+        def foo():
+            table_name = "TABLE"
+            search_vector = input()
+            connection = sqlite3.connect("my_db.db")
+            cursor = connection.cursor()
+            query = f"DELETE FROM {table_name} WHERE embeddings <=> ?"
+            cursor.execute(query, (search_vector, ))
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
+
     def test_formatted_string_quote_in_middle(self, tmpdir):
         input_code = """
         import sqlite3

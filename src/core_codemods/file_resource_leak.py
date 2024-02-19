@@ -4,7 +4,6 @@ from codemodder.codemods.libcst_transformer import (
     LibcstTransformerPipeline,
 )
 from codemodder.result import Result
-from codemodder.utils.utils import extract_targets_of_assignment
 import libcst as cst
 from libcst import SimpleStatementLine, ensure_type, matchers
 from libcst.codemod import (
@@ -19,7 +18,11 @@ from libcst.metadata import (
 )
 from codemodder.change import Change
 from codemodder.codemods.utils import MetadataPreservingTransformer
-from codemodder.codemods.utils_mixin import AncestorPatternsMixin, NameResolutionMixin
+from codemodder.codemods.utils_mixin import (
+    AncestorPatternsMixin,
+    NameAndAncestorResolutionMixin,
+    NameResolutionMixin,
+)
 from codemodder.file_context import FileContext
 from functools import partial
 from core_codemods.api import (
@@ -161,14 +164,8 @@ class FindResources(ContextAwareVisitor, NameResolutionMixin, AncestorPatternsMi
         return False
 
 
-class ResourceLeakFixer(
-    MetadataPreservingTransformer, NameResolutionMixin, AncestorPatternsMixin
-):
-    METADATA_DEPENDENCIES = (
-        PositionProvider,
-        ScopeProvider,
-        ParentNodeProvider,
-    )
+class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolutionMixin):
+    METADATA_DEPENDENCIES = (PositionProvider,)
 
     def __init__(
         self,
@@ -222,7 +219,7 @@ class ResourceLeakFixer(
         # 1 would point to 0 since f.read() would be included in the with statement of 0
         new_index_of_original_stmt = list(range(len(new_stmts)))
         for stmt, assignment, resource in reversed(leak):
-            named_targets, other_targets = self._find_transitive_assignment_targets(
+            named_targets, other_targets = self.find_transitive_assignment_targets(
                 resource
             )
             index = original_block.body.index(stmt)
@@ -308,57 +305,6 @@ class ResourceLeakFixer(
             if n in path:
                 last = i
         return last
-
-    def _find_direct_name_assignment_targets(
-        self, name: cst.Name
-    ) -> list[cst.BaseAssignTargetExpression]:
-        name_targets = []
-        accesses = self.find_accesses(name)
-        for node in (access.node for access in accesses):
-            if maybe_assigned := self.is_value_of_assignment(node):
-                targets = extract_targets_of_assignment(maybe_assigned)
-                name_targets.extend(targets)
-        return name_targets
-
-    def _find_name_assignment_targets(
-        self, name: cst.Name
-    ) -> tuple[list[cst.Name], list[cst.BaseAssignTargetExpression]]:
-        named_targets, other_targets = self._sieve_targets(
-            self._find_direct_name_assignment_targets(name)
-        )
-
-        for child in named_targets:
-            c_named_targets, c_other_targets = self._find_name_assignment_targets(child)
-            named_targets.extend(c_named_targets)
-            other_targets.extend(c_other_targets)
-        return named_targets, other_targets
-
-    def _sieve_targets(
-        self, targets
-    ) -> tuple[list[cst.Name], list[cst.BaseAssignTargetExpression]]:
-        named_targets = []
-        other_targets = []
-        for t in targets:
-            # TODO maybe consider subscript here for named_targets
-            if isinstance(t, cst.Name):
-                named_targets.append(t)
-            else:
-                other_targets.append(t)
-        return named_targets, other_targets
-
-    def _find_transitive_assignment_targets(
-        self, expr
-    ) -> tuple[list[cst.Name], list[cst.BaseAssignTargetExpression]]:
-        if maybe_assigned := self.is_value_of_assignment(expr):
-            named_targets, other_targets = self._sieve_targets(
-                extract_targets_of_assignment(maybe_assigned)
-            )
-            for n in named_targets:
-                n_named_targets, n_other_targets = self._find_name_assignment_targets(n)
-                named_targets.extend(n_named_targets)
-                other_targets.extend(n_other_targets)
-            return named_targets, other_targets
-        return ([], [])
 
     # pylint: disable-next=too-many-arguments
     def _wrap_in_with_statement(

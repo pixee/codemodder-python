@@ -1,14 +1,14 @@
-from typing import Any, Tuple
+from typing import ClassVar, Collection
 from libcst import MetadataDependent
 from libcst.codemod import ContextAwareVisitor, VisitorBasedCodemodCommand
-from libcst.metadata import PositionProvider
+from libcst.metadata import PositionProvider, ProviderT
 
 from codemodder.result import Result
 
 
 # TODO: this should just be part of BaseTransformer and BaseVisitor?
 class UtilsMixin(MetadataDependent):
-    METADATA_DEPENDENCIES: Tuple[Any, ...] = (PositionProvider,)
+    METADATA_DEPENDENCIES: ClassVar[Collection[ProviderT]] = (PositionProvider,)
 
     def __init__(
         self,
