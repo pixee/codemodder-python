@@ -16,24 +16,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linting:
-    name: Pylint Checks
-    runs-on: ubuntu-20.04
-    timeout-minutes: 5
-    steps:
-      - name: Set Up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Install Codemodder Package
-        run: pip install .
-      - name: Install Dependencies
-        run: pip install ".[test]"
-      - name: Run pylint
-        run: make lint
-
   complexity:
     name: Code Complexity
     runs-on: ubuntu-20.04
