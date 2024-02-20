@@ -1,0 +1,40 @@
+name: "Publish Sonar JSON to Pixee"
+on:
+  check_run:
+    types: [completed]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: "Publish Sonar JSON to Pixee"
+    runs-on: ubuntu-latest
+    if: ${{ github.event.check_run.name == 'SonarCloud Code Analysis' }}
+    steps:
+      - name: "Publish Sonar JSON to Pixee"
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ join(github.event.check_run.pull_requests.*.number, '') }}
+          URL="https://sonarcloud.io/api/issues/search?componentKeys=pixee_codemodder-python&resolved=false"
+
+          if [ -n "$PR_NUMBER" ]; then
+            URL="${URL}&pullRequest=$PR_NUMBER"
+          fi
+
+          curl -v "$URL" -o sonar_issues.json
+          cat sonar_issues.json
+          ANALYSIS_SHA=${{ github.event.check_run.head_sha }}
+          SECRET=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://app.pixee.ai" | jq -j '.value')
+          API_RESPONSE=$(curl -v -X PUT -H "Authorization: Bearer $SECRET" -H "Content-Type: multipart/form-data" -F "file=@sonar_issues.json" "https://api.pixee.ai/analysis-input/pixee/codemodder-python/$ANALYSIS_SHA/sonar")
+          echo "$API_RESPONSE"
+
+      - name: "Trigger Pixee Analysis"
+        if : ${{ toJson(github.event.check_run.pull_requests) != '[]' }}
+        run: |
+          SECRET=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://app.pixee.ai" | jq -j '.value')
+          API_RESPONSE=$(curl -v -X POST -H "Authorization: Bearer $SECRET" "https://api.pixee.ai/analysis-input/pixee/codemodder-python/${{ github.event.check_run.pull_requests[0].number }}")
+          echo $API_RESPONSE
