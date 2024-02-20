@@ -12,7 +12,7 @@ license = {file = "LICENSE"}
 description = "A pluggable framework for building codemods in Python"
 dependencies = [
     "isort>=5.12,<5.14",
-    "libcst~=1.1.0",
+    "libcst>=1.1,<1.3",
     "packaging~=23.2",
     "pylint~=3.0.0",
     "python-json-logger~=2.0.0",
