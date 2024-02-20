@@ -45,5 +45,11 @@ You can run the codemodder program with
 codemodder --help
 ```
 
+## Codemod API
+<picture>
+  <source srcset="img/base-codemod.jpg">
+  <img alt="Base Codemod Diagram" src="https://github.com/pixee/pixee-cli/raw/main/img/base-codemod.jpg">
+</picture>
+
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md).
