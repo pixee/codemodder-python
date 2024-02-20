@@ -1,3 +1,9 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="img/codemodder-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="img/codemodder-light.png">
+  <img alt="Pixee Logo" src="https://github.com/pixee/pixee-cli/raw/main/img/codemodder.png">
+</picture>
+
 # codemodder-python
 
 This is the Python version of the [Codemodder Framework](https://codemodder.io/), which builds on traditional codemod frameworks by providing
