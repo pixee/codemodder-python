@@ -20,7 +20,7 @@ jobs:
         run: |
           PR_NUMBER=${{ join(github.event.check_run.pull_requests.*.number, '') }}
           URL="https://sonarcloud.io/api/issues/search?componentKeys=pixee_codemodder-python&resolved=false"
-          
+
           if [ -n "$PR_NUMBER" ]; then
             URL="${URL}&pullRequest=$PR_NUMBER"
           fi
