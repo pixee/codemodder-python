@@ -32,7 +32,7 @@ class TestRequirementsTxtWriter:
         assert dependency_file.read_text(encoding="utf-8") == (
             contents
             if dry_run
-            else "# comment\n\nrequests\ndefusedxml~=0.7.1\nsecurity~=1.2.0\n"
+            else f"# comment\n\nrequests\n{DefusedXML.requirement} \\\n{DefusedXML.build_hashes()}{Security.requirement} \\\n{Security.build_hashes()}"
         )
 
         assert changeset is not None
@@ -44,8 +44,10 @@ class TestRequirementsTxtWriter:
             " # comment\n"
             " \n"
             " requests\n"
-            "+defusedxml~=0.7.1\n"
-            "+security~=1.2.0\n"
+            f"+{DefusedXML.requirement} \\\n"
+            f"{DefusedXML.build_hashes()}\n"
+            f"+{Security.requirement} \\\n"
+            f"{Security.build_hashes()}"
         )
         assert len(changeset.changes) == 2
         change_one = changeset.changes[0]
@@ -81,12 +83,12 @@ class TestRequirementsTxtWriter:
         assert len(changeset.changes) == 1
 
         assert dependency_file.read_text(encoding="utf-8") == (
-            "requests\nsecurity~=1.2.0\n"
+            f"requests\n{Security.requirement} \\\n{Security.build_hashes()}"
         )
 
     def test_dont_add_existing_dependency(self, tmpdir):
         dependency_file = Path(tmpdir) / "requirements.txt"
-        contents = "requests\nsecurity~=1.2.0\n"
+        contents = f"requests\n{Security.requirement}\n"
         dependency_file.write_text(contents, encoding="utf-8")
 
         store = PackageStore(
@@ -138,7 +140,7 @@ class TestRequirementsTxtWriter:
 
         assert (
             dependency_file.read_text(encoding="utf-8")
-            == "# comment\n\nrequests\ndefusedxml~=0.7.1\nsecurity~=1.2.0\n"
+            == f"# comment\n\nrequests\n{DefusedXML.requirement} \\\n{DefusedXML.build_hashes()}{Security.requirement} \\\n{Security.build_hashes()}"
         )
 
         assert changeset is not None
@@ -150,6 +152,8 @@ class TestRequirementsTxtWriter:
             " # comment\n"
             " \n"
             " requests\n"
-            "+defusedxml~=0.7.1\n"
-            "+security~=1.2.0\n"
+            f"+{DefusedXML.requirement} \\\n"
+            f"{DefusedXML.build_hashes()}\n"
+            f"+{Security.requirement} \\\n"
+            f"{Security.build_hashes()}"
         )

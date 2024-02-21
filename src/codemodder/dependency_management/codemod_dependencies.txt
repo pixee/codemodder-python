@@ -1,0 +1,9 @@
+# This is a temporary solution to use dependabot to alert us
+# when the dependencies our codemods inject (for example `security`, `defusedxml`, etc) have a version update.
+
+# If this file gets a dependabot update PR, we must also update the corresponding
+# dependency in dependency.py. Be sure to update the version AND the hashes.
+# Run `get-hashes pkg==version` to get the hashes.
+defusedxml==0.7.1
+flask-wtf==1.2.0
+security==1.2.1

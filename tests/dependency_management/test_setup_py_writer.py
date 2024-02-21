@@ -8,10 +8,7 @@ from codemodder.project_analysis.file_parsers.package_store import (
     PackageStore,
     FileType,
 )
-from packaging.requirements import Requirement
 from codemodder.dependency import DefusedXML, Security
-
-TEST_DEPENDENCIES = [Requirement("defusedxml==0.7.1"), Requirement("security~=1.2.0")]
 
 
 def test_update_setuppy_comma_single_element_newline(tmpdir):
@@ -46,7 +43,7 @@ def test_update_setuppy_comma_single_element_newline(tmpdir):
     dependencies = [DefusedXML, Security]
     writer.write(dependencies, dry_run=False)
 
-    after = """
+    after = f"""
         from setuptools import setup
         setup(
             name="test pkg",
@@ -54,14 +51,14 @@ def test_update_setuppy_comma_single_element_newline(tmpdir):
             long_description="...",
             author="Pixee",
             packages=find_packages("src"),
-            package_dir={"": "src"},
+            package_dir={{"": "src"}},
             python_requires=">3.6",
             install_requires=[
                 "protobuf>=3.12,<3.18; python_version < '3'",
-                "defusedxml~=0.7.1",
-                "security~=1.2.0",
+                "{DefusedXML.requirement}",
+                "{Security.requirement}",
             ],
-            entry_points={},
+            entry_points={{}},
         )
         """
     assert dependency_file.read() == dedent(after)
@@ -97,7 +94,7 @@ def test_update_setuppy_comma_single_element_inline(tmpdir):
     dependencies = [DefusedXML, Security]
     writer.write(dependencies, dry_run=False)
 
-    after = """
+    after = f"""
         from setuptools import setup
         setup(
             name="test pkg",
@@ -105,10 +102,10 @@ def test_update_setuppy_comma_single_element_inline(tmpdir):
             long_description="...",
             author="Pixee",
             packages=find_packages("src"),
-            package_dir={"": "src"},
+            package_dir={{"": "src"}},
             python_requires=">3.6",
-            install_requires=["protobuf>=3.12,<3.18; python_version < '3'", "defusedxml~=0.7.1", "security~=1.2.0"],
-            entry_points={},
+            install_requires=["protobuf>=3.12,<3.18; python_version < '3'", "{DefusedXML.requirement}", "{Security.requirement}"],
+            entry_points={{}},
         )
         """
     assert dependency_file.read() == dedent(after)
@@ -150,7 +147,7 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
     dependencies = [DefusedXML, Security]
     changeset = writer.write(dependencies, dry_run=dry_run)
 
-    after = """
+    after = f"""
         from setuptools import setup
         setup(
             name="test pkg",
@@ -158,17 +155,17 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
             long_description="...",
             author="Pixee",
             packages=find_packages("src"),
-            package_dir={"": "src"},
+            package_dir={{"": "src"}},
             python_requires=">3.6",
             install_requires=[
                 "protobuf>=3.12,<3.18; python_version < '3'",
                 "protobuf>=3.12,<4; python_version >= '3'",
                 "psutil>=5.7,<6",
                 "requests>=2.4.2,<3",
-                "defusedxml~=0.7.1",
-                "security~=1.2.0",
+                "{DefusedXML.requirement}",
+                "{Security.requirement}",
             ],
-            entry_points={},
+            entry_points={{}},
         )
         """
     assert dependency_file.read() == (dedent(original) if dry_run else dedent(after))
@@ -182,8 +179,8 @@ def test_update_setuppy_dependencies(tmpdir, dry_run):
         """         "protobuf>=3.12,<4; python_version >= '3'",\n"""
         """         "psutil>=5.7,<6",\n"""
         """         "requests>=2.4.2,<3",\n"""
-        """+        "defusedxml~=0.7.1",\n"""
-        """+        "security~=1.2.0",\n"""
+        f"""+        "{DefusedXML.requirement}",\n"""
+        f"""+        "{Security.requirement}",\n"""
         "     ],\n "
         "    entry_points={},\n"
         " )\n"
@@ -411,15 +408,16 @@ def test_setup_call_requirements_separate(tmpdir):
     dependencies = [DefusedXML, Security]
     changeset = writer.write(dependencies)
 
-    after = """
+    after = f"""
     from setuptools import setup
     requirements = [
             "protobuf>=3.12,<3.18; python_version < '3'",
             "protobuf>=3.12,<4; python_version >= '3'",
             "psutil>=5.7,<6",
             "requests>=2.4.2,<3",
-            "defusedxml==0.7.1",
-            "security~=1.2.0",
+            "{DefusedXML.requirement}",
+            "{Security.requirement}",
+
     ]
     setup(
         name="test pkg",
@@ -430,7 +428,7 @@ def test_setup_call_requirements_separate(tmpdir):
         package_dir={"": "src"},
         python_requires=">3.6",
         install_requires=requirements,
-        entry_points={},
+        entry_points={{}},
     )
     """
     assert dependency_file.read() == dedent(after)
@@ -446,8 +444,8 @@ def test_setup_call_requirements_separate(tmpdir):
         """         "psutil>=5.7,<6",\n"""
         """-        "requests>=2.4.2,<3"\n"""
         """+        "requests>=2.4.2,<3",\n"""
-        """+        "defusedxml~=0.7.1",\n"""
-        """+        "security~=1.2.0",\n"""
+        f"""+        "{DefusedXML.requirement}",\n"""
+        f"""+        "{Security.requirement}",\n"""
         "     ],\n "
         "    entry_points={},\n"
         " )\n"

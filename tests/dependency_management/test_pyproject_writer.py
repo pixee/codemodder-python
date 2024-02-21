@@ -45,7 +45,7 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
     dependencies = [DefusedXML, Security]
     changeset = writer.write(dependencies, dry_run=dry_run)
 
-    updated_pyproject = """\
+    updated_pyproject = f"""\
         [build-system]
         requires = ["setuptools", "setuptools_scm>=8"]
         build-backend = "setuptools.build_meta"
@@ -61,8 +61,8 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
             "libcst~=1.1.0",
             "pylint~=3.0.0",
             "PyYAML~=6.0.0",
-            "defusedxml~=0.7.1",
-            "security~=1.2.0",
+            "{DefusedXML.requirement}",
+            "{Security.requirement}",
         ]
     """
 
@@ -79,8 +79,8 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
         """     "libcst~=1.1.0",\n"""
         """     "pylint~=3.0.0",\n"""
         """     "PyYAML~=6.0.0",\n"""
-        """+    "defusedxml~=0.7.1",\n"""
-        """+    "security~=1.2.0",\n"""
+        f"""+    "{DefusedXML.requirement}",\n"""
+        f"""+    "{Security.requirement}",\n"""
         " ]\n "
     )
     assert changeset.diff == res
@@ -136,7 +136,7 @@ def test_add_same_dependency_only_once(tmpdir):
     dependencies = [Security, Security]
     writer.write(dependencies)
 
-    updated_pyproject = """\
+    updated_pyproject = f"""\
         [build-system]
         requires = ["setuptools", "setuptools_scm>=8"]
         build-backend = "setuptools.build_meta"
@@ -150,7 +150,7 @@ def test_add_same_dependency_only_once(tmpdir):
             "libcst~=1.1.0",
             "pylint~=3.0.0",
             "PyYAML~=6.0.0",
-            "security~=1.2.0",
+            "{Security.requirement}",
         ]
     """
 

@@ -20,7 +20,10 @@ class RequirementsTxtWriter(DependencyWriter):
         if not original_lines[-1].endswith("\n"):
             original_lines[-1] += "\n"
 
-        requirement_lines = [f"{dep.requirement}\n" for dep in dependencies]
+        requirement_lines = [
+            f"{dep.requirement} \\\n{dep.build_hashes()}" for dep in dependencies
+        ]
+
         updated_lines = original_lines + requirement_lines
 
         diff = create_diff(original_lines, updated_lines)
