@@ -46,9 +46,10 @@ class TestDjangoModelWithoutDunderStr(BaseCodemodTest):
             @property
             def decorated_name(self):
                 return f"***{self.name}***"
+
             def __str__(self):
                 pass
-        
+
         def something():
             pass
         """
