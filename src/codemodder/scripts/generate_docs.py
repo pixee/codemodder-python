@@ -302,7 +302,7 @@ def generate_docs(codemod):
     spacers = "-" * (len(codemod.review_guidance) - 19)
 
     output = f"""---
-title: {codemod.summary}
+title: "{codemod.summary}"
 sidebar_position: 1
 ---
 
