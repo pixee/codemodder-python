@@ -29,7 +29,7 @@ CORE_METADATA = {
     ),
     "enable-jinja2-autoescape": DocMetadata(
         importance="High",
-        guidance_explained="This codemod protects your applications against XSS attacks. We believe using the default behavior is unsafe.",
+        guidance_explained="This codemod protects your applications against XSS attacks. However, it's possible you would like to set the `autoescape` parameter to a custom callable.",
     ),
     "fix-mutable-params": DocMetadata(
         importance="Medium",
