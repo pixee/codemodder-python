@@ -1,5 +1,5 @@
-import requests
 import sys
+from security import safe_requests
 
 
 def get_package_hashes(package_name: str, version: str) -> list[str]:
@@ -7,7 +7,7 @@ def get_package_hashes(package_name: str, version: str) -> list[str]:
     Fetch the SHA256 hashes for a given package version from PyPI.
     """
     url = f"https://pypi.org/pypi/{package_name}/{version}/json"
-    response = requests.get(url, timeout=60)
+    response = safe_requests.get(url, timeout=60)
     hashes = []
 
     if response.status_code == 200:
