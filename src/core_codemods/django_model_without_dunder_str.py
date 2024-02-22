@@ -38,7 +38,7 @@ class DjangoModelWithoutDunderStrTransformer(
         self.report_change(original_node)
 
         dunder_str = cst.FunctionDef(
-            leading_lines=[cst.EmptyLine()],
+            leading_lines=[cst.EmptyLine(indent=False)],
             name=cst.Name("__str__"),
             params=cst.Parameters(params=[cst.Param(name=cst.Name("self"))]),
             body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])]),
