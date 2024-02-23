@@ -281,6 +281,16 @@ class NameResolutionMixin(MetadataDependent):
             return scope.accesses[node]
         return {}
 
+    def class_has_method(self, classdef: cst.ClassDef, method_name: str) -> bool:
+        """Check if a given class definition implements a method of name `method_name`."""
+        for node in classdef.body.body:
+            match node:
+                case cst.FunctionDef(
+                    name=cst.Name(value=value)
+                ) if value == method_name:
+                    return True
+        return False
+
 
 class AncestorPatternsMixin(MetadataDependent):
     METADATA_DEPENDENCIES: ClassVar[Collection[ProviderT]] = (ParentNodeProvider,)
