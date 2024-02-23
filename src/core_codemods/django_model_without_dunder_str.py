@@ -43,9 +43,14 @@ class DjangoModelWithoutDunderStrTransformer(
         return updated_node.with_changes(body=new_body)
 
     def implements_dunder_str(self, original_node: cst.ClassDef) -> bool:
-        for node in original_node.body.body:
-            match node:
-                case cst.FunctionDef(name=cst.Name(value="__str__")):
+        """Check if a ClassDef or its bases implement `__str__`"""
+        if self.class_has_method(original_node, "__str__"):
+            return True
+
+        for base in original_node.bases:
+            if maybe_assignment := self.find_single_assignment(base.value):
+                classdef = maybe_assignment.node
+                if self.class_has_method(classdef, "__str__"):
                     return True
         return False
 
