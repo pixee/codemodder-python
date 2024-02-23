@@ -37,16 +37,9 @@ class DjangoModelWithoutDunderStrTransformer(
 
         self.report_change(original_node)
 
-        dunder_str = cst.FunctionDef(
-            leading_lines=[cst.EmptyLine(indent=False)],
-            name=cst.Name("__str__"),
-            params=cst.Parameters(params=[cst.Param(name=cst.Name("self"))]),
-            body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])]),
-        )
         new_body = updated_node.body.with_changes(
-            body=[*updated_node.body.body, dunder_str]
+            body=[*updated_node.body.body, dunder_str_method()]
         )
-
         return updated_node.with_changes(body=new_body)
 
     def implements_dunder_str(self, original_node: cst.ClassDef) -> bool:
@@ -55,6 +48,24 @@ class DjangoModelWithoutDunderStrTransformer(
                 case cst.FunctionDef(name=cst.Name(value="__str__")):
                     return True
         return False
+
+
+def dunder_str_method() -> cst.FunctionDef:
+    self_body = cst.IndentedBlock(
+        body=[
+            cst.parse_statement("model_name = self.__class__.__name__"),
+            cst.parse_statement(
+                'fields_str = ", ".join([f"{field.name}={getattr(self, field.name)}" for field in self._meta.fields])'
+            ),
+            cst.parse_statement('return f"{model_name}({fields_str})"'),
+        ]
+    )
+    return cst.FunctionDef(
+        leading_lines=[cst.EmptyLine(indent=False)],
+        name=cst.Name("__str__"),
+        params=cst.Parameters(params=[cst.Param(name=cst.Name("self"))]),
+        body=self_body,
+    )
 
 
 DjangoModelWithoutDunderStr = CoreCodemod(

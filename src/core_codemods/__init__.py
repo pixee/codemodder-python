@@ -62,6 +62,7 @@ from .sonar.sonar_django_json_response_type import SonarDjangoJsonResponseType
 from .lazy_logging import LazyLogging
 from .str_concat_in_seq_literal import StrConcatInSeqLiteral
 from .fix_async_task_instantiation import FixAsyncTaskInstantiation
+from .django_model_without_dunder_str import DjangoModelWithoutDunderStr
 
 registry = CodemodCollection(
     origin="pixee",
@@ -118,6 +119,7 @@ registry = CodemodCollection(
         LazyLogging,
         StrConcatInSeqLiteral,
         FixAsyncTaskInstantiation,
+        DjangoModelWithoutDunderStr,
     ],
 )
 
@@ -134,3 +136,4 @@ sonar_registry = CodemodCollection(
         SonarDjangoJsonResponseType,
     ],
 )
+# Import and add Codemod class to registry above.

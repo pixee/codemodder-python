@@ -48,7 +48,9 @@ class TestDjangoModelWithoutDunderStr(BaseCodemodTest):
                 return f"***{self.name}***"
 
             def __str__(self):
-                pass
+                model_name = self.__class__.__name__
+                fields_str = ", ".join([f"{field.name}={getattr(self, field.name)}" for field in self._meta.fields])
+                return f"{model_name}({fields_str})"
 
         def something():
             pass
