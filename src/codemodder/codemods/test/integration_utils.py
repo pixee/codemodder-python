@@ -8,6 +8,7 @@ import sys
 from codemodder import __version__
 from codemodder import registry
 from .validations import execute_code
+from types import ModuleType
 
 SAMPLES_DIR = "tests/samples"
 # Enable import of test modules from test directory
@@ -139,11 +140,13 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             code = f.read()
         assert code == self.original_code
 
-    def check_code_after(self):
+    def check_code_after(self) -> ModuleType:
         with open(self.code_path, "r", encoding="utf-8") as f:
             new_code = f.read()
         assert new_code == self.expected_new_code
-        execute_code(path=self.code_path, allowed_exceptions=self.allowed_exceptions)
+        return execute_code(
+            path=self.code_path, allowed_exceptions=self.allowed_exceptions
+        )
 
     def test_file_rewritten(self):
         """
