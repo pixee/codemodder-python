@@ -136,4 +136,3 @@ sonar_registry = CodemodCollection(
         SonarDjangoJsonResponseType,
     ],
 )
-# Import and add Codemod class to registry above.
