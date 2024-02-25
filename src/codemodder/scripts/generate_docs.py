@@ -234,6 +234,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="Manual instantiation of `asyncio.Task` is discouraged. We believe this change is safe and will not cause any issues.",
     ),
+    "django-model-without-dunder-str": DocMetadata(
+        importance="Low",
+        guidance_explained="This codemod is a great starting point for models with few fields. We encourage you to write custom `__str__` methods that best suit your Django application.",
+    ),
 }
 
 METADATA = CORE_METADATA | {

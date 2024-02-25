@@ -16,7 +16,7 @@ from core_codemods.api.core_codemod import CoreCodemod
 class DjangoModelWithoutDunderStrTransformer(
     LibcstResultTransformer, NameResolutionMixin
 ):
-    change_description = "todoMoved @receiver to the top."
+    change_description = "Add `__str__` definition to `django` Model class."
 
     def leave_ClassDef(
         self, original_node: cst.ClassDef, updated_node: cst.ClassDef
@@ -76,10 +76,12 @@ def dunder_str_method() -> cst.FunctionDef:
 DjangoModelWithoutDunderStr = CoreCodemod(
     metadata=Metadata(
         name="django-model-without-dunder-str",
-        summary="TODOEnsure Django @receiver is the first decorator",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        summary="Ensure Django Model Classes Implement A `__str__` Method",
+        review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
         references=[
-            Reference(url="todohttps://docs.djangoproject.com/en/4.1/topics/signals/"),
+            Reference(
+                url="https://docs.djangoproject.com/en/5.0/ref/models/instances/#django.db.models.Model.__str__"
+            ),
         ],
     ),
     transformer=LibcstTransformerPipeline(DjangoModelWithoutDunderStrTransformer),

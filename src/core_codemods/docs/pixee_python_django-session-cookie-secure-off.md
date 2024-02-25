@@ -1,4 +1,4 @@
-This codemod will set django's `SESSION_COOKIE_SECURE` flag to `True` if it's `False` or missing on the `settings.py` file within django's default directory structure.
+This codemod will set Django's `SESSION_COOKIE_SECURE` flag to `True` if it's `False` or missing on the `settings.py` file within Django's default directory structure.
 
 ```diff
 + SESSION_COOKIE_SECURE = True
