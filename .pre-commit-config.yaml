@@ -38,6 +38,7 @@ repos:
          "types-PyYAML==6.0",
          "types-toml~=0.10",
          "types-requests~=2.13",
+         "lxml-stubs",
     ]
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.2.2
