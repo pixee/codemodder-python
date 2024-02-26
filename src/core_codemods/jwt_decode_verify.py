@@ -5,41 +5,17 @@ from core_codemods.api import (
     Metadata,
     Reference,
     ReviewGuidance,
-    SimpleCodemod,
 )
+from core_codemods.api.core_codemod import CoreCodemod
+from codemodder.codemods.libcst_transformer import (
+    LibcstTransformerPipeline,
+    LibcstResultTransformer,
+)
+from codemodder.codemods.semgrep import SemgrepRuleDetector
 
 
-class JwtDecodeVerify(SimpleCodemod):
-    metadata = Metadata(
-        name="jwt-decode-verify",
-        summary="Verify JWT Decode",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        references=[
-            Reference(url="https://pyjwt.readthedocs.io/en/stable/api.html"),
-            Reference(
-                url="https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens"
-            ),
-        ],
-    )
+class JwtDecodeVerifyTransformer(LibcstResultTransformer):
     change_description = "Enable all verifications in `jwt.decode` call."
-    detector_pattern = r"""
-            rules:
-                - pattern-either:
-                  - patterns:
-                      - pattern: jwt.decode(..., verify=False, ...)
-                      - pattern-inside: |
-                          import jwt
-                          ...
-                  - patterns:
-                      - pattern: |
-                          jwt.decode(..., options={..., "$KEY": False, ...}, ...)
-                      - metavariable-regex:
-                          metavariable: $KEY
-                          regex: verify_
-                      - pattern-inside: |
-                          import jwt
-                            ...
-        """
 
     def _replace_opts_dict(self, opts_dict):
         new_dict_elements = []
@@ -100,3 +76,39 @@ def is_verify_keyword(element: cst.DictElement) -> bool:
         matchers.matches(element.key, matchers.SimpleString())
         and "verify" in element.key.value
     )
+
+
+JwtDecodeVerify = CoreCodemod(
+    metadata=Metadata(
+        name="jwt-decode-verify",
+        summary="Verify JWT Decode",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(url="https://pyjwt.readthedocs.io/en/stable/api.html"),
+            Reference(
+                url="https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens"
+            ),
+        ],
+    ),
+    transformer=LibcstTransformerPipeline(JwtDecodeVerifyTransformer),
+    detector=SemgrepRuleDetector(
+        r"""
+            rules:
+                - pattern-either:
+                  - patterns:
+                      - pattern: jwt.decode(..., verify=False, ...)
+                      - pattern-inside: |
+                          import jwt
+                          ...
+                  - patterns:
+                      - pattern: |
+                          jwt.decode(..., options={..., "$KEY": False, ...}, ...)
+                      - metavariable-regex:
+                          metavariable: $KEY
+                          regex: verify_
+                      - pattern-inside: |
+                          import jwt
+                            ...
+        """
+    ),
+)
