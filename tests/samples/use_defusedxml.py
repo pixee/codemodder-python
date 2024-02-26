@@ -1,5 +1,7 @@
-from io import StringIO
-from xml.etree import ElementTree, ElementInclude  # pylint: disable=unused-import
+import xml.sax
 
-xml = StringIO("<root>Hello XML</root>")
-et = ElementTree.parse(xml)
+parser = xml.sax.make_parser()
+# myHandler = MyHandler()
+# parser.setContentHandler(myHandler)
+# parser.setFeature(feature_external_ges, True) # Noncompliant
+parser.parse('xxe.xml')
