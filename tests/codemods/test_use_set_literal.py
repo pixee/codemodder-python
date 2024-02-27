@@ -1,5 +1,5 @@
 from core_codemods.use_set_literal import UseSetLiteral
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 
 
 class TestUseSetLiteral(BaseCodemodTest):

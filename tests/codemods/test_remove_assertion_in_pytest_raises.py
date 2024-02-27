@@ -1,7 +1,7 @@
 from core_codemods.remove_assertion_in_pytest_raises import (
     RemoveAssertionInPytestRaises,
 )
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 
 
 class TestRemoveAssertionInPytestRaises(BaseCodemodTest):

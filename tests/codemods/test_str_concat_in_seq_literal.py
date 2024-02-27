@@ -1,6 +1,6 @@
 import pytest
 from core_codemods.str_concat_in_seq_literal import StrConcatInSeqLiteral
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 
 
 class TestList(BaseCodemodTest):

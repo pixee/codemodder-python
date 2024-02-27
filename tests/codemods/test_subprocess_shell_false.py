@@ -1,6 +1,6 @@
 import pytest
 from core_codemods.subprocess_shell_false import SubprocessShellFalse
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 
 each_func = pytest.mark.parametrize(
     "func", ["check_output", "check_call", "run", "call", "Popen"]

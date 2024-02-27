@@ -3,7 +3,7 @@ import mock
 
 from codemodder.dependency import Security
 from core_codemods.process_creation_sandbox import ProcessSandbox
-from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseSemgrepCodemodTest
 
 
 @mock.patch("codemodder.codemods.api.FileContext.add_dependency")

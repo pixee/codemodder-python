@@ -1,6 +1,6 @@
 import pytest
 from core_codemods.fix_async_task_instantiation import FixAsyncTaskInstantiation
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 
 
 class TestFixAsyncTaskInstantiation(BaseCodemodTest):

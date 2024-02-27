@@ -1,6 +1,6 @@
 import pytest
 from core_codemods.harden_ruamel import HardenRuamel
-from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseSemgrepCodemodTest
 
 
 class TestHardenRuamel(BaseSemgrepCodemodTest):

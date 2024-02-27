@@ -1,6 +1,6 @@
 import json
 from core_codemods.sonar.sonar_fix_assert_tuple import SonarFixAssertTuple
-from tests.codemods.base_codemod_test import BaseSASTCodemodTest
+from codemodder.codemods.test import BaseSASTCodemodTest
 
 
 class TestSonarFixAssertTuple(BaseSASTCodemodTest):

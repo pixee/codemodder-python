@@ -1,6 +1,6 @@
 import pytest
 from core_codemods.upgrade_sslcontext_tls import UpgradeSSLContextTLS
-from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseSemgrepCodemodTest
 
 INSECURE_PROTOCOLS = [
     "PROTOCOL_SSLv2",

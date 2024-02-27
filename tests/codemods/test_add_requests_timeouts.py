@@ -4,7 +4,7 @@ from core_codemods.add_requests_timeouts import (
     AddRequestsTimeouts,
     TransformAddRequestsTimeouts,
 )
-from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseSemgrepCodemodTest
 
 METHODS = ["get", "post", "put", "delete", "head", "options", "patch"]
 TIMEOUT = TransformAddRequestsTimeouts.DEFAULT_TIMEOUT

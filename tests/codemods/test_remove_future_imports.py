@@ -1,7 +1,7 @@
 import pytest
 
 from core_codemods.remove_future_imports import RemoveFutureImports, DEPRECATED_NAMES
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 
 
 class TestRemoveFutureImports(BaseCodemodTest):

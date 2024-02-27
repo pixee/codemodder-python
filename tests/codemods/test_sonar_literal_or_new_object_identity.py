@@ -2,7 +2,7 @@ import json
 from core_codemods.sonar.sonar_literal_or_new_object_identity import (
     SonarLiteralOrNewObjectIdentity,
 )
-from tests.codemods.base_codemod_test import BaseSASTCodemodTest
+from codemodder.codemods.test import BaseSASTCodemodTest
 
 
 class TestSonarLiteralOrNewObjectIdentity(BaseSASTCodemodTest):
