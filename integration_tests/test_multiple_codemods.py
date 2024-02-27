@@ -6,6 +6,7 @@ import subprocess
 import pytest
 
 from codemodder.codemods.test.integration_utils import SAMPLES_DIR
+from security import safe_command
 
 
 class TestMultipleCodemods:
@@ -32,8 +33,7 @@ class TestMultipleCodemods:
             '--path-exclude=""',
         ]
 
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
             shell=False,
         )
