@@ -1,6 +1,6 @@
 import json
 from core_codemods.sonar.sonar_exception_without_raise import SonarExceptionWithoutRaise
-from tests.codemods.base_codemod_test import BaseSASTCodemodTest
+from codemodder.codemods.test import BaseSASTCodemodTest
 
 
 class TestSonarExceptionWithoutRaise(BaseSASTCodemodTest):

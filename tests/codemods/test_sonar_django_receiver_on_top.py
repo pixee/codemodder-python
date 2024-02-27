@@ -1,6 +1,6 @@
 import json
 from core_codemods.sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
-from tests.codemods.base_codemod_test import BaseSASTCodemodTest
+from codemodder.codemods.test import BaseSASTCodemodTest
 
 
 class TestSonarDjangoReceiverOnTop(BaseSASTCodemodTest):

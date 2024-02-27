@@ -2,7 +2,7 @@ import os
 import subprocess
 import shutil
 import pytest
-from integration_tests.base_test import SAMPLES_DIR, CleanRepoMixin
+from codemodder.codemods.test.integration_utils import SAMPLES_DIR, CleanRepoMixin
 from textwrap import dedent
 
 

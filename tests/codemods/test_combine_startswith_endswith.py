@@ -1,5 +1,5 @@
 import pytest
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.combine_startswith_endswith import CombineStartswithEndswith
 
 each_func = pytest.mark.parametrize("func", ["startswith", "endswith"])

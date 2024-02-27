@@ -2,7 +2,7 @@ from core_codemods.numpy_nan_equality import NumpyNanEqualityTransformer
 from core_codemods.sonar.sonar_numpy_nan_equality import (
     SonarNumpyNanEquality,
 )
-from integration_tests.base_test import (
+from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )

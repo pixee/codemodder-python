@@ -1,5 +1,5 @@
 from core_codemods.limit_readline import LimitReadline
-from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseSemgrepCodemodTest
 
 
 class TestLimitReadline(BaseSemgrepCodemodTest):

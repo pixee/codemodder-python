@@ -1,5 +1,5 @@
 import pytest
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.fix_assert_tuple import FixAssertTuple
 
 

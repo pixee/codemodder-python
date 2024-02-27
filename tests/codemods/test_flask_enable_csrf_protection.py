@@ -1,5 +1,5 @@
 from core_codemods.flask_enable_csrf_protection import FlaskEnableCSRFProtection
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 
 
 class TestFlaskEnableCSRFProtection(BaseCodemodTest):

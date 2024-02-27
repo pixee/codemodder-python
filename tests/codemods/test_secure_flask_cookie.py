@@ -1,6 +1,6 @@
 import pytest
 from core_codemods.secure_flask_cookie import SecureFlaskCookie
-from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseSemgrepCodemodTest
 
 each_func = pytest.mark.parametrize("func", ["make_response", "Response"])
 

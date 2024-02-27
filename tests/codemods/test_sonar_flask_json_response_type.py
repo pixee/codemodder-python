@@ -2,7 +2,7 @@ import json
 from core_codemods.sonar.sonar_flask_json_response_type import (
     SonarFlaskJsonResponseType,
 )
-from tests.codemods.base_codemod_test import BaseSASTCodemodTest
+from codemodder.codemods.test import BaseSASTCodemodTest
 
 
 class TestSonarFlaskJsonResponseType(BaseSASTCodemodTest):

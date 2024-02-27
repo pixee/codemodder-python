@@ -1,7 +1,7 @@
 import pytest
 
 from core_codemods.fix_mutable_params import FixMutableParams
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 
 
 class TestFixMutableParams(BaseCodemodTest):

@@ -1,6 +1,6 @@
 import pytest
 from core_codemods.with_threading_lock import WithThreadingLock
-from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseSemgrepCodemodTest
 
 each_class = pytest.mark.parametrize(
     "klass",

@@ -2,7 +2,7 @@ import pytest
 from core_codemods.django_session_cookie_secure_off import (
     DjangoSessionCookieSecureOff,
 )
-from tests.codemods.base_codemod_test import BaseDjangoCodemodTest
+from codemodder.codemods.test import BaseDjangoCodemodTest
 
 
 class TestDjangoSessionSecureCookieOff(BaseDjangoCodemodTest):

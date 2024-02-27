@@ -1,5 +1,5 @@
 import pytest
-from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseSemgrepCodemodTest
 from core_codemods.lazy_logging import LazyLogging
 
 logging_funcs = {"debug", "info", "warning", "warn", "error", "critical"}

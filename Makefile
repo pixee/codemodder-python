@@ -1,5 +1,5 @@
 PYTEST = pytest -v
-COV_FLAGS = --cov-fail-under=95 --cov=codemodder --cov=core_codemods
+COV_FLAGS = --cov-fail-under=94 --cov=codemodder --cov=core_codemods
 XDIST_FLAGS = --numprocesses auto
 
 test:

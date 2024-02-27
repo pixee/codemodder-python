@@ -7,7 +7,7 @@ import sys
 
 from codemodder import __version__
 from codemodder import registry
-from tests.validations import execute_code
+from .validations import execute_code
 
 SAMPLES_DIR = "tests/samples"
 # Enable import of test modules from test directory
@@ -46,12 +46,12 @@ class DependencyTestMixin:
 
 class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     codemod = NotImplementedError
-    code_path: str = NotImplementedError
+    code_path = NotImplementedError
     original_code = NotImplementedError
     expected_new_code = NotImplementedError
     output_path = "test-codetf.txt"
     num_changes = 1
-    _lines = []
+    _lines: list = []
     num_changed_files = 1
     allowed_exceptions = ()
     sonar_issues_json: str | None = None

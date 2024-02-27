@@ -1,5 +1,5 @@
 from core_codemods.django_json_response_type import DjangoJsonResponseType
-from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseSemgrepCodemodTest
 
 
 class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):

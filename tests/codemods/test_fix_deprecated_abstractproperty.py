@@ -1,5 +1,5 @@
 from core_codemods.fix_deprecated_abstractproperty import FixDeprecatedAbstractproperty
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 
 
 class TestFixDeprecatedAbstractproperty(BaseCodemodTest):

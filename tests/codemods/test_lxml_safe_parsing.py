@@ -1,6 +1,6 @@
 import pytest
 from core_codemods.lxml_safe_parsing import LxmlSafeParsing
-from tests.codemods.base_codemod_test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseSemgrepCodemodTest
 
 each_func = pytest.mark.parametrize("func", ["parse", "fromstring"])
 

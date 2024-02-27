@@ -8,7 +8,7 @@ from core_codemods.use_defused_xml import (
     SAX_METHODS,
     UseDefusedXml,
 )
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 
 
 @mock.patch("codemodder.codemods.api.FileContext.add_dependency")
