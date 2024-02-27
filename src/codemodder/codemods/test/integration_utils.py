@@ -141,7 +141,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert code == self.original_code
 
     def check_code_after(self) -> ModuleType:
-        with open(self.code_path, "r", encoding="utf-8") as f:
+        with open(self.code_path, "r", encoding="utf-8") as f:  # type: ignore
             new_code = f.read()
         assert new_code == self.expected_new_code
         return execute_code(

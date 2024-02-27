@@ -1,5 +1,5 @@
 from core_codemods.django_model_without_dunder_str import DjangoModelWithoutDunderStr
-from tests.codemods.base_codemod_test import BaseCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 
 
 class TestDjangoModelWithoutDunderStr(BaseCodemodTest):
@@ -49,7 +49,7 @@ class TestDjangoModelWithoutDunderStr(BaseCodemodTest):
 
             def __str__(self):
                 model_name = self.__class__.__name__
-                fields_str = ", ".join([f"{field.name}={getattr(self, field.name)}" for field in self._meta.fields])
+                fields_str = ", ".join((f"{field.name}={getattr(self, field.name)}" for field in self._meta.fields))
                 return f"{model_name}({fields_str})"
 
         def something():

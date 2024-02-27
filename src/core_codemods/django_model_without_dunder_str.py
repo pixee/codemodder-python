@@ -60,7 +60,7 @@ def dunder_str_method() -> cst.FunctionDef:
         body=[
             cst.parse_statement("model_name = self.__class__.__name__"),
             cst.parse_statement(
-                'fields_str = ", ".join([f"{field.name}={getattr(self, field.name)}" for field in self._meta.fields])'
+                'fields_str = ", ".join((f"{field.name}={getattr(self, field.name)}" for field in self._meta.fields))'
             ),
             cst.parse_statement('return f"{model_name}({fields_str})"'),
         ]
