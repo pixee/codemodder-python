@@ -1,6 +1,6 @@
 from core_codemods.django_receiver_on_top import DjangoReceiverOnTopTransformer
 from core_codemods.sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
-from integration_tests.base_test import (
+from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )

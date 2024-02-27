@@ -46,12 +46,12 @@ class DependencyTestMixin:
 
 class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     codemod = NotImplementedError
-    code_path: str = NotImplementedError
+    code_path = NotImplementedError
     original_code = NotImplementedError
     expected_new_code = NotImplementedError
     output_path = "test-codetf.txt"
     num_changes = 1
-    _lines = []
+    _lines: list = []
     num_changed_files = 1
     allowed_exceptions = ()
     sonar_issues_json: str | None = None

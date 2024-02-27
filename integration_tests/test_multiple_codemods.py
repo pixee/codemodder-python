@@ -5,7 +5,7 @@ import subprocess
 
 import pytest
 
-from .base_test import SAMPLES_DIR
+from codemodder.codemods.test.integration_utils import SAMPLES_DIR
 
 
 class TestMultipleCodemods:
