@@ -7,7 +7,7 @@ import sys
 
 from codemodder import __version__
 from codemodder import registry
-from tests.validations import execute_code
+from .validations import execute_code
 
 SAMPLES_DIR = "tests/samples"
 # Enable import of test modules from test directory
