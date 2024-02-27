@@ -1,8 +1,8 @@
-If you've ever actively developed or debugged a Django application, you may have noticed Django models and their instances can sometimes be hard to read or distinguish one instance from another. Loading models in the interactive Django console or viewing them in the admin interface can be puzzling. This is because Django is trying to display your model objects as a plain strings.
+If you've ever actively developed or debugged a Django application, you may have noticed that the string representations of Django models and their instances can sometimes be hard to read or to distinguish from one another. Loading models in the interactive Django console or viewing them in the admin interface can be puzzling. This is because the default string representation of Django models is fairly generic.
 
-We've written this codemod to make your model objects human-readable. It will automatically detect all of your model's fields and display them as a nice string.
+This codemod is intended to make the string representation of your model objects more human-readable. It will automatically detect all of your model's fields and display them as a descriptive string.
 
-For example, the `Question` model from Django's popular Poll App tutorial will look like this:
+For example, the default string representation of the `Question` model from Django's popular Poll App tutorial looks like this:
 ```diff
 from django.db import models
 
@@ -16,7 +16,7 @@ class Question(models.Model):
 +        return f"{model_name}({fields_str})"
 ```
 
-Without this change, the `Question` objects look like this in the interactive Django shell:
+Without this change, the  string representation of `Question` objects look like this in the interactive Django shell:
 ```
 >>> Question.objects.all()
 <QuerySet [<Question: Question object (1)>]>

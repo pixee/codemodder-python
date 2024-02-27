@@ -76,7 +76,7 @@ def dunder_str_method() -> cst.FunctionDef:
 DjangoModelWithoutDunderStr = CoreCodemod(
     metadata=Metadata(
         name="django-model-without-dunder-str",
-        summary="Ensure Django Model Classes Implement A `__str__` Method",
+        summary="Ensure Django Model Classes Implement a `__str__` Method",
         review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
         references=[
             Reference(
