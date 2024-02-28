@@ -1,5 +1,7 @@
 import importlib.util
 import tempfile
+from types import ModuleType
+from typing import Optional
 
 
 def execute_code(*, path=None, code=None, allowed_exceptions=None):
@@ -11,20 +13,29 @@ def execute_code(*, path=None, code=None, allowed_exceptions=None):
     ), "Must pass either path to code or code as a str."
 
     if path:
-        _run_code(path, allowed_exceptions)
-        return
+        return _run_code(path, allowed_exceptions)
     with tempfile.NamedTemporaryFile(suffix=".py", mode="w+t") as temp:
         temp.write(code)
-        _run_code(temp.name, allowed_exceptions)
+        return _run_code(temp.name, allowed_exceptions)
 
 
-def _run_code(path, allowed_exceptions=None):
-    """Execute the code in `path` in its own namespace."""
+def _run_code(path, allowed_exceptions=None) -> Optional[ModuleType]:
+    """
+    Execute the code in `path` in its own namespace.
+    Return loaded module for any additional testing later on.
+    """
     allowed_exceptions = allowed_exceptions or ()
 
     spec = importlib.util.spec_from_file_location("output_code", path)
+    if not spec:
+        return None
+
     module = importlib.util.module_from_spec(spec)
+    if not spec.loader:
+        return None
     try:
         spec.loader.exec_module(module)
     except allowed_exceptions:
         pass
+
+    return module
