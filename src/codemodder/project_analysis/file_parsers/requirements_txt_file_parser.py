@@ -28,7 +28,9 @@ class RequirementsTxtParser(BaseParser):
             logger.debug("Unknown encoding for file: %s", file)
             return None
 
-        dependencies = set(line.strip() for line in lines if not line.startswith("#"))
+        dependencies = set(
+            line.split("#")[0].strip() for line in lines if not line.startswith("#")
+        )
 
         return PackageStore(
             type=self.file_type,
