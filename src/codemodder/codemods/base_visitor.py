@@ -52,7 +52,6 @@ class UtilsMixin(MetadataDependent):
 
 
 class BaseTransformer(VisitorBasedCodemodCommand, UtilsMixin):
-
     def __init__(
         self,
         context,
@@ -65,7 +64,6 @@ class BaseTransformer(VisitorBasedCodemodCommand, UtilsMixin):
 
 
 class BaseVisitor(ContextAwareVisitor, UtilsMixin):
-
     def __init__(
         self,
         context,

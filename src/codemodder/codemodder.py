@@ -19,6 +19,7 @@ from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default
 from codemodder.result import ResultSet
+from codemodder.sarifs import detect_sarif_tools
 from codemodder.semgrep import run as run_semgrep
 
 
@@ -156,8 +157,12 @@ def run(original_args) -> int:
     logger.info("codemodder: python/%s", __version__)
     logger.info("command: %s %s", Path(sys.argv[0]).name, " ".join(original_args))
 
-    tool_result_files_map = {"sonar": argv.sonar_issues_json}
-    # TODO find the tool name in the --sarif files here and populate the dict
+    # TODO: sonar files should be _parsed_ here as well
+    # TODO: this should be dict[str, list[Path]]
+    tool_result_files_map: dict[str, list[str]] = detect_sarif_tools(
+        [Path(name) for name in argv.sarif or []]
+    )
+    tool_result_files_map["sonar"] = argv.sonar_issues_json
 
     repo_manager = PythonRepoManager(Path(argv.directory))
     context = CodemodExecutionContext(
