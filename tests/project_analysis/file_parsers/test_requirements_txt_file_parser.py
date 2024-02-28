@@ -37,3 +37,13 @@ class TestRequirementsTxtParser:
         parser = RequirementsTxtParser(pkg_with_reqs_txt)
         found = parser.parse()
         assert len(found) == 0
+
+    def test_trailing_comments(self, pkg_with_reqs_txt_and_comments):
+        parser = RequirementsTxtParser(pkg_with_reqs_txt_and_comments)
+        found = parser.parse()
+        assert len(found) == 1
+        store = found[0]
+        assert store.type.value == "requirements.txt"
+        assert store.file == pkg_with_reqs_txt_and_comments / parser.file_type.value
+        assert store.py_versions == []
+        assert len(store.dependencies) == 4

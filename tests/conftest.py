@@ -45,6 +45,15 @@ def pkg_with_reqs_txt(tmp_path_factory):
 
 
 @pytest.fixture(scope="module")
+def pkg_with_reqs_txt_and_comments(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp("foo")
+    req_file = base_dir / "requirements.txt"
+    reqs = "# comment\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4 # comment\npylint>1\n"
+    req_file.write_text(reqs)
+    return base_dir
+
+
+@pytest.fixture(scope="module")
 def pkg_with_reqs_txt_utf_16(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("foo")
     req_file = base_dir / "requirements.txt"
