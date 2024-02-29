@@ -86,6 +86,19 @@ deserialized_data = yam.load(data, Loader=yam.SafeLoader)
 
         self.run_and_assert(tmpdir, input_code, expected)
 
+    def test_default_loader_unsafe(self, tmpdir):
+        input_code = """
+        import yaml
+
+        yaml.load(data)
+        """
+        expected = """
+        import yaml
+
+        yaml.load(data, Loader=yaml.SafeLoader)
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
+
 
 class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
     codemod = HardenPyyaml
