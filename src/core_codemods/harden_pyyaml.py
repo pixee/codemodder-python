@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, cast
 import libcst as cst
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from core_codemods.api import (
@@ -18,6 +18,9 @@ class HardenPyyaml(SimpleCodemod, NameResolutionMixin):
             Reference(
                 url="https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data"
             ),
+            Reference(
+                url="https://github.com/yaml/pyyaml/wiki/PyYAML-yaml.load(input)-Deprecation"
+            ),
         ],
     )
     change_description = "Replace unsafe `pyyaml` loader with `SafeLoader` in calls to `yaml.load` or custom loader classes."
@@ -26,6 +29,12 @@ class HardenPyyaml(SimpleCodemod, NameResolutionMixin):
     detector_pattern = """
         rules:
             - pattern-either:
+              - patterns:
+                  - pattern: yaml.load(...)
+                  - pattern-inside: |
+                      import yaml
+                      ...
+                      yaml.load($ARG)
               - patterns:
                   - pattern: yaml.load(...)
                   - pattern-inside: |
@@ -81,10 +90,25 @@ class HardenPyyaml(SimpleCodemod, NameResolutionMixin):
                 )
                 if (maybe_name := maybe_name or self._module_name) == self._module_name:
                     self.add_needed_import(self._module_name)
+                updated_node = cast(cst.Call, updated_node)  # satisfy the type checker
                 new_args = [
                     *updated_node.args[:1],
-                    updated_node.args[1].with_changes(
-                        value=self.parse_expression(f"{maybe_name}.SafeLoader")
+                    # This is the case where the arg is present but a bad value
+                    (
+                        updated_node.args[1].with_changes(
+                            value=self.parse_expression(f"{maybe_name}.SafeLoader")
+                        )
+                        if len(updated_node.args) > 1
+                        # This is the case where the arg is not present
+                        # Note that this case is deprecated in PyYAML 5.1 since the default is unsafe
+                        else cst.Arg(
+                            keyword=cst.Name("Loader"),
+                            value=self.parse_expression(f"{maybe_name}.SafeLoader"),
+                            equal=cst.AssignEqual(
+                                whitespace_before=cst.SimpleWhitespace(""),
+                                whitespace_after=cst.SimpleWhitespace(""),
+                            ),
+                        )
                     ),
                 ]
                 return self.update_arg_target(updated_node, new_args)
