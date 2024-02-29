@@ -83,6 +83,9 @@ class UseDefusedXml(SimpleCodemod):
         return _matching_functions
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        if not self.node_is_selected(tree):
+            return tree
+
         visitor = DefusedXmlModifier(
             self.context,
             self.file_context,
