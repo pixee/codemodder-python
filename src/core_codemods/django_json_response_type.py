@@ -14,17 +14,6 @@ from core_codemods.api.core_codemod import CoreCodemod
 
 class DjangoJsonResponseTypeTransformer(LibcstResultTransformer):
     change_description = "Sets `content_type` to `application/json`."
-    detector_pattern = """
-        rules:
-          - id: django-json-response-type
-            mode: taint
-            pattern-sources:
-              - pattern: json.dumps(...)
-            pattern-sinks:
-              - patterns:
-                - pattern: django.http.HttpResponse(...)
-                - pattern-not: django.http.HttpResponse(...,content_type=...,...)
-        """
 
     def on_result_found(self, _, updated_node):
         return self.update_arg_target(
