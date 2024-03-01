@@ -41,9 +41,7 @@ class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
     IGNORE_ANNOTATIONS = ["S603"]
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
-        if not self.filter_by_path_includes_or_excludes(
-            self.node_position(original_node)
-        ):
+        if not self.node_is_selected(original_node):
             return updated_node
 
         if self.find_base_name(original_node.func) in self.SUBPROCESS_FUNCS:
@@ -64,4 +62,4 @@ class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
                         [NewArg(name="shell", value="False", add_if_missing=False)],
                     )
                     return self.update_arg_target(updated_node, new_args)
-        return original_node
+        return updated_node
