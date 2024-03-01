@@ -80,6 +80,8 @@ class BaseCodemodTest:
             output_code = tmp_file.read()
 
         assert output_code == dedent(expected)
+        # All changes must have non-empty descriptions
+        assert all(change.description for change in changes.changes)
 
     def run_and_assert_filepath(
         self,

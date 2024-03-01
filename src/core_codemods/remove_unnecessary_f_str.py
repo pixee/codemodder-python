@@ -28,6 +28,8 @@ class RemoveUnnecessaryFStr(SimpleCodemod, UnnecessaryFormatString):
         ],
     )
 
+    change_description = "Remove unnecessary f-string"
+
     def __init__(
         self, codemod_context: CodemodContext, *codemod_args, **codemod_kwargs
     ):

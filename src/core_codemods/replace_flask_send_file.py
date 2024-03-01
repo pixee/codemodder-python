@@ -21,6 +21,10 @@ class ReplaceFlaskSendFile(SimpleCodemod, NameAndAncestorResolutionMixin):
         ],
     )
 
+    change_description = (
+        "Replace unsafe usage of `flask.send_file` with `flask.send_from_directory`"
+    )
+
     pos_to_key_map: list[str | None] = [
         "mimetype",
         "as_attachment",

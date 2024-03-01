@@ -66,6 +66,8 @@ class HTTPSConnection(SimpleCodemod):
         ],
     )
 
+    change_description = "Enforce HTTPS connection for `urllib3`"
+
     METADATA_DEPENDENCIES = (PositionProvider,)
 
     matching_functions: set[str] = {
