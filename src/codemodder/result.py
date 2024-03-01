@@ -1,8 +1,15 @@
+from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
+
+import libcst as cst
+from libcst._position import CodeRange
 
 from .utils.abc_dataclass import ABCDataclass
+
+if TYPE_CHECKING:
+    from codemodder.context import CodemodExecutionContext
 
 
 @dataclass
@@ -24,16 +31,20 @@ class Result(ABCDataclass):
     rule_id: str
     locations: list[Location]
 
-    def match_location(self, pos, node):
-        for location in self.locations:
-            start_column = location.start.column
-            end_column = location.end.column
-            return (
-                pos.start.line == location.start.line
-                and (pos.start.column in (start_column - 1, start_column))
-                and pos.end.line == location.end.line
-                and (pos.end.column in (end_column - 1, end_column))
+    def match_location(self, pos: CodeRange, node: cst.CSTNode) -> bool:
+        del node
+        return any(
+            pos.start.line == location.start.line
+            and (
+                pos.start.column
+                in ((start_column := location.start.column) - 1, start_column)
             )
+            and pos.end.line == location.end.line
+            and (
+                pos.end.column in ((end_column := location.end.column) - 1, end_column)
+            )
+            for location in self.locations
+        )
 
 
 class ResultSet(dict[str, dict[Path, list[Result]]]):
@@ -41,7 +52,19 @@ class ResultSet(dict[str, dict[Path, list[Result]]]):
         for loc in result.locations:
             self.setdefault(result.rule_id, {}).setdefault(loc.file, []).append(result)
 
-    def results_for_rule_and_file(self, rule_id: str, file: Path) -> list[Result]:
+    def results_for_rule_and_file(
+        self, context: CodemodExecutionContext, rule_id: str, file: Path
+    ) -> list[Result]:
+        """
+        Return list of results for a given rule and file.
+
+        :param context: The codemod execution context
+        :param rule_id: The rule ID
+        :param file: The filename
+
+        Some implementers may need to use the context to compute paths that are relative to the target directory.
+        """
+        del context
         return self.get(rule_id, {}).get(file, [])
 
     def files_for_rule(self, rule_id: str) -> list[Path]:

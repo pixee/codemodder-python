@@ -188,7 +188,7 @@ class BaseCodemod(metaclass=ABCMeta):
             findings_for_rule = []
             for rule in rules:
                 findings_for_rule.extend(
-                    results.results_for_rule_and_file(rule, filename)
+                    results.results_for_rule_and_file(context, rule, filename)
                 )
 
         file_context = FileContext(
@@ -198,6 +198,8 @@ class BaseCodemod(metaclass=ABCMeta):
             line_include,
             findings_for_rule,
         )
+
+        # TODO: for SAST tools we should preemtively filter out files that are not part of the result set
 
         if change_set := self.transformer.apply(
             context, file_context, findings_for_rule

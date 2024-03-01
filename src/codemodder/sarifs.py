@@ -1,10 +1,42 @@
+from abc import ABCMeta, abstractmethod
+from importlib.metadata import entry_points
 import json
 from pathlib import Path
 from typing import Optional
 
 from typing_extensions import Self
 
+from codemodder.logging import logger
 from .result import ResultSet, Result, Location, LineInfo
+
+
+class AbstractSarifToolDetector(metaclass=ABCMeta):
+    @classmethod
+    @abstractmethod
+    def detect(cls, run_data: dict) -> bool:
+        pass
+
+
+def detect_sarif_tools(filenames: list[Path]) -> dict[str, list[str]]:
+    results: dict[str, list[str]] = {}
+
+    logger.debug("loading registered SARIF tool detectors")
+    detectors = {
+        ent.name: ent.load() for ent in entry_points().select(group="sarif_detectors")
+    }
+    for fname in filenames:
+        data = json.loads(fname.read_text())
+        for name, det in detectors.items():
+            # TODO: handle malformed sarif?
+            for run in data["runs"]:
+                try:
+                    if det.detect(run):
+                        logger.debug("detected %s sarif: %s", name, fname)
+                        results.setdefault(name, []).append(str(fname))
+                except (KeyError, AttributeError, ValueError):
+                    continue
+
+    return results
 
 
 def extract_rule_id(result, sarif_run) -> Optional[str]:
@@ -21,6 +53,7 @@ def extract_rule_id(result, sarif_run) -> Optional[str]:
     return None
 
 
+# NOTE: These Sarif classes are actually specific to Semgrep and should be moved elsewhere
 class SarifLocation(Location):
     @classmethod
     def from_sarif(cls, sarif_location) -> Self:
