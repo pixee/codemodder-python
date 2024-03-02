@@ -22,6 +22,7 @@ class TestSonarJwtDecodeVerify(BaseSASTCodemodTest):
 
         encoded_jwt = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
         decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=False)
+        decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": False})
         """
         expected = """
         import jwt
@@ -34,6 +35,7 @@ class TestSonarJwtDecodeVerify(BaseSASTCodemodTest):
 
         encoded_jwt = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
         decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)
+        decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": True})
         """
         issues = {
             "issues": [
@@ -47,7 +49,20 @@ class TestSonarJwtDecodeVerify(BaseSASTCodemodTest):
                         "startOffset": 76,
                         "endOffset": 88,
                     },
-                }
+                },
+                {
+                    "rule": "python:S5659",
+                    "status": "OPEN",
+                    "component": f"{tmpdir / 'code.py'}",
+                    "textRange": {
+                        "startLine": 12,
+                        "endLine": 12,
+                        "startOffset": 84,
+                        "endOffset": 111,
+                    },
+                },
             ]
         }
-        self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(issues))
+        self.run_and_assert(
+            tmpdir, input_code, expected, results=json.dumps(issues), num_changes=2
+        )

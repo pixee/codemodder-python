@@ -1,5 +1,6 @@
 import libcst as cst
 from codemodder.codemods.base_codemod import Reference
+from codemodder.result import same_line, fuzzy_column_match
 from codemodder.codemods.sonar import SonarCodemod
 from codemodder.codemods.libcst_transformer import (
     LibcstTransformerPipeline,
@@ -22,15 +23,10 @@ class NewTransf(JwtDecodeVerifyTransformer):
         return False
 
     def match_location(self, pos, result):
-        for location in result.locations:
-            start_column = location.start.column
-            end_column = location.end.column
-            return (
-                pos.start.line == location.start.line
-                and pos.end.line == location.end.line
-                and pos.start.column <= start_column <= pos.end.column + 1
-                and pos.start.column <= end_column <= pos.end.column + 1
-            )
+        return any(
+            same_line(pos, location) and fuzzy_column_match(pos, location)
+            for location in result.locations
+        )
 
 
 SonarJwtDecodeVerify = SonarCodemod.from_core_codemod(
