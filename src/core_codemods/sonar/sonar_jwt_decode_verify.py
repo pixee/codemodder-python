@@ -8,10 +8,13 @@ from codemodder.codemods.libcst_transformer import (
 from core_codemods.jwt_decode_verify import JwtDecodeVerify, JwtDecodeVerifyTransformer
 
 
-class NewTransf(JwtDecodeVerifyTransformer):
+class JwtDecodeVerifySonarTransformer(JwtDecodeVerifyTransformer):
     def filter_by_result(self, node) -> bool:
-        # sonar results for this rule have a start/end column
-        # for the verify keyword, not for the decode call
+        """
+        Special case result-matching for this rule because the sonar
+        results returned have a start/end column for the verify keyword
+        within the `decode` call, not for the entire call like semgrep returns.
+        """
         if self.results is None:
             return False
         match node:
@@ -36,5 +39,5 @@ SonarJwtDecodeVerify = SonarCodemod.from_core_codemod(
     new_references=[
         Reference(url="https://rules.sonarsource.com/python/RSPEC-5659/"),
     ],
-    transformer=LibcstTransformerPipeline(NewTransf),
+    transformer=LibcstTransformerPipeline(JwtDecodeVerifySonarTransformer),
 )

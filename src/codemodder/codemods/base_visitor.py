@@ -23,7 +23,8 @@ class UtilsMixin(MetadataDependent):
     def filter_by_result(self, node):
         pos_to_match = self.node_position(node)
         if self.results is None:
-            return True  # should be false??
+            # Some codemods must run without results existing.
+            return True
         return any(result.match_location(pos_to_match, node) for result in self.results)
 
     def filter_by_path_includes_or_excludes(self, pos_to_match):
