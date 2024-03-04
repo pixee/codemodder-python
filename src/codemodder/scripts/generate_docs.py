@@ -365,3 +365,6 @@ def main():
         codemod_doc_name = f"{codemod.id.replace(':', '_').replace('/', '_')}.md"
         with open(parent_dir / codemod_doc_name, "w", encoding="utf-8") as f:
             f.write(doc)
+
+
+# Update METADATA above
