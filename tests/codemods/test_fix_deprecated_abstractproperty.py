@@ -6,7 +6,7 @@ property_or_class = pytest.mark.parametrize(
     "deprecated_func, arg_name, new_func",
     [
         ("abstractproperty", "self", "property"),
-        # ("abstractclassmethod", "cls", "classmethod"),
+        ("abstractclassmethod", "cls", "classmethod"),
     ],
 )
 
@@ -40,7 +40,7 @@ class TestFixDeprecatedAbstractproperty(BaseCodemodTest):
         from abc import {deprecated_func}
 
         class A:
-            @abstractproperty
+            @{deprecated_func}
             def foo({arg_name}):
                 pass
         """

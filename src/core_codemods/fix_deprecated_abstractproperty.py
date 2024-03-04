@@ -7,11 +7,14 @@ from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 class FixDeprecatedAbstractproperty(SimpleCodemod, NameResolutionMixin):
     metadata = Metadata(
         name="fix-deprecated-abstractproperty",
-        summary="Replace deprecated abstractproperty",
+        summary="Replace deprecated abstractproperty or abstractclassmethod",
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[
             Reference(
                 url="https://docs.python.org/3/library/abc.html#abc.abstractproperty"
+            ),
+            Reference(
+                url="https://docs.python.org/3/library/abc.html#abc.abstractclassmethod"
             ),
         ],
     )
@@ -27,16 +30,22 @@ class FixDeprecatedAbstractproperty(SimpleCodemod, NameResolutionMixin):
         ):
             return updated_node
 
-        if (
-            base_name := self.find_base_name(original_node.decorator)
-        ) and base_name == "abc.abstractproperty":
+        if (base_name := self.find_base_name(original_node.decorator)) in (
+            "abc.abstractproperty",
+            "abc.abstractclassmethod",
+        ):
             self.add_needed_import("abc")
             self.remove_unused_import(original_node)
             self.add_change(original_node, self.DESCRIPTION)
+            new_decorator = cst.Name(
+                value=(
+                    "property" if base_name == "abc.abstractproperty" else "classmethod"
+                )
+            )
             return cst.FlattenSentinel(
                 [
                     cst.Decorator(
-                        decorator=cst.Name(value="property"),
+                        decorator=new_decorator,
                         trailing_whitespace=updated_node.trailing_whitespace,
                     ),
                     cst.Decorator(
