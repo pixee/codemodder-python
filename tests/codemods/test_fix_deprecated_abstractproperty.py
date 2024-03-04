@@ -7,6 +7,7 @@ property_or_class = pytest.mark.parametrize(
     [
         ("abstractproperty", "self", "property"),
         ("abstractclassmethod", "cls", "classmethod"),
+        ("abstractstaticmethod", "arg", "staticmethod"),
     ],
 )
 

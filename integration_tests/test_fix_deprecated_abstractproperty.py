@@ -28,7 +28,12 @@ class TestFixDeprecatedAbstractproperty(BaseIntegrationTest):
         @abc.abstractmethod
         def hello(cls):
             pass
-            
+
+        @staticmethod
+        @abc.abstractmethod
+        def goodbye():
+            pass
+                        
         @abstractmethod
         def bar(self):
             pass
@@ -39,8 +44,8 @@ class TestFixDeprecatedAbstractproperty(BaseIntegrationTest):
     expected_diff =(
     """--- \n"""
     """+++ \n"""
-    """@@ -1,12 +1,15 @@\n"""
-    """-from abc import abstractproperty as ap, abstractclassmethod, abstractmethod\n"""
+    """@@ -1,16 +1,20 @@\n"""
+    """-from abc import abstractproperty as ap, abstractclassmethod, abstractstaticmethod, abstractmethod\n"""
     """+from abc import abstractmethod\n"""
     """+import abc\n"""
     """ \n"""
@@ -58,8 +63,14 @@ class TestFixDeprecatedAbstractproperty(BaseIntegrationTest):
     """     def hello(cls):\n"""
     """         pass\n"""
     """ \n"""
+    """-    @abstractstaticmethod\n"""
+    """+    @staticmethod\n"""
+    """+    @abc.abstractmethod\n"""
+    """     def goodbye():\n"""
+    """         pass\n"""
+    """ \n"""
     )
     # fmt: on
     expected_line_change = "5"
-    num_changes = 2
+    num_changes = 3
     change_description = FixDeprecatedAbstractproperty.change_description

@@ -1,4 +1,4 @@
-from abc import abstractproperty as ap, abstractclassmethod, abstractmethod
+from abc import abstractproperty as ap, abstractclassmethod, abstractstaticmethod, abstractmethod
 
 
 class A:
@@ -8,6 +8,10 @@ class A:
 
     @abstractclassmethod
     def hello(cls):
+        pass
+
+    @abstractstaticmethod
+    def goodbye():
         pass
 
     @abstractmethod
