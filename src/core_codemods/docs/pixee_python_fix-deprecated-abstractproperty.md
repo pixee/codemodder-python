@@ -1,4 +1,4 @@
-The `@abstractproperty` decorator from `abc` has been [deprecated](https://docs.python.org/3/library/abc.html#abc.abstractproperty) since Python 3.3. This is because it's possible to use `@property` in combination with `@abstractmethod`. 
+The `@abstractproperty`, `@abstractclassmethod`, and `@abstractstaticmethod` decorators from `abc` has been [deprecated](https://docs.python.org/3/library/abc.html) since Python 3.3. This is because it's possible to use `@property`, `@classmethod`, and `@staticmethod`  in combination with `@abstractmethod`. 
 
 Our changes look like the following:
 ```diff
@@ -11,3 +11,5 @@ Our changes look like the following:
     def bar():
         ...
 ```
+
+and similarly for `@abstractclassmethod` and `@abstractstaticmethod`.
