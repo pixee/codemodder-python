@@ -1,138 +1,150 @@
+import pytest
 from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.fix_deprecated_abstractproperty import FixDeprecatedAbstractproperty
 
+property_or_class = pytest.mark.parametrize(
+    "deprecated_func, arg_name, new_func",
+    [
+        ("abstractproperty", "self", "property"),
+        # ("abstractclassmethod", "cls", "classmethod"),
+    ],
+)
 
+
+@property_or_class
 class TestFixDeprecatedAbstractproperty(BaseCodemodTest):
     codemod = FixDeprecatedAbstractproperty
 
-    def test_import(self, tmpdir):
-        original_code = """
+    def test_import(self, tmpdir, deprecated_func, arg_name, new_func):
+        original_code = f"""
         import abc
 
         class A:
-            @abc.abstractproperty
-            def foo(self):
+            @abc.{deprecated_func}
+            def foo({arg_name}):
                 pass
         """
-        new_code = """
+        new_code = f"""
         import abc
 
         class A:
-            @property
+            @{new_func}
             @abc.abstractmethod
-            def foo(self):
+            def foo({arg_name}):
                 pass
         """
         self.run_and_assert(tmpdir, original_code, new_code)
 
-    def test_import_from(self, tmpdir):
-        original_code = """
-        from abc import abstractproperty
+    def test_import_from(self, tmpdir, deprecated_func, arg_name, new_func):
+        original_code = f"""
+        from abc import {deprecated_func}
 
         class A:
             @abstractproperty
-            def foo(self):
+            def foo({arg_name}):
                 pass
         """
-        new_code = """
+        new_code = f"""
         import abc
 
         class A:
-            @property
+            @{new_func}
             @abc.abstractmethod
-            def foo(self):
+            def foo({arg_name}):
                 pass
         """
         self.run_and_assert(tmpdir, original_code, new_code)
 
-    def test_import_alias(self, tmpdir):
-        original_code = """
-        from abc import abstractproperty as ap
+    def test_import_alias(self, tmpdir, deprecated_func, arg_name, new_func):
+        original_code = f"""
+        from abc import {deprecated_func} as ap
 
         class A:
             @ap
-            def foo(self):
+            def foo({arg_name}):
                 pass
         """
-        new_code = """
+        new_code = f"""
         import abc
 
         class A:
-            @property
+            @{new_func}
             @abc.abstractmethod
-            def foo(self):
+            def foo({arg_name}):
                 pass
         """
         self.run_and_assert(tmpdir, original_code, new_code)
 
-    def test_different_abstractproperty(self, tmpdir):
+    def test_different_abstract(self, tmpdir, deprecated_func, arg_name, new_func):
         new_code = (
             original_code
-        ) = """
-        from xyz import abstractproperty
+        ) = f"""
+        from xyz import {deprecated_func}
 
         class A:
-            @abstractproperty
-            def foo(self):
+            @{deprecated_func}
+            def foo({arg_name}):
                 pass
 
-            @property
-            def bar(self):
+            @{new_func}
+            def bar({arg_name}):
                 pass
         """
         self.run_and_assert(tmpdir, original_code, new_code)
 
-    def test_preserve_decorator_order(self, tmpdir):
-        original_code = """
+    def test_preserve_decorator_order(
+        self, tmpdir, deprecated_func, arg_name, new_func
+    ):
+        original_code = f"""
         import abc
 
         class A:
             @whatever
-            @abc.abstractproperty
-            def foo(self):
+            @abc.{deprecated_func}
+            def foo({arg_name}):
                 pass
         """
-        new_code = """
+        new_code = f"""
         import abc
 
         class A:
             @whatever
-            @property
+            @{new_func}
             @abc.abstractmethod
-            def foo(self):
+            def foo({arg_name}):
                 pass
         """
         self.run_and_assert(tmpdir, original_code, new_code)
 
-    def test_preserve_comments(self, tmpdir):
-        original_code = """
+    def test_preserve_comments(self, tmpdir, deprecated_func, arg_name, new_func):
+        original_code = f"""
         import abc
 
         class A:
-            @abc.abstractproperty # comment
-            def foo(self):
+            @abc.{deprecated_func} # comment
+            def foo({arg_name}):
                 pass
         """
-        new_code = """
+        new_code = f"""
         import abc
 
         class A:
-            @property # comment
+            @{new_func} # comment
             @abc.abstractmethod
-            def foo(self):
+            def foo({arg_name}):
                 pass
         """
         self.run_and_assert(tmpdir, original_code, new_code)
 
-    def test_exclude_line(self, tmpdir):
+    def test_exclude_line(self, tmpdir, deprecated_func, arg_name, new_func):
         input_code = (
             expected
-        ) = """
+        ) = f"""
         import abc
 
         class A:
-            @abc.abstractproperty
-            def foo(self):
+            @abc.{deprecated_func}
+            def foo({arg_name}):
                 pass
         """
         lines_to_exclude = [5]
