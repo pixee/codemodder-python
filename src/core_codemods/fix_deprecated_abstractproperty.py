@@ -7,7 +7,7 @@ from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 class FixDeprecatedAbstractproperty(SimpleCodemod, NameResolutionMixin):
     metadata = Metadata(
         name="fix-deprecated-abstractproperty",
-        summary="Replace deprecated abstractproperty or abstractclassmethod",
+        summary="Replace Deprecated `abstractproperty` or `abstractclassmethod` Decorators",
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[
             Reference(
@@ -18,9 +18,7 @@ class FixDeprecatedAbstractproperty(SimpleCodemod, NameResolutionMixin):
             ),
         ],
     )
-    change_description = (
-        "Replace deprecated abstractproperty with property and abstractmethod"
-    )
+    change_description = "Replace deprecated `abc` module decorator."
 
     def leave_Decorator(
         self, original_node: cst.Decorator, updated_node: cst.Decorator
@@ -36,7 +34,7 @@ class FixDeprecatedAbstractproperty(SimpleCodemod, NameResolutionMixin):
         ):
             self.add_needed_import("abc")
             self.remove_unused_import(original_node)
-            self.add_change(original_node, self.DESCRIPTION)
+            self.report_change(original_node)
             new_decorator = cst.Name(
                 value=(
                     "property" if base_name == "abc.abstractproperty" else "classmethod"
