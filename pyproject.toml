@@ -64,6 +64,7 @@ test = [
     "django>=4,<6",
     "numpy~=1.26.0",
     "flask_wtf~=1.2.0",
+    "fickling~=0.1.0",
 ]
 complexity = [
     "radon==6.0.*",

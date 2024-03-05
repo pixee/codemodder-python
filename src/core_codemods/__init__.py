@@ -19,6 +19,7 @@ from .fix_hasattr_call import TransformFixHasattrCall
 from .fix_mutable_params import FixMutableParams
 from .flask_enable_csrf_protection import FlaskEnableCSRFProtection
 from .flask_json_response_type import FlaskJsonResponseType
+from .harden_pickle_load import HardenPickleLoad
 from .harden_pyyaml import HardenPyyaml
 from .harden_ruamel import HardenRuamel
 from .https_connection import HTTPSConnection
@@ -75,6 +76,7 @@ registry = CodemodCollection(
         EnableJinja2Autoescape,
         FixDeprecatedAbstractproperty,
         FixMutableParams,
+        HardenPickleLoad,
         HardenPyyaml,
         HardenRuamel,
         HTTPSConnection,
