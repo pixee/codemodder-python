@@ -1,7 +1,8 @@
 import pytest
 import yaml
-from core_codemods.harden_pyyaml import HardenPyyaml
+
 from codemodder.codemods.test import BaseSemgrepCodemodTest
+from core_codemods.harden_pyyaml import HardenPyyaml
 
 UNSAFE_LOADERS = yaml.loader.__all__.copy()  # type: ignore
 UNSAFE_LOADERS.remove("SafeLoader")

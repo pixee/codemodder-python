@@ -1,10 +1,10 @@
 from textwrap import dedent
 
-from core_codemods.remove_future_imports import RemoveFutureImports
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.remove_future_imports import RemoveFutureImports
 
 
 class TestRemoveFutureImports(BaseIntegrationTest):

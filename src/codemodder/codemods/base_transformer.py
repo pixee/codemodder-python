@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 
 from codemodder.change import ChangeSet
-from codemodder.context import CodemodExecutionContext
 from codemodder.codemods.base_visitor import BaseTransformer
+from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from codemodder.result import Result
 

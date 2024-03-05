@@ -1,9 +1,10 @@
 from functools import cached_property
 from pathlib import Path
 from typing import Optional
+
 from codemodder.project_analysis.file_parsers import (
-    RequirementsTxtParser,
     PyprojectTomlParser,
+    RequirementsTxtParser,
     SetupCfgParser,
     SetupPyParser,
 )

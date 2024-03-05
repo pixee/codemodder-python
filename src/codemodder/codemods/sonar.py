@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from codemodder.codemods.base_codemod import Metadata, Reference
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline

@@ -1,5 +1,5 @@
-from core_codemods.remove_module_global import RemoveModuleGlobal
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.remove_module_global import RemoveModuleGlobal
 
 
 class TestJwtDecodeVerify(BaseCodemodTest):

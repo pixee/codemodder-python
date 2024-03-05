@@ -1,6 +1,8 @@
+from typing import Union
+
 import libcst as cst
 from libcst.metadata import GlobalScope, ScopeProvider
-from typing import Union
+
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 

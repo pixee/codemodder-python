@@ -1,5 +1,7 @@
 from pathlib import Path
-from codemodder.codemods.api import BaseCodemod, SimpleCodemod as _SimpleCodemod
+
+from codemodder.codemods.api import BaseCodemod
+from codemodder.codemods.api import SimpleCodemod as _SimpleCodemod
 from codemodder.codemods.base_codemod import Metadata
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline

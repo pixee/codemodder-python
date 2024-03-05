@@ -1,8 +1,9 @@
 from typing import Optional
-from codemodder.dependency_management.base_dependency_writer import DependencyWriter
+
 from codemodder.change import ChangeSet
-from codemodder.diff import create_diff
 from codemodder.dependency import Dependency
+from codemodder.dependency_management.base_dependency_writer import DependencyWriter
+from codemodder.diff import create_diff
 
 
 def original_lines_strategy(original_lines, i):

@@ -1,8 +1,8 @@
-from core_codemods.enable_jinja2_autoescape import EnableJinja2Autoescape
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.enable_jinja2_autoescape import EnableJinja2Autoescape
 
 
 class TestEnableJinja2Autoescape(BaseIntegrationTest):

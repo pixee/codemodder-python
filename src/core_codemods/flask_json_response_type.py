@@ -1,20 +1,17 @@
 from typing import Optional, Tuple
+
 import libcst as cst
 from libcst.codemod import CodemodContext, ContextAwareVisitor
+
 from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
 )
-
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 from codemodder.file_context import FileContext
 from codemodder.result import Result
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-)
+from core_codemods.api import Metadata, Reference, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 
 

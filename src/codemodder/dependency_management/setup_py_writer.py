@@ -1,16 +1,18 @@
-import libcst as cst
-from libcst.codemod import CodemodContext
-from libcst import matchers
 from typing import Optional
-from codemodder.codemods.api import SimpleCodemod, Metadata, ReviewGuidance
+
+import libcst as cst
+from libcst import matchers
+from libcst.codemod import CodemodContext
+from packaging.requirements import Requirement
+
+from codemodder.change import ChangeSet
+from codemodder.codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 from codemodder.codemods.utils import is_setup_py_file
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from codemodder.file_context import FileContext
-from packaging.requirements import Requirement
 from codemodder.dependency import Dependency
 from codemodder.dependency_management.base_dependency_writer import DependencyWriter
-from codemodder.change import ChangeSet
 from codemodder.diff import create_diff_from_tree
+from codemodder.file_context import FileContext
 
 
 def fixed_line_number_strategy(line_num_changed, _):

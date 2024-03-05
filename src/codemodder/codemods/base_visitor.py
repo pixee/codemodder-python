@@ -1,4 +1,5 @@
 from typing import ClassVar, Collection
+
 from libcst import MetadataDependent
 from libcst.codemod import ContextAwareVisitor, VisitorBasedCodemodCommand
 from libcst.metadata import PositionProvider, ProviderT

@@ -1,17 +1,14 @@
 from typing import Union
+
 import libcst as cst
+
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
 )
-
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.utils.utils import full_qualified_name_from_class, list_subclasses
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-)
+from core_codemods.api import Metadata, Reference, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 
 

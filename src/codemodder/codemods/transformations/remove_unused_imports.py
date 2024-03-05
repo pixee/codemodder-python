@@ -1,8 +1,9 @@
 from typing import Set, Tuple, Union
+
 import libcst as cst
+from libcst import matchers
 from libcst.codemod import Codemod
 from libcst.codemod.visitors import GatherUnusedImportsVisitor
-from libcst import matchers
 
 
 class RemoveUnusedImportsCodemod(Codemod):

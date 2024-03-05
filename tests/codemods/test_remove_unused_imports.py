@@ -1,6 +1,7 @@
 from pathlib import Path
-from core_codemods.remove_unused_imports import RemoveUnusedImports
+
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.remove_unused_imports import RemoveUnusedImports
 
 
 class TestRemoveUnusedImports(BaseCodemodTest):

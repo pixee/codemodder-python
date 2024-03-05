@@ -1,6 +1,7 @@
-from typing import Sequence
-import libcst as cst
 from functools import cache
+from typing import Sequence
+
+import libcst as cst
 
 
 @cache

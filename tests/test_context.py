@@ -1,7 +1,7 @@
 from codemodder.context import CodemodExecutionContext as Context
 from codemodder.dependency import Security
-from codemodder.registry import load_registered_codemods
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
+from codemodder.registry import load_registered_codemods
 
 
 class TestContext:

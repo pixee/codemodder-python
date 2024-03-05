@@ -1,9 +1,10 @@
-from core_codemods.requests_verify import RequestsVerify
+from requests import exceptions
+
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
-from requests import exceptions
+from core_codemods.requests_verify import RequestsVerify
 
 
 class TestRequestsVerify(BaseIntegrationTest):

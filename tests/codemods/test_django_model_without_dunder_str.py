@@ -1,5 +1,5 @@
-from core_codemods.django_model_without_dunder_str import DjangoModelWithoutDunderStr
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.django_model_without_dunder_str import DjangoModelWithoutDunderStr
 
 
 class TestDjangoModelWithoutDunderStr(BaseCodemodTest):

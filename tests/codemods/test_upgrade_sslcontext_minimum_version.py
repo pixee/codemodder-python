@@ -1,8 +1,9 @@
 import pytest
+
+from codemodder.codemods.test import BaseSemgrepCodemodTest
 from core_codemods.upgrade_sslcontext_minimum_version import (
     UpgradeSSLContextMinimumVersion,
 )
-from codemodder.codemods.test import BaseSemgrepCodemodTest
 
 INSECURE_VERSIONS = [
     "TLSv1",

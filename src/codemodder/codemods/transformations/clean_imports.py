@@ -1,24 +1,17 @@
-from typing import List, Union
-from isort.settings import Config
-
-import libcst as cst
-from libcst.codemod.visitors import GatherUnusedImportsVisitor
-from libcst import (
-    CSTTransformer,
-    CSTVisitor,
-    MaybeSentinel,
-    RemovalSentinel,
-    matchers,
-)
+import itertools
 import re
 from collections import defaultdict
-from libcst.codemod import Codemod, CodemodContext, ContextAwareTransformer
-from libcst.metadata import GlobalScope, ScopeProvider
-import itertools
-from libcst.helpers import get_full_name_for_node
+from typing import List, Union
+
 import isort.place
 import isort.sections
-
+import libcst as cst
+from isort.settings import Config
+from libcst import CSTTransformer, CSTVisitor, MaybeSentinel, RemovalSentinel, matchers
+from libcst.codemod import Codemod, CodemodContext, ContextAwareTransformer
+from libcst.codemod.visitors import GatherUnusedImportsVisitor
+from libcst.helpers import get_full_name_for_node
+from libcst.metadata import GlobalScope, ScopeProvider
 
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsCodemod,

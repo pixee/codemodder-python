@@ -1,7 +1,9 @@
+from textwrap import dedent
+
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
+
 from codemodder.codemods.utils_mixin import AncestorPatternsMixin
-from textwrap import dedent
 
 
 class TestNameResolutionMixin:

@@ -1,9 +1,11 @@
 import os
-import subprocess
 import shutil
-import pytest
-from codemodder.codemods.test.integration_utils import SAMPLES_DIR, CleanRepoMixin
+import subprocess
 from textwrap import dedent
+
+import pytest
+
+from codemodder.codemods.test.integration_utils import SAMPLES_DIR, CleanRepoMixin
 
 
 class TestDependencyManager(CleanRepoMixin):

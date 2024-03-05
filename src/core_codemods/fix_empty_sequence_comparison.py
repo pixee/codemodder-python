@@ -1,6 +1,7 @@
 import libcst as cst
-from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod, Reference
-from codemodder.codemods.utils_mixin import NameResolutionMixin, AncestorPatternsMixin
+
+from codemodder.codemods.utils_mixin import AncestorPatternsMixin, NameResolutionMixin
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class FixEmptySequenceComparison(

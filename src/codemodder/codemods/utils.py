@@ -1,11 +1,11 @@
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Any
+from typing import Any, Optional
 
+import libcst as cst
 from libcst import MetadataDependent, matchers
 from libcst.codemod import CodemodContext
 from libcst.matchers import MatcherDecoratableTransformer
-import libcst as cst
 
 
 class BaseType(Enum):

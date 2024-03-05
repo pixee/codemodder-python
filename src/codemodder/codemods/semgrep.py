@@ -1,7 +1,7 @@
 import io
 import os
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 import yaml
 

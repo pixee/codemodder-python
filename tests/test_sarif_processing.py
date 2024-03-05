@@ -1,8 +1,8 @@
-from codemodder.sarifs import extract_rule_id
-from codemodder.sarifs import SarifResultSet
-from pathlib import Path
-import subprocess
 import json
+import subprocess
+from pathlib import Path
+
+from codemodder.sarifs import SarifResultSet, extract_rule_id
 
 
 class TestSarifProcessing:

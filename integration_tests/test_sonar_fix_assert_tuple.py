@@ -1,9 +1,9 @@
-from core_codemods.fix_assert_tuple import FixAssertTupleTransform
-from core_codemods.sonar.sonar_fix_assert_tuple import SonarFixAssertTuple
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.fix_assert_tuple import FixAssertTupleTransform
+from core_codemods.sonar.sonar_fix_assert_tuple import SonarFixAssertTuple
 
 
 class TestFixAssertTuple(BaseIntegrationTest):

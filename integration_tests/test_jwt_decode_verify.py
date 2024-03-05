@@ -1,8 +1,8 @@
-from core_codemods.jwt_decode_verify import JwtDecodeVerify, JwtDecodeVerifyTransformer
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.jwt_decode_verify import JwtDecodeVerify, JwtDecodeVerifyTransformer
 
 
 class TestJwtDecodeVerify(BaseIntegrationTest):

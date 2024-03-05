@@ -1,14 +1,12 @@
 import configparser
-
+import re
 from typing import Optional
-from codemodder.dependency import Dependency
+
 from codemodder.change import ChangeSet
+from codemodder.dependency import Dependency
 from codemodder.dependency_management.base_dependency_writer import DependencyWriter
 from codemodder.diff import create_diff_and_linenums
 from codemodder.logging import logger
-
-
-import re
 
 
 def find_leading_whitespace(s):

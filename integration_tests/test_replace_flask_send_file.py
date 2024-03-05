@@ -1,10 +1,8 @@
-from core_codemods.replace_flask_send_file import (
-    ReplaceFlaskSendFile,
-)
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.replace_flask_send_file import ReplaceFlaskSendFile
 
 
 class TestReplaceFlaskSendFile(BaseIntegrationTest):

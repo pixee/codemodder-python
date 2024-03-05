@@ -47,3 +47,9 @@ repos:
     # todo: replace black with this?
     # Run the formatter.
     # - id: ruff-format
+- repo: https://github.com/pycqa/isort
+  rev: 5.13.2
+  hooks:
+    - id: isort
+      exclude: tests/samples/
+      args: ["--profile", "black"]

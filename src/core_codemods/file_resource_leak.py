@@ -1,22 +1,21 @@
+from functools import partial
 from typing import Optional, Sequence
-from codemodder.codemods.libcst_transformer import (
-    LibcstResultTransformer,
-    LibcstTransformerPipeline,
-)
-from codemodder.result import Result
+
 import libcst as cst
 from libcst import SimpleStatementLine, ensure_type, matchers
-from libcst.codemod import (
-    CodemodContext,
-    ContextAwareVisitor,
-)
+from libcst.codemod import CodemodContext, ContextAwareVisitor
 from libcst.metadata import (
     BuiltinAssignment,
     ParentNodeProvider,
     PositionProvider,
     ScopeProvider,
 )
+
 from codemodder.change import Change
+from codemodder.codemods.libcst_transformer import (
+    LibcstResultTransformer,
+    LibcstTransformerPipeline,
+)
 from codemodder.codemods.utils import MetadataPreservingTransformer
 from codemodder.codemods.utils_mixin import (
     AncestorPatternsMixin,
@@ -24,12 +23,8 @@ from codemodder.codemods.utils_mixin import (
     NameResolutionMixin,
 )
 from codemodder.file_context import FileContext
-from functools import partial
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-)
+from codemodder.result import Result
+from core_codemods.api import Metadata, Reference, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 
 

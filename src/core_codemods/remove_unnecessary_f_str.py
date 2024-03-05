@@ -1,16 +1,9 @@
 import libcst as cst
-from libcst.codemod import (
-    CodemodContext,
-)
-from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatString
 import libcst.matchers as m
+from libcst.codemod import CodemodContext
+from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatString
 
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-    SimpleCodemod,
-)
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class RemoveUnnecessaryFStr(SimpleCodemod, UnnecessaryFormatString):

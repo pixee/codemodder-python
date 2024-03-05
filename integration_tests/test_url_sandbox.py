@@ -1,9 +1,9 @@
-from core_codemods.url_sandbox import UrlSandbox
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
 from codemodder.dependency import Security
+from core_codemods.url_sandbox import UrlSandbox
 
 
 class TestUrlSandbox(BaseIntegrationTest):

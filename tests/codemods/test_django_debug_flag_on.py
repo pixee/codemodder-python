@@ -1,5 +1,5 @@
-from core_codemods.django_debug_flag_on import DjangoDebugFlagOn
 from codemodder.codemods.test import BaseDjangoCodemodTest
+from core_codemods.django_debug_flag_on import DjangoDebugFlagOn
 
 
 class TestDjangoDebugFlagOn(BaseDjangoCodemodTest):

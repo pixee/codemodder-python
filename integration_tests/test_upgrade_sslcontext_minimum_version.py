@@ -1,9 +1,9 @@
-from core_codemods.upgrade_sslcontext_minimum_version import (
-    UpgradeSSLContextMinimumVersion,
-)
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
+)
+from core_codemods.upgrade_sslcontext_minimum_version import (
+    UpgradeSSLContextMinimumVersion,
 )
 
 

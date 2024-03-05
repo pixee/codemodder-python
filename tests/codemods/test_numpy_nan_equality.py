@@ -1,5 +1,5 @@
-from core_codemods.numpy_nan_equality import NumpyNanEquality
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.numpy_nan_equality import NumpyNanEquality
 
 
 class TestNumpyNanEquality(BaseCodemodTest):

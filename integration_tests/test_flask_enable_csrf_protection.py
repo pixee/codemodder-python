@@ -1,9 +1,9 @@
-from core_codemods.flask_enable_csrf_protection import FlaskEnableCSRFProtection
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
 from codemodder.dependency import FlaskWTF
+from core_codemods.flask_enable_csrf_protection import FlaskEnableCSRFProtection
 
 
 class TestFlaskEnableCSRFProtection(BaseIntegrationTest):

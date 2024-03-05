@@ -1,8 +1,8 @@
-from core_codemods.remove_debug_breakpoint import RemoveDebugBreakpoint
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.remove_debug_breakpoint import RemoveDebugBreakpoint
 
 
 class TestRemoveDebugBreakpoint(BaseIntegrationTest):

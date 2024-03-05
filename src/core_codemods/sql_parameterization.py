@@ -1,17 +1,10 @@
+import itertools
 import re
 from typing import Any, Optional, Tuple
-import itertools
 
 import libcst as cst
-from libcst import (
-    ensure_type,
-    matchers,
-)
-from libcst.codemod import (
-    CodemodContext,
-    ContextAwareTransformer,
-    ContextAwareVisitor,
-)
+from libcst import ensure_type, matchers
+from libcst.codemod import CodemodContext, ContextAwareTransformer, ContextAwareVisitor
 from libcst.metadata import (
     ClassScope,
     GlobalScope,
@@ -19,18 +12,13 @@ from libcst.metadata import (
     PositionProvider,
     ScopeProvider,
 )
+
+from codemodder.change import Change
+from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
 )
-
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-)
-from codemodder.change import Change
-from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.transformations.remove_empty_string_concatenation import (
     RemoveEmptyStringConcatenation,
 )
@@ -41,9 +29,8 @@ from codemodder.codemods.utils import (
     get_function_name_node,
     infer_expression_type,
 )
-from codemodder.codemods.utils_mixin import (
-    NameAndAncestorResolutionMixin,
-)
+from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from core_codemods.api import Metadata, Reference, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 
 parameter_token = "?"

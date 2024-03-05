@@ -1,6 +1,7 @@
-import pytest
 import mock
+import pytest
 
+from codemodder.codemods.test import BaseCodemodTest
 from codemodder.dependency import DefusedXML
 from core_codemods.use_defused_xml import (
     DOM_METHODS,
@@ -8,7 +9,6 @@ from core_codemods.use_defused_xml import (
     SAX_METHODS,
     UseDefusedXml,
 )
-from codemodder.codemods.test import BaseCodemodTest
 
 
 @mock.patch("codemodder.codemods.api.FileContext.add_dependency")

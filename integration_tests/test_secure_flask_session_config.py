@@ -1,8 +1,8 @@
-from core_codemods.secure_flask_session_config import SecureFlaskSessionConfig
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.secure_flask_session_config import SecureFlaskSessionConfig
 
 
 class TestSecureFlaskSessionConfig(BaseIntegrationTest):

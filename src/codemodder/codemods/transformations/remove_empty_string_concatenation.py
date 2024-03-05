@@ -1,4 +1,5 @@
 from typing import Union
+
 import libcst as cst
 from libcst import CSTTransformer, RemovalSentinel, SimpleString
 

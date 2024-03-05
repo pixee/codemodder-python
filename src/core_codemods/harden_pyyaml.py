@@ -1,12 +1,9 @@
 from typing import Union, cast
+
 import libcst as cst
+
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-    SimpleCodemod,
-)
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class HardenPyyaml(SimpleCodemod, NameResolutionMixin):

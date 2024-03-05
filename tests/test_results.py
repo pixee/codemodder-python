@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+
 from codemodder.sonar_results import SonarResultSet
 
 

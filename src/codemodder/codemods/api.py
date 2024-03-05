@@ -13,8 +13,8 @@ from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
 )
-from codemodder.file_context import FileContext  # noqa: F401
 from codemodder.codemods.semgrep import SemgrepRuleDetector
+from codemodder.file_context import FileContext  # noqa: F401
 
 
 class SimpleCodemod(LibcstResultTransformer, metaclass=ABCMeta):

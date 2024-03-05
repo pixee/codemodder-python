@@ -1,11 +1,6 @@
 import libcst as cst
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-    SimpleCodemod,
-)
 
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 DEPRECATED_NAMES = [
     "print_function",

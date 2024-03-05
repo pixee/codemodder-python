@@ -1,8 +1,10 @@
-import tomlkit
-from typing import Optional
 from copy import deepcopy
-from codemodder.dependency import Dependency
+from typing import Optional
+
+import tomlkit
+
 from codemodder.change import ChangeSet
+from codemodder.dependency import Dependency
 from codemodder.dependency_management.base_dependency_writer import DependencyWriter
 from codemodder.diff import create_diff_and_linenums
 from codemodder.logging import logger

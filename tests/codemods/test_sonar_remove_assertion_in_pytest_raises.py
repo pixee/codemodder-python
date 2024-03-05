@@ -1,8 +1,9 @@
 import json
+
+from codemodder.codemods.test import BaseSASTCodemodTest
 from core_codemods.sonar.sonar_remove_assertion_in_pytest_raises import (
     SonarRemoveAssertionInPytestRaises,
 )
-from codemodder.codemods.test import BaseSASTCodemodTest
 
 
 class TestRemoveAssertionInPytestRaises(BaseSASTCodemodTest):

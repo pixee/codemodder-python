@@ -3,8 +3,8 @@ import json
 import mock
 import pytest
 
-from codemodder.cli import parse_args
 from codemodder import __version__
+from codemodder.cli import parse_args
 from codemodder.registry import DEFAULT_EXCLUDED_CODEMODS, load_registered_codemods
 from core_codemods import registry as core_registry
 

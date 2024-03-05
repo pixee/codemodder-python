@@ -1,13 +1,14 @@
+import json
 from abc import ABCMeta, abstractmethod
 from importlib.metadata import entry_points
-import json
 from pathlib import Path
 from typing import Optional
 
 from typing_extensions import Self
 
 from codemodder.logging import logger
-from .result import ResultSet, Result, Location, LineInfo
+
+from .result import LineInfo, Location, Result, ResultSet
 
 
 class AbstractSarifToolDetector(metaclass=ABCMeta):

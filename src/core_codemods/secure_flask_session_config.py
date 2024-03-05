@@ -1,19 +1,14 @@
 import libcst as cst
+from libcst import matchers
 from libcst.codemod import Codemod, CodemodContext
 from libcst.metadata import ParentNodeProvider
 
-from libcst import matchers
-from codemodder.codemods.utils_mixin import NameResolutionMixin
-from codemodder.utils.utils import extract_targets_of_assignment, true_value
-from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.change import Change
+from codemodder.codemods.base_visitor import BaseTransformer
+from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.file_context import FileContext
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-    SimpleCodemod,
-)
+from codemodder.utils.utils import extract_targets_of_assignment, true_value
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class SecureFlaskSessionConfig(SimpleCodemod, Codemod):

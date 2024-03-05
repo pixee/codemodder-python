@@ -1,10 +1,10 @@
-from core_codemods.django_model_without_dunder_str import (
-    DjangoModelWithoutDunderStr,
-    DjangoModelWithoutDunderStrTransformer,
-)
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
+)
+from core_codemods.django_model_without_dunder_str import (
+    DjangoModelWithoutDunderStr,
+    DjangoModelWithoutDunderStrTransformer,
 )
 
 

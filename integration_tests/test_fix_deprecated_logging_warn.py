@@ -1,8 +1,8 @@
-from core_codemods.fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 
 
 class TestFixDeprecatedLoggingWarn(BaseIntegrationTest):

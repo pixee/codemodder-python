@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import itertools
 import logging
 from pathlib import Path
-import itertools
 from textwrap import indent
-from typing import TYPE_CHECKING, List, Iterator
+from typing import TYPE_CHECKING, Iterator, List
 
 from codemodder.change import ChangeSet
 from codemodder.dependency import (
@@ -13,10 +13,10 @@ from codemodder.dependency import (
     build_failed_dependency_notification,
 )
 from codemodder.file_context import FileContext
-from codemodder.logging import logger, log_list
+from codemodder.logging import log_list, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
-from codemodder.registry import CodemodRegistry
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
+from codemodder.registry import CodemodRegistry
 from codemodder.utils.timer import Timer
 
 if TYPE_CHECKING:

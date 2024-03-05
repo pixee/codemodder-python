@@ -1,10 +1,10 @@
-from core_codemods.sonar.sonar_jwt_decode_verify import (
-    SonarJwtDecodeVerify,
-    JwtDecodeVerifySonarTransformer,
-)
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
+)
+from core_codemods.sonar.sonar_jwt_decode_verify import (
+    JwtDecodeVerifySonarTransformer,
+    SonarJwtDecodeVerify,
 )
 
 

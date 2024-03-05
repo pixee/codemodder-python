@@ -7,7 +7,7 @@ import mock
 
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff
-from codemodder.registry import CodemodRegistry, CodemodCollection
+from codemodder.registry import CodemodCollection, CodemodRegistry
 from codemodder.semgrep import run as semgrep_run
 
 

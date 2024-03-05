@@ -1,6 +1,7 @@
 import pytest
-from core_codemods.lxml_safe_parser_defaults import LxmlSafeParserDefaults
+
 from codemodder.codemods.test import BaseSemgrepCodemodTest
+from core_codemods.lxml_safe_parser_defaults import LxmlSafeParserDefaults
 
 each_class = pytest.mark.parametrize(
     "klass", ["XMLParser", "ETCompatXMLParser", "XMLTreeBuilder", "XMLPullParser"]

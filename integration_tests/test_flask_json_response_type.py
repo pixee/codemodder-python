@@ -1,10 +1,10 @@
-from core_codemods.flask_json_response_type import (
-    FlaskJsonResponseType,
-    FlaskJsonResponseTypeTransformer,
-)
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
+)
+from core_codemods.flask_json_response_type import (
+    FlaskJsonResponseType,
+    FlaskJsonResponseTypeTransformer,
 )
 
 

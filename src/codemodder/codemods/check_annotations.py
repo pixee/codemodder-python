@@ -3,10 +3,9 @@ from typing import Mapping
 
 import libcst as cst
 from libcst import CSTVisitor
+from libcst._nodes.base import CSTNode  # noqa: F401
 from libcst.metadata import ParentNodeProvider
 from libcst.metadata.base_provider import ProviderT  # noqa: F401
-from libcst._nodes.base import CSTNode  # noqa: F401
-
 from pylint.utils.pragma_parser import parse_pragma
 
 NOQA_PATTERN = re.compile(r"^#\s*noqa(:\s+[A-Z]+[A-Z0-9]+)?", re.IGNORECASE)
