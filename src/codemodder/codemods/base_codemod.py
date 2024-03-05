@@ -1,17 +1,17 @@
+import functools
+import importlib.resources
 from abc import ABCMeta, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import cached_property
-import functools
-import importlib.resources
 from importlib.abc import Traversable
 from pathlib import Path
 
+from codemodder.code_directory import file_line_patterns
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
 from codemodder.context import CodemodExecutionContext
-from codemodder.code_directory import file_line_patterns
 from codemodder.file_context import FileContext
 from codemodder.logging import logger
 from codemodder.result import ResultSet

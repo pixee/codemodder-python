@@ -1,8 +1,8 @@
-from core_codemods.str_concat_in_seq_literal import StrConcatInSeqLiteral
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.str_concat_in_seq_literal import StrConcatInSeqLiteral
 
 
 class TestStrConcatInSeqLiteral(BaseIntegrationTest):

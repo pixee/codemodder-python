@@ -1,10 +1,5 @@
 from codemodder.codemods.libcst_transformer import NewArg
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-    SimpleCodemod,
-)
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class HardenRuamel(SimpleCodemod):

@@ -1,8 +1,8 @@
-from core_codemods.combine_startswith_endswith import CombineStartswithEndswith
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.combine_startswith_endswith import CombineStartswithEndswith
 
 
 class TestCombineStartswithEndswith(BaseIntegrationTest):

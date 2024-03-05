@@ -1,11 +1,7 @@
 import libcst as cst
+
 from codemodder.dependency import Security
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-    SimpleCodemod,
-)
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class ProcessSandbox(SimpleCodemod):

@@ -1,5 +1,6 @@
 import itertools
 from typing import ClassVar, Collection, Optional, Union
+
 import libcst as cst
 from libcst import MetadataDependent, matchers
 from libcst.helpers import get_full_name_for_node

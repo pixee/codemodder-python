@@ -1,9 +1,9 @@
-from core_codemods.use_defused_xml import UseDefusedXml
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
 from codemodder.dependency import DefusedXML
+from core_codemods.use_defused_xml import UseDefusedXml
 
 
 class TestUseDefusedXml(BaseIntegrationTest):

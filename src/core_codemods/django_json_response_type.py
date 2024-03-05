@@ -1,14 +1,11 @@
 import libcst as cst
+
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
 )
 from codemodder.codemods.semgrep import SemgrepRuleDetector
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-)
+from core_codemods.api import Metadata, Reference, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 
 

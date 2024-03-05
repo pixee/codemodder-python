@@ -1,11 +1,12 @@
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Optional
-from codemodder.project_analysis.file_parsers.package_store import PackageStore
+from typing import Callable, List, Optional, Union
+
+from packaging.requirements import Requirement
+
 from codemodder.change import Action, Change, ChangeSet, PackageAction, Result
 from codemodder.dependency import Dependency
-from packaging.requirements import Requirement
-from typing import Callable, Union, List
+from codemodder.project_analysis.file_parsers.package_store import PackageStore
 
 
 class DependencyWriter(metaclass=ABCMeta):

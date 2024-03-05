@@ -1,5 +1,5 @@
-from core_codemods.django_receiver_on_top import DjangoReceiverOnTop
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.django_receiver_on_top import DjangoReceiverOnTop
 
 
 class TestDjangoReceiverOnTop(BaseCodemodTest):

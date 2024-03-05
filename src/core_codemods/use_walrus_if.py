@@ -1,18 +1,13 @@
-from collections import namedtuple
 import itertools
-from typing import List, Tuple, Optional
+from collections import namedtuple
+from typing import List, Optional, Tuple
 
 import libcst as cst
-from libcst._position import CodeRange
 from libcst import matchers as m
+from libcst._position import CodeRange
 from libcst.metadata import ParentNodeProvider, ScopeProvider
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-    SimpleCodemod,
-)
 
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 FoundAssign = namedtuple("FoundAssign", ["assign", "target", "value"])
 

@@ -1,6 +1,7 @@
 import json
-from core_codemods.sonar.sonar_numpy_nan_equality import SonarNumpyNanEquality
+
 from codemodder.codemods.test import BaseSASTCodemodTest
+from core_codemods.sonar.sonar_numpy_nan_equality import SonarNumpyNanEquality
 
 
 class TestSonarNumpyNanEquality(BaseSASTCodemodTest):

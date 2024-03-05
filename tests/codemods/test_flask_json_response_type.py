@@ -1,5 +1,5 @@
-from core_codemods.flask_json_response_type import FlaskJsonResponseType
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.flask_json_response_type import FlaskJsonResponseType
 
 
 class TestFlaskJsonResponseType(BaseCodemodTest):

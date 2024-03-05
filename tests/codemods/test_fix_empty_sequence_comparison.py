@@ -1,6 +1,7 @@
 import pytest
-from core_codemods.fix_empty_sequence_comparison import FixEmptySequenceComparison
+
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.fix_empty_sequence_comparison import FixEmptySequenceComparison
 
 
 class TestFixEmptySequenceComparisonIfStatements(BaseCodemodTest):

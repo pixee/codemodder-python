@@ -1,6 +1,7 @@
 import pytest
-from core_codemods.requests_verify import RequestsVerify
+
 from codemodder.codemods.test import BaseSemgrepCodemodTest
+from core_codemods.requests_verify import RequestsVerify
 
 each_func = pytest.mark.parametrize("func", ["get", "post", "request"])
 each_library = pytest.mark.parametrize("library", ["requests", "httpx"])

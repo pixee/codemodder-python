@@ -1,8 +1,8 @@
-from core_codemods.subprocess_shell_false import SubprocessShellFalse
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.subprocess_shell_false import SubprocessShellFalse
 
 
 class TestSubprocessShellFalse(BaseIntegrationTest):

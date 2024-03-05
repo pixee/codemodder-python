@@ -3,9 +3,10 @@ from pathlib import Path
 import toml
 
 from codemodder.project_analysis.file_parsers.package_store import (
-    PackageStore,
     FileType,
+    PackageStore,
 )
+
 from .base_parser import BaseParser
 
 

@@ -1,10 +1,10 @@
-from core_codemods.django_json_response_type import DjangoJsonResponseTypeTransformer
-from core_codemods.sonar.sonar_django_json_response_type import (
-    SonarDjangoJsonResponseType,
-)
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
+)
+from core_codemods.django_json_response_type import DjangoJsonResponseTypeTransformer
+from core_codemods.sonar.sonar_django_json_response_type import (
+    SonarDjangoJsonResponseType,
 )
 
 

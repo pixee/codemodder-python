@@ -1,5 +1,5 @@
-from core_codemods.remove_unnecessary_f_str import RemoveUnnecessaryFStr
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.remove_unnecessary_f_str import RemoveUnnecessaryFStr
 
 
 class TestFStr(BaseCodemodTest):

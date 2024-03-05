@@ -1,6 +1,6 @@
-from enum import Enum
 import logging
 import sys
+from enum import Enum
 from typing import Optional
 
 from pythonjsonlogger import jsonlogger

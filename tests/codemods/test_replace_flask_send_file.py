@@ -1,7 +1,5 @@
-from core_codemods.replace_flask_send_file import (
-    ReplaceFlaskSendFile,
-)
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.replace_flask_send_file import ReplaceFlaskSendFile
 
 
 class TestReplaceFlaskSendFile(BaseCodemodTest):

@@ -1,8 +1,8 @@
-from core_codemods.secure_flask_cookie import SecureFlaskCookie
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.secure_flask_cookie import SecureFlaskCookie
 
 
 class TestSecureFlaskCookie(BaseIntegrationTest):

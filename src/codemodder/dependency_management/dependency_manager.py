@@ -1,20 +1,18 @@
+from pathlib import Path
 from typing import Optional
+
 from codemodder.change import ChangeSet
 from codemodder.dependency import Dependency
+from codemodder.dependency_management.pyproject_writer import PyprojectWriter
 from codemodder.dependency_management.requirements_txt_writer import (
     RequirementsTxtWriter,
 )
-from codemodder.dependency_management.pyproject_writer import PyprojectWriter
-from codemodder.dependency_management.setup_py_writer import (
-    SetupPyWriter,
-)
+from codemodder.dependency_management.setup_py_writer import SetupPyWriter
 from codemodder.dependency_management.setupcfg_writer import SetupCfgWriter
-
 from codemodder.project_analysis.file_parsers.package_store import (
-    PackageStore,
     FileType,
+    PackageStore,
 )
-from pathlib import Path
 
 
 class DependencyManager:

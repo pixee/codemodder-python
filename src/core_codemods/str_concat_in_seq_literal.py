@@ -1,6 +1,7 @@
 import libcst as cst
+
+from codemodder.codemods.utils_mixin import AncestorPatternsMixin, NameResolutionMixin
 from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
-from codemodder.codemods.utils_mixin import NameResolutionMixin, AncestorPatternsMixin
 
 
 class StrConcatInSeqLiteral(SimpleCodemod, NameResolutionMixin, AncestorPatternsMixin):

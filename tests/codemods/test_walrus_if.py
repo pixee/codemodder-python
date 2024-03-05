@@ -1,7 +1,7 @@
 import pytest
 
-from core_codemods.use_walrus_if import UseWalrusIf
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.use_walrus_if import UseWalrusIf
 
 
 class TestUseWalrusIf(BaseCodemodTest):

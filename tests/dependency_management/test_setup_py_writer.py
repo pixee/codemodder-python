@@ -3,12 +3,12 @@ from textwrap import dedent
 import pytest
 
 from codemodder.change import DiffSide
+from codemodder.dependency import DefusedXML, Security
 from codemodder.dependency_management.setup_py_writer import SetupPyWriter
 from codemodder.project_analysis.file_parsers.package_store import (
-    PackageStore,
     FileType,
+    PackageStore,
 )
-from codemodder.dependency import DefusedXML, Security
 
 
 def test_update_setuppy_comma_single_element_newline(tmpdir):

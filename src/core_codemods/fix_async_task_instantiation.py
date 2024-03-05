@@ -1,9 +1,11 @@
+from typing import Optional
+
 import libcst as cst
 from libcst import MaybeSentinel
-from typing import Optional
-from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod, Reference
-from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+
 from codemodder.codemods.utils import BaseType, infer_expression_type
+from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class FixAsyncTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):

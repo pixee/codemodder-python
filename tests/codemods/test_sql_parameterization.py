@@ -1,5 +1,5 @@
-from core_codemods.sql_parameterization import SQLQueryParameterization
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.sql_parameterization import SQLQueryParameterization
 
 
 class TestSQLQueryParameterization(BaseCodemodTest):

@@ -1,4 +1,5 @@
 import pytest
+
 from codemodder.codemods.test import BaseSemgrepCodemodTest
 from core_codemods.lazy_logging import LazyLogging
 

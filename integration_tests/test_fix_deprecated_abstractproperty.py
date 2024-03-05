@@ -1,10 +1,10 @@
 from textwrap import dedent
 
-from core_codemods.fix_deprecated_abstractproperty import FixDeprecatedAbstractproperty
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.fix_deprecated_abstractproperty import FixDeprecatedAbstractproperty
 
 
 class TestFixDeprecatedAbstractproperty(BaseIntegrationTest):

@@ -1,10 +1,10 @@
-from core_codemods.remove_assertion_in_pytest_raises import (
-    RemoveAssertionInPytestRaises,
-    RemoveAssertionInPytestRaisesTransformer,
-)
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
+)
+from core_codemods.remove_assertion_in_pytest_raises import (
+    RemoveAssertionInPytestRaises,
+    RemoveAssertionInPytestRaisesTransformer,
 )
 
 

@@ -1,5 +1,5 @@
-from core_codemods.remove_debug_breakpoint import RemoveDebugBreakpoint
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.remove_debug_breakpoint import RemoveDebugBreakpoint
 
 
 class TestRemoveDebugBreakpoint(BaseCodemodTest):

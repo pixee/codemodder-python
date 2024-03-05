@@ -2,7 +2,6 @@ import json
 
 import pytest
 
-
 EXPECTED_FINDINGS = [
     "pixee:python/add-requests-timeouts",
     "pixee:python/secure-random",

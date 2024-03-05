@@ -1,7 +1,8 @@
 import argparse
 from dataclasses import dataclass
-from codemodder.registry import load_registered_codemods
 from pathlib import Path
+
+from codemodder.registry import load_registered_codemods
 
 
 @dataclass

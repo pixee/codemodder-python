@@ -1,7 +1,7 @@
 import pytest
 
-from core_codemods.use_generator import UseGenerator
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.use_generator import UseGenerator
 
 
 class TestUseGenerator(BaseCodemodTest):

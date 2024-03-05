@@ -1,6 +1,7 @@
 import pytest
-from core_codemods.fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
+
 from codemodder.codemods.test import BaseSemgrepCodemodTest
+from core_codemods.fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 
 
 class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):

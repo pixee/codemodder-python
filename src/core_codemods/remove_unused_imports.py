@@ -1,18 +1,18 @@
 import libcst as cst
 from libcst.codemod.visitors import GatherUnusedImportsVisitor
 from libcst.metadata import (
+    ParentNodeProvider,
     PositionProvider,
     QualifiedNameProvider,
     ScopeProvider,
-    ParentNodeProvider,
 )
 
-from core_codemods.api import SimpleCodemod, Metadata, ReviewGuidance
 from codemodder.change import Change
 from codemodder.codemods.check_annotations import is_disabled_by_annotations
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsTransformer,
 )
+from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 
 
 class RemoveUnusedImports(SimpleCodemod):

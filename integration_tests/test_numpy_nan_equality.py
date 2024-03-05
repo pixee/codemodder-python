@@ -1,10 +1,10 @@
-from core_codemods.numpy_nan_equality import (
-    NumpyNanEquality,
-    NumpyNanEqualityTransformer,
-)
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
+)
+from core_codemods.numpy_nan_equality import (
+    NumpyNanEquality,
+    NumpyNanEqualityTransformer,
 )
 
 

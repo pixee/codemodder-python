@@ -3,9 +3,9 @@ import json
 import sys
 
 from codemodder import __version__
-from codemodder.code_directory import DEFAULT_INCLUDED_PATHS, DEFAULT_EXCLUDED_PATHS
-from codemodder.registry import CodemodRegistry
+from codemodder.code_directory import DEFAULT_EXCLUDED_PATHS, DEFAULT_INCLUDED_PATHS
 from codemodder.logging import OutputFormat, logger
+from codemodder.registry import CodemodRegistry
 
 
 class ArgumentParser(argparse.ArgumentParser):

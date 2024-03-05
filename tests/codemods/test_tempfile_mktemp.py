@@ -1,5 +1,5 @@
-from core_codemods.tempfile_mktemp import TempfileMktemp
 from codemodder.codemods.test import BaseSemgrepCodemodTest
+from core_codemods.tempfile_mktemp import TempfileMktemp
 
 
 class TestTempfileMktemp(BaseSemgrepCodemodTest):

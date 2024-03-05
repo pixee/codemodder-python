@@ -1,5 +1,5 @@
-from core_codemods.literal_or_new_object_identity import LiteralOrNewObjectIdentity
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.literal_or_new_object_identity import LiteralOrNewObjectIdentity
 
 
 class TestLiteralOrNewObjectIdentity(BaseCodemodTest):

@@ -1,6 +1,7 @@
 import pytest
-from core_codemods.jwt_decode_verify import JwtDecodeVerify
+
 from codemodder.codemods.test import BaseSemgrepCodemodTest
+from core_codemods.jwt_decode_verify import JwtDecodeVerify
 
 
 class TestJwtDecodeVerify(BaseSemgrepCodemodTest):

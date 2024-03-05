@@ -1,8 +1,7 @@
-from typing import Optional, Sequence
-
 import fnmatch
 import itertools
 from pathlib import Path
+from typing import Optional, Sequence
 
 DEFAULT_INCLUDED_PATHS = ["**.py", "**/*.py"]
 DEFAULT_EXCLUDED_PATHS = [

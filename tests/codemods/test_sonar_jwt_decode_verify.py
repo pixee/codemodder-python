@@ -1,6 +1,7 @@
 import json
-from core_codemods.sonar.sonar_jwt_decode_verify import SonarJwtDecodeVerify
+
 from codemodder.codemods.test import BaseSASTCodemodTest
+from core_codemods.sonar.sonar_jwt_decode_verify import SonarJwtDecodeVerify
 
 
 class TestSonarJwtDecodeVerify(BaseSASTCodemodTest):

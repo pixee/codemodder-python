@@ -1,8 +1,8 @@
-from core_codemods.with_threading_lock import WithThreadingLock
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.with_threading_lock import WithThreadingLock
 
 
 class TestWithThreadingLock(BaseIntegrationTest):

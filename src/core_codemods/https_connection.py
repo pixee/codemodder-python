@@ -3,13 +3,9 @@ from typing import Sequence, Set
 import libcst as cst
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from libcst.metadata import PositionProvider
+
 from codemodder.codemods.imported_call_modifier import ImportedCallModifier
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-    SimpleCodemod,
-)
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class HTTPSConnectionModifier(ImportedCallModifier[Set[str]]):

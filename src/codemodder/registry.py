@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from importlib.metadata import entry_points
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from codemodder.logging import logger
 

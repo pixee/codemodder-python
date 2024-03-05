@@ -1,10 +1,10 @@
-from core_codemods.literal_or_new_object_identity import (
-    LiteralOrNewObjectIdentity,
-    LiteralOrNewObjectIdentityTransformer,
-)
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
+)
+from core_codemods.literal_or_new_object_identity import (
+    LiteralOrNewObjectIdentity,
+    LiteralOrNewObjectIdentityTransformer,
 )
 
 

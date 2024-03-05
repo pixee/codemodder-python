@@ -1,13 +1,12 @@
+import libcst as cst
 import mock
 import pytest
 
-import libcst as cst
-
-from codemodder.codemodder import run, find_semgrep_results
+from codemodder.codemodder import find_semgrep_results, run
 from codemodder.diff import create_diff_from_tree
-from codemodder.semgrep import run as semgrep_run
 from codemodder.registry import load_registered_codemods
 from codemodder.result import ResultSet
+from codemodder.semgrep import run as semgrep_run
 
 
 @pytest.fixture(autouse=True, scope="module")

@@ -1,5 +1,6 @@
-import requests
 import sys
+
+import requests
 
 
 def get_package_hashes(package_name: str, version: str) -> list[str]:

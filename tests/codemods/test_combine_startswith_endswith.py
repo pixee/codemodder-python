@@ -1,4 +1,5 @@
 import pytest
+
 from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.combine_startswith_endswith import CombineStartswithEndswith
 

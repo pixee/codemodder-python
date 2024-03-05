@@ -10,7 +10,6 @@ from codemodder.change import Change
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.file_context import FileContext
 
-
 # It seems to me like we actually want two separate bounds instead of a Union but this is what mypy wants
 FunctionMatchType = TypeVar("FunctionMatchType", bound=Union[Mapping, Set])
 

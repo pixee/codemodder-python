@@ -1,8 +1,8 @@
-from core_codemods.django_debug_flag_on import DjangoDebugFlagOn
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.django_debug_flag_on import DjangoDebugFlagOn
 
 
 class TestDjangoDebugFlagFlip(BaseIntegrationTest):

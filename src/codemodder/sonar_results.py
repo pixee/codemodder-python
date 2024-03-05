@@ -1,11 +1,12 @@
-import libcst as cst
 import json
+from dataclasses import replace
 from pathlib import Path
+
+import libcst as cst
 from typing_extensions import Self
 
-from codemodder.result import LineInfo, Location, Result, ResultSet
 from codemodder.logging import logger
-from dataclasses import replace
+from codemodder.result import LineInfo, Location, Result, ResultSet
 
 
 class SonarLocation(Location):

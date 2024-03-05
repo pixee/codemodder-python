@@ -1,6 +1,7 @@
 import pytest
-from core_codemods.secure_flask_session_config import SecureFlaskSessionConfig
+
 from codemodder.codemods.test import BaseCodemodTest
+from core_codemods.secure_flask_session_config import SecureFlaskSessionConfig
 
 
 class TestSecureFlaskSessionConfig(BaseCodemodTest):

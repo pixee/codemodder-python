@@ -3,14 +3,10 @@ from typing import Mapping
 
 import libcst as cst
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
-from core_codemods.api import (
-    SimpleCodemod,
-    Metadata,
-    Reference,
-    ReviewGuidance,
-)
+
 from codemodder.codemods.imported_call_modifier import ImportedCallModifier
 from codemodder.dependency import DefusedXML
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class DefusedXmlModifier(ImportedCallModifier[Mapping[str, str]]):

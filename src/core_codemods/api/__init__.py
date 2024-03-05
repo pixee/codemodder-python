@@ -1,7 +1,4 @@
 # ruff: noqa: F401
-from codemodder.codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-)
-from .core_codemod import SimpleCodemod, CoreCodemod
+from codemodder.codemods.api import Metadata, Reference, ReviewGuidance
+
+from .core_codemod import CoreCodemod, SimpleCodemod

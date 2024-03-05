@@ -2,9 +2,9 @@ from typing import Optional, Union
 
 import libcst as cst
 
-from core_codemods.api import SimpleCodemod, Metadata, Reference, ReviewGuidance
 from codemodder.codemods.utils_mixin import AncestorPatternsMixin, NameResolutionMixin
 from codemodder.dependency import FlaskWTF
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class FlaskEnableCSRFProtection(

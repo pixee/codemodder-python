@@ -1,6 +1,8 @@
-import libcst as cst
 from typing import Union
-from codemodder.codemods.utils_mixin import NameResolutionMixin, AncestorPatternsMixin
+
+import libcst as cst
+
+from codemodder.codemods.utils_mixin import AncestorPatternsMixin, NameResolutionMixin
 from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 
 

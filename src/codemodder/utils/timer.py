@@ -1,6 +1,6 @@
+import time
 from collections import defaultdict
 from contextlib import contextmanager
-import time
 
 from typing_extensions import Self
 

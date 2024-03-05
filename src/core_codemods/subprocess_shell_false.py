@@ -3,14 +3,9 @@ from libcst import matchers
 from libcst.metadata import ParentNodeProvider
 
 from codemodder.codemods.check_annotations import is_disabled_by_annotations
-from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.codemods.libcst_transformer import NewArg
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-    SimpleCodemod,
-)
+from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):

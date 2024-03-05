@@ -1,11 +1,9 @@
-from core_codemods.numpy_nan_equality import NumpyNanEqualityTransformer
-from core_codemods.sonar.sonar_numpy_nan_equality import (
-    SonarNumpyNanEquality,
-)
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.numpy_nan_equality import NumpyNanEqualityTransformer
+from core_codemods.sonar.sonar_numpy_nan_equality import SonarNumpyNanEquality
 
 
 class TestNumpyNanEquality(BaseIntegrationTest):

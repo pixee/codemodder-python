@@ -1,8 +1,8 @@
-from core_codemods.use_set_literal import UseSetLiteral
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
+from core_codemods.use_set_literal import UseSetLiteral
 
 
 class TestUseSetLiteral(BaseIntegrationTest):

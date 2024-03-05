@@ -3,16 +3,10 @@ from typing import List, Optional, Union
 import libcst as cst
 from libcst import CSTNode, matchers
 from libcst.codemod import CodemodContext, ContextAwareVisitor
+from libcst.codemod.visitors import AddImportsVisitor, ImportItem
 from libcst.metadata import PositionProvider, ScopeProvider
 
-from libcst.codemod.visitors import AddImportsVisitor, ImportItem
 from codemodder.change import Change
-from core_codemods.api import (
-    SimpleCodemod,
-    Metadata,
-    Reference,
-    ReviewGuidance,
-)
 from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsCodemod,
@@ -20,7 +14,7 @@ from codemodder.codemods.transformations.remove_unused_imports import (
 from codemodder.codemods.utils import ReplaceNodes
 from codemodder.dependency import Security
 from codemodder.file_context import FileContext
-
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 replacement_import = "safe_requests"
 

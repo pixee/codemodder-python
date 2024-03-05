@@ -1,12 +1,8 @@
 import libcst as cst
-from libcst.codemod import CodemodContext
 import mock
+from libcst.codemod import CodemodContext
 
-from codemodder.codemods.api import (
-    SimpleCodemod,
-    Metadata,
-    ReviewGuidance,
-)
+from codemodder.codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 
 
 class DoNothingCodemod(SimpleCodemod):

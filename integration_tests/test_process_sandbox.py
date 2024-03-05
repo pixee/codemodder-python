@@ -1,9 +1,9 @@
-from core_codemods.process_creation_sandbox import ProcessSandbox
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
 from codemodder.dependency import Security
+from core_codemods.process_creation_sandbox import ProcessSandbox
 
 
 class TestProcessSandbox(BaseIntegrationTest):

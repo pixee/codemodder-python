@@ -1,11 +1,12 @@
-import subprocess
 import itertools
+import subprocess
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Iterable, Optional
-from pathlib import Path
+
 from codemodder.context import CodemodExecutionContext
-from codemodder.sarifs import SarifResultSet
 from codemodder.logging import logger
+from codemodder.sarifs import SarifResultSet
 
 
 def run(

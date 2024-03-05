@@ -1,11 +1,7 @@
 import libcst as cst
+
 from codemodder.codemods.utils import is_django_settings_file
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-    SimpleCodemod,
-)
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class DjangoDebugFlagOn(SimpleCodemod):

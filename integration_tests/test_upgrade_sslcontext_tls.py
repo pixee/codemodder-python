@@ -1,5 +1,5 @@
-from core_codemods.upgrade_sslcontext_tls import UpgradeSSLContextTLS
 from codemodder.codemods.test import BaseIntegrationTest
+from core_codemods.upgrade_sslcontext_tls import UpgradeSSLContextTLS
 
 
 class TestUpgradeWeakTLS(BaseIntegrationTest):

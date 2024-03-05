@@ -3,18 +3,17 @@ import itertools
 import logging
 import os
 import sys
-from typing import Sequence
 from pathlib import Path
+from typing import Sequence
 
-from codemodder.dependency import Dependency
-
-from codemodder import registry, __version__
-from codemodder.logging import configure_logger, logger, log_section, log_list
+from codemodder import __version__, registry
 from codemodder.cli import parse_args
 from codemodder.code_directory import match_files
+from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.semgrep import SemgrepRuleDetector
 from codemodder.context import CodemodExecutionContext
-from codemodder.codemods.api import BaseCodemod
+from codemodder.dependency import Dependency
+from codemodder.logging import configure_logger, log_list, log_section, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.report.codetf_reporter import report_default

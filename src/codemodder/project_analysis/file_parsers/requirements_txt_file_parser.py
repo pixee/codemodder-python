@@ -4,9 +4,10 @@ import chardet
 
 from codemodder.logging import logger
 from codemodder.project_analysis.file_parsers.package_store import (
-    PackageStore,
     FileType,
+    PackageStore,
 )
+
 from .base_parser import BaseParser
 
 

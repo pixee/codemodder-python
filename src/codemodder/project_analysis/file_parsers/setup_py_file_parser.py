@@ -1,10 +1,12 @@
+from pathlib import Path
+
+import libcst as cst
+
 from codemodder.project_analysis.file_parsers.package_store import (
-    PackageStore,
     FileType,
+    PackageStore,
 )
 from codemodder.utils.utils import clean_simplestring
-from pathlib import Path
-import libcst as cst
 
 from .base_parser import BaseParser
 

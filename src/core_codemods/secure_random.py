@@ -1,9 +1,4 @@
-from core_codemods.api import (
-    SimpleCodemod,
-    Metadata,
-    Reference,
-    ReviewGuidance,
-)
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class SecureRandom(SimpleCodemod):

@@ -1,8 +1,9 @@
 import json
+
+from codemodder.codemods.test import BaseSASTCodemodTest
 from core_codemods.sonar.sonar_django_json_response_type import (
     SonarDjangoJsonResponseType,
 )
-from codemodder.codemods.test import BaseSASTCodemodTest
 
 
 class TestDjangoJsonResponseType(BaseSASTCodemodTest):

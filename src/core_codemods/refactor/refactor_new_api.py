@@ -1,7 +1,7 @@
 import libcst as cst
 
-from core_codemods.api import SimpleCodemod, Metadata, ReviewGuidance
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 
 
 class RefactorNewApi(SimpleCodemod, NameResolutionMixin):

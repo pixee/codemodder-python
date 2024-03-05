@@ -1,6 +1,7 @@
 import pytest
-from core_codemods.enable_jinja2_autoescape import EnableJinja2Autoescape
+
 from codemodder.codemods.test import BaseSemgrepCodemodTest
+from core_codemods.enable_jinja2_autoescape import EnableJinja2Autoescape
 
 
 class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
