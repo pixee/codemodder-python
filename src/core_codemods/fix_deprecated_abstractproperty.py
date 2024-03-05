@@ -7,17 +7,26 @@ from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 class FixDeprecatedAbstractproperty(SimpleCodemod, NameResolutionMixin):
     metadata = Metadata(
         name="fix-deprecated-abstractproperty",
-        summary="Replace deprecated abstractproperty",
+        summary="Replace Deprecated `abc` Decorators",
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[
             Reference(
                 url="https://docs.python.org/3/library/abc.html#abc.abstractproperty"
             ),
+            Reference(
+                url="https://docs.python.org/3/library/abc.html#abc.abstractclassmethod"
+            ),
+            Reference(
+                url="https://docs.python.org/3/library/abc.html#abc.abstractstaticmethod"
+            ),
         ],
     )
-    change_description = (
-        "Replace deprecated abstractproperty with property and abstractmethod"
-    )
+    change_description = "Replace deprecated `abc` decorator."
+    DEPRECATED_TO_NEW = {
+        "abc.abstractproperty": "property",
+        "abc.abstractclassmethod": "classmethod",
+        "abc.abstractstaticmethod": "staticmethod",
+    }
 
     def leave_Decorator(
         self, original_node: cst.Decorator, updated_node: cst.Decorator
@@ -29,14 +38,14 @@ class FixDeprecatedAbstractproperty(SimpleCodemod, NameResolutionMixin):
 
         if (
             base_name := self.find_base_name(original_node.decorator)
-        ) and base_name == "abc.abstractproperty":
+        ) in self.DEPRECATED_TO_NEW:
             self.add_needed_import("abc")
             self.remove_unused_import(original_node)
-            self.add_change(original_node, self.DESCRIPTION)
+            self.report_change(original_node)
             return cst.FlattenSentinel(
                 [
                     cst.Decorator(
-                        decorator=cst.Name(value="property"),
+                        decorator=cst.Name(value=self._new_decorator(base_name)),
                         trailing_whitespace=updated_node.trailing_whitespace,
                     ),
                     cst.Decorator(
@@ -49,3 +58,6 @@ class FixDeprecatedAbstractproperty(SimpleCodemod, NameResolutionMixin):
             )
 
         return original_node
+
+    def _new_decorator(self, old_name: str) -> str:
+        return self.DEPRECATED_TO_NEW[old_name]

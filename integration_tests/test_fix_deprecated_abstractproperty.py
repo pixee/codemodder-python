@@ -24,29 +24,53 @@ class TestFixDeprecatedAbstractproperty(BaseIntegrationTest):
         def foo(self):
             pass
 
+        @classmethod
+        @abc.abstractmethod
+        def hello(cls):
+            pass
+
+        @staticmethod
+        @abc.abstractmethod
+        def goodbye():
+            pass
+                        
         @abstractmethod
         def bar(self):
             pass
     """
     )
 
-    expected_diff = """\
---- 
-+++ 
-@@ -1,8 +1,10 @@
--from abc import abstractproperty as ap, abstractmethod
-+from abc import abstractmethod
-+import abc
- 
- 
- class A:
--    @ap
-+    @property
-+    @abc.abstractmethod
-     def foo(self):
-         pass
- 
-"""
-
+    # fmt: off
+    expected_diff =(
+    """--- \n"""
+    """+++ \n"""
+    """@@ -1,16 +1,20 @@\n"""
+    """-from abc import abstractproperty as ap, abstractclassmethod, abstractstaticmethod, abstractmethod\n"""
+    """+from abc import abstractmethod\n"""
+    """+import abc\n"""
+    """ \n"""
+    """ \n"""
+    """ class A:\n"""
+    """-    @ap\n"""
+    """+    @property\n"""
+    """+    @abc.abstractmethod\n"""
+    """     def foo(self):\n"""
+    """         pass\n"""
+    """ \n"""
+    """-    @abstractclassmethod\n"""
+    """+    @classmethod\n"""
+    """+    @abc.abstractmethod\n"""
+    """     def hello(cls):\n"""
+    """         pass\n"""
+    """ \n"""
+    """-    @abstractstaticmethod\n"""
+    """+    @staticmethod\n"""
+    """+    @abc.abstractmethod\n"""
+    """     def goodbye():\n"""
+    """         pass\n"""
+    """ \n"""
+    )
+    # fmt: on
     expected_line_change = "5"
-    change_description = FixDeprecatedAbstractproperty.DESCRIPTION
+    num_changes = 3
+    change_description = FixDeprecatedAbstractproperty.change_description
