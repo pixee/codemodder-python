@@ -1,9 +1,9 @@
+from core_codemods.harden_pickle_load import HardenPickleLoad
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
 from codemodder.dependency import Fickling
-from core_codemods.harden_pickle_load import HardenPickleLoad
 
 
 class TestHardenPickleLoad(BaseIntegrationTest):
@@ -41,7 +41,7 @@ except FileNotFoundError:
     requirements_path = "tests/samples/requirements.txt"
     original_requirements = "# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"
     expected_new_reqs = (
-        f"# file used to test dependency management\n"
+        "# file used to test dependency management\n"
         "requests==2.31.0\n"
         "black==23.7.*\n"
         "mypy~=1.4\n"
