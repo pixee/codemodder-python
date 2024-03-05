@@ -15,13 +15,12 @@ class JwtDecodeVerifySonarTransformer(JwtDecodeVerifyTransformer):
         results returned have a start/end column for the verify keyword
         within the `decode` call, not for the entire call like semgrep returns.
         """
-        if self.results is None:
-            return False
         match node:
             case cst.Call():
                 pos_to_match = self.node_position(node)
                 return any(
-                    self.match_location(pos_to_match, result) for result in self.results
+                    self.match_location(pos_to_match, result)
+                    for result in self.results or []
                 )
         return False
 

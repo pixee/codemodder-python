@@ -23,7 +23,8 @@ class UtilsMixin(MetadataDependent):
     def filter_by_result(self, node):
         pos_to_match = self.node_position(node)
         if self.results is None:
-            # Some codemods must run without results existing.
+            # Returning True here means codemods without detectors (and results)
+            # will still run their transformations.
             return True
         return any(result.match_location(pos_to_match, node) for result in self.results)
 
