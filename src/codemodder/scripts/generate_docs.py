@@ -239,6 +239,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="This codemod is a great starting point for models with few fields. We encourage you to write custom `__str__` methods that best suit your Django application.",
     ),
+    "fix-hasattr-call": DocMetadata(
+        importance="Low",
+        guidance_explained="We believe this change is safe because using `callable` is a more reliable way to check if an object is a callable.",
+    ),
 }
 
 METADATA = CORE_METADATA | {
@@ -365,6 +369,3 @@ def main():
         codemod_doc_name = f"{codemod.id.replace(':', '_').replace('/', '_')}.md"
         with open(parent_dir / codemod_doc_name, "w", encoding="utf-8") as f:
             f.write(doc)
-
-
-# Update METADATA above

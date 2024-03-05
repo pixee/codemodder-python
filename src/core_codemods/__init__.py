@@ -15,6 +15,7 @@ from .fix_async_task_instantiation import FixAsyncTaskInstantiation
 from .fix_deprecated_abstractproperty import FixDeprecatedAbstractproperty
 from .fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 from .fix_empty_sequence_comparison import FixEmptySequenceComparison
+from .fix_hasattr_call import TransformFixHasattrCall
 from .fix_mutable_params import FixMutableParams
 from .flask_enable_csrf_protection import FlaskEnableCSRFProtection
 from .flask_json_response_type import FlaskJsonResponseType
@@ -121,6 +122,7 @@ registry = CodemodCollection(
         StrConcatInSeqLiteral,
         FixAsyncTaskInstantiation,
         DjangoModelWithoutDunderStr,
+        TransformFixHasattrCall,
     ],
 )
 

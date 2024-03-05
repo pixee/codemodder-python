@@ -1,19 +1,16 @@
 import libcst as cst
-from core_codemods.api import (
-    Metadata,
-    Reference,
-    ReviewGuidance,
-    SimpleCodemod,
-)
+
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
 class TransformFixHasattrCall(SimpleCodemod):
     metadata = Metadata(
         name="fix-hasattr-call",
-        summary="todo",
-        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        summary="Use `callable` builtin to check for callables",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[
-            Reference(url="todo"),
+            Reference(url="https://docs.python.org/3/library/functions.html#callable"),
+            Reference(url="https://docs.python.org/3/library/functions.html#hasattr"),
         ],
     )
     detector_pattern = """
