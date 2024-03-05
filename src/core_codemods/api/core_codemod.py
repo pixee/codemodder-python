@@ -5,6 +5,9 @@ from codemodder.codemods.api import SimpleCodemod as _SimpleCodemod
 from codemodder.codemods.base_codemod import Metadata
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
+from codemodder.codemods.import_modifier_codemod import (
+    ImportModifierCodemod as _ImportModifierCodemod,
+)
 from codemodder.context import CodemodExecutionContext
 
 
@@ -52,3 +55,7 @@ class SimpleCodemod(_SimpleCodemod):
     """
 
     codemod_base = CoreCodemod
+
+
+class ImportModifierCodemod(SimpleCodemod, _ImportModifierCodemod):
+    pass

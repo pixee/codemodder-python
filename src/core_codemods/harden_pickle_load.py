@@ -1,51 +1,10 @@
 from typing import Mapping
 
-import libcst as cst
-from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
-
-from core_codemods.api import (
-    SimpleCodemod,
-    Metadata,
-    Reference,
-    ReviewGuidance,
-)
-from codemodder.codemods.imported_call_modifier import ImportedCallModifier
-from codemodder.dependency import Fickling
+from codemodder.dependency import Dependency, Fickling
+from core_codemods.api import ImportModifierCodemod, Metadata, Reference, ReviewGuidance
 
 
-class HardenPickleModifier(ImportedCallModifier[Mapping[str, str]]):
-    def update_attribute(self, true_name, original_node, updated_node, new_args):
-        if not self.node_is_selected(original_node):
-            return updated_node
-
-        import_name = self.matching_functions[true_name]
-        AddImportsVisitor.add_needed_import(self.context, import_name)
-        RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
-        return updated_node.with_changes(
-            args=new_args,
-            func=cst.Attribute(
-                value=cst.parse_expression(import_name),
-                attr=cst.Name(value=true_name.split(".")[-1]),
-            ),
-        )
-
-    def update_simple_name(self, true_name, original_node, updated_node, new_args):
-        if not self.node_is_selected(original_node):
-            return updated_node
-
-        import_name = self.matching_functions[true_name]
-        AddImportsVisitor.add_needed_import(self.context, import_name)
-        RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
-        return updated_node.with_changes(
-            args=new_args,
-            func=cst.Attribute(
-                value=cst.parse_expression(import_name),
-                attr=cst.Name(value=true_name.split(".")[-1]),
-            ),
-        )
-
-
-class HardenPickleLoad(SimpleCodemod):
+class HardenPickleLoad(ImportModifierCodemod):
     metadata = Metadata(
         name="harden-pickle-load",
         summary="Harden `pickle.load()` against deserialization attacks",
@@ -66,23 +25,13 @@ class HardenPickleLoad(SimpleCodemod):
 
     change_description = "Harden `pickle.load()` against deserialization attacks"
 
-    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        if not self.node_is_selected(tree):
-            return tree
+    @property
+    def dependency(self) -> Dependency:
+        return Fickling
 
-        visitor = HardenPickleModifier(
-            self.context,
-            self.file_context,
-            # NOTE: the fickling api doesn't seem to support `loads` yet
-            {
-                "pickle.load": "fickling",
-            },
-            self.change_description,
-            self.results,
-        )
-        result_tree = visitor.transform_module(tree)
-        self.file_context.codemod_changes.extend(visitor.changes_in_file)
-        if visitor.changes_in_file:
-            self.add_dependency(Fickling)
-
-        return result_tree
+    @property
+    def mapping(self) -> Mapping[str, str]:
+        # NOTE: the fickling api doesn't seem to support `loads` yet
+        return {
+            "pickle.load": "fickling",
+        }
