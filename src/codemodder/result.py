@@ -34,17 +34,28 @@ class Result(ABCDataclass):
     def match_location(self, pos: CodeRange, node: cst.CSTNode) -> bool:
         del node
         return any(
-            pos.start.line == location.start.line
+            same_line(pos, location)
             and (
                 pos.start.column
                 in ((start_column := location.start.column) - 1, start_column)
             )
-            and pos.end.line == location.end.line
             and (
                 pos.end.column in ((end_column := location.end.column) - 1, end_column)
             )
             for location in self.locations
         )
+
+
+def same_line(pos: CodeRange, location: Location) -> bool:
+    return pos.start.line == location.start.line and pos.end.line == location.end.line
+
+
+def fuzzy_column_match(pos: CodeRange, location: Location) -> bool:
+    """Checks that a result location is within the range of node's `pos` position"""
+    return (
+        pos.start.column <= location.start.column <= pos.end.column + 1
+        and pos.start.column <= location.end.column <= pos.end.column + 1
+    )
 
 
 class ResultSet(dict[str, dict[Path, list[Result]]]):

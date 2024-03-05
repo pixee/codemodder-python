@@ -63,6 +63,7 @@ from .lazy_logging import LazyLogging
 from .str_concat_in_seq_literal import StrConcatInSeqLiteral
 from .fix_async_task_instantiation import FixAsyncTaskInstantiation
 from .django_model_without_dunder_str import DjangoModelWithoutDunderStr
+from .sonar.sonar_jwt_decode_verify import SonarJwtDecodeVerify
 
 registry = CodemodCollection(
     origin="pixee",
@@ -134,5 +135,6 @@ sonar_registry = CodemodCollection(
         SonarRemoveAssertionInPytestRaises,
         SonarFlaskJsonResponseType,
         SonarDjangoJsonResponseType,
+        SonarJwtDecodeVerify,
     ],
 )

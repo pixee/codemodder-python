@@ -287,6 +287,11 @@ METADATA = CORE_METADATA | {
         ].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
+    "jwt-decode-verify-S5659": DocMetadata(
+        importance=CORE_METADATA["jwt-decode-verify"].importance,
+        guidance_explained=CORE_METADATA["jwt-decode-verify"].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 

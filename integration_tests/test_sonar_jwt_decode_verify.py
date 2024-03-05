@@ -1,4 +1,7 @@
-from core_codemods.jwt_decode_verify import JwtDecodeVerify, JwtDecodeVerifyTransformer
+from core_codemods.sonar.sonar_jwt_decode_verify import (
+    SonarJwtDecodeVerify,
+    JwtDecodeVerifySonarTransformer,
+)
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
@@ -6,7 +9,7 @@ from codemodder.codemods.test import (
 
 
 class TestJwtDecodeVerify(BaseIntegrationTest):
-    codemod = JwtDecodeVerify
+    codemod = SonarJwtDecodeVerify
     code_path = "tests/samples/jwt_decode_verify.py"
     original_code, expected_new_code = original_and_expected_from_code_path(
         code_path,
@@ -21,7 +24,9 @@ class TestJwtDecodeVerify(BaseIntegrationTest):
             ),
         ],
     )
+    sonar_issues_json = "tests/samples/sonar_issues.json"
+
     expected_diff = '--- \n+++ \n@@ -8,7 +8,7 @@\n \n encoded_jwt = jwt.encode(payload, SECRET_KEY, algorithm="HS256")\n \n-decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=False)\n-decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": False})\n+decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)\n+decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": True})\n \n var = "something"\n'
     expected_line_change = "11"
     num_changes = 2
-    change_description = JwtDecodeVerifyTransformer.change_description
+    change_description = JwtDecodeVerifySonarTransformer.change_description
