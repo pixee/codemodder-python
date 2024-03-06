@@ -181,3 +181,35 @@ if val is not None:
                 print("whatever", y)
             """
         self.run_and_assert(tmpdir, input_code, expected_output)
+
+    @pytest.mark.xfail(reason="Need to recompute line numbers to reflect removed lines")
+    def test_multiple_warlus_changes(self, tmpdir):
+        input_code = """
+        val = do_something()
+        if val is not None:
+            do_something_else(val)
+
+        foo = hello()
+        if foo == "bar":
+            whatever(foo)
+
+        bar = do_something_else()
+        if bar is not None:
+            do_something(bar)
+        """
+        expected_output = """
+        if (val := do_something()) is not None:
+            do_something_else(val)
+
+        if (foo := hello()) == "bar":
+            whatever(foo)
+
+        if (bar := do_something_else()) is not None:
+            do_something(bar)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=3)
+
+        changes = self.changeset[0].changes
+        assert changes[0].lineNumber == 2
+        assert changes[1].lineNumber == 5
+        assert changes[2].lineNumber == 8
