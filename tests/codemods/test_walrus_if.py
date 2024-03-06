@@ -183,7 +183,7 @@ if val is not None:
         self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.xfail(reason="Need to recompute line numbers to reflect removed lines")
-    def test_multiple_warlus_changes(self, tmpdir):
+    def test_multiple_walrus_changes(self, tmpdir):
         input_code = """
         val = do_something()
         if val is not None:
