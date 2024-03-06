@@ -6,7 +6,7 @@ def disable_write_report(mocker):
     """
     Unit tests should not write analysis report or update any source files.
     """
-    mocker.patch("codemodder.report.codetf_reporter.CodeTF.write_report")
+    mocker.patch("codemodder.change.CodeTF.write_report")
 
 
 @pytest.fixture(autouse=True)
@@ -31,7 +31,8 @@ def disable_write_dependencies(mocker):
     Unit tests should not write any dependency files
     """
     mocker.patch(
-        "codemodder.dependency_management.dependency_manager.DependencyManager.write"
+        "codemodder.dependency_management.dependency_manager.DependencyManager.write",
+        return_value=None,
     )
 
 

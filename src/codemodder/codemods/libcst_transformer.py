@@ -1,4 +1,5 @@
 from collections import namedtuple
+from typing import cast
 
 import libcst as cst
 from libcst import matchers
@@ -99,7 +100,7 @@ class LibcstResultTransformer(BaseTransformer):
 
     def node_position(self, node):
         # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
-        return self.get_metadata(self.METADATA_DEPENDENCIES[0], node)
+        return cast(CodeRange, self.get_metadata(self.METADATA_DEPENDENCIES[0], node))
 
     def add_change(self, node, description: str, start: bool = True):
         position = self.node_position(node)
@@ -125,7 +126,7 @@ class LibcstResultTransformer(BaseTransformer):
     def report_change(self, original_node):
         line_number = self.lineno_for_node(original_node)
         self.file_context.codemod_changes.append(
-            Change(line_number, self.change_description)
+            Change(lineNumber=line_number, description=self.change_description)
         )
 
     def remove_unused_import(self, original_node):
@@ -275,8 +276,8 @@ class LibcstTransformerPipeline(BaseTransformerPipeline):
             return None
 
         change_set = ChangeSet(
-            str(file_context.file_path.relative_to(context.directory)),
-            diff,
+            path=str(file_context.file_path.relative_to(context.directory)),
+            diff=diff,
             changes=file_context.codemod_changes,
         )
 

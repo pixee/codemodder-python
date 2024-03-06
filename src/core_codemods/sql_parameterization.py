@@ -149,8 +149,8 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
                 line_number = self.get_metadata(PositionProvider, call).start.line
                 self.file_context.codemod_changes.append(
                     Change(
-                        line_number,
-                        SQLQueryParameterizationTransformer.change_description,
+                        lineNumber=line_number,
+                        description=SQLQueryParameterizationTransformer.change_description,
                     )
                 )
                 # Normalization and cleanup

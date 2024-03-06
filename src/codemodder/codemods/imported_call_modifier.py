@@ -75,7 +75,7 @@ class ImportedCallModifier(
                 and true_name in self.matching_functions
             ):
                 self.changes_in_file.append(
-                    Change(line_number, self.change_description)
+                    Change(lineNumber=line_number, description=self.change_description)
                 )
 
                 new_args = self.updated_args(updated_node.args)

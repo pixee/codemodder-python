@@ -137,7 +137,10 @@ class FindRequestCallsAndImports(ContextAwareVisitor, UtilsMixin):
                             }
                         )
                         self.changes_in_file.append(
-                            Change(line_number, UrlSandbox.change_description)
+                            Change(
+                                lineNumber=line_number,
+                                description=UrlSandbox.change_description,
+                            )
                         )
 
             # case req.get(...)
@@ -151,7 +154,10 @@ class FindRequestCallsAndImports(ContextAwareVisitor, UtilsMixin):
                     }
                 )
                 self.changes_in_file.append(
-                    Change(line_number, UrlSandbox.change_description)
+                    Change(
+                        lineNumber=line_number,
+                        description=UrlSandbox.change_description,
+                    )
                 )
 
     def _find_assignments(self, node: CSTNode):

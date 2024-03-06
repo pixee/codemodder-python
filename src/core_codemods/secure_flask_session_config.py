@@ -194,5 +194,8 @@ class FixFlaskConfig(BaseTransformer, NameResolutionMixin):
     def report_change(self, original_node):
         line_number = self.lineno_for_node(original_node)
         self.file_context.codemod_changes.append(
-            Change(line_number, SecureFlaskSessionConfig.change_description)
+            Change(
+                lineNumber=line_number,
+                description=SecureFlaskSessionConfig.change_description,
+            )
         )

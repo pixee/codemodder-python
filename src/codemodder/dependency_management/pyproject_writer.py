@@ -41,8 +41,8 @@ class PyprojectWriter(DependencyWriter):
             dependencies, added_line_nums_strategy, added_line_nums
         )
         return ChangeSet(
-            str(self.path.relative_to(self.parent_directory)),
-            diff,
+            path=str(self.path.relative_to(self.parent_directory)),
+            diff=diff,
             changes=changes,
         )
 

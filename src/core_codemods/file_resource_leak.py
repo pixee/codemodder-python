@@ -222,7 +222,10 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
             if self._is_fixable(original_block, index, named_targets, other_targets):
                 line_number = self.get_metadata(PositionProvider, resource).start.line
                 self.changes.append(
-                    Change(line_number, FileResourceLeakTransformer.change_description)
+                    Change(
+                        lineNumber=line_number,
+                        description=FileResourceLeakTransformer.change_description,
+                    )
                 )
 
                 # grab the index of the last statement with reference to the resource

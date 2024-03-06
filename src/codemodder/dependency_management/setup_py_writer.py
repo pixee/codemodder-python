@@ -48,8 +48,8 @@ class SetupPyWriter(DependencyWriter):
             dependencies, fixed_line_number_strategy, codemod.line_num_changed
         )
         return ChangeSet(
-            str(self.path.relative_to(self.parent_directory)),
-            diff,
+            path=str(self.path.relative_to(self.parent_directory)),
+            diff=diff,
             changes=changes,
         )
 

@@ -40,8 +40,8 @@ class RequirementsTxtWriter(DependencyWriter):
             dependencies, original_lines_strategy, original_lines
         )
         return ChangeSet(
-            str(self.path.relative_to(self.parent_directory)),
-            diff,
+            path=str(self.path.relative_to(self.parent_directory)),
+            diff=diff,
             changes=changes,
         )
 

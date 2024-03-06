@@ -16,15 +16,15 @@ def test_change():
         ],
     )
 
-    result = changeset.to_json()
+    result = changeset.model_dump()
 
     assert result["path"] == "test"
     assert result["diff"] == diff
-    assert result["changes"][0]["lineNumber"] == str(1)
+    assert result["changes"][0]["lineNumber"] == 1
     assert result["changes"][0]["description"] == "Change 1 to 2"
-    assert result["changes"][0]["diffSide"] == "right"
-    assert result["changes"][0]["properties"] == {}
-    assert result["changes"][0]["packageActions"] == []
+    assert result["changes"][0]["diffSide"] == DiffSide.RIGHT
+    assert result["changes"][0]["properties"] is None
+    assert result["changes"][0]["packageActions"] is None
 
 
 @pytest.mark.parametrize("side", [DiffSide.LEFT, DiffSide.RIGHT])
@@ -36,4 +36,4 @@ def test_change_diffside(side):
     )
 
     assert change.diffSide == side
-    assert change.to_json()["diffSide"] == side.value
+    assert change.model_dump()["diffSide"] == side

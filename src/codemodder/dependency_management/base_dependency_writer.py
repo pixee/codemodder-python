@@ -4,7 +4,7 @@ from typing import Callable, List, Optional, Union
 
 from packaging.requirements import Requirement
 
-from codemodder.change import Action, Change, ChangeSet, PackageAction, Result
+from codemodder.change import Action, Change, ChangeSet, PackageAction, PackageResult
 from codemodder.dependency import Dependency
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 
@@ -61,7 +61,11 @@ class DependencyWriter(metaclass=ABCMeta):
                     "contextual_description_position": "right",
                 },
                 packageActions=[
-                    PackageAction(Action.ADD, Result.COMPLETED, str(dep.requirement))
+                    PackageAction(
+                        action=Action.ADD,
+                        result=PackageResult.COMPLETED,
+                        package=str(dep.requirement),
+                    )
                 ],
             )
             for i, dep in enumerate(dependencies)

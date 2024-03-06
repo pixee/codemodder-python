@@ -8,6 +8,7 @@ from functools import cached_property
 from importlib.abc import Traversable
 from pathlib import Path
 
+from codemodder.change import Reference
 from codemodder.code_directory import file_line_patterns
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
@@ -21,18 +22,6 @@ class ReviewGuidance(Enum):
     MERGE_AFTER_REVIEW = 1
     MERGE_AFTER_CURSORY_REVIEW = 2
     MERGE_WITHOUT_REVIEW = 3
-
-
-@dataclass
-class Reference:
-    url: str
-    description: str = ""
-
-    def to_json(self):
-        return {
-            "url": self.url,
-            "description": self.description or self.url,
-        }
 
 
 @dataclass
@@ -124,7 +113,7 @@ class BaseCodemod(metaclass=ABCMeta):
             "codemod": self.id,
             "summary": self.summary,
             "description": self.description,
-            "references": [ref.to_json() for ref in self.references],
+            "references": [ref.model_dump() for ref in self.references],
         }
 
     def _apply(
