@@ -1,9 +1,9 @@
-from core_codemods.harden_pickle_load import HardenPickleLoad
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
 from codemodder.dependency import Fickling
+from core_codemods.harden_pickle_load import HardenPickleLoad
 
 
 class TestHardenPickleLoad(BaseIntegrationTest):
