@@ -1,39 +1,7 @@
 from functools import cached_property
-from typing import Mapping
 
-import libcst as cst
-from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
-
-from codemodder.codemods.imported_call_modifier import ImportedCallModifier
-from codemodder.dependency import DefusedXML
-from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
-
-
-class DefusedXmlModifier(ImportedCallModifier[Mapping[str, str]]):
-    def update_attribute(self, true_name, original_node, updated_node, new_args):
-        import_name = self.matching_functions[true_name]
-        AddImportsVisitor.add_needed_import(self.context, import_name)
-        RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
-        return updated_node.with_changes(
-            args=new_args,
-            func=cst.Attribute(
-                value=cst.parse_expression(import_name),
-                attr=cst.Name(value=true_name.split(".")[-1]),
-            ),
-        )
-
-    def update_simple_name(self, true_name, original_node, updated_node, new_args):
-        import_name = self.matching_functions[true_name]
-        AddImportsVisitor.add_needed_import(self.context, import_name)
-        RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
-        return updated_node.with_changes(
-            args=new_args,
-            func=cst.Attribute(
-                value=cst.parse_expression(import_name),
-                attr=cst.Name(value=true_name.split(".")[-1]),
-            ),
-        )
-
+from codemodder.dependency import DefusedXML, Dependency
+from core_codemods.api import ImportModifierCodemod, Metadata, Reference, ReviewGuidance
 
 ETREE_METHODS = ["parse", "fromstring", "iterparse", "XMLParser"]
 SAX_METHODS = ["parse", "make_parser", "parseString"]
@@ -41,7 +9,7 @@ DOM_METHODS = ["parse", "parseString"]
 # TODO: add expat methods?
 
 
-class UseDefusedXml(SimpleCodemod):
+class UseDefusedXml(ImportModifierCodemod):
     metadata = Metadata(
         name="use-defusedxml",
         summary="Use `defusedxml` for Parsing XML",
@@ -63,7 +31,7 @@ class UseDefusedXml(SimpleCodemod):
     change_description = "Replace builtin XML method with safe `defusedxml` method"
 
     @cached_property
-    def matching_functions(self) -> dict[str, str]:
+    def mapping(self) -> dict[str, str]:
         """Build a mapping of functions to their defusedxml imports"""
         _matching_functions: dict[str, str] = {}
         for module, defusedxml, methods in [
@@ -78,19 +46,6 @@ class UseDefusedXml(SimpleCodemod):
             )
         return _matching_functions
 
-    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        if not self.node_is_selected(tree):
-            return tree
-
-        visitor = DefusedXmlModifier(
-            self.context,
-            self.file_context,
-            self.matching_functions,
-            self.change_description,
-        )
-        result_tree = visitor.transform_module(tree)
-        self.file_context.codemod_changes.extend(visitor.changes_in_file)
-        if visitor.changes_in_file:
-            self.add_dependency(DefusedXML)
-
-        return result_tree
+    @property
+    def dependency(self) -> Dependency:
+        return DefusedXML

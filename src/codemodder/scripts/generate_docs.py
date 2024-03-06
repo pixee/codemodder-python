@@ -243,6 +243,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="We believe this change is safe because using `callable` is a more reliable way to check if an object is a callable.",
     ),
+    "harden-pickle-load": DocMetadata(
+        importance="High",
+        guidance_explained="This change may impact performance in some cases, but it is recommended when handling untrusted data.",
+    ),
 }
 
 METADATA = CORE_METADATA | {

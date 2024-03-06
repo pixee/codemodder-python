@@ -7,8 +7,10 @@ from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.metadata import PositionProvider
 
 from codemodder.change import Change
+from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.utils_mixin import NameResolutionMixin
 from codemodder.file_context import FileContext
+from codemodder.result import Result
 
 # It seems to me like we actually want two separate bounds instead of a Union but this is what mypy wants
 FunctionMatchType = TypeVar("FunctionMatchType", bound=Union[Mapping, Set])
@@ -18,6 +20,7 @@ class ImportedCallModifier(
     Generic[FunctionMatchType],
     VisitorBasedCodemodCommand,
     NameResolutionMixin,
+    UtilsMixin,
     metaclass=abc.ABCMeta,
 ):
     METADATA_DEPENDENCIES = (PositionProvider,)
@@ -28,13 +31,15 @@ class ImportedCallModifier(
         file_context: FileContext,
         matching_functions: FunctionMatchType,
         change_description: str,
+        results: list[Result] | None = None,
     ):
-        super().__init__(codemod_context)
+        VisitorBasedCodemodCommand.__init__(self, codemod_context)
         self.line_exclude = file_context.line_exclude
         self.line_include = file_context.line_include
         self.matching_functions: FunctionMatchType = matching_functions
         self.change_description = change_description
         self.changes_in_file: list[Change] = []
+        self.results = results
 
     def updated_args(self, original_args: Sequence[cst.Arg]):
         return original_args

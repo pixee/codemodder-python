@@ -91,6 +91,21 @@ Security = Dependency(
     package_link="https://pypi.org/project/security/",
 )
 
+Fickling = Dependency(
+    Requirement("fickling~=0.1.0"),
+    hashes=[
+        "a5bb5982e2c0e86d41fceaf9576929f0e7bfeef53998248f69c885224cf45739",
+        "1d74a9ef84e56ecd3114563907166bfa65e17e3a00190157c1514fff08e086b4",
+    ],
+    description="""This package provides analysis of pickled data to help identify potential security vulnerabilities.""",
+    _license=License(
+        "LGPL-3.0",
+        "https://opensource.org/license/LGPL-3.0/",
+    ),
+    oss_link="https://github.com/trailofbits/fickling",
+    package_link="https://pypi.org/project/fickling/",
+)
+
 
 DEPENDENCY_NOTIFICATION = """
 ## Dependency Updates
