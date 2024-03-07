@@ -40,7 +40,7 @@ repos:
          "types-requests~=2.13",
     ]
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.3.0
+  rev: v0.3.1
   hooks:
     - id: ruff
       exclude: tests/samples/
