@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
-ValueError("TESTING")
+raise ValueError("TESTING")
 
 
 class Action(Enum):
