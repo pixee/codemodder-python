@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
+ValueError("TESTING")
+
 
 class Action(Enum):
     ADD = "add"
