@@ -3,7 +3,7 @@ COV_FLAGS = --cov-fail-under=94 --cov=codemodder --cov=core_codemods
 XDIST_FLAGS = --numprocesses auto
 
 test:
-	${PYTEST} ${COV_FLAGS} tests ${XDIST_FLAGS}
+	COVERAGE_CORE=sysmon ${PYTEST} ${COV_FLAGS} tests ${XDIST_FLAGS}
 
 integration-test:
 	${PYTEST} integration_tests
