@@ -33,7 +33,7 @@ class TestSonarDjangoReceiverOnTop(BaseSASTCodemodTest):
                 {
                     "rule": "python:S6552",
                     "status": "OPEN",
-                    "component": f"{tmpdir / 'code.py'}",
+                    "component": "code.py",
                     "textRange": {
                         "startLine": 5,
                         "endLine": 5,

@@ -23,7 +23,7 @@ class TestSonarExceptionWithoutRaise(BaseSASTCodemodTest):
                 {
                     "rule": "python:S3984",
                     "status": "OPEN",
-                    "component": f"{tmpdir / 'code.py'}",
+                    "component": "code.py",
                     "textRange": {
                         "startLine": 2,
                         "endLine": 2,

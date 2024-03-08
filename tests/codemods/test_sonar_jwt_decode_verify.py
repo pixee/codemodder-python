@@ -43,7 +43,7 @@ class TestSonarJwtDecodeVerify(BaseSASTCodemodTest):
                 {
                     "rule": "python:S5659",
                     "status": "OPEN",
-                    "component": f"{tmpdir / 'code.py'}",
+                    "component": "code.py",
                     "textRange": {
                         "startLine": 11,
                         "endLine": 11,
@@ -54,7 +54,7 @@ class TestSonarJwtDecodeVerify(BaseSASTCodemodTest):
                 {
                     "rule": "python:S5659",
                     "status": "OPEN",
-                    "component": f"{tmpdir / 'code.py'}",
+                    "component": "code.py",
                     "textRange": {
                         "startLine": 12,
                         "endLine": 12,

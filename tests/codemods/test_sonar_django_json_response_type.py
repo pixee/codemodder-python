@@ -35,7 +35,7 @@ class TestDjangoJsonResponseType(BaseSASTCodemodTest):
                 {
                     "rule": "pythonsecurity:S5131",
                     "status": "OPEN",
-                    "component": f"{tmpdir / 'code.py'}",
+                    "component": "code.py",
                     "textRange": {
                         "startLine": 7,
                         "endLine": 7,

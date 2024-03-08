@@ -33,7 +33,7 @@ class TestRemoveAssertionInPytestRaises(BaseSASTCodemodTest):
                 {
                     "rule": "python:S5915",
                     "status": "OPEN",
-                    "component": f"{tmpdir / 'code.py'}",
+                    "component": "code.py",
                     "textRange": {
                         "startLine": 6,
                         "endLine": 6,
