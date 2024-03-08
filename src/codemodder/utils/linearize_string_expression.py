@@ -4,6 +4,7 @@ from typing import Optional
 import libcst as cst
 from libcst import matchers
 from libcst.codemod import CodemodContext, ContextAwareVisitor
+from libcst.metadata import ParentNodeProvider, ScopeProvider
 
 from codemodder.codemods.utils import BaseType, infer_expression_type
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
@@ -34,7 +35,12 @@ class LinearizedStringExpression:
     ]
 
 
-class LinearizeStringMixin:
+class LinearizeStringMixin(cst.MetadataDependent):
+
+    METADATA_DEPENDENCIES = (
+        ParentNodeProvider,
+        ScopeProvider,
+    )
     """
     A mixin class for libcst Codemod classes. It provides a method to gather all the pieces that composes a string expression.
     """
@@ -179,6 +185,7 @@ class LinearizeStringExpressionVisitor(
         return False
 
     def visit_Attribute(self, node: cst.Attribute) -> Optional[bool]:
+        # TODO try to resolve this
         self.leaves.append(node)
         return False
 
@@ -195,8 +202,4 @@ class LinearizeStringExpressionVisitor(
             self.aliased |= visitor.aliased
             self.node_pieces |= visitor.node_pieces
             return visitor.leaves
-        return [node]
-
-    def recurse_Attribute(self, node: cst.Attribute) -> list[cst.CSTNode]:
-        # TODO may need to look into class definitions
         return [node]
