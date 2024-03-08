@@ -1,12 +1,11 @@
 import libcst as cst
-from libcst.metadata import PositionProvider
 
-from codemodder.codemods.libcst_transformer import LibcstResultTransformer
-from codemodder.codemods.utils_mixin import NameResolutionMixin
+from codemodder.codemods.base_visitor import UtilsMixin
+from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
-class FixDataclassDefaults(SimpleCodemod, NameResolutionMixin):
+class FixDataclassDefaults(SimpleCodemod, NameAndAncestorResolutionMixin, UtilsMixin):
     metadata = Metadata(
         name="fix-dataclass-defaults",
         summary="todo",
@@ -19,45 +18,24 @@ class FixDataclassDefaults(SimpleCodemod, NameResolutionMixin):
     )
     change_description = "todo"
 
-    def leave_ClassDef(
-        self, original_node: cst.ClassDef, updated_node: cst.ClassDef
-    ) -> cst.ClassDef:
-
-        for decorator in original_node.decorators:
-            if self.find_base_name(decorator.decorator) == "dataclass.dataclass":
-                mod = FieldTransformer(
-                    self.context, results=None, file_context=self.file_context
-                )
-
-                new_class = original_node.visit(mod)
-
-                if mod.needs_import:
-                    self.add_needed_import("dataclass", "field")
-                return new_class
-        return updated_node
-
-
-class FieldTransformer(LibcstResultTransformer):
-    """
-    Converts mutable default values in dataclass fields to use default_factory.
-    """
-
-    METADATA_DEPENDENCIES = (PositionProvider,)
-
-    def __init__(
-        self,
-        *codemod_args,
-        **codemod_kwargs,
-    ) -> None:
-        LibcstResultTransformer.__init__(self, *codemod_args, **codemod_kwargs)
-        self.needs_import = False
-
     def leave_AnnAssign(
         self, original_node: cst.Assign, updated_node: cst.Assign
     ) -> cst.CSTNode:
+        if not self.filter_by_path_includes_or_excludes(
+            self.node_position(original_node)
+        ):
+            return updated_node
+
+        maybe_classdef = self.find_immediate_class_def(original_node)
+        maybe_has_decorator = (
+            self._has_dataclass_decorator(maybe_classdef) if maybe_classdef else False
+        )
+        if not maybe_has_decorator:
+            return updated_node
+
         match original_node.value:
             case cst.List(elements=[]) | cst.Dict(elements=[]) | cst.Tuple(elements=[]):
-                self.needs_import = True
+                self.add_needed_import("dataclass", "field")
                 self.report_change(original_node)
                 return updated_node.with_changes(
                     value=cst.parse_expression(
@@ -65,9 +43,15 @@ class FieldTransformer(LibcstResultTransformer):
                     )
                 )
             case cst.Call(func=cst.Name(value="set")):
-                self.needs_import = True
+                self.add_needed_import("dataclass", "field")
                 self.report_change(original_node)
                 return updated_node.with_changes(
                     value=cst.parse_expression("field(default_factory=set)")
                 )
         return updated_node
+
+    def _has_dataclass_decorator(self, node: cst.ClassDef) -> bool:
+        for decorator in node.decorators:
+            if self.find_base_name(decorator.decorator) == "dataclass.dataclass":
+                return True
+        return False

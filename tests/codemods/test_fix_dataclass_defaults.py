@@ -32,7 +32,7 @@ class TestFixDataclassDefaults(BaseCodemodTest):
             friends: dict = field(default_factory=dict) # I collect friends as I go :)
             family: set = field(default_factory=set)
         """
-        self.run_and_assert(tmpdir, input_code, expected)
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=3)
 
     def test_import_from(self, tmpdir):
         input_code = """
@@ -55,7 +55,7 @@ class TestFixDataclassDefaults(BaseCodemodTest):
             friends: dict = field(default_factory=dict) # I collect friends as I go :)
             family: set = field(default_factory=set)
         """
-        self.run_and_assert(tmpdir, input_code, expected)
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=3)
 
     @pytest.mark.parametrize(
         "code",
