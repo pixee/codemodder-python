@@ -27,7 +27,7 @@ class TestSonarNumpyNanEquality(BaseSASTCodemodTest):
                 {
                     "rule": "python:S6725",
                     "status": "OPEN",
-                    "component": f"{tmpdir / 'code.py'}",
+                    "component": "code.py",
                     "textRange": {
                         "startLine": 3,
                         "endLine": 3,

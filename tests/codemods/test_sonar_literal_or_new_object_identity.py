@@ -25,7 +25,7 @@ class TestSonarLiteralOrNewObjectIdentity(BaseSASTCodemodTest):
                 {
                     "rule": "python:S5796",
                     "status": "OPEN",
-                    "component": f"{tmpdir / 'code.py'}",
+                    "component": "code.py",
                     "textRange": {
                         "startLine": 2,
                         "endLine": 2,

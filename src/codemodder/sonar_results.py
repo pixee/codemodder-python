@@ -3,8 +3,9 @@ from dataclasses import replace
 from pathlib import Path
 
 import libcst as cst
-from typing_extensions import Self
+from typing_extensions import Self, override
 
+from codemodder.context import CodemodExecutionContext
 from codemodder.logging import logger
 from codemodder.result import LineInfo, Location, Result, ResultSet
 
@@ -58,3 +59,10 @@ class SonarResultSet(ResultSet):
         except Exception:
             logger.debug("Could not parse sonar json %s", json_file)
         return cls()
+
+    @override
+    def results_for_rule_and_file(
+        self, context: CodemodExecutionContext, rule_id: str, file: Path
+    ) -> list[Result]:
+        paths_for_rule = self.get(rule_id, {})
+        return paths_for_rule.get(file.relative_to(context.directory), [])
