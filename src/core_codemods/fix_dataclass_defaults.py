@@ -34,6 +34,7 @@ class FixDataclassDefaults(SimpleCodemod, NameAndAncestorResolutionMixin, UtilsM
             return updated_node
 
         match original_node.value:
+            # TODO: add support for populated elements
             case cst.List(elements=[]) | cst.Dict(elements=[]) | cst.Tuple(elements=[]):
                 self.add_needed_import("dataclasses", "field")
                 self.report_change(original_node)
@@ -42,7 +43,7 @@ class FixDataclassDefaults(SimpleCodemod, NameAndAncestorResolutionMixin, UtilsM
                         f"field(default_factory={ type(original_node.value).__name__.lower()})"
                     )
                 )
-            case cst.Call(func=cst.Name(value="set")):
+            case cst.Call(func=cst.Name(value="set"), args=[]):
                 self.add_needed_import("dataclasses", "field")
                 self.report_change(original_node)
                 return updated_node.with_changes(

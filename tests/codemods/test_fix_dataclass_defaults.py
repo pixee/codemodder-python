@@ -57,6 +57,20 @@ class TestFixDataclassDefaults(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected, num_changes=3)
 
+    def test_populated_defaults(self, tmpdir):
+        # TODO: support later using lambda.
+        input_code = """
+        import dataclasses
+
+        @dataclasses.dataclass
+        class Test:
+            name: str = ""
+            phones: list = [1, 2, 3]
+            friends: dict = {"friend": "one"}
+            family: set = set((1, 2, 3))
+        """
+        self.run_and_assert(tmpdir, input_code, input_code)
+
     @pytest.mark.parametrize(
         "code",
         [
