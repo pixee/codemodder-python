@@ -12,9 +12,9 @@ class TestFixDataclassDefaults(BaseCodemodTest):
 
     def test_import(self, tmpdir):
         input_code = """
-        import dataclass
+        import dataclasses
     
-        @dataclass.dataclass
+        @dataclasses.dataclass
         class Test:
             name: str = ""
             phones: list = []
@@ -22,10 +22,10 @@ class TestFixDataclassDefaults(BaseCodemodTest):
             family: set = set()
         """
         expected = """
-        import dataclass
-        from dataclass import field
+        import dataclasses
+        from dataclasses import field
     
-        @dataclass.dataclass
+        @dataclasses.dataclass
         class Test:
             name: str = ""
             phones: list = field(default_factory=list)
@@ -36,7 +36,7 @@ class TestFixDataclassDefaults(BaseCodemodTest):
 
     def test_import_from(self, tmpdir):
         input_code = """
-        from dataclass import dataclass
+        from dataclasses import dataclass
 
         @dataclass
         class Test:
@@ -46,7 +46,7 @@ class TestFixDataclassDefaults(BaseCodemodTest):
             family: set = set()
         """
         expected = """
-        from dataclass import field, dataclass
+        from dataclasses import field, dataclass
 
         @dataclass
         class Test:
@@ -60,6 +60,13 @@ class TestFixDataclassDefaults(BaseCodemodTest):
     @pytest.mark.parametrize(
         "code",
         [
+            """
+            class Test:
+                name: str = ""
+                phones: list = []
+                friends: dict = {} # I collect friends as I go :)
+                family: set = set()
+            """,
             """"
             from dataclasses import dataclass
             
@@ -96,9 +103,9 @@ class TestFixDataclassDefaults(BaseCodemodTest):
         input_code = (
             expected
         ) = """
-        import dataclass
+        import dataclasses
     
-        @dataclass.dataclass
+        @dataclasses.dataclass
         class Test:
             phones: list = []
         """

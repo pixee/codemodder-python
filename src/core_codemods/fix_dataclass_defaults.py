@@ -35,7 +35,7 @@ class FixDataclassDefaults(SimpleCodemod, NameAndAncestorResolutionMixin, UtilsM
 
         match original_node.value:
             case cst.List(elements=[]) | cst.Dict(elements=[]) | cst.Tuple(elements=[]):
-                self.add_needed_import("dataclass", "field")
+                self.add_needed_import("dataclasses", "field")
                 self.report_change(original_node)
                 return updated_node.with_changes(
                     value=cst.parse_expression(
@@ -43,7 +43,7 @@ class FixDataclassDefaults(SimpleCodemod, NameAndAncestorResolutionMixin, UtilsM
                     )
                 )
             case cst.Call(func=cst.Name(value="set")):
-                self.add_needed_import("dataclass", "field")
+                self.add_needed_import("dataclasses", "field")
                 self.report_change(original_node)
                 return updated_node.with_changes(
                     value=cst.parse_expression("field(default_factory=set)")
@@ -52,6 +52,6 @@ class FixDataclassDefaults(SimpleCodemod, NameAndAncestorResolutionMixin, UtilsM
 
     def _has_dataclass_decorator(self, node: cst.ClassDef) -> bool:
         for decorator in node.decorators:
-            if self.find_base_name(decorator.decorator) == "dataclass.dataclass":
+            if self.find_base_name(decorator.decorator) == "dataclasses.dataclass":
                 return True
         return False
