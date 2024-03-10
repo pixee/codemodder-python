@@ -8,7 +8,7 @@ from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 class FixDataclassDefaults(SimpleCodemod, NameAndAncestorResolutionMixin, UtilsMixin):
     metadata = Metadata(
         name="fix-dataclass-defaults",
-        summary="todo",
+        summary="Replace `dataclass` Mutable Default Values with Call to `field`",
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[
             Reference(
@@ -16,7 +16,9 @@ class FixDataclassDefaults(SimpleCodemod, NameAndAncestorResolutionMixin, UtilsM
             )
         ],
     )
-    change_description = "todo"
+    change_description = (
+        "Replace `dataclass` mutable default values with call to `field`"
+    )
 
     def leave_AnnAssign(
         self, original_node: cst.Assign, updated_node: cst.Assign
