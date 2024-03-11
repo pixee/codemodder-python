@@ -6,6 +6,7 @@ import sys
 from types import ModuleType
 
 import git
+import jsonschema
 
 from codemodder import __version__, registry
 
@@ -99,7 +100,8 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         result = results[0]
         assert result["codemod"] == self.codemod_instance.id
         assert result["references"] == [
-            ref.to_json() for ref in self.codemod_instance.references
+            ref.model_dump(exclude_none=True)
+            for ref in self.codemod_instance.references
         ]
 
         # TODO: once we add description for each url.
@@ -118,14 +120,14 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
 
         assert len(change["changes"]) == self.num_changes
         line_change = change["changes"][0]
-        assert line_change["lineNumber"] == str(self.expected_line_change)
+        assert line_change["lineNumber"] == int(self.expected_line_change)
         assert line_change["description"] == self.change_description
-        assert line_change["packageActions"] == []
-        assert line_change["properties"] == {}
 
-    def _assert_codetf_output(self):
+    def _assert_codetf_output(self, codetf_schema):
         with open(self.output_path, "r", encoding="utf-8") as f:
             codetf = json.load(f)
+
+        jsonschema.validate(codetf, codetf_schema)
 
         assert sorted(codetf.keys()) == ["results", "run"]
         run = codetf["run"]
@@ -149,7 +151,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             path=self.code_path, allowed_exceptions=self.allowed_exceptions
         )
 
-    def test_file_rewritten(self):
+    def test_file_rewritten(self, codetf_schema):
         """
         Tests that file is re-written correctly with new code and correct codetf output.
 
@@ -183,7 +185,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
 
         self.check_code_after()
         self.check_dependencies_after()
-        self._assert_codetf_output()
+        self._assert_codetf_output(codetf_schema)
         pathlib.Path(self.output_path).unlink(missing_ok=True)
         self._run_idempotency_chec(command)
 

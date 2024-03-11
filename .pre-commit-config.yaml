@@ -34,6 +34,7 @@ repos:
      args: [--disable-error-code=has-type,--disable-error-code=import-not-found]
      additional_dependencies:
        [
+         "types-jsonschema~=4.21.0",
          "types-mock==5.0.*",
          "types-PyYAML==6.0",
          "types-toml~=0.10",
