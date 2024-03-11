@@ -309,6 +309,11 @@ METADATA = CORE_METADATA | {
         guidance_explained=CORE_METADATA["jwt-decode-verify"].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
+    "fix-missing-self-or-cls-S5719": DocMetadata(
+        importance=CORE_METADATA["fix-missing-self-or-cls"].importance,
+        guidance_explained=CORE_METADATA["fix-missing-self-or-cls"].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 

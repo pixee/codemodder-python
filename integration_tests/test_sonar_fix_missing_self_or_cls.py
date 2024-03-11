@@ -2,14 +2,12 @@ from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
 )
-from core_codemods.fix_missing_self_or_cls import (
-    FixMissingSelfOrCls,
-    FixMissingSelfOrClsTransformer,
-)
+from core_codemods.fix_missing_self_or_cls import FixMissingSelfOrClsTransformer
+from core_codemods.sonar.sonar_fix_missing_self_or_cls import SonarFixMissingSelfOrCls
 
 
-class TestFixMissingSelfOrCls(BaseIntegrationTest):
-    codemod = FixMissingSelfOrCls
+class TestSonarFixMissingSelfOrCls(BaseIntegrationTest):
+    codemod = SonarFixMissingSelfOrCls
     code_path = "tests/samples/fix_missing_self_or_cls.py"
     original_code, expected_new_code = original_and_expected_from_code_path(
         code_path,
@@ -24,7 +22,7 @@ class TestFixMissingSelfOrCls(BaseIntegrationTest):
             ),
         ],
     )
-
+    sonar_issues_json = "tests/samples/sonar_issues.json"
     # fmt: off
     expected_diff = (
     """--- \n"""

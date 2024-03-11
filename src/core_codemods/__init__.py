@@ -49,6 +49,7 @@ from .sonar.sonar_django_json_response_type import SonarDjangoJsonResponseType
 from .sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
 from .sonar.sonar_exception_without_raise import SonarExceptionWithoutRaise
 from .sonar.sonar_fix_assert_tuple import SonarFixAssertTuple
+from .sonar.sonar_fix_missing_self_or_cls import SonarFixMissingSelfOrCls
 from .sonar.sonar_flask_json_response_type import SonarFlaskJsonResponseType
 from .sonar.sonar_jwt_decode_verify import SonarJwtDecodeVerify
 from .sonar.sonar_literal_or_new_object_identity import SonarLiteralOrNewObjectIdentity
@@ -144,5 +145,6 @@ sonar_registry = CodemodCollection(
         SonarFlaskJsonResponseType,
         SonarDjangoJsonResponseType,
         SonarJwtDecodeVerify,
+        SonarFixMissingSelfOrCls,
     ],
 )
