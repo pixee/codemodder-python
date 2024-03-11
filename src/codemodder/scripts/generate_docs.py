@@ -251,6 +251,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="This change is safe and will prevent runtime `ValueError`.",
     ),
+    "fix-missing-self-or-cls": DocMetadata(
+        importance="Medium",
+        guidance_explained="This change is safe and will prevent errors when calling on these instance or class methods..",
+    ),
 }
 
 METADATA = CORE_METADATA | {

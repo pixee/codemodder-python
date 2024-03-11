@@ -7,12 +7,12 @@ from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 class FixMissingSelfOrCls(SimpleCodemod, NameResolutionMixin):
     metadata = Metadata(
         name="fix-missing-self-or-cls",
-        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
-        summary="todo",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        summary="Fix Missing Positional Parameter for Instance and Class Methods",
         references=[],
     )
 
-    change_description = "todo"
+    change_description = "Add `self` or `cls` parameter to instance or class method."
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
