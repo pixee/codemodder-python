@@ -12,6 +12,7 @@ from .exception_without_raise import ExceptionWithoutRaise
 from .file_resource_leak import FileResourceLeak
 from .fix_assert_tuple import FixAssertTuple
 from .fix_async_task_instantiation import FixAsyncTaskInstantiation
+from .fix_dataclass_defaults import FixDataclassDefaults
 from .fix_deprecated_abstractproperty import FixDeprecatedAbstractproperty
 from .fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 from .fix_empty_sequence_comparison import FixEmptySequenceComparison
@@ -125,6 +126,7 @@ registry = CodemodCollection(
         FixAsyncTaskInstantiation,
         DjangoModelWithoutDunderStr,
         TransformFixHasattrCall,
+        FixDataclassDefaults,
     ],
 )
 

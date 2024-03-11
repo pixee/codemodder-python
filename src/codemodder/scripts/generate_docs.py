@@ -247,6 +247,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="High",
         guidance_explained="This change may impact performance in some cases, but it is recommended when handling untrusted data.",
     ),
+    "fix-dataclass-defaults": DocMetadata(
+        importance="Medium",
+        guidance_explained="This change is safe and will prevent runtime `ValueError`.",
+    ),
 }
 
 METADATA = CORE_METADATA | {

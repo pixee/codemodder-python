@@ -422,6 +422,19 @@ class AncestorPatternsMixin(MetadataDependent):
                 break
         return first_fdef
 
+    def find_immediate_class_def(self, node: cst.CSTNode) -> Optional[cst.ClassDef]:
+        """
+        Find if node is inside a class definition. In case of nested classes, it returns the most immediate one.
+        """
+        # We disregard nested classes, we consider only the immediate one
+        ancestors = self.path_to_root(node)
+        first_cdef = None
+        for ancestor in ancestors:
+            if isinstance(ancestor, cst.ClassDef):
+                first_cdef = ancestor
+                break
+        return first_cdef
+
     def path_to_root(self, node: cst.CSTNode) -> list[cst.CSTNode]:
         """
         Returns node's path to root. Includes self.
