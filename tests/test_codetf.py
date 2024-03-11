@@ -1,6 +1,6 @@
 import pytest
 
-from codemodder.change import Change, ChangeSet, DiffSide
+from codemodder.codetf import Change, ChangeSet, DiffSide
 
 
 def test_change():

@@ -4,7 +4,7 @@ from typing import Callable, List, Optional, Union
 
 from packaging.requirements import Requirement
 
-from codemodder.change import Action, Change, ChangeSet, PackageAction, PackageResult
+from codemodder.codetf import Action, Change, ChangeSet, PackageAction, PackageResult
 from codemodder.dependency import Dependency
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 

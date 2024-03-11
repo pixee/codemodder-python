@@ -11,7 +11,6 @@ from libcst.metadata import (
     ScopeProvider,
 )
 
-from codemodder.change import Change
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
@@ -22,6 +21,7 @@ from codemodder.codemods.utils_mixin import (
     NameAndAncestorResolutionMixin,
     NameResolutionMixin,
 )
+from codemodder.codetf import Change
 from codemodder.file_context import FileContext
 from codemodder.result import Result
 from core_codemods.api import Metadata, Reference, ReviewGuidance

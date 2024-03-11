@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-from codemodder.change import ChangeSet
+from codemodder.codetf import ChangeSet
 from codemodder.dependency import Dependency
 from codemodder.dependency_management.pyproject_writer import PyprojectWriter
 from codemodder.dependency_management.requirements_txt_writer import (

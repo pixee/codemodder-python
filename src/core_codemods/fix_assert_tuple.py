@@ -2,12 +2,12 @@ from typing import List, Union
 
 import libcst as cst
 
-from codemodder.change import Change
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
 )
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from codemodder.codetf import Change
 from core_codemods.api import Metadata, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 

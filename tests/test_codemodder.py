@@ -35,7 +35,7 @@ class TestRun:
         assert codetf.exists()
 
     @mock.patch("libcst.parse_module", side_effect=Exception)
-    @mock.patch("codemodder.change.CodeTF.build")
+    @mock.patch("codemodder.codetf.CodeTF.build")
     def test_cst_parsing_fails(self, build_report, mock_parse):
         args = [
             "tests/samples/",
@@ -89,7 +89,7 @@ class TestRun:
         mock_update_code.assert_not_called()
 
     @pytest.mark.parametrize("dry_run", [True, False])
-    @mock.patch("codemodder.change.CodeTF.build")
+    @mock.patch("codemodder.codetf.CodeTF.build")
     def test_reporting(self, mock_reporting, dry_run):
         args = [
             "tests/samples/",
@@ -134,7 +134,7 @@ class TestRun:
 
     @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
     @mock.patch("codemodder.context.CodemodExecutionContext.compile_results")
-    @mock.patch("codemodder.change.CodeTF.write_report")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_run_codemod_name_or_id(self, write_report, mock_compile_results, codemod):
         del write_report
         args = [
@@ -150,7 +150,7 @@ class TestRun:
 
 
 class TestExitCode:
-    @mock.patch("codemodder.change.CodeTF.write_report")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_success_0(self, mock_report):
         del mock_report
         args = [
@@ -165,7 +165,7 @@ class TestExitCode:
         exit_code = run(args)
         assert exit_code == 0
 
-    @mock.patch("codemodder.change.CodeTF.write_report")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_bad_project_dir_1(self, mock_report):
         del mock_report
         args = [
@@ -178,7 +178,7 @@ class TestExitCode:
         exit_code = run(args)
         assert exit_code == 1
 
-    @mock.patch("codemodder.change.CodeTF.write_report")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_conflicting_include_exclude(self, mock_report):
         del mock_report
         args = [
@@ -194,7 +194,7 @@ class TestExitCode:
             run(args)
         assert err.value.args[0] == 3
 
-    @mock.patch("codemodder.change.CodeTF.write_report")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_bad_codemod_name(self, mock_report):
         del mock_report
         bad_codemod = "doesntexist"

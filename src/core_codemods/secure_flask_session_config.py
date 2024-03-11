@@ -3,9 +3,9 @@ from libcst import matchers
 from libcst.codemod import Codemod, CodemodContext
 from libcst.metadata import ParentNodeProvider
 
-from codemodder.change import Change
 from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from codemodder.codetf import Change
 from codemodder.file_context import FileContext
 from codemodder.utils.utils import extract_targets_of_assignment, true_value
 from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod

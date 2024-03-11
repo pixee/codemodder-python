@@ -6,12 +6,12 @@ from libcst.codemod import CodemodContext, ContextAwareVisitor
 from libcst.codemod.visitors import AddImportsVisitor, ImportItem
 from libcst.metadata import PositionProvider, ScopeProvider
 
-from codemodder.change import Change
 from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsCodemod,
 )
 from codemodder.codemods.utils import ReplaceNodes
+from codemodder.codetf import Change
 from codemodder.dependency import Security
 from codemodder.file_context import FileContext
 from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod

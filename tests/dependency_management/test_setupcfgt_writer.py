@@ -3,7 +3,7 @@ from textwrap import dedent
 import mock
 import pytest
 
-from codemodder.change import DiffSide
+from codemodder.codetf import DiffSide
 from codemodder.dependency import DefusedXML, Security
 from codemodder.dependency_management.setupcfg_writer import SetupCfgWriter
 from codemodder.project_analysis.file_parsers.package_store import (

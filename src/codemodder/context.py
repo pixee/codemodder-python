@@ -6,8 +6,8 @@ from pathlib import Path
 from textwrap import indent
 from typing import TYPE_CHECKING, Iterator, List
 
-from codemodder.change import ChangeSet
-from codemodder.change import Result as CodeTFResult
+from codemodder.codetf import ChangeSet
+from codemodder.codetf import Result as CodeTFResult
 from codemodder.dependency import (
     Dependency,
     build_dependency_notification,

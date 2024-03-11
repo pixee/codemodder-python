@@ -8,10 +8,10 @@ from functools import cached_property
 from importlib.abc import Traversable
 from pathlib import Path
 
-from codemodder.change import Reference
 from codemodder.code_directory import file_line_patterns
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
+from codemodder.codetf import Reference
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from codemodder.logging import logger

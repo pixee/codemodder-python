@@ -13,7 +13,6 @@ from libcst.metadata import (
     ScopeProvider,
 )
 
-from codemodder.change import Change
 from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
@@ -30,6 +29,7 @@ from codemodder.codemods.utils import (
     infer_expression_type,
 )
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from codemodder.codetf import Change
 from core_codemods.api import Metadata, Reference, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 

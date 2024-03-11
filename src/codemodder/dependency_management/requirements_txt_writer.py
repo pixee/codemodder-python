@@ -1,6 +1,6 @@
 from typing import Optional
 
-from codemodder.change import ChangeSet
+from codemodder.codetf import ChangeSet
 from codemodder.dependency import Dependency
 from codemodder.dependency_management.base_dependency_writer import DependencyWriter
 from codemodder.diff import create_diff

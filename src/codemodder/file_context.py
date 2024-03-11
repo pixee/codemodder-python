@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from codemodder.change import Change, ChangeSet
+from codemodder.codetf import Change, ChangeSet
 from codemodder.dependency import Dependency
 from codemodder.result import Result
 from codemodder.utils.timer import Timer

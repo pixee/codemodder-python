@@ -7,11 +7,11 @@ from pathlib import Path
 from typing import Sequence
 
 from codemodder import __version__, registry
-from codemodder.change import CodeTF
 from codemodder.cli import parse_args
 from codemodder.code_directory import match_files
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.semgrep import SemgrepRuleDetector
+from codemodder.codetf import CodeTF
 from codemodder.context import CodemodExecutionContext
 from codemodder.dependency import Dependency
 from codemodder.logging import configure_logger, log_list, log_section, logger
