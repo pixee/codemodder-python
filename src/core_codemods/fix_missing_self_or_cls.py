@@ -1,17 +1,15 @@
 import libcst as cst
 
+from codemodder.codemods.libcst_transformer import (
+    LibcstResultTransformer,
+    LibcstTransformerPipeline,
+)
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
+from core_codemods.api import Metadata, ReviewGuidance
+from core_codemods.api.core_codemod import CoreCodemod
 
 
-class FixMissingSelfOrCls(SimpleCodemod, NameResolutionMixin):
-    metadata = Metadata(
-        name="fix-missing-self-or-cls",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        summary="Fix Missing Positional Parameter for Instance and Class Methods",
-        references=[],
-    )
-
+class FixMissingSelfOrClsTransformer(LibcstResultTransformer, NameResolutionMixin):
     change_description = "Add `self` or `cls` parameter to instance or class method."
 
     def __init__(self, *args, **kwargs):
@@ -76,3 +74,15 @@ class FixMissingSelfOrCls(SimpleCodemod, NameResolutionMixin):
                 node.params.posonly_params,
             )
         )
+
+
+FixMissingSelfOrCls = CoreCodemod(
+    metadata=Metadata(
+        name="fix-missing-self-or-cls",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        summary="Fix Missing Positional Parameter for Instance and Class Methods",
+        references=[],
+    ),
+    transformer=LibcstTransformerPipeline(FixMissingSelfOrClsTransformer),
+    detector=None,
+)
