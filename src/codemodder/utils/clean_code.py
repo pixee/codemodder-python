@@ -193,14 +193,6 @@ class RemoveUnusedVariables(VisitorBasedCodemodCommand, NameResolutionMixin):
     Removes assinments that aren't referenced anywhere else. It will preseve assignments that are in exposed scopes, that is, module or class scope.
     """
 
-    def _is_target_in_exposed_scope(self, expression):
-        assignments = self.find_assignments(expression)
-        for assignment in assignments:
-            match assignment.scope:
-                case GlobalScope() | ClassScope() | None:
-                    return True
-        return False
-
     def _handle_target(self, node):
         # TODO starred elements
         # TODO list/tuple case, remove assignment values
