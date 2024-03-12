@@ -3,23 +3,15 @@ import libcst.matchers as m
 from libcst.codemod import CodemodContext
 from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatString
 
-from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
+from codemodder.codemods.libcst_transformer import (
+    LibcstResultTransformer,
+    LibcstTransformerPipeline,
+)
+from core_codemods.api import Metadata, Reference, ReviewGuidance
+from core_codemods.api.core_codemod import CoreCodemod
 
 
-class RemoveUnnecessaryFStr(SimpleCodemod, UnnecessaryFormatString):
-    metadata = Metadata(
-        name="remove-unnecessary-f-str",
-        summary="Remove Unnecessary F-strings",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        references=[
-            Reference(
-                url="https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/f-string-without-interpolation.html"
-            ),
-            Reference(
-                url="https://github.com/Instagram/LibCST/blob/main/libcst/codemod/commands/unnecessary_format_string.py"
-            ),
-        ],
-    )
+class RemoveUnnecessaryFStrTransform(LibcstResultTransformer, UnnecessaryFormatString):
 
     change_description = "Remove unnecessary f-string"
 
@@ -27,7 +19,9 @@ class RemoveUnnecessaryFStr(SimpleCodemod, UnnecessaryFormatString):
         self, codemod_context: CodemodContext, *codemod_args, **codemod_kwargs
     ):
         UnnecessaryFormatString.__init__(self, codemod_context)
-        SimpleCodemod.__init__(self, codemod_context, *codemod_args, **codemod_kwargs)
+        LibcstResultTransformer.__init__(
+            self, codemod_context, *codemod_args, **codemod_kwargs
+        )
 
     @m.leave(m.FormattedString(parts=(m.FormattedStringText(),)))
     def _check_formatted_string(
@@ -44,3 +38,22 @@ class RemoveUnnecessaryFStr(SimpleCodemod, UnnecessaryFormatString):
         if not _original_node.deep_equals(transformed_node):
             self.report_change(_original_node)
         return transformed_node
+
+
+RemoveUnnecessaryFStr = CoreCodemod(
+    metadata=Metadata(
+        name="remove-unnecessary-f-str",
+        summary="Remove Unnecessary F-strings",
+        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        references=[
+            Reference(
+                url="https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/f-string-without-interpolation.html"
+            ),
+            Reference(
+                url="https://github.com/Instagram/LibCST/blob/main/libcst/codemod/commands/unnecessary_format_string.py"
+            ),
+        ],
+    ),
+    transformer=LibcstTransformerPipeline(RemoveUnnecessaryFStrTransform),
+    detector=None,
+)
