@@ -5,7 +5,12 @@ from typing import Any, Optional, Tuple
 
 import libcst as cst
 from libcst import ensure_type, matchers
-from libcst.codemod import CodemodContext, ContextAwareTransformer, ContextAwareVisitor
+from libcst.codemod import (
+    Codemod,
+    CodemodContext,
+    ContextAwareTransformer,
+    ContextAwareVisitor,
+)
 from libcst.metadata import (
     ClassScope,
     GlobalScope,
@@ -166,6 +171,12 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
 
             # TODO research if named parameters are widely supported
             # it could solve for the case of existing parameters
+            # TODO Do all middle expressions hail from a single source?
+            # e.g. the following
+            # name = 'user_' + input() + '_name'
+            # execute("'" + name + "'")
+            # should produce: execute("?", name)
+            # instead of: execute("?", 'user_{0}_name'.format(input()))
             if params_elements:
                 tuple_arg = cst.Arg(cst.Tuple(elements=params_elements))
                 # self.changed_nodes[call] = call.with_changes(args=[*call.args, tuple_arg])
@@ -183,12 +194,9 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
                         case _:
                             new_changed_nodes[k] = v
                 for node in new_parts_for:
-                    print(node)
                     new_raw_value = ""
                     for part in linearized_query.node_pieces[node]:
                         new_part = self.changed_nodes.get(part) or part
-                        print(part)
-                        print(new_part)
                         match new_part:
                             case cst.SimpleString():
                                 new_raw_value += new_part.raw_value
@@ -222,9 +230,11 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
                     )
                 )
                 # Normalization and cleanup
+                result = RemoveEmptyExpressionsFormatting(
+                    self.context
+                ).transform_module(result)
                 result = result.visit(RemoveEmptyStringConcatenation())
                 result = NormalizeFStrings(self.context).transform_module(result)
-                # TODO CLEAN EMPTY STRINGS FROM FORMAT
                 # TODO The transform below may break nested f-strings: f"{f"1"}" -> f"{"1"}"
                 # May be a bug...
                 # result = UnnecessaryFormatString(self.context).transform_module(result)
@@ -731,3 +741,171 @@ def _extract_prefix_raw_value(self, node) -> Optional[Tuple[str, str]]:
             return None
         case _:
             return None
+
+
+class RemoveEmptyExpressionsFormatting(Codemod):
+
+    METADATA_DEPENDENCIES = (
+        ParentNodeProvider,
+        ScopeProvider,
+    )
+
+    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        result = tree
+        visitor = RemoveEmptyExpressionsFormattingVisitor(self.context)
+        result.visit(visitor)
+        if visitor.node_replacements:
+            result = result.visit(ReplaceNodes(visitor.node_replacements))
+        return result
+
+    def should_allow_multiple_passes(self) -> bool:
+        return True
+
+
+class RemoveEmptyExpressionsFormattingVisitor(
+    ContextAwareVisitor, NameAndAncestorResolutionMixin
+):
+
+    def __init__(self, context: CodemodContext) -> None:
+        self.node_replacements: dict[cst.CSTNode, cst.CSTNode] = {}
+        super().__init__(context)
+
+    def _resolve_dict(
+        self, dict_node: cst.Dict
+    ) -> dict[cst.BaseExpression, cst.BaseExpression]:
+        returned: dict[cst.BaseExpression, cst.BaseExpression] = {}
+        for element in dict_node.elements:
+            match element:
+                case cst.DictElement():
+                    returned |= {element.key: element.value}
+                case cst.StarredDictElement():
+                    resolved = self.resolve_expression(element.value)
+                    if isinstance(resolved, cst.Dict):
+                        returned |= self._resolve_dict(resolved)
+        return returned
+
+    def _is_empty_sequence_literal(self, expr: cst.BaseExpression) -> bool:
+        match expr:
+            case cst.Dict() | cst.Tuple() if not expr.elements:
+                return True
+        return False
+
+    def _build_replacements(self, node, node_parts, parts_to_remove):
+        new_raw_value = ""
+        change = False
+        for part in node_parts:
+            if part in parts_to_remove:
+                change = True
+            else:
+                new_raw_value += part.value
+        if change:
+            match node:
+                case cst.SimpleString():
+                    self.node_replacements[node] = node.with_changes(
+                        value=node.prefix + node.quote + new_raw_value + node.quote
+                    )
+                case cst.FormattedStringText():
+                    self.node_replacements[node] = node.with_changes(
+                        value=new_raw_value
+                    )
+
+    def _record_node_pieces(self, parts) -> dict:
+        node_pieces: dict[
+            cst.CSTNode,
+            list[FormattedLiteralStringExpression | FormattedLiteralStringText],
+        ] = {}
+        for part in parts:
+            match part:
+                case FormattedLiteralStringText() | FormattedLiteralStringExpression():
+                    if part.origin in node_pieces:
+                        node_pieces[part.origin].append(part)
+                    else:
+                        node_pieces[part.origin] = [part]
+        return node_pieces
+
+    def leave_BinaryOperation(self, original_node: cst.BinaryOperation):
+        if not isinstance(original_node.operator, cst.Modulo):
+            return
+
+        # is left or right an empty literal?
+        if _is_empty_string_literal(self.resolve_expression(original_node.left)):
+            self.node_replacements[original_node] = cst.SimpleString("''")
+            return
+        right = self.resolve_expression(right := original_node.right)
+        if self._is_empty_sequence_literal(right):
+            self.node_replacements[original_node] = original_node.left
+            return
+
+        # gather all the parts of the format operator
+        match right:
+            case cst.Dict():
+                resolved_dict = self._resolve_dict(right)
+                keys: dict | list = dict_to_values_dict(resolved_dict)
+            case _:
+                keys = expressions_from_replacements(right)
+        visitor = LinearizeQuery(self.context)
+        original_node.left.visit(visitor)
+        linearized_string_expr = LinearizedStringExpression(
+            visitor.leaves,
+            visitor.aliased,
+            visitor.node_pieces,
+        )
+        parsed = parse_formatted_string(linearized_string_expr.parts, keys)
+        node_pieces = self._record_node_pieces(parsed)
+
+        # failed parsing of expression, aborting
+        if not parsed:
+            return
+
+        # is there any expressions to replace? if not, remove the operator
+        if all(not isinstance(p, FormattedLiteralStringExpression) for p in parsed):
+            self.node_replacements[original_node] = original_node.left
+            return
+
+        # gather all the expressions parts that resolves to an empty string and remove them
+        to_remove = set()
+        for part in parsed:
+            match part:
+                case FormattedLiteralStringExpression():
+                    resolved_part_expression = self.resolve_expression(part.expression)
+                    if _is_empty_string_literal(resolved_part_expression):
+                        to_remove.add(part)
+        keys_to_remove = {part.key or 0 for part in to_remove}
+        for part in to_remove:
+            self._build_replacements(part.origin, node_pieces[part.origin], to_remove)
+
+        # remove all the elements on the right that resolves to an empty string
+        match right:
+            case cst.Dict():
+                for k, v in resolved_dict.items():
+                    resolved_v = self.resolve_expression(v)
+                    if _is_empty_string_literal(resolved_v):
+                        parent = self.get_parent(v)
+                        self.node_replacements[parent] = cst.RemovalSentinel.REMOVE
+
+            case cst.Tuple():
+                new_tuple_elements = []
+                # outright remove
+                if len(keys_to_remove) != len(keys):
+                    for i, element in enumerate(right.elements):
+                        if i not in keys_to_remove:
+                            new_tuple_elements.append(element)
+                if len(new_tuple_elements) != len(right.elements):
+                    if len(new_tuple_elements) == 1:
+                        self.node_replacements[right] = new_tuple_elements[0].value
+                    else:
+                        self.node_replacements[right] = right.with_changes(
+                            elements=new_tuple_elements
+                        )
+            case _:
+                if keys_to_remove:
+                    self.node_replacements[original_node] = cst.SimpleString("''")
+
+
+def _is_empty_string_literal(node) -> bool:
+    match node:
+        case cst.SimpleString() if node.raw_value == "":
+            return True
+        case cst.FormattedString() if not node.parts:
+            return True
+    return False
