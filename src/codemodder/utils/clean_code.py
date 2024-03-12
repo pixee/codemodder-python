@@ -209,8 +209,7 @@ class RemoveUnusedVariables(VisitorBasedCodemodCommand, NameResolutionMixin):
             #        return node.with_changes(elements = new_elements)
             #    return None
             case cst.Name():
-                target_acesses = self.find_accesses(node)
-                if target_acesses:
+                if target_acesses := self.find_accesses(node):
                     return node
                 else:
                     return None
@@ -230,8 +229,7 @@ class RemoveUnusedVariables(VisitorBasedCodemodCommand, NameResolutionMixin):
 
         new_targets = []
         for target in original_node.targets:
-            new_target = self._handle_target(target.target)
-            if new_target:
+            if new_target := self._handle_target(target.target):
                 new_targets.append(target.with_changes(target=new_target))
         # remove everything
         if not new_targets:
