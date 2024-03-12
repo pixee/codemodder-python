@@ -1,10 +1,10 @@
+from textwrap import dedent
+
 import libcst as cst
 from libcst.codemod import Codemod, CodemodContext
+
 from codemodder.utils.format_string_parser import extract_raw_value
-from codemodder.utils.linearize_string_expression import (
-    LinearizeStringMixin,
-)
-from textwrap import dedent
+from codemodder.utils.linearize_string_expression import LinearizeStringMixin
 
 
 class TestLinearizeStringExpression:
