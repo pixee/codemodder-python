@@ -80,7 +80,7 @@ FixMissingSelfOrCls = CoreCodemod(
     metadata=Metadata(
         name="fix-missing-self-or-cls",
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
-        summary="Fix Missing Positional Parameter for Instance and Class Methods",
+        summary="Add Missing Positional Parameter for Instance and Class Methods",
         references=[],
     ),
     transformer=LibcstTransformerPipeline(FixMissingSelfOrClsTransformer),
