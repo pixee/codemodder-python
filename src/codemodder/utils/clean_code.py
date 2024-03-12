@@ -209,7 +209,7 @@ class RemoveUnusedVariables(VisitorBasedCodemodCommand, NameResolutionMixin):
             #        return node.with_changes(elements = new_elements)
             #    return None
             case cst.Name():
-                if target_acesses := self.find_accesses(node):
+                if self.find_accesses(node):
                     return node
                 else:
                     return None
