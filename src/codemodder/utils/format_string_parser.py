@@ -96,7 +96,7 @@ def _convert_piece_and_parts(
                                 FormattedLiteralStringExpression(
                                     origin=piece,
                                     expression=keys[token_count],
-                                    key=key,
+                                    key=token_count,
                                     index=index_count,
                                     value=s,
                                 )

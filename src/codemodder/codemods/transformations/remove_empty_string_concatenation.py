@@ -27,8 +27,9 @@ class RemoveEmptyStringConcatenation(CSTTransformer):
     def leave_BinaryOperation(
         self, original_node: cst.BinaryOperation, updated_node: cst.BinaryOperation
     ) -> cst.BaseExpression:
-        if isinstance(original_node.operator, cst.Add):
-            return self.handle_node(updated_node)
+        match original_node.operator:
+            case cst.Add():
+                return self.handle_node(updated_node)
         return updated_node
 
     def leave_ConcatenatedString(
@@ -43,20 +44,21 @@ class RemoveEmptyStringConcatenation(CSTTransformer):
     ) -> cst.BaseExpression:
         left = updated_node.left
         right = updated_node.right
-        if self._is_empty_string_literal(left):
-            if self._is_empty_string_literal(right):
+        if _is_empty_string_literal(left):
+            if _is_empty_string_literal(right):
                 return cst.SimpleString(value='""')
             return right
-        if self._is_empty_string_literal(right):
-            if self._is_empty_string_literal(left):
+        if _is_empty_string_literal(right):
+            if _is_empty_string_literal(left):
                 return cst.SimpleString(value='""')
             return left
         return updated_node
 
-    def _is_empty_string_literal(self, node):
-        match node:
-            case cst.SimpleString() if node.raw_value == "":
-                return True
-            case cst.FormattedString() if not node.parts:
-                return True
-        return False
+
+def _is_empty_string_literal(node):
+    match node:
+        case cst.SimpleString() if node.raw_value == "":
+            return True
+        case cst.FormattedString() if not node.parts:
+            return True
+    return False
