@@ -77,8 +77,7 @@ class ExtractPrefixMixin(cst.MetadataDependent):
 
     def _extract_prefix_raw_value(self, node: StringLiteralNodeType) -> tuple[str, str]:
         raw_value = extract_raw_value(node)
-        prefix = self.extract_prefix(node)
-        if prefix is not None:
+        if (prefix := self.extract_prefix(node)) is not None:
             return prefix, raw_value
         return prefix, raw_value
 

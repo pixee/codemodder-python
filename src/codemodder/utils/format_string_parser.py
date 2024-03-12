@@ -157,10 +157,9 @@ def parse_formatted_string(
     for piece, piece_parts in parsed_pieces:
         match piece:
             case cst.SimpleString() | cst.FormattedStringText():
-                maybe_conversion = _convert_piece_and_parts(
+                if maybe_conversion := _convert_piece_and_parts(
                     piece, piece_parts, token_count, keys
-                )
-                if maybe_conversion:
+                ):
                     converted, token_count = maybe_conversion
                     parts.extend(converted)
                 else:
