@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, TypeAlias
+from typing import Optional
 
 import libcst as cst
 from libcst import matchers
@@ -8,20 +8,13 @@ from libcst.codemod import CodemodContext, ContextAwareVisitor
 from codemodder.codemods.utils import BaseType, infer_expression_type
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 from codemodder.utils.format_string_parser import (
-    FormattedLiteralStringExpression,
-    FormattedLiteralStringText,
+    ExpressionNodeType,
+    PrintfStringExpression,
+    PrintfStringText,
+    StringLiteralNodeType,
     dict_to_values_dict,
     expressions_from_replacements,
     parse_formatted_string,
-)
-
-# Type aliases
-CSTStringNodeType: TypeAlias = cst.SimpleString | cst.FormattedStringText
-StringLiteralNodeType: TypeAlias = CSTStringNodeType | FormattedLiteralStringText
-ExpressionNodeType: TypeAlias = (
-    cst.FormattedStringExpression
-    | cst.BaseExpression
-    | FormattedLiteralStringExpression
 )
 
 
@@ -36,8 +29,8 @@ class LinearizedStringExpression:
     parts: list[StringLiteralNodeType | ExpressionNodeType]
     aliased: dict[StringLiteralNodeType | ExpressionNodeType, cst.Name]
     node_pieces: dict[
-        CSTStringNodeType,
-        list[FormattedLiteralStringText | FormattedLiteralStringExpression],
+        cst.SimpleString | cst.FormattedStringText,
+        list[PrintfStringText | PrintfStringExpression],
     ]
 
 
@@ -85,14 +78,14 @@ class LinearizeStringExpressionVisitor(
         self.aliased: dict[StringLiteralNodeType | ExpressionNodeType, cst.Name] = {}
         self.node_pieces: dict[
             cst.SimpleString | cst.FormattedStringText,
-            list[FormattedLiteralStringText | FormattedLiteralStringExpression],
+            list[PrintfStringText | PrintfStringExpression],
         ] = {}
         super().__init__(context)
 
     def _record_node_pieces(self, parts):
         for part in parts:
             match part:
-                case FormattedLiteralStringText() | FormattedLiteralStringExpression():
+                case PrintfStringText() | PrintfStringExpression():
                     if part.origin in self.node_pieces:
                         self.node_pieces[part.origin].append(part)
                     else:
@@ -137,9 +130,7 @@ class LinearizeStringExpressionVisitor(
                         returned |= self._resolve_dict(resolved)
         return returned
 
-    def visit_FormatLiteralStringExpression(
-        self, flse: FormattedLiteralStringExpression
-    ):
+    def visit_FormatLiteralStringExpression(self, flse: PrintfStringExpression):
         visitor = LinearizeStringExpressionVisitor(self.context)
         flse.expression.visit(visitor)
         self.leaves.extend(visitor.leaves)
@@ -170,7 +161,7 @@ class LinearizeStringExpressionVisitor(
                         return False
                     for piece in parsed:
                         match piece:
-                            case FormattedLiteralStringExpression():
+                            case PrintfStringExpression():
                                 self.visit_FormatLiteralStringExpression(piece)
                             case _:
                                 self.leaves.append(piece)

@@ -1,7 +1,7 @@
 import itertools
 import re
 from dataclasses import replace
-from typing import Any, Optional, Tuple
+from typing import Any, ClassVar, Collection, Optional
 
 import libcst as cst
 from libcst.codemod import (
@@ -15,6 +15,7 @@ from libcst.metadata import (
     GlobalScope,
     ParentNodeProvider,
     PositionProvider,
+    ProviderT,
     ScopeProvider,
 )
 
@@ -36,10 +37,12 @@ from codemodder.codemods.utils import (
 )
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 from codemodder.utils.format_string_parser import (
-    FormattedLiteralStringExpression,
-    FormattedLiteralStringText,
+    PrintfStringExpression,
+    PrintfStringText,
+    StringLiteralNodeType,
     dict_to_values_dict,
     expressions_from_replacements,
+    extract_raw_value,
     parse_formatted_string,
 )
 from codemodder.utils.linearize_string_expression import (
@@ -55,7 +58,36 @@ quote_pattern = re.compile(r"(?<!\\)\\'|(?<!\\)'")
 raw_quote_pattern = re.compile(r"(?<!\\)'")
 
 
-class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
+class ExtractPrefixMixin(cst.MetadataDependent):
+
+    METADATA_DEPENDENCIES: ClassVar[Collection[ProviderT]] = (ParentNodeProvider,)
+
+    def extract_prefix(self, node: StringLiteralNodeType) -> str:
+        match node:
+            case cst.SimpleString():
+                return node.prefix.lower()
+            case cst.FormattedStringText():
+                try:
+                    parent = self.get_metadata(ParentNodeProvider, node)
+                    parent = cst.ensure_type(parent, cst.FormattedString)
+                except Exception:
+                    return ""
+                return parent.start.lower()
+            case PrintfStringText():
+                return self.extract_prefix(node.origin)
+        return ""
+
+    def _extract_prefix_raw_value(self, node: StringLiteralNodeType) -> tuple[str, str]:
+        raw_value = extract_raw_value(node)
+        prefix = self.extract_prefix(node)
+        if prefix is not None:
+            return prefix, raw_value
+        return prefix, raw_value
+
+
+class SQLQueryParameterizationTransformer(
+    LibcstResultTransformer, UtilsMixin, ExtractPrefixMixin
+):
     change_description = "Parameterized SQL query execution."
 
     METADATA_DEPENDENCIES = (
@@ -70,7 +102,7 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
         **codemod_kwargs,
     ) -> None:
         self.changed_nodes: dict[
-            cst.CSTNode,
+            cst.CSTNode | PrintfStringText | PrintfStringExpression,
             ReplacementNodeType | dict[str, Any],
         ] = {}
         LibcstResultTransformer.__init__(self, *codemod_args, **codemod_kwargs)
@@ -95,15 +127,12 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
         for e in new_middle:
             exception = False
             if isinstance(
-                e,
-                cst.SimpleString | cst.FormattedStringText | FormattedLiteralStringText,
+                e, cst.SimpleString | cst.FormattedStringText | PrintfStringText
             ):
-                t = _extract_prefix_raw_value(self, e)
-                if t:
-                    prefix, raw_value = t
-                    if all(char not in prefix for char in "bru"):
-                        format_pieces.append(raw_value)
-                        exception = True
+                prefix, raw_value = self._extract_prefix_raw_value(e)
+                if all(char not in prefix for char in "bru"):
+                    format_pieces.append(raw_value)
+                    exception = True
             if not exception:
                 format_pieces.append(f"{{{format_expr_count}}}")
                 format_expr_count += 1
@@ -163,7 +192,6 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
             # instead of: execute("?", 'user_{0}_name'.format(input()))
             if params_elements:
                 tuple_arg = cst.Arg(cst.Tuple(elements=params_elements))
-                # self.changed_nodes[call] = call.with_changes(args=[*call.args, tuple_arg])
                 self.changed_nodes[call] = {"args": Append([tuple_arg])}
 
             # made changes
@@ -173,7 +201,7 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
                 new_parts_for = set()
                 for k, v in self.changed_nodes.items():
                     match k:
-                        case FormattedLiteralStringText():
+                        case PrintfStringText():
                             new_parts_for.add(k.origin)
                         case _:
                             new_changed_nodes[k] = v
@@ -184,10 +212,7 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
                         match new_part:
                             case cst.SimpleString():
                                 new_raw_value += new_part.raw_value
-                            case (
-                                FormattedLiteralStringText()
-                                | FormattedLiteralStringExpression()
-                            ):
+                            case PrintfStringText() | PrintfStringExpression():
                                 new_raw_value += new_part.value
                             case _:
                                 new_raw_value = ""
@@ -246,8 +271,7 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
         # remove quote literal from start
         updated_start = self.changed_nodes.get(start) or start
 
-        t = _extract_prefix_raw_value(self, updated_start)
-        prefix, raw_value = t if t else ("", "")
+        prefix, raw_value = self._extract_prefix_raw_value(updated_start)
 
         # gather string after the quote
         if "r" in prefix:
@@ -265,8 +289,7 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
         # remove quote literal from end
         updated_end = self.changed_nodes.get(end) or end
 
-        t = _extract_prefix_raw_value(self, updated_end)
-        prefix, raw_value = t if t else ("", "")
+        prefix, raw_value = self._extract_prefix_raw_value(updated_end)
         if "r" in prefix:
             quote_span = list(raw_quote_pattern.finditer(raw_value))[0]
         else:
@@ -318,7 +341,7 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
                 self.changed_nodes[original_node] = updated_node.with_changes(
                     value=new_value
                 )
-            case FormattedLiteralStringText():
+            case PrintfStringText():
                 if extra_raw_value:
                     extra = cst.SimpleString(
                         value=("r" if "r" in prefix else "")
@@ -349,7 +372,9 @@ SQLQueryParameterization = CoreCodemod(
 )
 
 
-class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
+class ExtractParameters(
+    ContextAwareVisitor, NameAndAncestorResolutionMixin, ExtractPrefixMixin
+):
     """
     Detects injections and gather the expressions that are injectable.
     """
@@ -374,7 +399,6 @@ class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
         modulo_2 = 1
         # treat it as a stack
         while leaves:
-            # TODO check if we can change values here any expression in middle should not be from GlobalScope or ClassScope
             # search for the literal start, we detect the single quote
             start = leaves.pop()
             if not self._is_literal_start(start, modulo_2):
@@ -403,12 +427,8 @@ class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
             else:
                 modulo_2 = 1
 
-    def _is_not_a_single_quote(self, expression: cst.CSTNode) -> bool:
-        value = expression
-        t = _extract_prefix_raw_value(self, value)
-        if not t:
-            return True
-        prefix, raw_value = t
+    def _is_not_a_single_quote(self, expression: StringLiteralNodeType) -> bool:
+        prefix, raw_value = self._extract_prefix_raw_value(expression)
         if "b" in prefix:
             return False
         if "r" in prefix:
@@ -437,7 +457,7 @@ class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
         # is itself a target in global/class scope?
         # if the expression is aliased, it is just a reference and we can always change
         match expression:
-            case FormattedLiteralStringText():
+            case PrintfStringText():
                 expression = expression.origin
 
         if expression in self.linearized_query.aliased:
@@ -451,7 +471,7 @@ class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
         # is it assigned to a variable with global/class scope?
         # is itself a target in global/class scope?
         match expression:
-            case FormattedLiteralStringText():
+            case PrintfStringText():
                 expression = expression.origin
         return not (
             self._is_target_in_expose_scope(expression)
@@ -462,36 +482,44 @@ class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
         return not bool(infer_expression_type(expression))
 
     def _is_literal_start(
-        self, node: cst.CSTNode | tuple[cst.CSTNode, cst.CSTNode], modulo_2: int
+        self,
+        node: cst.CSTNode | PrintfStringText | PrintfStringExpression,
+        modulo_2: int,
     ) -> bool:
-        t = _extract_prefix_raw_value(self, node)
-        if not t:
-            return False
-        prefix, raw_value = t
-        if "b" in prefix:
-            return False
-        if "r" in prefix:
-            matches = list(raw_quote_pattern.finditer(raw_value))
-        else:
-            matches = list(quote_pattern.finditer(raw_value))
-        # avoid cases like: "where name = 'foo\\\'s name'"
-        # don't count \\' as these are escaped in string literals
-        return (matches is not None) and len(matches) % 2 == modulo_2
+        if isinstance(
+            node, cst.SimpleString | cst.FormattedStringText | PrintfStringText
+        ):
+            prefix, raw_value = self._extract_prefix_raw_value(node)
+
+            if "b" in prefix:
+                return False
+            if "r" in prefix:
+                matches = list(raw_quote_pattern.finditer(raw_value))
+            else:
+                matches = list(quote_pattern.finditer(raw_value))
+            # avoid cases like: "where name = 'foo\\\'s name'"
+            # don't count \\' as these are escaped in string literals
+            return (matches is not None) and len(matches) % 2 == modulo_2
+        return False
 
     def _is_literal_end(
-        self, node: cst.CSTNode | tuple[cst.CSTNode, cst.CSTNode]
+        self, node: cst.CSTNode | PrintfStringExpression | PrintfStringText
     ) -> bool:
-        t = _extract_prefix_raw_value(self, node)
-        if not t:
-            return False
-        prefix, raw_value = t
-        if "b" in prefix:
-            return False
-        if "r" in prefix:
-            matches = list(raw_quote_pattern.finditer(raw_value))
-        else:
-            matches = list(quote_pattern.finditer(raw_value))
-        return bool(matches)
+        if isinstance(
+            node, cst.SimpleString | cst.FormattedStringText | PrintfStringText
+        ):
+            prefix, raw_value = self._extract_prefix_raw_value(node)
+            if prefix is None:
+                return False
+
+            if "b" in prefix:
+                return False
+            if "r" in prefix:
+                matches = list(raw_quote_pattern.finditer(raw_value))
+            else:
+                matches = list(quote_pattern.finditer(raw_value))
+            return bool(matches)
+        return False
 
 
 class NormalizeFStrings(ContextAwareTransformer):
@@ -552,31 +580,10 @@ class FindQueryCalls(ContextAwareVisitor, LinearizeStringMixin):
                             case (
                                 cst.SimpleString()
                                 | cst.FormattedStringText()
-                                | FormattedLiteralStringText()
+                                | PrintfStringText()
                             ) if self._has_keyword(part.value):
                                 self.calls[original_node] = linearized_string_expr
                                 break
-
-
-def _extract_prefix_raw_value(self, node) -> Optional[Tuple[str, str]]:
-    match node:
-        case cst.SimpleString():
-            return node.prefix.lower(), node.raw_value
-        case cst.FormattedStringText():
-            try:
-                parent = self.get_metadata(ParentNodeProvider, node)
-                parent = cst.ensure_type(parent, cst.FormattedString)
-            except Exception:
-                return None
-            return parent.start.lower(), node.value
-        case FormattedLiteralStringText():
-            maybe_t = _extract_prefix_raw_value(self, node.origin)
-            if maybe_t:
-                prefix, _ = maybe_t
-                return prefix, node.value
-            return None
-        case _:
-            return None
 
 
 class RemoveEmptyExpressionsFormatting(Codemod):
@@ -648,11 +655,11 @@ class RemoveEmptyExpressionsFormattingVisitor(
     def _record_node_pieces(self, parts) -> dict:
         node_pieces: dict[
             cst.CSTNode,
-            list[FormattedLiteralStringExpression | FormattedLiteralStringText],
+            list[PrintfStringExpression | PrintfStringText],
         ] = {}
         for part in parts:
             match part:
-                case FormattedLiteralStringText() | FormattedLiteralStringExpression():
+                case PrintfStringText() | PrintfStringExpression():
                     if part.origin in node_pieces:
                         node_pieces[part.origin].append(part)
                     else:
@@ -673,6 +680,7 @@ class RemoveEmptyExpressionsFormattingVisitor(
             return
 
         # gather all the parts of the format operator
+        resolved_dict = {}
         match right:
             case cst.Dict():
                 resolved_dict = self._resolve_dict(right)
@@ -690,7 +698,7 @@ class RemoveEmptyExpressionsFormattingVisitor(
             return
 
         # is there any expressions to replace? if not, remove the operator
-        if all(not isinstance(p, FormattedLiteralStringExpression) for p in parsed):
+        if all(not isinstance(p, PrintfStringExpression) for p in parsed):
             self.node_replacements[original_node] = original_node.left
             return
 
@@ -698,7 +706,7 @@ class RemoveEmptyExpressionsFormattingVisitor(
         to_remove = set()
         for part in parsed:
             match part:
-                case FormattedLiteralStringExpression():
+                case PrintfStringExpression():
                     resolved_part_expression = self.resolve_expression(part.expression)
                     if _is_empty_string_literal(resolved_part_expression):
                         to_remove.add(part)
@@ -709,11 +717,12 @@ class RemoveEmptyExpressionsFormattingVisitor(
         # remove all the elements on the right that resolves to an empty string
         match right:
             case cst.Dict():
-                for k, v in resolved_dict.items():
+                for v in resolved_dict.values():
                     resolved_v = self.resolve_expression(v)
                     if _is_empty_string_literal(resolved_v):
                         parent = self.get_parent(v)
-                        self.node_replacements[parent] = cst.RemovalSentinel.REMOVE
+                        if parent:
+                            self.node_replacements[parent] = cst.RemovalSentinel.REMOVE
 
             case cst.Tuple():
                 new_tuple_elements = []
