@@ -30,6 +30,12 @@ from codemodder.codemods.utils import (
     infer_expression_type,
 )
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from codemodder.utils.format_string_parser import (
+    FormattedLiteralStringExpression,
+    dict_to_values_dict,
+    expressions_from_replacements,
+    parse_formatted_string,
+)
 from core_codemods.api import Metadata, Reference, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 
@@ -103,7 +109,6 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
         # (2) LinearizeQuery - For each call, it gather all the string literals and expressions that composes the query. The result is a list of nodes whose concatenation is the query.
         # (3) ExtractParameters - Detects which expressions are part of SQL string literals in the query. The result is a list of triples (a,b,c) such that a is the node that contains the start of the string literal, b is a list of expressions that composes that literal, and c is the node containing the end of the string literal. At least one node in b must be "injectable" (see).
         # (4) SQLQueryParameterization - Executes steps (1)-(3) and gather a list of injection triples. For each triple (a,b,c) it makes the associated changes to insert the query parameter token. All the expressions in b are then concatenated in an expression and passed as a sequence of parameters to the execute call.
-
         # Steps (1) and (2)
         find_queries = FindQueryCalls(self.context)
         tree.visit(find_queries)
@@ -308,10 +313,65 @@ class LinearizeQuery(ContextAwareVisitor, NameAndAncestorResolutionMixin):
                 return super().on_visit(node)
         return False
 
+    def _resolve_dict(
+        self, dict_node: cst.Dict
+    ) -> dict[cst.BaseExpression, cst.BaseExpression]:
+        returned: dict[cst.BaseExpression, cst.BaseExpression] = {}
+        for element in dict_node.elements:
+            match element:
+                case cst.DictElement():
+                    returned |= {element.key: element.value}
+                case cst.StarredDictElement():
+                    resolved = self.resolve_expression(element.value)
+                    if isinstance(resolved, cst.Dict):
+                        returned |= self.resolve_dict(resolved)
+        return returned
+
+    def visit_FormatLiteralStringExpression(
+        self, flse: FormattedLiteralStringExpression
+    ):
+        visitor = LinearizeQuery(self.context)
+        flse.expression.visit(visitor)
+        self.leaves.extend(visitor.leaves)
+        self.aliased |= visitor.aliased
+
     def visit_BinaryOperation(self, node: cst.BinaryOperation) -> Optional[bool]:
         maybe_type = infer_expression_type(node)
         if not maybe_type or maybe_type == BaseType.STRING:
-            return True
+            match node.operator:
+                # format string operator case
+                case cst.Modulo():
+                    visitor = LinearizeQuery(self.context)
+                    node.left.visit(visitor)
+                    resolved = self.resolve_expression(node.right)
+                    parsed = None
+                    match resolved:
+                        case cst.Dict():
+                            dict_format_expressions = dict_to_values_dict(
+                                self._resolve_dict(resolved)
+                            )
+                            parsed = parse_formatted_string(
+                                visitor.leaves, dict_format_expressions
+                            )
+                        case _:
+                            format_expressions = expressions_from_replacements(resolved)
+                            parsed = parse_formatted_string(
+                                visitor.leaves, format_expressions
+                            )
+                    # something went wrong, abort
+                    if not parsed:
+                        self.leaves.append(node)
+                        return False
+                    for piece in parsed:
+                        match piece:
+                            case FormattedLiteralStringExpression():
+                                self.visit_FormatLiteralStringExpression(piece)
+                            case _:
+                                self.leaves.append(piece)
+                    self.aliased |= visitor.aliased
+                    return False
+                case cst.Add():
+                    return True
         self.leaves.append(node)
         return False
 
@@ -331,7 +391,7 @@ class LinearizeQuery(ContextAwareVisitor, NameAndAncestorResolutionMixin):
             resolved.visit(visitor)
             if len(visitor.leaves) == 1:
                 self.aliased[resolved] = node
-                return [resolved]
+                return visitor.leaves
             self.aliased |= visitor.aliased
             return visitor.leaves
         return [node]
