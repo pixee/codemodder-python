@@ -1,15 +1,35 @@
 import re
 from dataclasses import dataclass
+from typing import TypeAlias
 
 import libcst as cst
-from libcst.codemod import CodemodContext, ContextAwareVisitor
-
-from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
-
-# STRING_TYPE = cst.SimpleString | cst.FormattedStringText
-# LEAF_TYPE = cst.BaseExpression | cst.SimpleString | cst.FormattedStringText
 
 
+@dataclass(frozen=True)
+class PrintfStringText:
+    origin: cst.SimpleString | cst.FormattedStringText
+    value: str
+    index: int
+
+
+@dataclass(frozen=True)
+class PrintfStringExpression:
+    origin: cst.SimpleString | cst.FormattedStringText
+    expression: cst.BaseExpression
+    key: str | int | None
+    index: int
+    value: str
+
+
+# Type aliases
+StringLiteralNodeType: TypeAlias = (
+    cst.SimpleString | cst.FormattedStringText | PrintfStringText
+)
+ExpressionNodeType: TypeAlias = (
+    cst.BaseExpression | cst.FormattedStringExpression | PrintfStringExpression
+)
+
+# regexes for parsing strings with format tokens
 conversion_type = r"[diouxXeEfFgGcrsa%]"
 mapping_key = r"\([^)]*\)"
 conversion_flags = r"[#0\-+ ]*"
@@ -18,22 +38,6 @@ length_modifier = r"[hlL]"
 param_regex = f"(%(?:{mapping_key})?{conversion_flags}{minimum_width}?{length_modifier}?{conversion_type})"
 param_pattern = re.compile(param_regex)
 mapping_key_pattern = re.compile(f"({mapping_key})")
-
-
-@dataclass(frozen=True)
-class FormattedLiteralStringText:
-    origin: cst.FormattedStringText | cst.SimpleString
-    value: str
-    index: int
-
-
-@dataclass(frozen=True)
-class FormattedLiteralStringExpression:
-    origin: cst.FormattedStringText | cst.SimpleString
-    expression: cst.BaseExpression
-    key: str | int | None
-    index: int
-    value: str
 
 
 def extract_mapping_key(string: str) -> str | None:
@@ -56,8 +60,8 @@ def _convert_piece_and_parts(
         list[
             cst.SimpleString
             | cst.FormattedStringText
-            | FormattedLiteralStringExpression
-            | FormattedLiteralStringText
+            | PrintfStringExpression
+            | PrintfStringText
         ],
         int,
     ]
@@ -68,8 +72,8 @@ def _convert_piece_and_parts(
         parsed_parts: list[
             cst.SimpleString
             | cst.FormattedStringText
-            | FormattedLiteralStringExpression
-            | FormattedLiteralStringText
+            | PrintfStringExpression
+            | PrintfStringText
         ] = []
         index_count = 0
         for s in piece_parts:
@@ -83,7 +87,7 @@ def _convert_piece_and_parts(
                             if not key:
                                 return None
                             parsed_parts.append(
-                                FormattedLiteralStringExpression(
+                                PrintfStringExpression(
                                     origin=piece,
                                     expression=keys[key],
                                     key=key,
@@ -93,7 +97,7 @@ def _convert_piece_and_parts(
                             )
                         case list():
                             parsed_parts.append(
-                                FormattedLiteralStringExpression(
+                                PrintfStringExpression(
                                     origin=piece,
                                     expression=keys[token_count],
                                     key=token_count,
@@ -104,38 +108,11 @@ def _convert_piece_and_parts(
                     token_count = token_count + 1
                 else:
                     parsed_parts.append(
-                        FormattedLiteralStringText(
-                            origin=piece, value=s, index=index_count
-                        )
+                        PrintfStringText(origin=piece, value=s, index=index_count)
                     )
                 index_count += len(s)
         return parsed_parts, token_count
     return [piece], token_count
-
-
-class DictFromLiteralVisitor(ContextAwareVisitor, NameAndAncestorResolutionMixin):
-    """
-    Gather all the expressions defining key, value pairs in dict literals in the module into proper python dicts.
-    The attribute dict_dict will map the Dict nodes into python dicts.
-    """
-
-    def __init__(self, context: CodemodContext) -> None:
-        self.dict_dict: dict[cst.Dict, dict[cst.BaseExpression, cst.BaseExpression]] = (
-            {}
-        )
-        super().__init__(context)
-
-    def leave_Dict(self, original_node: cst.Dict) -> None:
-        returned: dict[cst.BaseExpression, cst.BaseExpression] = {}
-        for element in original_node.elements:
-            match element:
-                case cst.DictElement():
-                    returned |= {element.key: element.value}
-                case cst.StarredDictElement():
-                    resolved = self.resolve_expression(element.value)
-                    if isinstance(resolved, cst.Dict):
-                        returned |= self.dict_dict.get(resolved, {})
-        self.dict_dict[original_node] = returned
 
 
 def expressions_from_replacements(
@@ -161,29 +138,12 @@ def dict_to_values_dict(
 
 
 def parse_formatted_string(
-    string_pieces: list[
-        cst.BaseExpression | cst.SimpleString | cst.FormattedStringText
-    ],
+    string_pieces: list[StringLiteralNodeType | ExpressionNodeType],
     keys: dict[str | cst.BaseExpression, cst.BaseExpression] | list[cst.BaseExpression],
-) -> (
-    list[
-        cst.BaseExpression
-        | cst.SimpleString
-        | cst.FormattedStringText
-        | FormattedLiteralStringExpression
-        | FormattedLiteralStringText
-    ]
-    | None
-):
-    parts: list[
-        cst.BaseExpression
-        | cst.SimpleString
-        | cst.FormattedStringText
-        | FormattedLiteralStringExpression
-        | FormattedLiteralStringText
-    ] = []
+) -> list[StringLiteralNodeType | ExpressionNodeType] | None:
+    parts: list[StringLiteralNodeType | ExpressionNodeType] = []
     parsed_pieces: list[
-        tuple[cst.FormattedStringText | cst.BaseExpression, list[str] | None]
+        tuple[StringLiteralNodeType | ExpressionNodeType, list[str] | None]
     ] = []
     for piece in string_pieces:
         match piece:
@@ -210,9 +170,19 @@ def parse_formatted_string(
     return parts
 
 
-def extract_raw_value(node: cst.FormattedStringText | cst.SimpleString) -> str:
-    return node.raw_value if isinstance(node, cst.SimpleString) else node.value
-
-
 def _has_conversion_parts(piece_parts: list[str]) -> bool:
     return any(s.startswith("%") for s in piece_parts)
+
+
+def extract_raw_value(
+    node: cst.FormattedStringText | cst.SimpleString | PrintfStringText,
+) -> str:
+    match node:
+        case cst.FormattedStringText():
+            return node.value
+        case cst.SimpleString():
+            return node.raw_value
+        case PrintfStringText():
+            return node.value
+    # shouldn't reach here
+    return ""
