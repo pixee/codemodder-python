@@ -1,4 +1,5 @@
 from typing import cast
+
 import libcst as cst
 
 from codemodder.utils.format_string_parser import (

@@ -4,8 +4,8 @@ import libcst as cst
 from libcst import matchers
 from libcst._position import CodeRange
 from libcst.codemod import CodemodContext
-from libcst.metadata import PositionProvider
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
+from libcst.metadata import PositionProvider
 
 from codemodder.change import Change, ChangeSet
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
