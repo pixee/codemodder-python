@@ -1,7 +1,7 @@
 import itertools
 import re
 from dataclasses import replace
-from typing import Any, ClassVar, Collection, Optional
+from typing import Any, ClassVar, Collection, Optional, Union
 
 import libcst as cst
 from libcst.codemod import (
@@ -9,7 +9,9 @@ from libcst.codemod import (
     CodemodContext,
     ContextAwareTransformer,
     ContextAwareVisitor,
+    VisitorBasedCodemodCommand,
 )
+from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatString
 from libcst.metadata import (
     ClassScope,
     GlobalScope,
@@ -35,7 +37,10 @@ from codemodder.codemods.utils import (
     get_function_name_node,
     infer_expression_type,
 )
-from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from codemodder.codemods.utils_mixin import (
+    NameAndAncestorResolutionMixin,
+    NameResolutionMixin,
+)
 from codemodder.utils.format_string_parser import (
     PrintfStringExpression,
     PrintfStringText,
@@ -85,12 +90,31 @@ class ExtractPrefixMixin(cst.MetadataDependent):
         return prefix, raw_value
 
 
+class CleanCode(Codemod):
+
+    METADATA_DEPENDENCIES = (
+        ParentNodeProvider,
+        ScopeProvider,
+    )
+
+    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        result = RemoveEmptyStringConcatenation(self.context).transform_module(tree)
+        result = RemoveEmptyExpressionsFormatting(self.context).transform_module(result)
+        result = NormalizeFStrings(self.context).transform_module(result)
+        result = RemoveUnusedVariables(self.context).transform_module(result)
+        result = UnnecessaryFormatString(self.context).transform_module(result)
+        return result
+
+    def should_allow_multiple_passes(self) -> bool:
+        return True
+
+
 class SQLQueryParameterizationTransformer(
     LibcstResultTransformer, UtilsMixin, ExtractPrefixMixin
 ):
     change_description = "Parameterized SQL query execution."
 
-    METADATA_DEPENDENCIES = (
+    METADATA_DEPENDENCIES: ClassVar[Collection[ProviderT]] = (
         PositionProvider,
         ScopeProvider,
         ParentNodeProvider,
@@ -146,12 +170,10 @@ class SQLQueryParameterizationTransformer(
         )
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        # The transformation has four major steps:
-        # (1) FindQueryCalls - Find and gather all the SQL query execution calls. The result is a dict of call nodes and their associated list of nodes composing the query (i.e. step (2)).
-        # (2) LinearizeQuery - For each call, it gather all the string literals and expressions that composes the query. The result is a list of nodes whose concatenation is the query.
-        # (3) ExtractParameters - Detects which expressions are part of SQL string literals in the query. The result is a list of triples (a,b,c) such that a is the node that contains the start of the string literal, b is a list of expressions that composes that literal, and c is the node containing the end of the string literal. At least one node in b must be "injectable" (see).
-        # (4) SQLQueryParameterization - Executes steps (1)-(3) and gather a list of injection triples. For each triple (a,b,c) it makes the associated changes to insert the query parameter token. All the expressions in b are then concatenated in an expression and passed as a sequence of parameters to the execute call.
-        # Steps (1) and (2)
+        # (1) FindQueryCalls -> (2) ExtractParameters -> (3) SQLQueryParameterization
+        # (1) Find execute calls and linearize the query argument.
+        # (2) Search for non-string expressions surrounded by single quotes.
+        # (3) Fix things.
         find_queries = FindQueryCalls(self.context)
         tree.visit(find_queries)
 
@@ -239,14 +261,7 @@ class SQLQueryParameterizationTransformer(
                     )
                 )
                 # Normalization and cleanup
-                result = RemoveEmptyExpressionsFormatting(
-                    self.context
-                ).transform_module(result)
-                result = result.visit(RemoveEmptyStringConcatenation())
-                result = NormalizeFStrings(self.context).transform_module(result)
-                # TODO The transform below may break nested f-strings: f"{f"1"}" -> f"{"1"}"
-                # May be a bug...
-                # result = UnnecessaryFormatString(self.context).transform_module(result)
+                result = CleanCode(self.context).transform_module(result)
 
         return result
 
@@ -436,6 +451,17 @@ class ExtractParameters(
         return quote_pattern.fullmatch(raw_value) is None
 
     def _is_assigned_to_exposed_scope(self, expression):
+        # is it part of an expression that is assigned to a variable in an exposed scope?
+        path = self.path_to_root(expression)
+        for i, node in enumerate(path):
+            # ensure it descend from the value attribute
+            if isinstance(node, cst.Assign) and (i > 0 and path[i - 1] == node.value):
+                expression = node.value
+                scope = self.get_metadata(ScopeProvider, node, None)
+                match scope:
+                    case GlobalScope() | ClassScope() | None:
+                        return True
+
         named, other = self.find_transitive_assignment_targets(expression)
         for t in itertools.chain(named, other):
             scope = self.get_metadata(ScopeProvider, t, None)
@@ -444,7 +470,7 @@ class ExtractParameters(
                     return True
         return False
 
-    def _is_target_in_expose_scope(self, expression):
+    def _is_target_in_exposed_scope(self, expression):
         assignments = self.find_assignments(expression)
         for assignment in assignments:
             match assignment.scope:
@@ -463,7 +489,7 @@ class ExtractParameters(
         if expression in self.linearized_query.aliased:
             return True
         return not (
-            self._is_target_in_expose_scope(expression)
+            self._is_target_in_exposed_scope(expression)
             or self._is_assigned_to_exposed_scope(expression)
         )
 
@@ -474,7 +500,7 @@ class ExtractParameters(
             case PrintfStringText():
                 expression = expression.origin
         return not (
-            self._is_target_in_expose_scope(expression)
+            self._is_target_in_exposed_scope(expression)
             or self._is_assigned_to_exposed_scope(expression)
         )
 
@@ -584,6 +610,62 @@ class FindQueryCalls(ContextAwareVisitor, LinearizeStringMixin):
                             ) if self._has_keyword(part.value):
                                 self.calls[original_node] = linearized_string_expr
                                 break
+
+
+class RemoveUnusedVariables(VisitorBasedCodemodCommand, NameResolutionMixin):
+
+    def _is_target_in_exposed_scope(self, expression):
+        assignments = self.find_assignments(expression)
+        for assignment in assignments:
+            match assignment.scope:
+                case GlobalScope() | ClassScope() | None:
+                    return True
+        return False
+
+    def _handle_target(self, node):
+        # TODO starred elements
+        # TODO list/tuple case, remove assignment values
+        match node:
+            # case cst.Tuple() | cst.List():
+            #    new_elements = []
+            #    for e in node.elements:
+            #        new_expr = self._handle_target(e.value)
+            #        if new_expr:
+            #            new_elements.append(e.with_changes(value = new_expr))
+            #    if new_elements:
+            #        if len(new_elements) ==1:
+            #            return new_elements[0]
+            #        return node.with_changes(elements = new_elements)
+            #    return None
+            case cst.Name():
+                target_acesses = self.find_accesses(node)
+                if target_acesses:
+                    return node
+                else:
+                    return None
+            case _:
+                return node
+
+    def leave_Assign(
+        self, original_node: cst.Assign, updated_node: cst.Assign
+    ) -> Union[
+        cst.BaseSmallStatement,
+        cst.FlattenSentinel[cst.BaseSmallStatement],
+        cst.RemovalSentinel,
+    ]:
+        if scope := self.get_metadata(ScopeProvider, original_node, None):
+            if isinstance(scope, GlobalScope | ClassScope):
+                return updated_node
+
+        new_targets = []
+        for target in original_node.targets:
+            new_target = self._handle_target(target.target)
+            if new_target:
+                new_targets.append(target.with_changes(target=new_target))
+        # remove everything
+        if not new_targets:
+            return cst.RemovalSentinel.REMOVE
+        return updated_node.with_changes(targets=new_targets)
 
 
 class RemoveEmptyExpressionsFormatting(Codemod):
@@ -740,7 +822,9 @@ class RemoveEmptyExpressionsFormattingVisitor(
                         )
             case _:
                 if keys_to_remove:
-                    self.node_replacements[original_node] = cst.SimpleString("''")
+                    self.node_replacements[original_node] = self.node_replacements.get(
+                        original_node.left, original_node.left
+                    )
 
 
 def _is_empty_string_literal(node) -> bool:

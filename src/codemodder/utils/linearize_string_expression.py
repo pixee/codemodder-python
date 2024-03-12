@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import ClassVar, Collection, Optional
 
 import libcst as cst
 from libcst import matchers
 from libcst.codemod import CodemodContext, ContextAwareVisitor
-from libcst.metadata import ParentNodeProvider, ScopeProvider
+from libcst.metadata import ParentNodeProvider, ProviderT, ScopeProvider
 
 from codemodder.codemods.utils import BaseType, infer_expression_type
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
@@ -28,16 +28,17 @@ class LinearizedStringExpression:
     """
 
     parts: list[StringLiteralNodeType | ExpressionNodeType]
-    aliased: dict[StringLiteralNodeType | ExpressionNodeType, cst.Name]
     node_pieces: dict[
         cst.SimpleString | cst.FormattedStringText,
         list[PrintfStringText | PrintfStringExpression],
     ]
+    # TODO crutch, maybe maintain the whole tree?
+    aliased: dict[StringLiteralNodeType | ExpressionNodeType, cst.Name]
 
 
 class LinearizeStringMixin(cst.MetadataDependent):
 
-    METADATA_DEPENDENCIES = (
+    METADATA_DEPENDENCIES: ClassVar[Collection[ProviderT]] = (
         ParentNodeProvider,
         ScopeProvider,
     )
@@ -66,8 +67,8 @@ class LinearizeStringMixin(cst.MetadataDependent):
         if visitor.leaves:
             return LinearizedStringExpression(
                 visitor.leaves,
-                visitor.aliased,
                 visitor.node_pieces,
+                visitor.aliased,
             )
         return None
 
@@ -80,6 +81,7 @@ class LinearizeStringExpressionVisitor(
     """
 
     def __init__(self, context) -> None:
+        self.tree = None
         self.leaves: list[StringLiteralNodeType | ExpressionNodeType] = []
         self.aliased: dict[StringLiteralNodeType | ExpressionNodeType, cst.Name] = {}
         self.node_pieces: dict[
@@ -136,9 +138,10 @@ class LinearizeStringExpressionVisitor(
                         returned |= self._resolve_dict(resolved)
         return returned
 
-    def visit_FormatLiteralStringExpression(self, flse: PrintfStringExpression):
+    def visit_FormatLiteralStringExpression(self, pfse: PrintfStringExpression):
         visitor = LinearizeStringExpressionVisitor(self.context)
-        flse.expression.visit(visitor)
+        pfse.expression.visit(visitor)
+
         self.leaves.extend(visitor.leaves)
         self.aliased |= visitor.aliased
         self.node_pieces |= visitor.node_pieces
@@ -157,8 +160,10 @@ class LinearizeStringExpressionVisitor(
                             keys: dict | list = dict_to_values_dict(
                                 self._resolve_dict(resolved)
                             )
-                        case _:
+                        case cst.Tuple():
                             keys = expressions_from_replacements(resolved)
+                        case _:
+                            keys = expressions_from_replacements(node.right)
                     parsed = parse_formatted_string(visitor.leaves, keys)
                     self._record_node_pieces(parsed)
                     # something went wrong, abort
