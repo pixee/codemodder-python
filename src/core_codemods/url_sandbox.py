@@ -6,12 +6,12 @@ from libcst.codemod import CodemodContext, ContextAwareVisitor
 from libcst.codemod.visitors import AddImportsVisitor, ImportItem
 from libcst.metadata import PositionProvider, ScopeProvider
 
-from codemodder.change import Change
 from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsCodemod,
 )
 from codemodder.codemods.utils import ReplaceNodes
+from codemodder.codetf import Change
 from codemodder.dependency import Security
 from codemodder.file_context import FileContext
 from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
@@ -137,7 +137,10 @@ class FindRequestCallsAndImports(ContextAwareVisitor, UtilsMixin):
                             }
                         )
                         self.changes_in_file.append(
-                            Change(line_number, UrlSandbox.change_description)
+                            Change(
+                                lineNumber=line_number,
+                                description=UrlSandbox.change_description,
+                            )
                         )
 
             # case req.get(...)
@@ -151,7 +154,10 @@ class FindRequestCallsAndImports(ContextAwareVisitor, UtilsMixin):
                     }
                 )
                 self.changes_in_file.append(
-                    Change(line_number, UrlSandbox.change_description)
+                    Change(
+                        lineNumber=line_number,
+                        description=UrlSandbox.change_description,
+                    )
                 )
 
     def _find_assignments(self, node: CSTNode):

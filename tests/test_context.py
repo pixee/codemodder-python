@@ -1,7 +1,21 @@
+import pytest
+
 from codemodder.context import CodemodExecutionContext as Context
 from codemodder.dependency import Security
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.registry import load_registered_codemods
+
+
+@pytest.fixture(autouse=True)
+def disable_write_dependencies(mocker):
+    """
+    Unit tests should not write any dependency files
+    """
+    mocker.patch(
+        "codemodder.dependency_management.dependency_manager.DependencyManager.write",
+        # In conftest.py the return value is set to None
+        # We need a mocked value for the tests in this file
+    )
 
 
 class TestContext:

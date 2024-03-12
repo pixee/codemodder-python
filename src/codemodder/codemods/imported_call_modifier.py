@@ -6,9 +6,9 @@ from libcst import matchers
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.metadata import PositionProvider
 
-from codemodder.change import Change
 from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from codemodder.codetf import Change
 from codemodder.file_context import FileContext
 from codemodder.result import Result
 
@@ -75,7 +75,7 @@ class ImportedCallModifier(
                 and true_name in self.matching_functions
             ):
                 self.changes_in_file.append(
-                    Change(line_number, self.change_description)
+                    Change(lineNumber=line_number, description=self.change_description)
                 )
 
                 new_args = self.updated_args(updated_node.args)

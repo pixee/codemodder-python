@@ -6,7 +6,8 @@ from pathlib import Path
 from textwrap import indent
 from typing import TYPE_CHECKING, Iterator, List
 
-from codemodder.change import ChangeSet
+from codemodder.codetf import ChangeSet
+from codemodder.codetf import Result as CodeTFResult
 from codemodder.dependency import (
     Dependency,
     build_dependency_notification,
@@ -150,22 +151,20 @@ class CodemodExecutionContext:
             self.add_dependencies(codemod_id, file_context.dependencies)
             self.timer.aggregate(file_context.timer)
 
-    def compile_results(self, codemods: list[BaseCodemod]):
+    def compile_results(self, codemods: list[BaseCodemod]) -> list[CodeTFResult]:
         results = []
         for codemod in codemods:
-            data = {
-                "codemod": codemod.id,
-                "summary": codemod.summary,
-                "description": self.add_description(codemod),
-                "references": [ref.to_json() for ref in codemod.references],
-                "properties": {},
-                "failedFiles": [str(file) for file in self.get_failures(codemod.id)],
-                "changeset": [
-                    change.to_json() for change in self.get_results(codemod.id)
-                ],
-            }
+            result = CodeTFResult(
+                codemod=codemod.id,
+                summary=codemod.summary,
+                description=self.add_description(codemod),
+                references=codemod.references,
+                properties={},
+                failedFiles=[str(file) for file in self.get_failures(codemod.id)],
+                changeset=self.get_results(codemod.id),
+            )
 
-            results.append(data)
+            results.append(result)
 
         return results
 

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from codemodder.change import ChangeSet
+from codemodder.codetf import ChangeSet
 from codemodder.dependency import Dependency
 from codemodder.dependency_management.base_dependency_writer import DependencyWriter
 from codemodder.diff import create_diff
@@ -40,8 +40,8 @@ class RequirementsTxtWriter(DependencyWriter):
             dependencies, original_lines_strategy, original_lines
         )
         return ChangeSet(
-            str(self.path.relative_to(self.parent_directory)),
-            diff,
+            path=str(self.path.relative_to(self.parent_directory)),
+            diff=diff,
             changes=changes,
         )
 

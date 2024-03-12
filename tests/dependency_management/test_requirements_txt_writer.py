@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from codemodder.change import DiffSide
+from codemodder.codetf import DiffSide
 from codemodder.dependency import DefusedXML, Requirement, Security
 from codemodder.dependency_management.requirements_txt_writer import (
     RequirementsTxtWriter,

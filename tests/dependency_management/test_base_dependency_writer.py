@@ -1,4 +1,4 @@
-from codemodder.change import ChangeSet
+from codemodder.codetf import ChangeSet
 from codemodder.dependency import Dependency, Requirement
 from codemodder.dependency_management.base_dependency_writer import DependencyWriter
 from codemodder.project_analysis.file_parsers.package_store import PackageStore

@@ -1,7 +1,6 @@
 import libcst as cst
 from libcst.metadata import PositionProvider
 
-from codemodder.change import Change
 from codemodder.codemods.transformations.clean_imports import (
     GatherTopLevelImportBlocks,
     OrderImportsBlocksTransform,
@@ -41,11 +40,9 @@ class OrderImports(SimpleCodemod):
             # seemingly redundant, this check makes it possible to return the original tree
             for i, changed in enumerate(order_transformer.changes):
                 if changed:
-                    line_number = self.node_position(
-                        top_imports_visitor.top_imports_blocks[i][0]
-                    ).start.line
-                    self.file_context.codemod_changes.append(
-                        Change(line_number, self.change_description)
+                    self.add_change(
+                        top_imports_visitor.top_imports_blocks[i][0],
+                        self.change_description,
                     )
             return result_tree
         return tree

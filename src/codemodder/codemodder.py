@@ -11,12 +11,12 @@ from codemodder.cli import parse_args
 from codemodder.code_directory import match_files
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.semgrep import SemgrepRuleDetector
+from codemodder.codetf import CodeTF
 from codemodder.context import CodemodExecutionContext
 from codemodder.dependency import Dependency
 from codemodder.logging import configure_logger, log_list, log_section, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
-from codemodder.report.codetf_reporter import report_default
 from codemodder.result import ResultSet
 from codemodder.sarifs import detect_sarif_tools
 from codemodder.semgrep import run as run_semgrep
@@ -210,13 +210,17 @@ def run(original_args) -> int:
         files_to_analyze,
     )
 
-    results = context.compile_results(codemods_to_run)
-
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
 
     if argv.output:
-        report_default(elapsed_ms, argv, original_args, results)
+        codetf = CodeTF.build(
+            context,
+            elapsed_ms,
+            original_args,
+            context.compile_results(codemods_to_run),
+        )
+        codetf.write_report(argv.output)
 
     log_report(context, argv, elapsed_ms, files_to_analyze)
     return 0

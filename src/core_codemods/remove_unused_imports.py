@@ -7,7 +7,6 @@ from libcst.metadata import (
     ScopeProvider,
 )
 
-from codemodder.change import Change
 from codemodder.codemods.check_annotations import is_disabled_by_annotations
 from codemodder.codemods.transformations.remove_unused_imports import (
     RemoveUnusedImportsTransformer,
@@ -48,9 +47,7 @@ class RemoveUnusedImports(SimpleCodemod):
                     self.metadata,  # type: ignore
                     messages=self.IGNORE_ANNOTATIONS,
                 ):
-                    self.file_context.codemod_changes.append(
-                        Change(pos.start.line, self.change_description)
-                    )
+                    self.add_change_from_position(pos, self.change_description)
                     filtered_unused_imports.add((import_alias, importt))
         return tree.visit(RemoveUnusedImportsTransformer(filtered_unused_imports))
 

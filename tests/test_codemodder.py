@@ -35,8 +35,8 @@ class TestRun:
         assert codetf.exists()
 
     @mock.patch("libcst.parse_module", side_effect=Exception)
-    @mock.patch("codemodder.codemodder.report_default")
-    def test_cst_parsing_fails(self, mock_reporting, mock_parse):
+    @mock.patch("codemodder.codetf.CodeTF.build")
+    def test_cst_parsing_fails(self, build_report, mock_parse):
         args = [
             "tests/samples/",
             "--output",
@@ -52,18 +52,20 @@ class TestRun:
         assert res == 0
         mock_parse.assert_called()
 
-        mock_reporting.assert_called_once()
-        args_to_reporting = mock_reporting.call_args_list[0][0]
+        build_report.assert_called_once()
+        args_to_reporting = build_report.call_args_list[0][0]
         assert len(args_to_reporting) == 4
         _, _, _, results_by_codemod = args_to_reporting
         assert results_by_codemod != []
 
         requests_report = results_by_codemod[0]
-        assert requests_report["changeset"] == []
-        assert len(requests_report["failedFiles"]) == 1
-        assert sorted(requests_report["failedFiles"]) == [
+        assert requests_report.changeset == []
+        assert len(requests_report.failedFiles) == 1
+        assert sorted(requests_report.failedFiles) == [
             "tests/samples/unverified_request.py",
         ]
+
+        build_report.return_value.write_report.assert_called_once()
 
     @mock.patch("codemodder.codemods.libcst_transformer.update_code")
     @mock.patch("codemodder.codemods.semgrep.semgrep_run", side_effect=semgrep_run)
@@ -87,7 +89,7 @@ class TestRun:
         mock_update_code.assert_not_called()
 
     @pytest.mark.parametrize("dry_run", [True, False])
-    @mock.patch("codemodder.codemodder.report_default")
+    @mock.patch("codemodder.codetf.CodeTF.build")
     def test_reporting(self, mock_reporting, dry_run):
         args = [
             "tests/samples/",
@@ -108,6 +110,8 @@ class TestRun:
         _, _, _, results_by_codemod = args_to_reporting
 
         assert len(results_by_codemod) == 3
+
+        mock_reporting.return_value.write_report.assert_called_once()
 
     @mock.patch("codemodder.codemods.semgrep.semgrep_run")
     def test_no_codemods_to_run(self, mock_semgrep_run, tmpdir):
@@ -130,11 +134,9 @@ class TestRun:
 
     @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
     @mock.patch("codemodder.context.CodemodExecutionContext.compile_results")
-    @mock.patch("codemodder.codemodder.report_default")
-    def test_run_codemod_name_or_id(
-        self, report_default, mock_compile_results, codemod
-    ):
-        del report_default
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
+    def test_run_codemod_name_or_id(self, write_report, mock_compile_results, codemod):
+        del write_report
         args = [
             "tests/samples/",
             "--output",
@@ -148,7 +150,7 @@ class TestRun:
 
 
 class TestExitCode:
-    @mock.patch("codemodder.codemodder.report_default")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_success_0(self, mock_report):
         del mock_report
         args = [
@@ -163,7 +165,7 @@ class TestExitCode:
         exit_code = run(args)
         assert exit_code == 0
 
-    @mock.patch("codemodder.codemodder.report_default")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_bad_project_dir_1(self, mock_report):
         del mock_report
         args = [
@@ -176,7 +178,7 @@ class TestExitCode:
         exit_code = run(args)
         assert exit_code == 1
 
-    @mock.patch("codemodder.codemodder.report_default")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_conflicting_include_exclude(self, mock_report):
         del mock_report
         args = [
@@ -192,7 +194,7 @@ class TestExitCode:
             run(args)
         assert err.value.args[0] == 3
 
-    @mock.patch("codemodder.codemodder.report_default")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_bad_codemod_name(self, mock_report):
         del mock_report
         bad_codemod = "doesntexist"

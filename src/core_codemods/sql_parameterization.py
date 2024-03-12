@@ -13,7 +13,6 @@ from libcst.metadata import (
     ScopeProvider,
 )
 
-from codemodder.change import Change
 from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
@@ -30,6 +29,7 @@ from codemodder.codemods.utils import (
     infer_expression_type,
 )
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from codemodder.codetf import Change
 from core_codemods.api import Metadata, Reference, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 
@@ -149,8 +149,8 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
                 line_number = self.get_metadata(PositionProvider, call).start.line
                 self.file_context.codemod_changes.append(
                     Change(
-                        line_number,
-                        SQLQueryParameterizationTransformer.change_description,
+                        lineNumber=line_number,
+                        description=SQLQueryParameterizationTransformer.change_description,
                     )
                 )
                 # Normalization and cleanup

@@ -5,10 +5,10 @@ from libcst import matchers
 from libcst.codemod import CodemodContext
 from packaging.requirements import Requirement
 
-from codemodder.change import ChangeSet
 from codemodder.codemods.api import Metadata, ReviewGuidance, SimpleCodemod
 from codemodder.codemods.utils import is_setup_py_file
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from codemodder.codetf import ChangeSet
 from codemodder.dependency import Dependency
 from codemodder.dependency_management.base_dependency_writer import DependencyWriter
 from codemodder.diff import create_diff_from_tree
@@ -48,8 +48,8 @@ class SetupPyWriter(DependencyWriter):
             dependencies, fixed_line_number_strategy, codemod.line_num_changed
         )
         return ChangeSet(
-            str(self.path.relative_to(self.parent_directory)),
-            diff,
+            path=str(self.path.relative_to(self.parent_directory)),
+            diff=diff,
             changes=changes,
         )
 

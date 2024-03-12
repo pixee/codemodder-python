@@ -1,6 +1,6 @@
 import pytest
 
-from codemodder.change import ChangeSet
+from codemodder.codetf import ChangeSet
 from codemodder.dependency import DefusedXML, Security
 from codemodder.dependency_management import DependencyManager
 from codemodder.project_analysis.file_parsers import (

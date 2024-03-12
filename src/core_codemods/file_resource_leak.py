@@ -11,7 +11,6 @@ from libcst.metadata import (
     ScopeProvider,
 )
 
-from codemodder.change import Change
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
@@ -22,6 +21,7 @@ from codemodder.codemods.utils_mixin import (
     NameAndAncestorResolutionMixin,
     NameResolutionMixin,
 )
+from codemodder.codetf import Change
 from codemodder.file_context import FileContext
 from codemodder.result import Result
 from core_codemods.api import Metadata, Reference, ReviewGuidance
@@ -222,7 +222,10 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
             if self._is_fixable(original_block, index, named_targets, other_targets):
                 line_number = self.get_metadata(PositionProvider, resource).start.line
                 self.changes.append(
-                    Change(line_number, FileResourceLeakTransformer.change_description)
+                    Change(
+                        lineNumber=line_number,
+                        description=FileResourceLeakTransformer.change_description,
+                    )
                 )
 
                 # grab the index of the last statement with reference to the resource
