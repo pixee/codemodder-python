@@ -27,7 +27,9 @@ class RemoveEmptyStringConcatenation(CSTTransformer):
     def leave_BinaryOperation(
         self, original_node: cst.BinaryOperation, updated_node: cst.BinaryOperation
     ) -> cst.BaseExpression:
-        return self.handle_node(updated_node)
+        if isinstance(original_node.operator, cst.Add):
+            return self.handle_node(updated_node)
+        return updated_node
 
     def leave_ConcatenatedString(
         self,

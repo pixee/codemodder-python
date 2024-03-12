@@ -1,6 +1,5 @@
 import re
 from dataclasses import dataclass
-from typing import Sequence
 
 import libcst as cst
 from libcst.codemod import CodemodContext, ContextAwareVisitor
@@ -12,7 +11,7 @@ from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 
 
 conversion_type = r"[diouxXeEfFgGcrsa%]"
-mapping_key = r"\(.*\)"
+mapping_key = r"\([^)]*\)"
 conversion_flags = r"[#0\-+ ]*"
 minimum_width = r"(?:\d+|\*)"
 length_modifier = r"[hlL]"
@@ -25,6 +24,7 @@ mapping_key_pattern = re.compile(f"({mapping_key})")
 class FormattedLiteralStringText:
     origin: cst.FormattedStringText | cst.SimpleString
     value: str
+    index: int
 
 
 @dataclass(frozen=True)
@@ -32,15 +32,12 @@ class FormattedLiteralStringExpression:
     origin: cst.FormattedStringText | cst.SimpleString
     expression: cst.BaseExpression
     key: str | int | None
+    index: int
+    value: str
 
 
-class FormattedLiteralString:
-    parts: Sequence[FormattedLiteralStringText | FormattedLiteralStringExpression]
-    original_expression: cst.BinaryOperation
-
-
-# TODO extract all the flags and values into an object
 def extract_mapping_key(string: str) -> str | None:
+    # TODO extract all the flags and values into an object
     maybe_match = mapping_key_pattern.search(string)
     return maybe_match[0][1:-1] if maybe_match else None
 
@@ -74,6 +71,7 @@ def _convert_piece_and_parts(
             | FormattedLiteralStringExpression
             | FormattedLiteralStringText
         ] = []
+        index_count = 0
         for s in piece_parts:
             if s:
                 if s.startswith("%"):
@@ -86,20 +84,31 @@ def _convert_piece_and_parts(
                                 return None
                             parsed_parts.append(
                                 FormattedLiteralStringExpression(
-                                    origin=piece, expression=keys[key], key=key
+                                    origin=piece,
+                                    expression=keys[key],
+                                    key=key,
+                                    index=index_count,
+                                    value=s,
                                 )
                             )
                         case list():
                             parsed_parts.append(
                                 FormattedLiteralStringExpression(
-                                    origin=piece, expression=keys[token_count], key=key
+                                    origin=piece,
+                                    expression=keys[token_count],
+                                    key=key,
+                                    index=index_count,
+                                    value=s,
                                 )
                             )
                     token_count = token_count + 1
                 else:
                     parsed_parts.append(
-                        FormattedLiteralStringText(origin=piece, value=s)
+                        FormattedLiteralStringText(
+                            origin=piece, value=s, index=index_count
+                        )
                     )
+                index_count += len(s)
         return parsed_parts, token_count
     return [piece], token_count
 
@@ -198,10 +207,6 @@ def parse_formatted_string(
                     return None
             case _:
                 parts.append(piece)
-    # pathological cases
-    # case: ("" + name + "") % (value, )
-    # case: ("%s" % "prefix %s suffix") % "middle"
-    # case: ("%s" % "%s") % expression
     return parts
 
 
