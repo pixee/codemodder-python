@@ -164,10 +164,11 @@ class SQLQueryParameterizationTransformer(
         )
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        # (1) FindQueryCalls -> (2) ExtractParameters -> (3) SQLQueryParameterization
-        # (1) Find execute calls and linearize the query argument.
-        # (2) Search for non-string expressions surrounded by single quotes.
-        # (3) Fix things.
+        """
+        The transformation is composed of 3 steps, each step is done by a codemod/visitor: (1) FindQueryCalls, (2) ExtractParameters, and (3) SQLQueryParameterization.
+        Step (1) finds the `execute` calls and linearizing the query argument. Step (2) extracts the expressions that are parameters to the query.
+        Step (3) swaps the parameters in the query for `?` tokens and passes them as an arguments for the `execute` call. At the end of the transformation, the `CleanCode` codemod is executed to remove leftover empty strings and unused variables.
+        """
         find_queries = FindQueryCalls(self.context)
         tree.visit(find_queries)
 
@@ -379,7 +380,7 @@ class ExtractParameters(
     ContextAwareVisitor, NameAndAncestorResolutionMixin, ExtractPrefixMixin
 ):
     """
-    Detects injections and gather the expressions that are injectable.
+    This visitor a takes the linearized query and extracts the expressions that are parameters in this query. An expression is a parameter if it is surrounded by single quotes in the query. It results in a list of triples (start, middle, end), where start and end contains the expressions with single quotes marking the parameter, and middle is a list of expressions that composes the parameter.
     """
 
     def __init__(
@@ -538,7 +539,7 @@ class ExtractParameters(
 
 class FindQueryCalls(ContextAwareVisitor, LinearizeStringMixin):
     """
-    Find all the execute calls with a sql query as an argument.
+    Finds `execute` calls and linearizes the query argument. The result is a dict mappig each detected call with the linearized query.
     """
 
     # Right now it works by looking into some sql keywords in any pieces of the query
