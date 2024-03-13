@@ -449,10 +449,10 @@ class AncestorPatternsMixin(MetadataDependent):
 
     def path_to_root(self, node: cst.CSTNode) -> list[cst.CSTNode]:
         """
-        Returns node's path to root. Includes self.
+        Returns node's path to `node` (excludes `node`).
         """
         path = []
-        maybe_parent = node
+        maybe_parent = self.get_parent(node)
         while maybe_parent:
             path.append(maybe_parent)
             maybe_parent = self.get_parent(maybe_parent)
