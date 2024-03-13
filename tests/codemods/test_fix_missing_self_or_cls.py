@@ -41,6 +41,41 @@ class TestFixMissingSelfOrCls(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected, num_changes=4)
 
+    def test_change_not_nested(self, tmpdir):
+        input_code = """
+        class A:
+            def method():
+                def inner():
+                    pass
+
+            @classmethod
+            def clsmethod():
+                def other_inner():
+                    pass
+        
+        def wrapper():
+            class B:
+                def method():
+                    pass                    
+        """
+        expected = """
+        class A:
+            def method(self):
+                def inner():
+                    pass
+
+            @classmethod
+            def clsmethod(cls):
+                def other_inner():
+                    pass
+
+        def wrapper():
+            class B:
+                def method():
+                    pass                    
+        """
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=2)
+
     @pytest.mark.parametrize(
         "code",
         [
@@ -56,7 +91,7 @@ class TestFixMissingSelfOrCls(BaseCodemodTest):
                 @classmethod
                 def clsmethod(cls, arg):
                     pass
-                    
+
                 @staticmethod
                 def my_static():
                     pass
@@ -67,6 +102,12 @@ class TestFixMissingSelfOrCls(BaseCodemodTest):
                     pass
                 def __init_subclass__(**kwargs):
                     pass
+            """,
+            """
+            class A():
+              def f(self):
+                def g():
+                  pass
             """,
         ],
     )
@@ -94,17 +135,3 @@ class TestFixMissingSelfOrCls(BaseCodemodTest):
                pass
            """
         self.run_and_assert(tmpdir, input_code, input_code)
-
-    # def test_exclude_line(self, tmpdir):
-    #     input_code = (
-    #         expected
-    #     ) = """
-    #     assert (1, 2)
-    #     """
-    #     lines_to_exclude = [2]
-    #     self.run_and_assert(
-    #         tmpdir,
-    #         input_code,
-    #         expected,
-    #         lines_to_exclude=lines_to_exclude,
-    #     )
