@@ -1,10 +1,15 @@
 from typing import Union
 
 import libcst as cst
-from libcst import CSTTransformer, RemovalSentinel, SimpleString
+from libcst import RemovalSentinel, SimpleString
+from libcst.codemod import ContextAwareTransformer
+
+from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 
 
-class RemoveEmptyStringConcatenation(CSTTransformer):
+class RemoveEmptyStringConcatenation(
+    ContextAwareTransformer, NameAndAncestorResolutionMixin
+):
     """
     Removes concatenation with empty strings (e.g. "hello " + "") or "hello" ""
     """
@@ -19,8 +24,9 @@ class RemoveEmptyStringConcatenation(CSTTransformer):
         RemovalSentinel,
     ]:
         expr = original_node.expression
-        match expr:
-            case SimpleString() if expr.raw_value == "":  # type: ignore
+        resolved = self.resolve_expression(expr)
+        match resolved:
+            case SimpleString() if resolved.raw_value == "":  # type: ignore
                 return RemovalSentinel.REMOVE
         return updated_node
 
