@@ -31,12 +31,12 @@ from codemodder.codemods.utils import (
     infer_expression_type,
 )
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from codemodder.codetf import Change
 from codemodder.utils.clean_code import (
     NormalizeFStrings,
     RemoveEmptyExpressionsFormatting,
     RemoveUnusedVariables,
 )
-from codemodder.codetf import Change
 from codemodder.utils.format_string_parser import (
     PrintfStringExpression,
     PrintfStringText,
