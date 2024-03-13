@@ -72,10 +72,34 @@ class Reference(BaseModel):
         return self
 
 
+class Rule(BaseModel):
+    id: str
+    name: str
+    url: Optional[str] = None
+
+
+class Finding(BaseModel):
+    id: str
+    fixed: bool
+    reason: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_reason(self):
+        assert self.fixed or self.reason, "reason is required if fixed is False"
+        return self
+
+
+class DetectionTool(BaseModel):
+    name: str
+    rule: Rule
+    findings: list[Finding] = []
+
+
 class Result(BaseModel):
     codemod: str
     summary: str
     description: str
+    detectionTool: Optional[DetectionTool] = None
     references: Optional[list[Reference]] = None
     properties: Optional[dict] = None
     failedFiles: Optional[list[str]] = None
