@@ -24,6 +24,7 @@ from codemodder.utils.format_string_parser import (
     parse_formatted_string,
 )
 from codemodder.utils.linearize_string_expression import LinearizeStringMixin
+from codemodder.utils.utils import is_empty_sequence_literal, is_empty_string_literal
 
 
 class RemoveEmptyExpressionsFormatting(Codemod):
@@ -70,12 +71,6 @@ class RemoveEmptyExpressionsFormattingVisitor(
                         returned |= self._resolve_dict(resolved)
         return returned
 
-    def _is_empty_sequence_literal(self, expr: cst.BaseExpression) -> bool:
-        match expr:
-            case cst.Dict() | cst.Tuple() if not expr.elements:
-                return True
-        return False
-
     def _build_replacements(self, node, node_parts, parts_to_remove):
         new_raw_value = ""
         change = False
@@ -114,11 +109,11 @@ class RemoveEmptyExpressionsFormattingVisitor(
             return
 
         # is left or right an empty literal?
-        if _is_empty_string_literal(self.resolve_expression(original_node.left)):
+        if is_empty_string_literal(self.resolve_expression(original_node.left)):
             self.node_replacements[original_node] = cst.SimpleString("''")
             return
         right = self.resolve_expression(right := original_node.right)
-        if self._is_empty_sequence_literal(right):
+        if is_empty_sequence_literal(right):
             self.node_replacements[original_node] = original_node.left
             return
 
@@ -151,7 +146,7 @@ class RemoveEmptyExpressionsFormattingVisitor(
             match part:
                 case PrintfStringExpression():
                     resolved_part_expression = self.resolve_expression(part.expression)
-                    if _is_empty_string_literal(resolved_part_expression):
+                    if is_empty_string_literal(resolved_part_expression):
                         to_remove.add(part)
         keys_to_remove = {part.key or 0 for part in to_remove}
         for part in to_remove:
@@ -162,7 +157,7 @@ class RemoveEmptyExpressionsFormattingVisitor(
             case cst.Dict():
                 for v in resolved_dict.values():
                     resolved_v = self.resolve_expression(v)
-                    if _is_empty_string_literal(resolved_v):
+                    if is_empty_string_literal(resolved_v):
                         parent = self.get_parent(v)
                         if parent:
                             self.node_replacements[parent] = cst.RemovalSentinel.REMOVE
@@ -256,12 +251,3 @@ class NormalizeFStrings(ContextAwareTransformer):
             value="".join(map(lambda x: x.value, all_parts))
         )
         return updated_node.with_changes(parts=[new_part])
-
-
-def _is_empty_string_literal(node) -> bool:
-    match node:
-        case cst.SimpleString() if node.raw_value == "":
-            return True
-        case cst.FormattedString() if not node.parts:
-            return True
-    return False

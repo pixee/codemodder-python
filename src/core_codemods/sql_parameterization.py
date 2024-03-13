@@ -77,8 +77,7 @@ class ExtractPrefixMixin(cst.MetadataDependent):
 
     def _extract_prefix_raw_value(self, node: StringLiteralNodeType) -> tuple[str, str]:
         raw_value = extract_raw_value(node)
-        if (prefix := self.extract_prefix(node)) is not None:
-            return prefix, raw_value
+        prefix = self.extract_prefix(node)
         return prefix, raw_value
 
 
@@ -119,7 +118,10 @@ class SQLQueryParameterizationTransformer(
     ) -> None:
         self.changed_nodes: dict[
             cst.CSTNode | PrintfStringText | PrintfStringExpression,
-            ReplacementNodeType | dict[str, Any],
+            ReplacementNodeType
+            | PrintfStringText
+            | PrintfStringExpression
+            | dict[str, Any],
         ] = {}
         LibcstResultTransformer.__init__(self, *codemod_args, **codemod_kwargs)
         UtilsMixin.__init__(
@@ -338,10 +340,7 @@ class SQLQueryParameterizationTransformer(
             case cst.FormattedStringText():
                 if extra_raw_value:
                     extra = cst.SimpleString(
-                        value=("r" if "r" in prefix else "")
-                        + "'"
-                        + extra_raw_value
-                        + "'"
+                        value=("r" if "r" in prefix else "") + f"'{extra_raw_value}'"
                     )
 
                 new_value = new_raw_value
@@ -351,10 +350,7 @@ class SQLQueryParameterizationTransformer(
             case PrintfStringText():
                 if extra_raw_value:
                     extra = cst.SimpleString(
-                        value=("r" if "r" in prefix else "")
-                        + "'"
-                        + extra_raw_value
-                        + "'"
+                        value=("r" if "r" in prefix else "") + f"'{extra_raw_value}'"
                     )
 
                 new_value = new_raw_value

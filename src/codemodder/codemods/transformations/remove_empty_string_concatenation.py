@@ -5,6 +5,7 @@ from libcst import RemovalSentinel, SimpleString
 from libcst.codemod import ContextAwareTransformer
 
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from codemodder.utils.utils import is_empty_string_literal
 
 
 class RemoveEmptyStringConcatenation(
@@ -50,21 +51,12 @@ class RemoveEmptyStringConcatenation(
     ) -> cst.BaseExpression:
         left = updated_node.left
         right = updated_node.right
-        if _is_empty_string_literal(left):
-            if _is_empty_string_literal(right):
+        if is_empty_string_literal(left):
+            if is_empty_string_literal(right):
                 return cst.SimpleString(value='""')
             return right
-        if _is_empty_string_literal(right):
-            if _is_empty_string_literal(left):
+        if is_empty_string_literal(right):
+            if is_empty_string_literal(left):
                 return cst.SimpleString(value='""')
             return left
         return updated_node
-
-
-def _is_empty_string_literal(node):
-    match node:
-        case cst.SimpleString() if node.raw_value == "":
-            return True
-        case cst.FormattedString() if not node.parts:
-            return True
-    return False

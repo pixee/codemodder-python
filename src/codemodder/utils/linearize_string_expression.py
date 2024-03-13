@@ -190,7 +190,7 @@ class LinearizeStringExpressionVisitor(
         return False
 
     def visit_Attribute(self, node: cst.Attribute) -> Optional[bool]:
-        # TODO try to resolve this
+        # TODO should we also try to resolve values for attributes?
         self.leaves.append(node)
         return False
 
