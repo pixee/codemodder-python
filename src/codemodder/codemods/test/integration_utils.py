@@ -95,6 +95,19 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert run["directory"] == os.path.abspath(SAMPLES_DIR)
         assert run["sarifs"] == []
 
+    def _assert_sonar_fields(self, result):
+        assert result["detectionTool"]["name"] == "Sonar"
+        assert (
+            result["detectionTool"]["rule"]["id"]
+            == self.codemod_instance._metadata.tool.rule_id
+        )
+        assert (
+            result["detectionTool"]["rule"]["name"]
+            == self.codemod_instance._metadata.tool.rule_name
+        )
+        # TODO: empty array until we add findings metadata
+        assert result["detectionTool"]["findings"] == []
+
     def _assert_results_fields(self, results, output_path):
         assert len(results) == 1
         result = results[0]
@@ -104,9 +117,22 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             for ref in self.codemod_instance.references
         ]
 
-        # TODO: once we add description for each url.
-        for reference in result["references"]:
+        assert ("detectionTool" in result) == bool(self.sonar_issues_json)
+
+        # TODO: if/when we add description for each url
+        for reference in result["references"][
+            # Last reference for Sonar has a different description
+            : (-1 if self.sonar_issues_json else None)
+        ]:
             assert reference["url"] == reference["description"]
+
+        if self.sonar_issues_json:
+            assert self.codemod_instance._metadata.tool is not None
+            assert (
+                result["references"][-1]["description"]
+                == self.codemod_instance._metadata.tool.rule_name
+            )
+            self._assert_sonar_fields(result)
 
         assert len(result["changeset"]) == self.num_changed_files
 

@@ -158,6 +158,7 @@ class CodemodExecutionContext:
                 codemod=codemod.id,
                 summary=codemod.summary,
                 description=self.add_description(codemod),
+                detectionTool=codemod.detection_tool,
                 references=codemod.references,
                 properties={},
                 failedFiles=[str(file) for file in self.get_failures(codemod.id)],

@@ -2,10 +2,19 @@ import json
 from pathlib import Path
 
 import jsonschema
+import pydantic
 import pytest
 import requests
 
-from codemodder.codetf import Change, ChangeSet, CodeTF, DiffSide, Result
+from codemodder.codetf import (
+    Change,
+    ChangeSet,
+    CodeTF,
+    DiffSide,
+    Finding,
+    Reference,
+    Result,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -111,3 +120,18 @@ def test_write_codetf_with_results(tmpdir, mocker, codetf_schema):
     CodeTF.model_validate_json(data)
 
     jsonschema.validate(json.loads(data), codetf_schema)
+
+
+def test_reference_use_url_for_description():
+    ref = Reference(url="https://example.com")
+    assert ref.description == "https://example.com"
+
+
+def test_unfixed_finding_with_no_reason():
+    with pytest.raises(pydantic.ValidationError):
+        Finding(id="test", fixed=False)
+
+
+def test_unfixed_finding_with_reason():
+    finding = Finding(id="test", fixed=False, reason="test")
+    assert finding.reason == "test"
