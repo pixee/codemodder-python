@@ -1,4 +1,3 @@
-from codemodder.codemods.base_codemod import Reference
 from codemodder.codemods.sonar import SonarCodemod
 from core_codemods.remove_assertion_in_pytest_raises import (
     RemoveAssertionInPytestRaises,
@@ -7,8 +6,7 @@ from core_codemods.remove_assertion_in_pytest_raises import (
 SonarRemoveAssertionInPytestRaises = SonarCodemod.from_core_codemod(
     name="remove-assertion-in-pytest-raises-S5915",
     other=RemoveAssertionInPytestRaises,
-    rules=["python:S5915"],
-    new_references=[
-        Reference(url="https://rules.sonarsource.com/python/type/Bug/RSPEC-5915/"),
-    ],
+    rule_id="python:S5915",
+    rule_name="Assertions should not be made at the end of blocks expecting an exception",
+    rule_url="https://rules.sonarsource.com/python/type/Bug/RSPEC-5915/",
 )

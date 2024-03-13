@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 import importlib.resources
 from abc import ABCMeta, abstractmethod
@@ -11,7 +13,7 @@ from pathlib import Path
 from codemodder.code_directory import file_line_patterns
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
-from codemodder.codetf import Reference
+from codemodder.codetf import DetectionTool, Reference, Rule
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from codemodder.logging import logger
@@ -31,6 +33,15 @@ class Metadata:
     review_guidance: ReviewGuidance
     references: list[Reference] = field(default_factory=list)
     description: str | None = None
+    tool: ToolMetadata | None = None
+
+
+@dataclass
+class ToolMetadata:
+    name: str
+    rule_id: str
+    rule_name: str
+    rule_url: str
 
 
 class BaseCodemod(metaclass=ABCMeta):
@@ -88,6 +99,20 @@ class BaseCodemod(metaclass=ABCMeta):
     @property
     def summary(self):
         return self._metadata.summary
+
+    @property
+    def detection_tool(self) -> DetectionTool | None:
+        if self._metadata.tool is None:
+            return None
+
+        return DetectionTool(
+            name=self._metadata.tool.name,
+            rule=Rule(
+                id=self._metadata.tool.rule_id,
+                name=self._metadata.tool.rule_name,
+                url=self._metadata.tool.rule_url,
+            ),
+        )
 
     @cached_property
     def docs_module(self) -> Traversable:

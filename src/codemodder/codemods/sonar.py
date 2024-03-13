@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from codemodder.codemods.base_codemod import Metadata, Reference
+from codemodder.codemods.base_codemod import Metadata, Reference, ToolMetadata
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
 from codemodder.context import CodemodExecutionContext
@@ -19,9 +19,10 @@ class SonarCodemod(SASTCodemod):
         cls,
         name: str,
         other: CoreCodemod,
-        rules: list[str],
+        rule_id: str,
+        rule_name: str,
+        rule_url: str,
         transformer: BaseTransformerPipeline | None = None,
-        new_references: list[Reference] | None = None,
     ):
         return SonarCodemod(
             metadata=Metadata(
@@ -29,16 +30,20 @@ class SonarCodemod(SASTCodemod):
                 summary="Sonar: " + other.summary,
                 review_guidance=other._metadata.review_guidance,
                 references=(
-                    other.references
-                    if not new_references
-                    else other.references + new_references
+                    other.references + [Reference(url=rule_url, description=rule_name)]
                 ),
-                description=f"This codemod acts upon the following Sonar rules: {str(rules)[1:-1]}.\n\n"
+                description=f"This codemod acts upon the following Sonar rules: {rule_id}.\n\n"
                 + other.description,
+                tool=ToolMetadata(
+                    name="Sonar",
+                    rule_id=rule_id,
+                    rule_name=rule_name,
+                    rule_url=rule_url,
+                ),
             ),
             transformer=transformer if transformer else other.transformer,
             detector=SonarDetector(),
-            requested_rules=rules,
+            requested_rules=[rule_id],
         )
 
 

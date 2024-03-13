@@ -1,6 +1,5 @@
 import libcst as cst
 
-from codemodder.codemods.base_codemod import Reference
 from codemodder.codemods.libcst_transformer import LibcstTransformerPipeline
 from codemodder.codemods.sonar import SonarCodemod
 from codemodder.result import fuzzy_column_match, same_line
@@ -33,9 +32,8 @@ class JwtDecodeVerifySonarTransformer(JwtDecodeVerifyTransformer):
 SonarJwtDecodeVerify = SonarCodemod.from_core_codemod(
     name="jwt-decode-verify-S5659",
     other=JwtDecodeVerify,
-    rules=["python:S5659"],
-    new_references=[
-        Reference(url="https://rules.sonarsource.com/python/RSPEC-5659/"),
-    ],
+    rule_id="python:S5659",
+    rule_name="JWT should be signed and verified",
+    rule_url="https://rules.sonarsource.com/python/RSPEC-5659/",
     transformer=LibcstTransformerPipeline(JwtDecodeVerifySonarTransformer),
 )
