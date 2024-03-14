@@ -41,7 +41,7 @@ class ToolMetadata:
     name: str
     rule_id: str
     rule_name: str
-    rule_url: str
+    rule_url: str | None = None
 
 
 class BaseCodemod(metaclass=ABCMeta):
