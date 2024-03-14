@@ -69,3 +69,19 @@ def positional_to_keyword(
         else:
             new_args.append(arg)
     return new_args
+
+
+def is_empty_string_literal(node) -> bool:
+    match node:
+        case cst.SimpleString() if node.raw_value == "":
+            return True
+        case cst.FormattedString() if not node.parts:
+            return True
+    return False
+
+
+def is_empty_sequence_literal(expr: cst.BaseExpression) -> bool:
+    match expr:
+        case cst.Dict() | cst.Tuple() if not expr.elements:
+            return True
+    return False

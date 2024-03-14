@@ -1,15 +1,17 @@
 import itertools
 import re
-from typing import Any, Optional, Tuple
+from dataclasses import replace
+from typing import Any, ClassVar, Collection, Optional
 
 import libcst as cst
-from libcst import ensure_type, matchers
-from libcst.codemod import CodemodContext, ContextAwareTransformer, ContextAwareVisitor
+from libcst.codemod import Codemod, CodemodContext, ContextAwareVisitor
+from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatString
 from libcst.metadata import (
     ClassScope,
     GlobalScope,
     ParentNodeProvider,
     PositionProvider,
+    ProviderT,
     ScopeProvider,
 )
 
@@ -23,13 +25,28 @@ from codemodder.codemods.transformations.remove_empty_string_concatenation impor
 )
 from codemodder.codemods.utils import (
     Append,
-    BaseType,
+    ReplacementNodeType,
     ReplaceNodes,
     get_function_name_node,
     infer_expression_type,
 )
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
 from codemodder.codetf import Change
+from codemodder.utils.clean_code import (
+    NormalizeFStrings,
+    RemoveEmptyExpressionsFormatting,
+    RemoveUnusedVariables,
+)
+from codemodder.utils.format_string_parser import (
+    PrintfStringExpression,
+    PrintfStringText,
+    StringLiteralNodeType,
+    extract_raw_value,
+)
+from codemodder.utils.linearize_string_expression import (
+    LinearizedStringExpression,
+    LinearizeStringMixin,
+)
 from core_codemods.api import Metadata, Reference, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 
@@ -39,10 +56,56 @@ quote_pattern = re.compile(r"(?<!\\)\\'|(?<!\\)'")
 raw_quote_pattern = re.compile(r"(?<!\\)'")
 
 
-class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
-    change_description = "Parameterized SQL query execution."
+class ExtractPrefixMixin(cst.MetadataDependent):
+
+    METADATA_DEPENDENCIES: ClassVar[Collection[ProviderT]] = (ParentNodeProvider,)
+
+    def extract_prefix(self, node: StringLiteralNodeType) -> str:
+        match node:
+            case cst.SimpleString():
+                return node.prefix.lower()
+            case cst.FormattedStringText():
+                try:
+                    parent = self.get_metadata(ParentNodeProvider, node)
+                    parent = cst.ensure_type(parent, cst.FormattedString)
+                except Exception:
+                    return ""
+                return parent.start.lower()
+            case PrintfStringText():
+                return self.extract_prefix(node.origin)
+        return ""
+
+    def _extract_prefix_raw_value(self, node: StringLiteralNodeType) -> tuple[str, str]:
+        raw_value = extract_raw_value(node)
+        prefix = self.extract_prefix(node)
+        return prefix, raw_value
+
+
+class CleanCode(Codemod):
 
     METADATA_DEPENDENCIES = (
+        ParentNodeProvider,
+        ScopeProvider,
+    )
+
+    def transform_module_impl(self, tree: cst.Module) -> cst.Module:
+        result = RemoveEmptyStringConcatenation(self.context).transform_module(tree)
+        result = RemoveEmptyExpressionsFormatting(self.context).transform_module(result)
+        result = NormalizeFStrings(self.context).transform_module(result)
+        result = RemoveUnusedVariables(self.context).transform_module(result)
+        result = UnnecessaryFormatString(self.context).transform_module(result)
+        return result
+
+    def should_allow_multiple_passes(self) -> bool:
+        return True
+
+
+class SQLQueryParameterizationTransformer(
+    LibcstResultTransformer, UtilsMixin, ExtractPrefixMixin
+):
+    change_description = "Parameterized SQL query execution."
+
+    METADATA_DEPENDENCIES: ClassVar[Collection[ProviderT]] = (
         PositionProvider,
         ScopeProvider,
         ParentNodeProvider,
@@ -54,8 +117,11 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
         **codemod_kwargs,
     ) -> None:
         self.changed_nodes: dict[
-            cst.CSTNode,
-            cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel | dict[str, Any],
+            cst.CSTNode | PrintfStringText | PrintfStringExpression,
+            ReplacementNodeType
+            | PrintfStringText
+            | PrintfStringExpression
+            | dict[str, Any],
         ] = {}
         LibcstResultTransformer.__init__(self, *codemod_args, **codemod_kwargs)
         UtilsMixin.__init__(
@@ -65,8 +131,8 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
             line_include=self.file_context.line_include,
         )
 
-    def _build_param_element(self, prepend, middle, append, aliased_expr):
-        middle = [aliased_expr.get(e, e) for e in middle]
+    def _build_param_element(self, prepend, middle, append, linearized_query):
+        middle = [linearized_query.aliased.get(e, e) for e in middle]
         new_middle = (
             ([prepend] if prepend else []) + middle + ([append] if append else [])
         )
@@ -78,13 +144,13 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
             return new_middle[0]
         for e in new_middle:
             exception = False
-            if isinstance(e, cst.SimpleString | cst.FormattedStringText):
-                t = _extract_prefix_raw_value(self, e)
-                if t:
-                    prefix, raw_value = t
-                    if all(char not in prefix for char in "bru"):
-                        format_pieces.append(raw_value)
-                        exception = True
+            if isinstance(
+                e, cst.SimpleString | cst.FormattedStringText | PrintfStringText
+            ):
+                prefix, raw_value = self._extract_prefix_raw_value(e)
+                if all(char not in prefix for char in "bru"):
+                    format_pieces.append(raw_value)
+                    exception = True
             if not exception:
                 format_pieces.append(f"{{{format_expr_count}}}")
                 format_expr_count += 1
@@ -98,35 +164,33 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
         )
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        # The transformation has four major steps:
-        # (1) FindQueryCalls - Find and gather all the SQL query execution calls. The result is a dict of call nodes and their associated list of nodes composing the query (i.e. step (2)).
-        # (2) LinearizeQuery - For each call, it gather all the string literals and expressions that composes the query. The result is a list of nodes whose concatenation is the query.
-        # (3) ExtractParameters - Detects which expressions are part of SQL string literals in the query. The result is a list of triples (a,b,c) such that a is the node that contains the start of the string literal, b is a list of expressions that composes that literal, and c is the node containing the end of the string literal. At least one node in b must be "injectable" (see).
-        # (4) SQLQueryParameterization - Executes steps (1)-(3) and gather a list of injection triples. For each triple (a,b,c) it makes the associated changes to insert the query parameter token. All the expressions in b are then concatenated in an expression and passed as a sequence of parameters to the execute call.
-
-        # Steps (1) and (2)
+        """
+        The transformation is composed of 3 steps, each step is done by a codemod/visitor: (1) FindQueryCalls, (2) ExtractParameters, and (3) SQLQueryParameterization.
+        Step (1) finds the `execute` calls and linearizing the query argument. Step (2) extracts the expressions that are parameters to the query.
+        Step (3) swaps the parameters in the query for `?` tokens and passes them as an arguments for the `execute` call. At the end of the transformation, the `CleanCode` codemod is executed to remove leftover empty strings and unused variables.
+        """
         find_queries = FindQueryCalls(self.context)
         tree.visit(find_queries)
 
         result = tree
-        for call, query in find_queries.calls.items():
+        for call, linearized_query in find_queries.calls.items():
             # filter by line includes/excludes
             call_pos = self.node_position(call)
             if not self.filter_by_path_includes_or_excludes(call_pos):
                 break
 
             # Step (3)
-            ep = ExtractParameters(self.context, query, find_queries.aliased)
+            ep = ExtractParameters(self.context, linearized_query)
             tree.visit(ep)
 
             # Step (4) - build tuple elements and fix injection
             params_elements: list[cst.Element] = []
             for start, middle, end in ep.injection_patterns:
                 prepend, append = self._fix_injection(
-                    start, middle, end, find_queries.aliased
+                    start, middle, end, linearized_query
                 )
                 expr = self._build_param_element(
-                    prepend, middle, append, find_queries.aliased
+                    prepend, middle, append, linearized_query
                 )
                 params_elements.append(
                     cst.Element(
@@ -137,14 +201,52 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
 
             # TODO research if named parameters are widely supported
             # it could solve for the case of existing parameters
+            # TODO Do all middle expressions hail from a single source?
+            # e.g. the following
+            # name = 'user_' + input() + '_name'
+            # execute("'" + name + "'")
+            # should produce: execute("?", name)
+            # instead of: execute("?", 'user_{0}_name'.format(input()))
             if params_elements:
                 tuple_arg = cst.Arg(cst.Tuple(elements=params_elements))
-                # self.changed_nodes[call] = call.with_changes(args=[*call.args, tuple_arg])
                 self.changed_nodes[call] = {"args": Append([tuple_arg])}
 
             # made changes
             if self.changed_nodes:
-                result = result.visit(ReplaceNodes(self.changed_nodes))
+                # build changed_nodes from parts here
+                new_changed_nodes = {}
+                new_parts_for = set()
+                for k, v in self.changed_nodes.items():
+                    match k:
+                        case PrintfStringText():
+                            new_parts_for.add(k.origin)
+                        case _:
+                            new_changed_nodes[k] = v
+                for node in new_parts_for:
+                    new_raw_value = ""
+                    for part in linearized_query.node_pieces[node]:
+                        new_part = self.changed_nodes.get(part) or part
+                        match new_part:
+                            case cst.SimpleString():
+                                new_raw_value += new_part.raw_value
+                            case PrintfStringText() | PrintfStringExpression():
+                                new_raw_value += new_part.value
+                            case _:
+                                new_raw_value = ""
+                    match node:
+                        case cst.SimpleString():
+                            new_changed_nodes[node] = node.with_changes(
+                                value=node.prefix
+                                + node.quote
+                                + new_raw_value
+                                + node.quote
+                            )
+                        case cst.FormattedStringText():
+                            new_changed_nodes[node] = node.with_changes(
+                                value=new_raw_value
+                            )
+
+                result = result.visit(ReplaceNodes(new_changed_nodes))
                 self.changed_nodes = {}
                 line_number = self.get_metadata(PositionProvider, call).start.line
                 self.file_context.codemod_changes.append(
@@ -154,11 +256,7 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
                     )
                 )
                 # Normalization and cleanup
-                result = result.visit(RemoveEmptyStringConcatenation())
-                result = NormalizeFStrings(self.context).transform_module(result)
-                # TODO The transform below may break nested f-strings: f"{f"1"}" -> f"{"1"}"
-                # May be a bug...
-                # result = UnnecessaryFormatString(self.context).transform_module(result)
+                result = CleanCode(self.context).transform_module(result)
 
         return result
 
@@ -167,24 +265,23 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
         start: cst.CSTNode,
         middle: list[cst.CSTNode],
         end: cst.CSTNode,
-        aliased_expr: dict[cst.CSTNode, cst.CSTNode],
+        linearized_query: LinearizedStringExpression,
     ):
         for expr in middle:
-            # TODO aliased
-            if expr in aliased_expr:
-                self.changed_nodes[aliased_expr[expr]] = cst.parse_expression('""')
-            elif isinstance(
-                expr, cst.FormattedStringText | cst.FormattedStringExpression
-            ):
-                self.changed_nodes[expr] = cst.RemovalSentinel.REMOVE
+            if expr in linearized_query.aliased:
+                self.changed_nodes[linearized_query.aliased[expr]] = (
+                    cst.parse_expression('""')
+                )
             else:
-                self.changed_nodes[expr] = cst.parse_expression('""')
-
+                match expr:
+                    case cst.FormattedStringText() | cst.FormattedStringExpression():
+                        self.changed_nodes[expr] = cst.RemovalSentinel.REMOVE
+                    case _:
+                        self.changed_nodes[expr] = cst.parse_expression('""')
         # remove quote literal from start
         updated_start = self.changed_nodes.get(start) or start
 
-        t = _extract_prefix_raw_value(self, updated_start)
-        prefix, raw_value = t if t else ("", "")
+        prefix, raw_value = self._extract_prefix_raw_value(updated_start)
 
         # gather string after the quote
         if "r" in prefix:
@@ -202,8 +299,7 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
         # remove quote literal from end
         updated_end = self.changed_nodes.get(end) or end
 
-        t = _extract_prefix_raw_value(self, updated_end)
-        prefix, raw_value = t if t else ("", "")
+        prefix, raw_value = self._extract_prefix_raw_value(updated_end)
         if "r" in prefix:
             quote_span = list(raw_quote_pattern.finditer(raw_value))[0]
         else:
@@ -245,15 +341,22 @@ class SQLQueryParameterizationTransformer(LibcstResultTransformer, UtilsMixin):
             case cst.FormattedStringText():
                 if extra_raw_value:
                     extra = cst.SimpleString(
-                        value=("r" if "r" in prefix else "")
-                        + "'"
-                        + extra_raw_value
-                        + "'"
+                        value=("r" if "r" in prefix else "") + f"'{extra_raw_value}'"
                     )
 
                 new_value = new_raw_value
                 self.changed_nodes[original_node] = updated_node.with_changes(
                     value=new_value
+                )
+            case PrintfStringText():
+                if extra_raw_value:
+                    extra = cst.SimpleString(
+                        value=("r" if "r" in prefix else "") + f"'{extra_raw_value}'"
+                    )
+
+                new_value = new_raw_value
+                self.changed_nodes[original_node] = replace(
+                    updated_node, value=new_value
                 )
         return extra
 
@@ -273,96 +376,19 @@ SQLQueryParameterization = CoreCodemod(
 )
 
 
-class LinearizeQuery(ContextAwareVisitor, NameAndAncestorResolutionMixin):
+class ExtractParameters(
+    ContextAwareVisitor, NameAndAncestorResolutionMixin, ExtractPrefixMixin
+):
     """
-    Gather all the expressions that are concatenated to build the query.
-    """
-
-    def __init__(self, context) -> None:
-        self.leaves: list[cst.CSTNode] = []
-        self.aliased: dict[cst.CSTNode, cst.CSTNode] = {}
-        super().__init__(context)
-
-    def on_visit(self, node: cst.CSTNode):
-        # We only care about expressions, ignore everything else
-        # Mostly as a sanity check, this may not be necessary since we start the visit with an expression node
-        if isinstance(
-            node,
-            (
-                cst.BaseExpression,
-                cst.FormattedStringExpression,
-                cst.FormattedStringText,
-            ),
-        ):
-            # These will be the only types that will be properly visited
-            if not matchers.matches(
-                node,
-                matchers.Name()
-                | matchers.FormattedString()
-                | matchers.BinaryOperation()
-                | matchers.FormattedStringExpression()
-                | matchers.ConcatenatedString(),
-            ):
-                self.leaves.append(node)
-            else:
-                return super().on_visit(node)
-        return False
-
-    def visit_BinaryOperation(self, node: cst.BinaryOperation) -> Optional[bool]:
-        maybe_type = infer_expression_type(node)
-        if not maybe_type or maybe_type == BaseType.STRING:
-            return True
-        self.leaves.append(node)
-        return False
-
-    # recursive search
-    def visit_Name(self, node: cst.Name) -> Optional[bool]:
-        self.leaves.extend(self.recurse_Name(node))
-        return False
-
-    def visit_Attribute(self, node: cst.Attribute) -> Optional[bool]:
-        self.leaves.append(node)
-        return False
-
-    def recurse_Name(self, node: cst.Name) -> list[cst.CSTNode]:
-        # if the expression is a name, try to find its single assignment
-        if (resolved := self.resolve_expression(node)) != node:
-            visitor = LinearizeQuery(self.context)
-            resolved.visit(visitor)
-            if len(visitor.leaves) == 1:
-                self.aliased[resolved] = node
-                return [resolved]
-            self.aliased |= visitor.aliased
-            return visitor.leaves
-        return [node]
-
-    def recurse_Attribute(self, node: cst.Attribute) -> list[cst.CSTNode]:
-        # TODO attributes may have been assigned, should those be modified?
-        # research how to detect attribute assigns in libcst
-        return [node]
-
-    def _find_gparent(self, n: cst.CSTNode) -> Optional[cst.CSTNode]:
-        gparent = None
-        try:
-            parent = self.get_metadata(ParentNodeProvider, n)
-            gparent = self.get_metadata(ParentNodeProvider, parent)
-        except Exception:
-            pass
-        return gparent
-
-
-class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
-    """
-    Detects injections and gather the expressions that are injectable.
+    This visitor a takes the linearized query and extracts the expressions that are parameters in this query. An expression is a parameter if it is surrounded by single quotes in the query. It results in a list of triples (start, middle, end), where start and end contains the expressions with single quotes marking the parameter, and middle is a list of expressions that composes the parameter.
     """
 
     def __init__(
         self,
         context: CodemodContext,
-        query: list[cst.CSTNode],
-        aliased: dict[cst.CSTNode, cst.CSTNode],
+        linearized_query: LinearizedStringExpression,
     ) -> None:
-        self.query: list[cst.CSTNode] = query
+        self.linearized_query = linearized_query
         self.injection_patterns: list[
             tuple[
                 cst.CSTNode,
@@ -370,15 +396,13 @@ class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
                 cst.CSTNode,
             ]
         ] = []
-        self.aliased: dict[cst.CSTNode, cst.CSTNode] = aliased
         super().__init__(context)
 
     def leave_Module(self, original_node: cst.Module):
-        leaves = list(reversed(self.query))
+        leaves = list(reversed(self.linearized_query.parts))
         modulo_2 = 1
         # treat it as a stack
         while leaves:
-            # TODO check if we can change values here any expression in middle should not be from GlobalScope or ClassScope
             # search for the literal start, we detect the single quote
             start = leaves.pop()
             if not self._is_literal_start(start, modulo_2):
@@ -407,12 +431,8 @@ class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
             else:
                 modulo_2 = 1
 
-    def _is_not_a_single_quote(self, expression: cst.CSTNode) -> bool:
-        value = expression
-        t = _extract_prefix_raw_value(self, value)
-        if not t:
-            return True
-        prefix, raw_value = t
+    def _is_not_a_single_quote(self, expression: StringLiteralNodeType) -> bool:
+        prefix, raw_value = self._extract_prefix_raw_value(expression)
         if "b" in prefix:
             return False
         if "r" in prefix:
@@ -420,6 +440,17 @@ class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
         return quote_pattern.fullmatch(raw_value) is None
 
     def _is_assigned_to_exposed_scope(self, expression):
+        # is it part of an expression that is assigned to a variable in an exposed scope?
+        path = self.path_to_root(expression)
+        for i, node in enumerate(path):
+            # ensure it descend from the value attribute
+            if isinstance(node, cst.Assign) and (i > 0 and path[i - 1] == node.value):
+                expression = node.value
+                scope = self.get_metadata(ScopeProvider, node, None)
+                match scope:
+                    case GlobalScope() | ClassScope() | None:
+                        return True
+
         named, other = self.find_transitive_assignment_targets(expression)
         for t in itertools.chain(named, other):
             scope = self.get_metadata(ScopeProvider, t, None)
@@ -428,7 +459,7 @@ class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
                     return True
         return False
 
-    def _is_target_in_expose_scope(self, expression):
+    def _is_target_in_exposed_scope(self, expression):
         assignments = self.find_assignments(expression)
         for assignment in assignments:
             match assignment.scope:
@@ -440,18 +471,25 @@ class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
         # is it assigned to a variable with global/class scope?
         # is itself a target in global/class scope?
         # if the expression is aliased, it is just a reference and we can always change
-        if expression in self.aliased:
+        match expression:
+            case PrintfStringText():
+                expression = expression.origin
+
+        if expression in self.linearized_query.aliased:
             return True
         return not (
-            self._is_target_in_expose_scope(expression)
+            self._is_target_in_exposed_scope(expression)
             or self._is_assigned_to_exposed_scope(expression)
         )
 
     def _can_be_changed(self, expression):
         # is it assigned to a variable with global/class scope?
         # is itself a target in global/class scope?
+        match expression:
+            case PrintfStringText():
+                expression = expression.origin
         return not (
-            self._is_target_in_expose_scope(expression)
+            self._is_target_in_exposed_scope(expression)
             or self._is_assigned_to_exposed_scope(expression)
         )
 
@@ -459,71 +497,57 @@ class ExtractParameters(ContextAwareVisitor, NameAndAncestorResolutionMixin):
         return not bool(infer_expression_type(expression))
 
     def _is_literal_start(
-        self, node: cst.CSTNode | tuple[cst.CSTNode, cst.CSTNode], modulo_2: int
+        self,
+        node: cst.CSTNode | PrintfStringText | PrintfStringExpression,
+        modulo_2: int,
     ) -> bool:
-        t = _extract_prefix_raw_value(self, node)
-        if not t:
-            return False
-        prefix, raw_value = t
-        if "b" in prefix:
-            return False
-        if "r" in prefix:
-            matches = list(raw_quote_pattern.finditer(raw_value))
-        else:
-            matches = list(quote_pattern.finditer(raw_value))
-        # avoid cases like: "where name = 'foo\\\'s name'"
-        # don't count \\' as these are escaped in string literals
-        return (matches is not None) and len(matches) % 2 == modulo_2
+        if isinstance(
+            node, cst.SimpleString | cst.FormattedStringText | PrintfStringText
+        ):
+            prefix, raw_value = self._extract_prefix_raw_value(node)
+
+            if "b" in prefix:
+                return False
+            if "r" in prefix:
+                matches = list(raw_quote_pattern.finditer(raw_value))
+            else:
+                matches = list(quote_pattern.finditer(raw_value))
+            # avoid cases like: "where name = 'foo\\\'s name'"
+            # don't count \\' as these are escaped in string literals
+            return (matches is not None) and len(matches) % 2 == modulo_2
+        return False
 
     def _is_literal_end(
-        self, node: cst.CSTNode | tuple[cst.CSTNode, cst.CSTNode]
+        self, node: cst.CSTNode | PrintfStringExpression | PrintfStringText
     ) -> bool:
-        t = _extract_prefix_raw_value(self, node)
-        if not t:
-            return False
-        prefix, raw_value = t
-        if "b" in prefix:
-            return False
-        if "r" in prefix:
-            matches = list(raw_quote_pattern.finditer(raw_value))
-        else:
-            matches = list(quote_pattern.finditer(raw_value))
-        return bool(matches)
+        if isinstance(
+            node, cst.SimpleString | cst.FormattedStringText | PrintfStringText
+        ):
+            prefix, raw_value = self._extract_prefix_raw_value(node)
+            if prefix is None:
+                return False
+
+            if "b" in prefix:
+                return False
+            if "r" in prefix:
+                matches = list(raw_quote_pattern.finditer(raw_value))
+            else:
+                matches = list(quote_pattern.finditer(raw_value))
+            return bool(matches)
+        return False
 
 
-class NormalizeFStrings(ContextAwareTransformer):
+class FindQueryCalls(ContextAwareVisitor, LinearizeStringMixin):
     """
-    Finds all the f-strings whose parts are only composed of FormattedStringText and concats all of them in a single part.
-    """
-
-    def leave_FormattedString(
-        self, original_node: cst.FormattedString, updated_node: cst.FormattedString
-    ) -> cst.BaseExpression:
-        all_parts = list(
-            itertools.takewhile(
-                lambda x: isinstance(x, cst.FormattedStringText), original_node.parts
-            )
-        )
-        if len(all_parts) != len(updated_node.parts):
-            return updated_node
-        new_part = cst.FormattedStringText(
-            value="".join(map(lambda x: x.value, all_parts))
-        )
-        return updated_node.with_changes(parts=[new_part])
-
-
-class FindQueryCalls(ContextAwareVisitor):
-    """
-    Find all the execute calls with a sql query as an argument.
+    Finds `execute` calls and linearizes the query argument. The result is a dict mappig each detected call with the linearized query.
     """
 
-    # right now it works by looking into some sql keywords in any pieces of the query
+    # Right now it works by looking into some sql keywords in any pieces of the query
     # Ideally we should infer what driver we are using
     sql_keywords: list[str] = ["insert", "select", "delete", "create", "alter", "drop"]
 
     def __init__(self, context: CodemodContext) -> None:
         self.calls: dict = {}
-        self.aliased: dict[cst.CSTNode, cst.CSTNode] = {}
         super().__init__(context)
 
     def _has_keyword(self, string: str) -> bool:
@@ -540,27 +564,17 @@ class FindQueryCalls(ContextAwareVisitor):
             if len(original_node.args) > 0 and len(original_node.args) < 2:
                 first_arg = original_node.args[0] if original_node.args else None
                 if first_arg:
-                    query_visitor = LinearizeQuery(self.context)
-                    first_arg.value.visit(query_visitor)
-                    for expr in query_visitor.leaves:
-                        match expr:
+                    linearized_string_expr = self.linearize_string_expression(
+                        first_arg.value
+                    )
+                    for part in (
+                        linearized_string_expr.parts if linearized_string_expr else []
+                    ):
+                        match part:
                             case (
-                                cst.SimpleString() | cst.FormattedStringText()
-                            ) if self._has_keyword(expr.value):
-                                self.calls[original_node] = query_visitor.leaves
-                                self.aliased |= query_visitor.aliased
-
-
-def _extract_prefix_raw_value(self, node) -> Optional[Tuple[str, str]]:
-    match node:
-        case cst.SimpleString():
-            return node.prefix.lower(), node.raw_value
-        case cst.FormattedStringText():
-            try:
-                parent = self.get_metadata(ParentNodeProvider, node)
-                parent = ensure_type(parent, cst.FormattedString)
-            except Exception:
-                return None
-            return parent.start.lower(), node.value
-        case _:
-            return None
+                                cst.SimpleString()
+                                | cst.FormattedStringText()
+                                | PrintfStringText()
+                            ) if self._has_keyword(part.value):
+                                self.calls[original_node] = linearized_string_expr
+                                break

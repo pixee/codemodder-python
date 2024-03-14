@@ -37,7 +37,8 @@ from .remove_assertion_in_pytest_raises import RemoveAssertionInPytestRaises
 from .remove_debug_breakpoint import RemoveDebugBreakpoint
 from .remove_future_imports import RemoveFutureImports
 from .remove_module_global import RemoveModuleGlobal
-from .remove_unnecessary_f_str import RemoveUnnecessaryFStr
+
+# from .remove_unnecessary_f_str import RemoveUnnecessaryFStr
 from .remove_unused_imports import RemoveUnusedImports
 from .replace_flask_send_file import ReplaceFlaskSendFile
 from .requests_verify import RequestsVerify
@@ -88,7 +89,7 @@ registry = CodemodCollection(
         OrderImports,
         ProcessSandbox,
         RemoveFutureImports,
-        RemoveUnnecessaryFStr,
+        # RemoveUnnecessaryFStr, # Temporarely disabled due to potential error. See Issue #378.
         RemoveUnusedImports,
         RequestsVerify,
         SecureFlaskCookie,

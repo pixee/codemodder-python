@@ -1,5 +1,5 @@
 import libcst as cst
-from libcst.codemod import Codemod, CodemodTest
+from libcst.codemod import Codemod, CodemodContext, CodemodTest
 
 from codemodder.codemods.transformations.remove_empty_string_concatenation import (
     RemoveEmptyStringConcatenation,
@@ -8,7 +8,7 @@ from codemodder.codemods.transformations.remove_empty_string_concatenation impor
 
 class RemoveEmptyStringConcatenationCodemod(Codemod):
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        return tree.visit(RemoveEmptyStringConcatenation())
+        return tree.visit(RemoveEmptyStringConcatenation(CodemodContext()))
 
 
 class TestRemoveEmptyStringConcatenation(CodemodTest):

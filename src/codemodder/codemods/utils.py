@@ -1,6 +1,6 @@
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, TypeAlias
 
 import libcst as cst
 from libcst import MetadataDependent, matchers
@@ -79,6 +79,11 @@ class Prepend(SequenceExtension):
     pass
 
 
+ReplacementNodeType: TypeAlias = (
+    cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel | dict[str, Any]
+)
+
+
 class ReplaceNodes(cst.CSTTransformer):
     """
     Replace nodes with their corresponding values in a given dict. The replacements dictionary should either contain a mapping from a node to another node, RemovalSentinel, or FlattenSentinel to be replaced, or a dict mapping each attribute, by name, to a new value. Additionally if the attribute is a sequence, you may pass Append(l)/Prepend(l), where l is a list of nodes, to append or prepend, respectively.
@@ -88,7 +93,7 @@ class ReplaceNodes(cst.CSTTransformer):
         self,
         replacements: dict[
             cst.CSTNode,
-            cst.CSTNode | cst.FlattenSentinel | cst.RemovalSentinel | dict[str, Any],
+            ReplacementNodeType | dict[str, Any],
         ],
     ):
         self.replacements = replacements
