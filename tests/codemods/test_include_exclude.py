@@ -9,21 +9,20 @@ class TestMatchCodemods:
     def setup_class(cls):
         cls.registry = load_registered_codemods()
         cls.codemod_map = cls.registry._codemods_by_name
-        cls.default_ids = [
+        cls.all_ids = [
             c().id if isinstance(c, type) else c.id for c in registry.codemods
         ]
 
     def test_no_include_exclude(self):
-        default_codemods = set(
+        assert set(self.registry.match_codemods(None, None)) == set(
             x
             for x in self.registry.codemods
-            if x.id in self.default_ids and x.id not in DEFAULT_EXCLUDED_CODEMODS
+            if x.id in self.all_ids and x.id not in DEFAULT_EXCLUDED_CODEMODS
         )
-        assert set(self.registry.match_codemods(None, None)) == default_codemods
 
     def test_load_sast_codemods(self):
         sast_codemods = set(
-            c for c in self.registry.codemods if c.id not in self.default_ids
+            c for c in self.registry.codemods if c.id not in self.all_ids
         )
         assert (
             set(self.registry.match_codemods(None, None, sast_only=True))
@@ -65,5 +64,27 @@ class TestMatchCodemods:
         assert self.registry.match_codemods(None, excludes) == [
             c
             for c in self.registry.codemods
-            if c.name not in excludes and c.id in self.default_ids
+            if c.name not in excludes and c.id in self.all_ids
         ]
+
+    def test_bad_codemod_include_no_match(self):
+        assert self.registry.match_codemods(["doesntexist"], None) == []
+
+    def test_codemod_include_some_match(self):
+        assert self.registry.match_codemods(["doesntexist", "secure-random"], None) == [
+            self.codemod_map["secure-random"]
+        ]
+
+    def test_bad_codemod_exclude_all_match(self):
+        assert self.registry.match_codemods(None, ["doesntexist"]) == [
+            c for c in self.registry.codemods if c.id in self.all_ids
+        ]
+
+    def test_exclude_some_match(self):
+        assert self.registry.match_codemods(None, ["doesntexist", "secure-random"]) == [
+            c
+            for c in self.registry.codemods
+            if c.name not in "secure-random" and c.id in self.all_ids
+        ]
+
+    # todo: test name or id

@@ -27,6 +27,20 @@ class CodemodCollection:
     codemods: list
 
 
+class TupledKeysDict(dict):
+    # todo: document
+    def get(self, key):
+        for key_tuple, value in self.items():
+            if key in key_tuple:
+                return value
+        raise KeyError
+
+    def pop(self, key):
+        for key_tuple in list(self.keys()):
+            if key in key_tuple:
+                del self[key_tuple]
+
+
 class CodemodRegistry:
     _codemods_by_name: dict[str, BaseCodemod]
     _codemods_by_id: dict[str, BaseCodemod]
@@ -61,25 +75,54 @@ class CodemodRegistry:
     ) -> list[BaseCodemod]:
         codemod_include = codemod_include or []
         codemod_exclude = codemod_exclude or DEFAULT_EXCLUDED_CODEMODS
-        base_list = [
-            codemod
-            for codemod in self.codemods
-            if (sast_only and codemod.origin != "pixee")
-            or (not sast_only and codemod.origin == "pixee")
-        ]
+        # base_list = [
+        #     codemod
+        #     for codemod in self.codemods
+        #     if (sast_only and codemod.origin != "pixee")
+        #     or (not sast_only and codemod.origin == "pixee")
+        # ]
 
+        base_codemods = TupledKeysDict(
+            {
+                (codemod.id, codemod.name): codemod
+                for codemod in self.codemods
+                if (sast_only and codemod.origin != "pixee")
+                or (not sast_only and codemod.origin == "pixee")
+            }
+        )
         if codemod_exclude and not codemod_include:
-            return [
-                codemod
-                for codemod in base_list
-                if codemod.name not in codemod_exclude
-                and codemod.id not in codemod_exclude
-            ]
+            # other approach: instead of iterating over all base_list, iterate over
+            # exclude list and return base_list filtered
+            for name in codemod_exclude:
+                try:
+                    # if this name to exclude exists, pop it from the dict.
+                    base_codemods.get(name)
+                    base_codemods.pop(name)
+                except KeyError:
+                    logger.warning(
+                        f"Requested codemod to exclude'{name}' does not exist."
+                    )
+            return list(base_codemods.values())
+            # excluded_codemods = []
+            # for codemod in base_list:
+            #     if codemod.name not in codemod_exclude and codemod.id not in codemod_exclude:
+            #         matched_codemods.append(codemod)
+            #     else:
+            #         excluded_codemods.append(codemod)
+            # names = ["a", "b"]
+            # logger.warning(f"Requested codemod to exclude'{name}' does not exist.")
+            # return matched_codemods
 
-        return [
-            self._codemods_by_name.get(name) or self._codemods_by_id[name]
-            for name in codemod_include
-        ]
+        # todo: make list comp, other function
+        matched_codemods = []
+        for name in codemod_include:
+            try:
+                matched_codemods.append(
+                    self._codemods_by_name.get(name) or self._codemods_by_id[name]
+                )
+            except KeyError:
+                logger.warning(f"Requested codemod to include'{name}' does not exist.")
+        return matched_codemods
 
     def describe_codemods(
         self,

@@ -113,8 +113,78 @@ class TestRun:
 
         mock_reporting.return_value.write_report.assert_called_once()
 
+    @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
+    @mock.patch("codemodder.context.CodemodExecutionContext.compile_results")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
+    def test_run_codemod_name_or_id(self, write_report, mock_compile_results, codemod):
+        del write_report
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            f"--codemod-include={codemod}",
+        ]
+
+        exit_code = run(args)
+        assert exit_code == 0
+        # todo: if no codemods run do we still compile results?
+        mock_compile_results.assert_called()
+
+
+class TestCodemodIncludeExclude:
+    def test_codemod_include_no_match(self):
+        bad_codemod = "doesntexist"
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            f"--codemod-include={bad_codemod}",
+        ]
+        # Should not run, sould generate codetf
+        # should warn requested codemod does not exist
+        run(args)
+
+    def test_codemod_include_some_match(self):
+        bad_codemod = "doesntexist"
+        good_codemod = "secure-random"
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            f"--codemod-include={bad_codemod},{good_codemod}",
+        ]
+        # Should run, sould generate codetf
+        # should warn of bad codemod
+        # should warn bad codemod
+        run(args)
+
+    def test_codemod_exclude_some_match(self):
+        bad_codemod = "doesntexist"
+        good_codemod = "secure-random"
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            f"--codemod-exclude={bad_codemod},{good_codemod}",
+        ]
+        # Should run, sould generate codetf
+        # should warn of bad codemod
+        # should run runs all default codemods except secure-random
+        run(args)
+
+    def test_codemod_exclude_no_match(self):
+        bad_codemod = "doesntexist"
+        args = [
+            "tests/samples/",
+            "--output",
+            "here.txt",
+            f"--codemod-include={bad_codemod}",
+        ]
+        # Should run all default codemods, sould generate codetf
+        run(args)
+
     @mock.patch("codemodder.codemods.semgrep.semgrep_run")
-    def test_no_codemods_to_run(self, mock_semgrep_run, tmpdir):
+    def test_exclude_all_registered_codemods(self, mock_semgrep_run, tmpdir):
         codetf = tmpdir / "result.codetf"
         assert not codetf.exists()
 
@@ -131,22 +201,6 @@ class TestRun:
         assert exit_code == 0
         mock_semgrep_run.assert_not_called()
         assert codetf.exists()
-
-    @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
-    @mock.patch("codemodder.context.CodemodExecutionContext.compile_results")
-    @mock.patch("codemodder.codetf.CodeTF.write_report")
-    def test_run_codemod_name_or_id(self, write_report, mock_compile_results, codemod):
-        del write_report
-        args = [
-            "tests/samples/",
-            "--output",
-            "here.txt",
-            f"--codemod-include={codemod}",
-        ]
-
-        exit_code = run(args)
-        assert exit_code == 0
-        mock_compile_results.assert_called()
 
 
 class TestExitCode:
@@ -189,20 +243,6 @@ class TestExitCode:
             "secure-random",
             "--codemod-include",
             "secure-random",
-        ]
-        with pytest.raises(SystemExit) as err:
-            run(args)
-        assert err.value.args[0] == 3
-
-    @mock.patch("codemodder.codetf.CodeTF.write_report")
-    def test_bad_codemod_name(self, mock_report):
-        del mock_report
-        bad_codemod = "doesntexist"
-        args = [
-            "tests/samples/",
-            "--output",
-            "here.txt",
-            f"--codemod-include={bad_codemod}",
         ]
         with pytest.raises(SystemExit) as err:
             run(args)
