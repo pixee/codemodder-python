@@ -35,12 +35,13 @@ class TestMatchCodemods:
         ) == {self.codemod_map["secure-random"]}
 
     @pytest.mark.parametrize(
-        "input_str", ["secure-random", "secure-random,url-sandbox"]
+        "input_str",
+        ["secure-random", "pixee:python/secure-random", "secure-random,url-sandbox"],
     )
     def test_include(self, input_str):
         includes = input_str.split(",")
         assert self.registry.match_codemods(includes, None) == [
-            self.codemod_map[name] for name in includes
+            self.codemod_map[name.replace("pixee:python/", "")] for name in includes
         ]
 
     @pytest.mark.parametrize(
@@ -56,15 +57,17 @@ class TestMatchCodemods:
         "input_str",
         [
             "secure-random",
+            "pixee:python/secure-random",
             "secure-random,url-sandbox",
         ],
     )
     def test_exclude(self, input_str):
         excludes = input_str.split(",")
+        # todo: change behavior depending on issue
         assert self.registry.match_codemods(None, excludes) == [
             c
             for c in self.registry.codemods
-            if c.name not in excludes and c.id in self.all_ids
+            if c.name not in excludes or c.id not in excludes
         ]
 
     def test_bad_codemod_include_no_match(self):
@@ -86,5 +89,3 @@ class TestMatchCodemods:
             for c in self.registry.codemods
             if c.name not in "secure-random" and c.id in self.all_ids
         ]
-
-    # todo: test name or id
