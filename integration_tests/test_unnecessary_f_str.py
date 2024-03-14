@@ -1,5 +1,3 @@
-import pytest
-
 from codemodder.codemods.test import (
     BaseIntegrationTest,
     original_and_expected_from_code_path,
@@ -10,9 +8,6 @@ from core_codemods.remove_unnecessary_f_str import (
 )
 
 
-@pytest.mark.skipif(
-    True, reason="May fail if it runs after test_sql_parameterization. See Issue #378."
-)
 class TestFStr(BaseIntegrationTest):
     codemod = RemoveUnnecessaryFStr
     code_path = "tests/samples/unnecessary_f_str.py"
