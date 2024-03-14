@@ -1,3 +1,5 @@
+import pytest
+
 from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.remove_unnecessary_f_str import RemoveUnnecessaryFStr
 
@@ -5,6 +7,9 @@ from core_codemods.remove_unnecessary_f_str import RemoveUnnecessaryFStr
 class TestFStr(BaseCodemodTest):
     codemod = RemoveUnnecessaryFStr
 
+    @pytest.mark.skip(
+        reason="May fail if it runs after the test_sql_parameterization. See Issue #378."
+    )
     def test_no_change(self, tmpdir):
         before = r"""
         good: str = "good"
@@ -18,6 +23,9 @@ class TestFStr(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, before, before)
 
+    @pytest.mark.skip(
+        reason="May fail if it runs after the test_sql_parameterization. See Issue #378."
+    )
     def test_change(self, tmpdir):
         before = r"""
         bad: str = f"bad" + "bad"
@@ -31,6 +39,9 @@ class TestFStr(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, before, after, num_changes=3)
 
+    @pytest.mark.skip(
+        reason="May fail if it runs after the test_sql_parameterization. See Issue #378."
+    )
     def test_exclude_line(self, tmpdir):
         input_code = (
             expected
