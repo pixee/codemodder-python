@@ -10,6 +10,7 @@ on:
       - main
       - develop
   merge_group:
+  workflow_call:
 
 concurrency:
   group: (${{ github.workflow }}-${{ github.event.inputs.branch || github.event.pull_request.head.ref }})
