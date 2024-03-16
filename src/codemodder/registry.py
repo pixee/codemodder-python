@@ -28,7 +28,11 @@ class CodemodCollection:
 
 
 class TupledKeysDict(dict):
-    # todo: document
+    """
+    Dict whose keys are a two-item tuple so it's possible to
+    get or remove a dict item based on either item in the tuple.
+    """
+
     def get(self, key):
         for key_tuple, value in self.items():
             if key in key_tuple:
@@ -75,12 +79,6 @@ class CodemodRegistry:
     ) -> list[BaseCodemod]:
         codemod_include = codemod_include or []
         codemod_exclude = codemod_exclude or DEFAULT_EXCLUDED_CODEMODS
-        # base_list = [
-        #     codemod
-        #     for codemod in self.codemods
-        #     if (sast_only and codemod.origin != "pixee")
-        #     or (not sast_only and codemod.origin == "pixee")
-        # ]
 
         base_codemods = TupledKeysDict(
             {
@@ -91,11 +89,8 @@ class CodemodRegistry:
             }
         )
         if codemod_exclude and not codemod_include:
-            # other approach: instead of iterating over all base_list, iterate over
-            # exclude list and return base_list filtered
             for name in codemod_exclude:
                 try:
-                    # if this name to exclude exists, pop it from the dict.
                     base_codemods.get(name)
                     base_codemods.pop(name)
                 except KeyError:
@@ -103,17 +98,7 @@ class CodemodRegistry:
                         f"Requested codemod to exclude'{name}' does not exist."
                     )
             return list(base_codemods.values())
-            # excluded_codemods = []
-            # for codemod in base_list:
-            #     if codemod.name not in codemod_exclude and codemod.id not in codemod_exclude:
-            #         matched_codemods.append(codemod)
-            #     else:
-            #         excluded_codemods.append(codemod)
-            # names = ["a", "b"]
-            # logger.warning(f"Requested codemod to exclude'{name}' does not exist.")
-            # return matched_codemods
 
-        # todo: make list comp, other function
         matched_codemods = []
         for name in codemod_include:
             try:

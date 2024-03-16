@@ -63,12 +63,12 @@ class TestMatchCodemods:
     )
     def test_exclude(self, input_str):
         excludes = input_str.split(",")
-        # todo: change behavior depending on issue
-        assert self.registry.match_codemods(None, excludes) == [
+        res = [
             c
             for c in self.registry.codemods
-            if c.name not in excludes or c.id not in excludes
+            if c.id in self.all_ids and c.name not in excludes and c.id not in excludes
         ]
+        assert self.registry.match_codemods(None, excludes) == res
 
     def test_bad_codemod_include_no_match(self):
         assert self.registry.match_codemods(["doesntexist"], None) == []
