@@ -14,6 +14,18 @@ def disable_write_report():
     """Override fixture from conftest.py"""
 
 
+@pytest.fixture(autouse=True)
+def disable_codemod_apply(mocker, request):
+    """
+    The tests in this module are like integration tests in that they  often
+    run all of codemodder but we most often don't need to actually apply codemods.
+    """
+    # Skip mocking only for specific tests that need to apply codemods.
+    if request.function.__name__ == "test_cst_parsing_fails":
+        return
+    mocker.patch("codemodder.codemods.base_codemod.BaseCodemod.apply")
+
+
 class TestRun:
     @mock.patch("libcst.parse_module")
     def test_no_files_matched(self, mock_parse, tmpdir):
@@ -132,7 +144,11 @@ class TestRun:
 
 
 class TestCodemodIncludeExclude:
-    def test_codemod_include_no_match(self):
+
+    @mock.patch("codemodder.registry.logger.warning")
+    @mock.patch("codemodder.codemodder.logger.info")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
+    def test_codemod_include_no_match(self, write_report, info_logger, warning_logger):
         bad_codemod = "doesntexist"
         args = [
             "tests/samples/",
@@ -140,11 +156,21 @@ class TestCodemodIncludeExclude:
             "here.txt",
             f"--codemod-include={bad_codemod}",
         ]
-        # Should not run, sould generate codetf
-        # should warn requested codemod does not exist
         run(args)
+        write_report.assert_called_once()
 
-    def test_codemod_include_some_match(self):
+        assert any("no codemods to run" in x[0][0] for x in info_logger.call_args_list)
+        assert any(
+            f"Requested codemod to include'{bad_codemod}' does not exist." in x[0][0]
+            for x in warning_logger.call_args_list
+        )
+
+    @mock.patch("codemodder.registry.logger.warning")
+    @mock.patch("codemodder.codemodder.logger.info")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
+    def test_codemod_include_some_match(
+        self, write_report, info_logger, warning_logger
+    ):
         bad_codemod = "doesntexist"
         good_codemod = "secure-random"
         args = [
@@ -153,12 +179,20 @@ class TestCodemodIncludeExclude:
             "here.txt",
             f"--codemod-include={bad_codemod},{good_codemod}",
         ]
-        # Should run, sould generate codetf
-        # should warn of bad codemod
-        # should warn bad codemod
         run(args)
+        write_report.assert_called_once()
+        assert any("running codemod %s" in x[0][0] for x in info_logger.call_args_list)
+        assert any(
+            f"Requested codemod to include'{bad_codemod}' does not exist." in x[0][0]
+            for x in warning_logger.call_args_list
+        )
 
-    def test_codemod_exclude_some_match(self):
+    @mock.patch("codemodder.registry.logger.warning")
+    @mock.patch("codemodder.codemodder.logger.info")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
+    def test_codemod_exclude_some_match(
+        self, write_report, info_logger, warning_logger
+    ):
         bad_codemod = "doesntexist"
         good_codemod = "secure-random"
         args = [
@@ -167,21 +201,43 @@ class TestCodemodIncludeExclude:
             "here.txt",
             f"--codemod-exclude={bad_codemod},{good_codemod}",
         ]
-        # Should run, sould generate codetf
-        # should warn of bad codemod
-        # should run runs all default codemods except secure-random
         run(args)
+        write_report.assert_called_once()
+        codemods_that_ran = [
+            x[0][1]
+            for x in info_logger.call_args_list
+            if x[0][0] == "running codemod %s"
+        ]
 
-    def test_codemod_exclude_no_match(self):
+        assert f"pixee:python/{good_codemod}" not in codemods_that_ran
+        assert any("running codemod %s" in x[0][0] for x in info_logger.call_args_list)
+        assert any(
+            f"Requested codemod to exclude'{bad_codemod}' does not exist." in x[0][0]
+            for x in warning_logger.call_args_list
+        )
+
+    @mock.patch("codemodder.registry.logger.warning")
+    @mock.patch("codemodder.codemodder.logger.info")
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
+    @mock.patch("codemodder.codemods.base_codemod.BaseCodemod.apply")
+    def test_codemod_exclude_no_match(
+        self, apply, write_report, info_logger, warning_logger
+    ):
         bad_codemod = "doesntexist"
         args = [
             "tests/samples/",
             "--output",
             "here.txt",
-            f"--codemod-include={bad_codemod}",
+            f"--codemod-exclude={bad_codemod}",
         ]
-        # Should run all default codemods, sould generate codetf
+
         run(args)
+        write_report.assert_called_once()
+        assert any("running codemod %s" in x[0][0] for x in info_logger.call_args_list)
+        assert any(
+            f"Requested codemod to exclude'{bad_codemod}' does not exist." in x[0][0]
+            for x in warning_logger.call_args_list
+        )
 
     @mock.patch("codemodder.codemods.semgrep.semgrep_run")
     def test_exclude_all_registered_codemods(self, mock_semgrep_run, tmpdir):
