@@ -22,10 +22,10 @@ jobs:
         continue-on-error: true
       - name: lint on diff
         if: steps.git-check.outputs.modified == 'true'
-        uses: ./github/workflows/lint.yml
+        uses: ./.github/workflows/lint.yml
       - name: run tests on diff
         if: steps.git-check.outputs.modified == 'true'
-        uses: ./github/workflows/test.yml
+        uses: ./.github/workflows/test.yml
       - uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
