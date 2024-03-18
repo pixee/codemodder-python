@@ -1,6 +1,7 @@
+from typing import cast
+
 import libcst as cst
 import libcst.matchers as m
-from libcst.codemod import CodemodContext
 from libcst.codemod.commands.unnecessary_format_string import UnnecessaryFormatString
 
 from codemodder.codemods.libcst_transformer import (
@@ -11,17 +12,8 @@ from core_codemods.api import Metadata, Reference, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 
 
-class RemoveUnnecessaryFStrTransform(LibcstResultTransformer, UnnecessaryFormatString):
-
+class RemoveUnnecessaryFStrTransform(LibcstResultTransformer):
     change_description = "Remove unnecessary f-string"
-
-    def __init__(
-        self, codemod_context: CodemodContext, *codemod_args, **codemod_kwargs
-    ):
-        UnnecessaryFormatString.__init__(self, codemod_context)
-        LibcstResultTransformer.__init__(
-            self, codemod_context, *codemod_args, **codemod_kwargs
-        )
 
     @m.leave(m.FormattedString(parts=(m.FormattedStringText(),)))
     def _check_formatted_string(
@@ -34,7 +26,9 @@ class RemoveUnnecessaryFStrTransform(LibcstResultTransformer, UnnecessaryFormatS
         ):
             return updated_node
 
-        transformed_node = super()._check_formatted_string(_original_node, updated_node)
+        transformed_node = UnnecessaryFormatString._check_formatted_string(
+            cast(UnnecessaryFormatString, self), _original_node, updated_node
+        )
         if not _original_node.deep_equals(transformed_node):
             self.report_change(_original_node)
         return transformed_node
