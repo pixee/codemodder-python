@@ -6,7 +6,6 @@ on:
     - cron: "0 0 * * *"
   # on demand
   workflow_dispatch:
-  push:
 
 jobs:
   auto-update:
@@ -24,8 +23,7 @@ jobs:
           branch: update/pre-commit-hooks
           title: Update pre-commit hooks
           commit-message: "chore: update pre-commit hooks"
-          body:
-            Update versions of pre-commit hooks to latest version.
+          body: Update versions of pre-commit hooks to latest version.
       - name: Set outputs
         id: check-diff
         if: |
