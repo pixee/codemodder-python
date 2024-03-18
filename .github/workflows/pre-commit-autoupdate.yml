@@ -6,6 +6,7 @@ on:
     - cron: "0 0 * * *"
   # on demand
   workflow_dispatch:
+  push:
 
 jobs:
   auto-update:
