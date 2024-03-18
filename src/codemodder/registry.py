@@ -27,24 +27,6 @@ class CodemodCollection:
     codemods: list
 
 
-class TupledKeysDict(dict):
-    """
-    Dict whose keys are a two-item tuple so it's possible to
-    get or remove a dict item based on either item in the tuple.
-    """
-
-    def get(self, key):
-        for key_tuple, value in self.items():
-            if key in key_tuple:
-                return value
-        raise KeyError
-
-    def pop(self, key):
-        for key_tuple in list(self.keys()):
-            if key in key_tuple:
-                del self[key_tuple]
-
-
 class CodemodRegistry:
     _codemods_by_name: dict[str, BaseCodemod]
     _codemods_by_id: dict[str, BaseCodemod]
@@ -80,24 +62,29 @@ class CodemodRegistry:
         codemod_include = codemod_include or []
         codemod_exclude = codemod_exclude or DEFAULT_EXCLUDED_CODEMODS
 
-        base_codemods = TupledKeysDict(
-            {
-                (codemod.id, codemod.name): codemod
-                for codemod in self.codemods
-                if (sast_only and codemod.origin != "pixee")
-                or (not sast_only and codemod.origin == "pixee")
-            }
-        )
         if codemod_exclude and not codemod_include:
-            for name in codemod_exclude:
+            base_codemods = {}
+            for codemod in self.codemods:
+                if (sast_only and codemod.origin != "pixee") or (
+                    not sast_only and codemod.origin == "pixee"
+                ):
+                    base_codemods[codemod.id] = codemod
+                    base_codemods[codemod.name] = codemod
+
+            for name_or_id in codemod_exclude:
                 try:
-                    base_codemods.get(name)
-                    base_codemods.pop(name)
+                    codemod = base_codemods[name_or_id]
                 except KeyError:
                     logger.warning(
-                        f"Requested codemod to exclude'{name}' does not exist."
+                        f"Requested codemod to exclude'{name_or_id}' does not exist."
                     )
-            return list(base_codemods.values())
+                    continue
+
+                # remove both by name and id since we don't know which `name_or_id` represented
+                base_codemods.pop(codemod.name, None)
+                base_codemods.pop(codemod.id, None)
+            # Remove duplicates and preserve order
+            return list(dict.fromkeys(base_codemods.values()))
 
         matched_codemods = []
         for name in codemod_include:
