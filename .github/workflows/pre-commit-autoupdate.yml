@@ -17,17 +17,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
       - uses: browniebroke/pre-commit-autoupdate-action@main
-      # - name: Check for changes
-      #   id: git-check
-      #   run: |
-      #     git diff --exit-code || echo "::set-output name=modified::true"
-      #   continue-on-error: true
-      # - name: lint on diff
-      #   if: steps.git-check.outputs.modified == 'true'
-      #   uses: ./.github/workflows/lint.yml
-      # - name: run tests on diff
-      #   if: steps.git-check.outputs.modified == 'true'
-      #   uses: ./.github/workflows/test.yml
       - uses: peter-evans/create-pull-request@v6
         id: pr-create
         with:
@@ -37,14 +26,17 @@ jobs:
           commit-message: "chore: update pre-commit hooks"
           body:
             Update versions of pre-commit hooks to latest version.
-            # output is called pull-request-operation
       - name: Set outputs
         id: check-diff
         if: |
-          steps.pr-create.outputs.pull-request-number &&
           (steps.pr-create.outputs.pull-request-operation == 'created' ||
-          steps.pr-create.outputs.pull-request-operation == 'updated')
-        run: echo "diff=true" >> "$GITHUB_OUTPUT"
+          steps.pr-create.outputs.pull-request-operation == 'updated') &&
+          steps.pr-create.outputs.pull-request-number
+        run: |
+          echo "diff=true" >> "$GITHUB_OUTPUT"
+          echo "PR status: ${{ steps.pr-create.outputs.pull-request-operation }}"
+          echo "PR number: ${{ steps.pr-create.outputs.pull-request-number }}"
+          echo "Running workflows for ${{ steps.pr-create.outputs.pull-request-url }}"
 
   lint-workflow:
     name: Run lint
