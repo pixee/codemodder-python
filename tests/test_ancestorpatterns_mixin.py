@@ -46,7 +46,7 @@ class TestNameResolutionMixin:
                 node = stmt.body[0]
 
                 path = self.path_to_root(node)
-                assert len(path) == 3
+                assert len(path) == 2
                 return tree
 
         input_code = dedent(

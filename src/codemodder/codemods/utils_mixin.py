@@ -277,6 +277,18 @@ class NameResolutionMixin(MetadataDependent):
             return matchers.matches(node.func, matchers.Name())
         return False
 
+    def is_staticmethod(self, node: cst.FunctionDef) -> bool:
+        for decorator in node.decorators:
+            if self.find_base_name(decorator.decorator) == "builtins.staticmethod":
+                return True
+        return False
+
+    def is_classmethod(self, node: cst.FunctionDef) -> bool:
+        for decorator in node.decorators:
+            if self.find_base_name(decorator.decorator) == "builtins.classmethod":
+                return True
+        return False
+
     def find_accesses(self, node) -> Collection[Access]:
         if scope := self.get_metadata(ScopeProvider, node, None):
             return scope.accesses[node]
@@ -437,10 +449,10 @@ class AncestorPatternsMixin(MetadataDependent):
 
     def path_to_root(self, node: cst.CSTNode) -> list[cst.CSTNode]:
         """
-        Returns node's path to root. Includes self.
+        Returns node's path to `node` (excludes `node`).
         """
         path = []
-        maybe_parent = node
+        maybe_parent = self.get_parent(node)
         while maybe_parent:
             path.append(maybe_parent)
             maybe_parent = self.get_parent(maybe_parent)

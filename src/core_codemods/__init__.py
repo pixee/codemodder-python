@@ -17,6 +17,7 @@ from .fix_deprecated_abstractproperty import FixDeprecatedAbstractproperty
 from .fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 from .fix_empty_sequence_comparison import FixEmptySequenceComparison
 from .fix_hasattr_call import TransformFixHasattrCall
+from .fix_missing_self_or_cls import FixMissingSelfOrCls
 from .fix_mutable_params import FixMutableParams
 from .flask_enable_csrf_protection import FlaskEnableCSRFProtection
 from .flask_json_response_type import FlaskJsonResponseType
@@ -48,6 +49,7 @@ from .sonar.sonar_django_json_response_type import SonarDjangoJsonResponseType
 from .sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
 from .sonar.sonar_exception_without_raise import SonarExceptionWithoutRaise
 from .sonar.sonar_fix_assert_tuple import SonarFixAssertTuple
+from .sonar.sonar_fix_missing_self_or_cls import SonarFixMissingSelfOrCls
 from .sonar.sonar_flask_json_response_type import SonarFlaskJsonResponseType
 from .sonar.sonar_jwt_decode_verify import SonarJwtDecodeVerify
 from .sonar.sonar_literal_or_new_object_identity import SonarLiteralOrNewObjectIdentity
@@ -127,6 +129,7 @@ registry = CodemodCollection(
         DjangoModelWithoutDunderStr,
         TransformFixHasattrCall,
         FixDataclassDefaults,
+        FixMissingSelfOrCls,
     ],
 )
 
@@ -142,5 +145,6 @@ sonar_registry = CodemodCollection(
         SonarFlaskJsonResponseType,
         SonarDjangoJsonResponseType,
         SonarJwtDecodeVerify,
+        SonarFixMissingSelfOrCls,
     ],
 )
