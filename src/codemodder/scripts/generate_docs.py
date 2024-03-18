@@ -251,6 +251,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="This change is safe and will prevent runtime `ValueError`.",
     ),
+    "fix-missing-self-or-cls": DocMetadata(
+        importance="Medium",
+        guidance_explained="This change is safe and will prevent errors when calling on these instance or class methods..",
+    ),
 }
 
 METADATA = CORE_METADATA | {
@@ -303,6 +307,11 @@ METADATA = CORE_METADATA | {
     "jwt-decode-verify-S5659": DocMetadata(
         importance=CORE_METADATA["jwt-decode-verify"].importance,
         guidance_explained=CORE_METADATA["jwt-decode-verify"].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
+    "fix-missing-self-or-cls-S5719": DocMetadata(
+        importance=CORE_METADATA["fix-missing-self-or-cls"].importance,
+        guidance_explained=CORE_METADATA["fix-missing-self-or-cls"].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
 }
