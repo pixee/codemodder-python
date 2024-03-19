@@ -159,16 +159,19 @@ def parse_args(argv, codemod_registry: CodemodRegistry):
         help="maximum number of workers (threads) to use for processing files in parallel",
     )
 
-    # At this time we don't do anything with the sarif arg.
     parser.add_argument(
         "--sarif",
         action=CsvListAction,
         help="Comma-separated set of path(s) to SARIF file(s) to feed to the codemods",
     )
-    # At this time we don't do anything with the sonar-issues-json arg.
     parser.add_argument(
         "--sonar-issues-json",
         action=CsvListAction,
         help="Comma-separated set of path(s) to Sonar issues JSON file(s) to feed to the codemods",
+    )
+    parser.add_argument(
+        "--sonar-hotspots-json",
+        action=CsvListAction,
+        help="Comma-separated set of path(s) to Sonar hotspots JSON file(s) to feed to the codemods",
     )
     return parser.parse_args(argv)
