@@ -70,37 +70,7 @@ class CsvListAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         # Conversion to dict removes duplicates while preserving order
         items = list(dict.fromkeys(values.split(",")).keys())
-        self.validate_items(items)
         setattr(namespace, self.dest, items)
-
-    def validate_items(self, items):
-        """Basic Action does not validate the items"""
-
-
-def build_codemod_validator(codemod_registry: CodemodRegistry):
-    names = codemod_registry.names
-    ids = codemod_registry.ids
-
-    class ValidatedCodmods(CsvListAction):
-        """
-        argparse Action to convert "codemod1,codemod2,codemod3" into a list
-        representation and validate against existing codemods
-        """
-
-        def validate_items(self, items):
-            potential_names = ids + names
-
-            if unrecognized_codemods := [
-                name for name in items if name not in potential_names
-            ]:
-                args = {
-                    "values": unrecognized_codemods,
-                    "choices": ", ".join(map(repr, names)),
-                }
-                msg = "invalid choice(s): %(values)r (choose from %(choices)s)"
-                raise argparse.ArgumentError(self, msg % args)
-
-    return ValidatedCodmods
 
 
 def parse_args(argv, codemod_registry: CodemodRegistry):
@@ -117,17 +87,15 @@ def parse_args(argv, codemod_registry: CodemodRegistry):
         help="name of output file to produce",
     )
 
-    codemod_validator = build_codemod_validator(codemod_registry)
-
     codemod_args_group = parser.add_mutually_exclusive_group()
     codemod_args_group.add_argument(
         "--codemod-exclude",
-        action=codemod_validator,
+        action=CsvListAction,
         help="Comma-separated set of codemod ID(s) to exclude",
     )
     codemod_args_group.add_argument(
         "--codemod-include",
-        action=codemod_validator,
+        action=CsvListAction,
         help="Comma-separated set of codemod ID(s) to include",
     )
 

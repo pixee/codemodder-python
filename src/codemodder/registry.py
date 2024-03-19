@@ -61,25 +61,40 @@ class CodemodRegistry:
     ) -> list[BaseCodemod]:
         codemod_include = codemod_include or []
         codemod_exclude = codemod_exclude or DEFAULT_EXCLUDED_CODEMODS
-        base_list = [
-            codemod
-            for codemod in self.codemods
-            if (sast_only and codemod.origin != "pixee")
-            or (not sast_only and codemod.origin == "pixee")
-        ]
 
         if codemod_exclude and not codemod_include:
-            return [
-                codemod
-                for codemod in base_list
-                if codemod.name not in codemod_exclude
-                and codemod.id not in codemod_exclude
-            ]
+            base_codemods = {}
+            for codemod in self.codemods:
+                if (sast_only and codemod.origin != "pixee") or (
+                    not sast_only and codemod.origin == "pixee"
+                ):
+                    base_codemods[codemod.id] = codemod
+                    base_codemods[codemod.name] = codemod
 
-        return [
-            self._codemods_by_name.get(name) or self._codemods_by_id[name]
-            for name in codemod_include
-        ]
+            for name_or_id in codemod_exclude:
+                try:
+                    codemod = base_codemods[name_or_id]
+                except KeyError:
+                    logger.warning(
+                        f"Requested codemod to exclude'{name_or_id}' does not exist."
+                    )
+                    continue
+
+                # remove both by name and id since we don't know which `name_or_id` represented
+                base_codemods.pop(codemod.name, None)
+                base_codemods.pop(codemod.id, None)
+            # Remove duplicates and preserve order
+            return list(dict.fromkeys(base_codemods.values()))
+
+        matched_codemods = []
+        for name in codemod_include:
+            try:
+                matched_codemods.append(
+                    self._codemods_by_name.get(name) or self._codemods_by_id[name]
+                )
+            except KeyError:
+                logger.warning(f"Requested codemod to include'{name}' does not exist.")
+        return matched_codemods
 
     def describe_codemods(
         self,
