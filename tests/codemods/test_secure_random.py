@@ -214,8 +214,22 @@ class TestSecureRandom(BaseSemgrepCodemodTest):
         import secrets
 
         secrets.SystemRandom().sample(["a", "b"], 1)
-        secrets.SystemRandom().choice(["a", "b"])
+        secrets.choice(["a", "b"])
         secrets.SystemRandom().choices(["a", "b"])
         """
 
         self.run_and_assert(tmpdir, input_code, expected_output, num_changes=3)
+
+    def test_from_import_choice(self, tmpdir):
+        input_code = """
+        from random import choice
+
+        choice(["a", "b"])
+        """
+        expected_output = """
+        import secrets
+
+        secrets.choice(["a", "b"])
+        """
+
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=1)
