@@ -24,6 +24,8 @@ class EnableJinja2Autoescape(SimpleCodemod):
                   - pattern: jinja2.Environment(...)
                   - pattern-not: jinja2.Environment(..., autoescape=True, ...)
                   - pattern-not: jinja2.Environment(..., autoescape=jinja2.select_autoescape(...), ...)
+                  # Exclude cases where the arguments can't be precisely determined
+                  - pattern-not: jinja2.Environment(**$KWARGS)
                   - pattern-inside: |
                       import jinja2
                       ...

@@ -117,6 +117,42 @@ class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
     def test_autoescape_callable(self, tmpdir, code):
         self.run_and_assert(tmpdir, code, code)
 
+    def test_kwargs_unpacked(self, tmpdir):
+        input_code = (
+            expexted_output
+        ) = """
+        import jinja2
+        env = jinja2.Environment(**kwargs)
+        var = "hello"
+        """
+        self.run_and_assert(tmpdir, input_code, expexted_output)
+
+    def test_kwargs_unpacked_with_autoescape(self, tmpdir):
+        input_code = """
+        import jinja2
+        env = jinja2.Environment(**kwargs, autoescape=False)
+        var = "hello"
+        """
+        expexted_output = """
+        import jinja2
+        env = jinja2.Environment(**kwargs, autoescape=True)
+        var = "hello"
+        """
+        self.run_and_assert(tmpdir, input_code, expexted_output)
+
+    def test_kwargs_unpacked_with_autoescape_before(self, tmpdir):
+        input_code = """
+        import jinja2
+        env = jinja2.Environment(autoescape=False, **kwargs)
+        var = "hello"
+        """
+        expexted_output = """
+        import jinja2
+        env = jinja2.Environment(autoescape=True, **kwargs)
+        var = "hello"
+        """
+        self.run_and_assert(tmpdir, input_code, expexted_output)
+
     def test_aiohttp_import_setup(self, tmpdir):
         input_code = """
         import aiohttp_jinja2
@@ -178,5 +214,12 @@ class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
         import aiohttp_jinja2
         import jinja
         aiohttp_jinja2.setup(app, autoescape=jinja2.select_autoescape())
+        """
+        self.run_and_assert(tmpdir, input_code, input_code)
+
+    def test_aiohttp_autoescape_kwargs(self, tmpdir):
+        input_code = """
+        import aiohttp_jinja2
+        aiohttp_jinja2.setup(app, **kwargs)
         """
         self.run_and_assert(tmpdir, input_code, input_code)
