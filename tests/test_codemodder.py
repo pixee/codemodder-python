@@ -160,6 +160,8 @@ class TestCodemodIncludeExclude:
         write_report.assert_called_once()
 
         assert any("no codemods to run" in x[0][0] for x in info_logger.call_args_list)
+        assert any(x[0] == ("scanned: %s files", 0) for x in info_logger.call_args_list)
+
         assert any(
             f"Requested codemod to include'{bad_codemod}' does not exist." in x[0][0]
             for x in warning_logger.call_args_list

@@ -222,7 +222,9 @@ def run(original_args) -> int:
         )
         codetf.write_report(argv.output)
 
-    log_report(context, argv, elapsed_ms, files_to_analyze)
+    log_report(
+        context, argv, elapsed_ms, [] if not codemods_to_run else files_to_analyze
+    )
     return 0
 
 
