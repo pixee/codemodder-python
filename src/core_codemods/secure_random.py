@@ -1,7 +1,8 @@
+from codemodder.codemods.utils_mixin import NameResolutionMixin
 from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
-class SecureRandom(SimpleCodemod):
+class SecureRandom(SimpleCodemod, NameResolutionMixin):
     metadata = Metadata(
         name="secure-random",
         review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
@@ -32,4 +33,7 @@ class SecureRandom(SimpleCodemod):
     def on_result_found(self, original_node, updated_node):
         self.remove_unused_import(original_node)
         self.add_needed_import("secrets")
+
+        if self.find_base_name(original_node.func) == "random.choice":
+            return self.update_call_target(updated_node, "secrets")
         return self.update_call_target(updated_node, "secrets.SystemRandom()")
