@@ -1,5 +1,5 @@
 from codemodder.codemods.test import BaseIntegrationTest
-from core_codemods.secure_random import SecureRandom
+from core_codemods.secure_random import SecureRandom, SecureRandomTransformer
 
 
 class TestSecureRandom(BaseIntegrationTest):
@@ -26,4 +26,4 @@ class TestSecureRandom(BaseIntegrationTest):
         """ var = "hello"\n""")
     # fmt: on
     expected_line_change = "2"
-    change_description = SecureRandom.change_description
+    change_description = SecureRandomTransformer.change_description
