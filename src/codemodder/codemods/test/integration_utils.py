@@ -225,12 +225,10 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             check=False,
         )
         assert completed_process.returncode == 0
-        # codemodder stops earlier when no semgrep results are found
-        # this output_path file may not exist.
-        if pathlib.Path(self.output_path).exists():
-            with open(self.output_path, "r", encoding="utf-8") as f:
-                codetf = json.load(f)
-            assert codetf["results"][0]["changeset"] == []
+
+        with open(self.output_path, "r", encoding="utf-8") as f:
+            codetf = json.load(f)
+        assert codetf["results"][0]["changeset"] == []
 
         with open(self.code_path, "r", encoding="utf-8") as f:
             still_new_code = f.read()
