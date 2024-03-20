@@ -12,21 +12,17 @@ from codemodder import __version__, registry
 
 from .validations import execute_code
 
-# SAMPLES_DIR = "tests/samples"
-# # Enable import of test modules from test directory
-# sys.path.append(SAMPLES_DIR)
-
 
 class CleanRepoMixin:
     @classmethod
     def teardown_class(cls):
         """Ensure any re-written file is undone after integration test class"""
-        # TODO: we should probably use temporary directories instead
-        # repo = git.Git(os.getcwd())
-        # repo.execute(["git", "checkout", os.path.join(os.getcwd(), SAMPLES_DIR)])
-        # pathlib.Path(cls.output_path).unlink(missing_ok=True)
-        #
-        # os.remove(path)
+        pathlib.Path(cls.output_path).unlink(missing_ok=True)
+        pathlib.Path(cls.code_path).unlink(missing_ok=True)
+
+        if cls.requirements_file_name:
+            pathlib.Path(cls.dependency_path).unlink(missing_ok=True)
+            os.rmdir(cls.requirements_dir)
 
 
 class DependencyTestMixin:
@@ -40,14 +36,11 @@ class DependencyTestMixin:
             with open(self.dependency_path, "w", encoding="utf-8") as f:  # type: ignore
                 f.write(self.original_requirements)
 
-    #
     def check_dependencies_after(self):
         if self.requirements_file_name:
             with open(self.dependency_path, "r", encoding="utf-8") as f:
                 new_requirements_txt = f.read()
             assert new_requirements_txt == self.expected_requirements
-
-    # todo teardown, delete files
 
 
 class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
@@ -63,8 +56,6 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     @classmethod
     def setup_class(cls):
         cls.codemod_registry = registry.load_registered_codemods()
-
-        # todo: can supply dir to all
         cls.code_path = tempfile.mkstemp(suffix=".py")[1]
         cls.code_dir = os.path.dirname(cls.code_path)
         cls.code_filename = os.path.relpath(cls.code_path, cls.code_dir)
@@ -75,8 +66,10 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         )
 
         if cls.requirements_file_name:
-            temp_dir = tempfile.mkdtemp()
-            cls.dependency_path = os.path.join(temp_dir, cls.requirements_file_name)
+            cls.requirements_dir = tempfile.mkdtemp()
+            cls.dependency_path = os.path.join(
+                cls.requirements_dir, cls.requirements_file_name
+            )
 
     def setup_method(self):
         # todo move to stup class?
@@ -223,8 +216,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         self.check_code_after()
         self.check_dependencies_after()
         self._assert_codetf_output(codetf_schema)
-        # pathlib.Path(self.output_path).unlink(missing_ok=True)
-        # self._run_idempotency_check(command)
+        self._run_idempotency_check(command)
 
     def _run_idempotency_check(self, command):
         # idempotency test, run it again and assert no files changed
