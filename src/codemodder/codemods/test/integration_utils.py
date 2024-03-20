@@ -31,21 +31,23 @@ class CleanRepoMixin:
 
 class DependencyTestMixin:
     # Only for codemods that modify requirements should these be overridden
-    requirements_path = ""
+    requirements_file_name = ""
     original_requirements = ""
-    expected_new_reqs = ""
+    expected_requirements = ""
 
-    def check_dependencies_before(self):
-        if self.requirements_path:
-            with open(self.requirements_path, "r", encoding="utf-8") as f:
-                requirements_txt = f.read()
-            assert requirements_txt == self.original_requirements
+    def write_original_dependencies(self):
+        if self.requirements_file_name:
+            with open(self.dependency_path, "w", encoding="utf-8") as f:  # type: ignore
+                f.write(self.original_requirements)
 
+    #
     def check_dependencies_after(self):
-        if self.requirements_path:
-            with open(self.requirements_path, "r", encoding="utf-8") as f:
+        if self.requirements_file_name:
+            with open(self.dependency_path, "r", encoding="utf-8") as f:
                 new_requirements_txt = f.read()
-            assert new_requirements_txt == self.expected_new_reqs
+            assert new_requirements_txt == self.expected_requirements
+
+    # todo teardown, delete files
 
 
 class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
@@ -71,6 +73,10 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         cls.original_code, cls.expected_new_code = original_and_expected_from_code_path(
             cls.original_code, cls.replacement_lines
         )
+
+        if cls.requirements_file_name:
+            temp_dir = tempfile.mkdtemp()
+            cls.dependency_path = os.path.join(temp_dir, cls.requirements_file_name)
 
     def setup_method(self):
         # todo move to stup class?
@@ -205,8 +211,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
             command.append(f"--sonar-issues-json={self.sonar_issues_json}")
 
         self.write_original_code()
-        # todo: enable
-        # self.check_dependencies_before()
+        self.write_original_dependencies()
 
         completed_process = subprocess.run(
             command,
@@ -216,7 +221,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         assert completed_process.returncode == 0
 
         self.check_code_after()
-        # self.check_dependencies_after()
+        self.check_dependencies_after()
         self._assert_codetf_output(codetf_schema)
         # pathlib.Path(self.output_path).unlink(missing_ok=True)
         # self._run_idempotency_check(command)
