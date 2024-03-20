@@ -51,7 +51,7 @@ class DependencyTestMixin:
 class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     codemod = NotImplementedError
     original_code = NotImplementedError
-    expected_new_code = NotImplementedError
+    replacement_lines = NotImplementedError
     num_changes = 1
     _lines: list = []
     num_changed_files = 1
@@ -68,7 +68,12 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         cls.code_filename = os.path.relpath(cls.code_path, cls.code_dir)
         cls.output_path = tempfile.mkstemp()[1]
 
+        cls.original_code, cls.expected_new_code = original_and_expected_from_code_path(
+            cls.original_code, cls.replacement_lines
+        )
+
     def setup_method(self):
+        # todo move to stup class?
         try:
             name = (
                 self.codemod().name
@@ -173,7 +178,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     def check_code_after(self) -> ModuleType:
         with open(self.code_path, "r", encoding="utf-8") as f:  # type: ignore
             new_code = f.read()
-        assert new_code == self.expected_new_code
+        assert new_code == self.expected_new_code  # type: ignore
         return execute_code(
             path=self.code_path, allowed_exceptions=self.allowed_exceptions  # type: ignore
         )
