@@ -25,12 +25,13 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 5
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
       - name: Set Up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Check out code
-        uses: actions/checkout@v4
+          cache: 'pip'
       - name: Install build dependencies
         run: pip install build twine
       - name: Build package
@@ -45,12 +46,13 @@ jobs:
       matrix:
         python-version: ['3.10',  '3.11', '3.12']
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
       - name: Set Up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Check out code
-        uses: actions/checkout@v4
+          cache: 'pip'
       - name: Install Codemodder Package
         run: pip install .
       - name: Install Dependencies

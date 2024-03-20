@@ -21,12 +21,13 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 10
     steps:
+      - name: Check out codemodder
+        uses: actions/checkout@v4
       - name: Set Up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Check out codemodder
-        uses: actions/checkout@v4
+          cache: 'pip'
       - name: Install Codemodder Package
         run: pip install .
       - name: Install Test Dependencies
