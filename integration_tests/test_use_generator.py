@@ -1,18 +1,19 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.use_generator import UseGenerator
 
 
 class TestUseGenerator(BaseIntegrationTest):
     codemod = UseGenerator
-    code_path = "tests/samples/use_generator.py"
+    original_code = """
+    def some(iterable):
+        for i in iterable:
+            yield i
 
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [(5, "x = sum(i for i in range(1000))\n")],
-    )
+
+    x = sum([i for i in range(1000)])
+    y = some([i for i in range(1000)])
+    """
+    replacement_lines = [(6, "x = sum(i for i in range(1000))\n")]
 
     expected_diff = """\
 --- 

@@ -1,24 +1,26 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from codemodder.dependency import Fickling
 from core_codemods.harden_pickle_load import HardenPickleLoad
 
 
 class TestHardenPickleLoad(BaseIntegrationTest):
     codemod = HardenPickleLoad
-    code_path = "tests/samples/harden_pickle.py"
-
-    original_code, _ = original_and_expected_from_code_path(code_path, [])
+    original_code = """
+    import pickle
+    
+    try:
+        data = pickle.load(open("some.pickle", "rb"))
+    except FileNotFoundError:
+        data = None
+    """
     expected_new_code = """
-import fickling
-
-try:
-    data = fickling.load(open("some.pickle", "rb"))
-except FileNotFoundError:
-    data = None
-""".lstrip()
+    import fickling
+    
+    try:
+        data = fickling.load(open("some.pickle", "rb"))
+    except FileNotFoundError:
+        data = None
+    """
 
     expected_diff = """
 --- 
@@ -31,16 +33,21 @@ except FileNotFoundError:
 -    data = pickle.load(open("some.pickle", "rb"))
 +    data = fickling.load(open("some.pickle", "rb"))
  except FileNotFoundError:
-     data = None
-""".lstrip()
+     data = None""".lstrip()
 
     num_changed_files = 2
     change_description = HardenPickleLoad.change_description
     expected_line_change = 4
 
-    requirements_path = "tests/samples/requirements.txt"
-    original_requirements = "# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"
-    expected_new_reqs = (
+    requirements_file_name = "requirements.txt"
+    original_requirements = (
+        "# file used to test dependency management\n"
+        "requests==2.31.0\n"
+        "black==23.7.*\n"
+        "mypy~=1.4\n"
+        "pylint>1\n"
+    )
+    expected_requirements = (
         (
             "# file used to test dependency management\n"
             "requests==2.31.0\n"

@@ -7,7 +7,6 @@ from core_codemods.django_receiver_on_top import (
 
 class TestDjangoReceiverOnTop(BaseIntegrationTest):
     codemod = DjangoReceiverOnTop
-    code_path = "tests/samples/django_receiver_on_top.py"
     original_code = """
     from django.dispatch import receiver
     from django.views.decorators.csrf import csrf_exempt

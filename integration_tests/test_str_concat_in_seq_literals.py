@@ -1,23 +1,24 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.str_concat_in_seq_literal import StrConcatInSeqLiteral
 
 
 class TestStrConcatInSeqLiteral(BaseIntegrationTest):
     codemod = StrConcatInSeqLiteral
-    code_path = "tests/samples/str_concat_in_sequence_literals.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (1, """    "ab",\n"""),
-            (4, """    "gh",\n"""),
-        ],
-    )
-
+    original_code = """
+        bad = [
+            "ab"
+            "cd",
+            "ef",
+            "gh"
+            "ij",
+        ]
+    """
+    replacement_lines = [
+        (2, """    "ab",\n"""),
+        (5, """    "gh",\n"""),
+    ]
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -1,7 +1,7 @@\n"""
