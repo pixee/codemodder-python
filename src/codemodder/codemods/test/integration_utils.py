@@ -23,7 +23,6 @@ class CleanRepoMixin:
 
         if cls.requirements_file_name:
             pathlib.Path(cls.dependency_path).unlink(missing_ok=True)
-            os.rmdir(cls.requirements_dir)
 
 
 class DependencyTestMixin:
@@ -80,10 +79,7 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         )
 
         if cls.requirements_file_name:
-            cls.requirements_dir = tempfile.mkdtemp()
-            cls.dependency_path = os.path.join(
-                cls.requirements_dir, cls.requirements_file_name
-            )
+            cls.dependency_path = os.path.join(cls.code_dir, cls.requirements_file_name)
 
     def setup_method(self):
         # todo move to stup class?
