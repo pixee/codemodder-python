@@ -3,6 +3,7 @@ import os
 import pathlib
 import subprocess
 import tempfile
+from pathlib import Path
 from textwrap import dedent
 from types import ModuleType
 
@@ -56,9 +57,22 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     @classmethod
     def setup_class(cls):
         cls.codemod_registry = registry.load_registered_codemods()
-        cls.code_path = tempfile.mkstemp(suffix=".py")[1]
-        cls.code_dir = os.path.dirname(cls.code_path)
-        cls.code_filename = os.path.relpath(cls.code_path, cls.code_dir)
+        # TODO: dedupe
+        if hasattr(cls, "code_filename"):
+            # Only a few codemods require the analyzed file to have a specific filename
+            cls.code_dir = tempfile.mkdtemp()
+            cls.code_path = os.path.join(cls.code_dir, cls.code_filename)
+
+            if cls.code_filename == "settings.py" and "Django" in str(cls):
+                # manage.py must be in the directory above settings.py for this codemod to run
+                parent_dir = Path(cls.code_dir).parent
+                manage_py_path = parent_dir / "manage.py"
+                manage_py_path.touch()
+        else:
+            cls.code_filename = "code.py"
+            cls.code_dir = tempfile.mkdtemp()
+            cls.code_path = os.path.join(cls.code_dir, cls.code_filename)
+
         cls.output_path = tempfile.mkstemp()[1]
 
         cls.original_code, cls.expected_new_code = original_and_expected_from_code_path(
