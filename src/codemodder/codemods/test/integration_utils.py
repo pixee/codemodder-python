@@ -74,9 +74,17 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
 
         cls.output_path = tempfile.mkstemp()[1]
 
-        cls.original_code, cls.expected_new_code = original_and_expected_from_code_path(
-            cls.original_code, cls.replacement_lines
-        )
+        if hasattr(cls, "expected_new_code"):
+            # Some tests are easier to understand with the expected new code provided
+            # instead of calculated
+            cls.original_code = dedent(cls.original_code).strip("\n")
+            cls.expected_new_code = dedent(cls.expected_new_code).strip("\n")
+        else:
+            cls.original_code, cls.expected_new_code = (
+                original_and_expected_from_code_path(
+                    cls.original_code, cls.replacement_lines
+                )
+            )
 
         if cls.requirements_file_name:
             cls.dependency_path = os.path.join(cls.code_dir, cls.requirements_file_name)
