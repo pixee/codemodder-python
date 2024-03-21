@@ -1,7 +1,4 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.numpy_nan_equality import (
     NumpyNanEquality,
     NumpyNanEqualityTransformer,
@@ -10,16 +7,18 @@ from core_codemods.numpy_nan_equality import (
 
 class TestNumpyNanEquality(BaseIntegrationTest):
     codemod = NumpyNanEquality
-    code_path = "tests/samples/numpy_nan_equality.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (3, """if np.isnan(a):\n"""),
-        ],
-    )
+    original_code = """
+    import numpy as np
 
+    a = np.nan
+    if a == np.nan:
+        pass
+    """
+    replacement_lines = [
+        (4, """if np.isnan(a):\n"""),
+    ]
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -1,5 +1,5 @@\n"""

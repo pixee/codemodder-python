@@ -1,25 +1,30 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.fix_async_task_instantiation import FixAsyncTaskInstantiation
 
 
 class TestFixAsyncTaskInstantiation(BaseIntegrationTest):
     codemod = FixAsyncTaskInstantiation
-    code_path = "tests/samples/fix_async_task_instantiation.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (
-                7,
-                """    task = asyncio.create_task(my_coroutine(), name="my task")\n""",
-            ),
-        ],
-    )
+    original_code = """
+    import asyncio
 
+    async def my_coroutine():
+        await asyncio.sleep(1)
+        print("Task completed")
+    
+    async def main():
+        task = asyncio.Task(my_coroutine(), name="my task")
+        await task
+    
+    asyncio.run(main())
+    """
+    replacement_lines = [
+        (
+            8,
+            """    task = asyncio.create_task(my_coroutine(), name="my task")\n""",
+        ),
+    ]
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -5,7 +5,7 @@\n"""
