@@ -1,17 +1,23 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.limit_readline import LimitReadline
 
 
 class TestLimitReadline(BaseIntegrationTest):
     codemod = LimitReadline
-    code_path = "tests/samples/unlimited_readline.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path, [(1, "file.readline(5_000_000)\n")]
-    )
-    expected_diff = '--- \n+++ \n@@ -1,2 +1,2 @@\n file = open("some_file.txt")\n-file.readline()\n+file.readline(5_000_000)\n'
+    original_code = """
+    file = open("some_file.txt")
+    file.readline()
+    """
+    replacement_lines = [(2, "file.readline(5_000_000)\n")]
+    # fmt: off
+    expected_diff = (
+        """--- \n"""
+        """+++ \n"""
+        """@@ -1,2 +1,2 @@\n"""
+        """ file = open("some_file.txt")\n"""
+        """-file.readline()\n"""
+        """+file.readline(5_000_000)\n""")
+    # fmt: on
     expected_line_change = "2"
     change_description = LimitReadline.change_description
     # expected because output code points to fake file

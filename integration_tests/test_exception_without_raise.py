@@ -1,7 +1,4 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.exception_without_raise import (
     ExceptionWithoutRaise,
     ExceptionWithoutRaiseTransformer,
@@ -10,16 +7,15 @@ from core_codemods.exception_without_raise import (
 
 class TestExceptionWithoutRaise(BaseIntegrationTest):
     codemod = ExceptionWithoutRaise
-    code_path = "tests/samples/exception_without_raise.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (1, """    raise ValueError\n"""),
-        ],
-    )
-
+    original_code = """
+    try:
+        ValueError
+    except:
+        pass
+    """
+    replacement_lines = [(2, """    raise ValueError\n""")]
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -1,4 +1,4 @@\n"""

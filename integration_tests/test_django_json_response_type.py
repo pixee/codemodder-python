@@ -1,7 +1,4 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.django_json_response_type import (
     DjangoJsonResponseType,
     DjangoJsonResponseTypeTransformer,
@@ -10,19 +7,23 @@ from core_codemods.django_json_response_type import (
 
 class TestDjangoJsonResponseType(BaseIntegrationTest):
     codemod = DjangoJsonResponseType
-    code_path = "tests/samples/django_json_response_type.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (
-                5,
-                """    return HttpResponse(json_response, content_type="application/json")\n""",
-            ),
-        ],
-    )
+    original_code = """
+    from django.http import HttpResponse
+    import json
+    
+    def foo(request):
+        json_response = json.dumps({ "user_input": request.GET.get("input") })
+        return HttpResponse(json_response)
+    """
+    replacement_lines = [
+        (
+            6,
+            """    return HttpResponse(json_response, content_type="application/json")\n""",
+        ),
+    ]
 
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -3,4 +3,4 @@\n"""

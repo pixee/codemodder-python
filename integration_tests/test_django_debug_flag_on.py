@@ -1,17 +1,24 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.django_debug_flag_on import DjangoDebugFlagOn
 
 
 class TestDjangoDebugFlagFlip(BaseIntegrationTest):
     codemod = DjangoDebugFlagOn
-    code_path = "tests/samples/django-project/mysite/mysite/settings.py"
-
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path, [(25, "DEBUG = False\n")]
+    code_filename = "settings.py"
+    original_code = """
+    # SECURITY WARNING: don't run with debug turned on in production!
+    DEBUG = True
+    """
+    replacement_lines = [(2, "DEBUG = False\n")]
+    # fmt: off
+    expected_diff = (
+    """--- \n"""
+    """+++ \n"""
+    """@@ -1,2 +1,2 @@\n"""
+    """ # SECURITY WARNING: don't run with debug turned on in production!\n"""
+    """-DEBUG = True\n"""
+    """+DEBUG = False\n"""
     )
-    expected_diff = '--- \n+++ \n@@ -23,7 +23,7 @@\n SECRET_KEY = "django-insecure-t*rrda&qd4^#q+50^%q^rrsp-t$##&u5_#=9)&@ei^ppl6$*c*"\n \n # SECURITY WARNING: don\'t run with debug turned on in production!\n-DEBUG = True\n+DEBUG = False\n \n ALLOWED_HOSTS = []\n \n'
-    expected_line_change = "26"
+    # fmt: on
+    expected_line_change = "2"
     change_description = DjangoDebugFlagOn.change_description
