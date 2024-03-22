@@ -32,22 +32,35 @@ class TestRequirementsTxtWriter:
         assert dependency_file.read_text(encoding="utf-8") == (
             contents
             if dry_run
-            else f"# comment\n\nrequests\n{DefusedXML.requirement} \\\n{DefusedXML.build_hashes()}{Security.requirement} \\\n{Security.build_hashes()}"
+            else (
+                "# comment\n\nrequests\n"
+                + f"{DefusedXML.requirement} \\\n"
+                + "\n".join(DefusedXML.build_hashes())
+                + "\n"
+                + f"{Security.requirement} \\\n"
+                + "\n".join(Security.build_hashes())
+                + "\n"
+            )
         )
 
         assert changeset is not None
         assert changeset.path == dependency_file.name
+
+        defused_xml_hashes = DefusedXML.build_hashes()
+        security_hashes = Security.build_hashes()
         assert changeset.diff == (
             "--- \n"
             "+++ \n"
-            "@@ -1,3 +1,5 @@\n"
+            "@@ -1,3 +1,9 @@\n"
             " # comment\n"
             " \n"
             " requests\n"
             f"+{DefusedXML.requirement} \\\n"
-            f"{DefusedXML.build_hashes()}\n"
+            f"+{defused_xml_hashes[0]}\n"
+            f"+{defused_xml_hashes[1]}\n"
             f"+{Security.requirement} \\\n"
-            f"{Security.build_hashes()}"
+            f"+{security_hashes[0]}\n"
+            f"+{security_hashes[1]}\n"
         )
         assert len(changeset.changes) == 2
         change_one = changeset.changes[0]
@@ -83,7 +96,9 @@ class TestRequirementsTxtWriter:
         assert len(changeset.changes) == 1
 
         assert dependency_file.read_text(encoding="utf-8") == (
-            f"requests\n{Security.requirement} \\\n{Security.build_hashes()}"
+            f"requests\n{Security.requirement} \\\n"
+            + "\n".join(Security.build_hashes())
+            + "\n"
         )
 
     def test_dont_add_existing_dependency(self, tmpdir):
@@ -140,20 +155,31 @@ class TestRequirementsTxtWriter:
 
         assert (
             dependency_file.read_text(encoding="utf-8")
-            == f"# comment\n\nrequests\n{DefusedXML.requirement} \\\n{DefusedXML.build_hashes()}{Security.requirement} \\\n{Security.build_hashes()}"
+            == "# comment\n\nrequests\n"
+            + f"{DefusedXML.requirement} \\\n"
+            + "\n".join(DefusedXML.build_hashes())
+            + "\n"
+            + f"{Security.requirement} \\\n"
+            + "\n".join(Security.build_hashes())
+            + "\n"
         )
 
         assert changeset is not None
         assert changeset.path == dependency_file.name
+
+        defused_xml_hashes = DefusedXML.build_hashes()
+        security_hashes = Security.build_hashes()
         assert changeset.diff == (
             "--- \n"
             "+++ \n"
-            "@@ -1,3 +1,5 @@\n"
+            "@@ -1,3 +1,9 @@\n"
             " # comment\n"
             " \n"
             " requests\n"
             f"+{DefusedXML.requirement} \\\n"
-            f"{DefusedXML.build_hashes()}\n"
+            f"+{defused_xml_hashes[0]}\n"
+            f"+{defused_xml_hashes[1]}\n"
             f"+{Security.requirement} \\\n"
-            f"{Security.build_hashes()}"
+            f"+{security_hashes[0]}\n"
+            f"+{security_hashes[1]}\n"
         )

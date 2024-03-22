@@ -41,11 +41,14 @@ except FileNotFoundError:
     requirements_path = "tests/samples/requirements.txt"
     original_requirements = "# file used to test dependency management\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n"
     expected_new_reqs = (
-        "# file used to test dependency management\n"
-        "requests==2.31.0\n"
-        "black==23.7.*\n"
-        "mypy~=1.4\n"
-        "pylint>1\n"
-        f"{Fickling.requirement} \\\n"
-        f"{Fickling.build_hashes()}"
+        (
+            "# file used to test dependency management\n"
+            "requests==2.31.0\n"
+            "black==23.7.*\n"
+            "mypy~=1.4\n"
+            "pylint>1\n"
+            f"{Fickling.requirement} \\\n"
+        )
+        + "\n".join(Fickling.build_hashes())
+        + "\n"
     )
