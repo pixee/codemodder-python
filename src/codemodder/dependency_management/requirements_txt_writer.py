@@ -21,9 +21,11 @@ class RequirementsTxtWriter(DependencyWriter):
         if not original_lines[-1].endswith("\n"):
             original_lines[-1] += "\n"
 
-        requirement_lines = [
-            f"{dep.requirement} \\\n{dep.build_hashes()}" for dep in dependencies
-        ]
+        requirement_lines = []
+        for dep in dependencies:
+            requirement_lines.append(f"{dep.requirement} \\\n")
+            for hash_line in dep.build_hashes():
+                requirement_lines.append(f"{hash_line}\n")
 
         updated_lines = original_lines + requirement_lines
 

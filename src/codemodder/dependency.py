@@ -34,8 +34,8 @@ License: [{self._license.name}]({self._license.url}) ✅ \
 [More facts]({self.package_link})
 """
 
-    def build_hashes(self) -> str:
-        return " \\\n".join(f"{' '*4}--hash=sha256:{sha256}" for sha256 in self.hashes)
+    def build_hashes(self) -> list[str]:
+        return [f"{' '*4}--hash=sha256:{sha256}" for sha256 in self.hashes]
 
     def __hash__(self):
         return hash(self.requirement)
