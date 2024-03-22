@@ -1,7 +1,4 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.remove_assertion_in_pytest_raises import (
     RemoveAssertionInPytestRaises,
     RemoveAssertionInPytestRaisesTransformer,
@@ -10,17 +7,22 @@ from core_codemods.remove_assertion_in_pytest_raises import (
 
 class TestRemoveAssertionInPytestRaises(BaseIntegrationTest):
     codemod = RemoveAssertionInPytestRaises
-    code_path = "tests/samples/remove_assertion_in_pytest_raises.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (5, """    assert 1\n"""),
-            (6, """    assert 2\n"""),
-        ],
-    )
+    original_code = """
+    import pytest
+
+    def test_foo():
+        with pytest.raises(ZeroDivisionError):
+            error = 1/0
+            assert 1
+            assert 2
+    """
+    replacement_lines = [
+        (6, """    assert 1\n"""),
+        (7, """    assert 2\n"""),
+    ]
 
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -3,5 +3,5 @@\n"""

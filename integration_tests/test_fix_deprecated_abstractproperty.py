@@ -1,19 +1,31 @@
-from textwrap import dedent
-
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.fix_deprecated_abstractproperty import FixDeprecatedAbstractproperty
 
 
 class TestFixDeprecatedAbstractproperty(BaseIntegrationTest):
     codemod = FixDeprecatedAbstractproperty
-    code_path = "tests/samples/deprecated_abstractproperty.py"
+    original_code = """
+    from abc import abstractproperty as ap, abstractclassmethod, abstractstaticmethod, abstractmethod
 
-    original_code, _ = original_and_expected_from_code_path(code_path, [])
-    expected_new_code = dedent(
-        """\
+    
+    class A:
+        @ap
+        def foo(self):
+            pass
+    
+        @abstractclassmethod
+        def hello(cls):
+            pass
+    
+        @abstractstaticmethod
+        def goodbye():
+            pass
+    
+        @abstractmethod
+        def bar(self):
+            pass
+    """
+    expected_new_code = """
     from abc import abstractmethod
     import abc
 
@@ -38,10 +50,8 @@ class TestFixDeprecatedAbstractproperty(BaseIntegrationTest):
         def bar(self):
             pass
     """
-    )
-
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -1,16 +1,20 @@\n"""

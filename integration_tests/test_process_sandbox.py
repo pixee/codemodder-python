@@ -5,7 +5,6 @@ from core_codemods.process_creation_sandbox import ProcessSandbox
 
 class TestProcessSandbox(BaseIntegrationTest):
     codemod = ProcessSandbox
-    code_path = "tests/samples/make_process.py"
     original_code = """
     import subprocess
 

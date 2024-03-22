@@ -1,33 +1,34 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.replace_flask_send_file import ReplaceFlaskSendFile
 
 
 class TestReplaceFlaskSendFile(BaseIntegrationTest):
     codemod = ReplaceFlaskSendFile
-    code_path = "tests/samples/replace_flask_send_file.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (0, """from flask import Flask\n"""),
-            (1, """import flask\n"""),
-            (2, """from pathlib import Path\n"""),
-            (3, """\n"""),
-            (4, """app = Flask(__name__)\n"""),
-            (5, """\n"""),
-            (6, """@app.route("/uploads/<path:name>")\n"""),
-            (7, """def download_file(name):\n"""),
-            (
-                8,
-                """    return flask.send_from_directory((p := Path(f'path/to/{name}.txt')).parent, p.name)\n""",
-            ),
-        ],
-    )
+    original_code = """
+    from flask import Flask, send_file
 
+    app = Flask(__name__)
+    
+    @app.route("/uploads/<path:name>")
+    def download_file(name):
+        return send_file(f'path/to/{name}.txt')
+    """
+    replacement_lines = [
+        (1, """from flask import Flask\n"""),
+        (2, """import flask\n"""),
+        (3, """from pathlib import Path\n"""),
+        (4, """\n"""),
+        (5, """app = Flask(__name__)\n"""),
+        (6, """\n"""),
+        (7, """@app.route("/uploads/<path:name>")\n"""),
+        (8, """def download_file(name):\n"""),
+        (
+            9,
+            """    return flask.send_from_directory((p := Path(f'path/to/{name}.txt')).parent, p.name)\n""",
+        ),
+    ]
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -1,7 +1,9 @@\n"""
