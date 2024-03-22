@@ -1,20 +1,19 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.harden_ruamel import HardenRuamel
 
 
 class TestHardenRuamel(BaseIntegrationTest):
     codemod = HardenRuamel
-    code_path = "tests/samples/unsafe_ruamel.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (2, 'serializer = YAML(typ="safe")\n'),
-            (3, 'serializer = YAML(typ="safe")\n'),
-        ],
-    )
+    original_code = """
+    from ruamel.yaml import YAML
+
+    serializer = YAML(typ="unsafe")
+    serializer = YAML(typ="base")
+    """
+    replacement_lines = [
+        (3, 'serializer = YAML(typ="safe")\n'),
+        (4, 'serializer = YAML(typ="safe")\n'),
+    ]
     expected_diff = '--- \n+++ \n@@ -1,4 +1,4 @@\n from ruamel.yaml import YAML\n \n-serializer = YAML(typ="unsafe")\n-serializer = YAML(typ="base")\n+serializer = YAML(typ="safe")\n+serializer = YAML(typ="safe")\n'
     expected_line_change = "3"
     num_changes = 2
