@@ -204,6 +204,7 @@ class BaseCodemod(metaclass=ABCMeta):
                 findings_for_rule.extend(
                     results.results_for_rule_and_file(context, rule, filename)
                 )
+            logger.debug("%d findings for %s", len(findings_for_rule), filename)
 
         file_context = FileContext(
             context.directory,
@@ -212,6 +213,9 @@ class BaseCodemod(metaclass=ABCMeta):
             line_include,
             findings_for_rule,
         )
+        if results is not None and not findings_for_rule:
+            logger.debug("no findings for %s, short-circuiting analysis", filename)
+            return file_context
 
         # TODO: for SAST tools we should preemtively filter out files that are not part of the result set
 
