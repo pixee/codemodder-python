@@ -1,23 +1,15 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import SonarIntegrationTest
 from core_codemods.django_receiver_on_top import DjangoReceiverOnTopTransformer
 from core_codemods.sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
 
 
-class TestDjangoReceiverOnTop(BaseIntegrationTest):
+class TestDjangoReceiverOnTop(SonarIntegrationTest):
     codemod = SonarDjangoReceiverOnTop
     code_path = "tests/samples/django_receiver_on_top.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (4, """@receiver(request_finished)\n"""),
-            (5, """@csrf_exempt\n"""),
-        ],
-    )
-    sonar_issues_json = "tests/samples/sonar_issues.json"
-
+    replacement_lines = [
+        (4, """@receiver(request_finished)\n"""),
+        (5, """@csrf_exempt\n"""),
+    ]
     # fmt: off
     expected_diff =(
     """--- \n"""

@@ -1,7 +1,4 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import SonarIntegrationTest
 from core_codemods.remove_assertion_in_pytest_raises import (
     RemoveAssertionInPytestRaisesTransformer,
 )
@@ -10,17 +7,13 @@ from core_codemods.sonar.sonar_remove_assertion_in_pytest_raises import (
 )
 
 
-class TestSonarRemoveAssertionInPytestRaises(BaseIntegrationTest):
+class TestSonarRemoveAssertionInPytestRaises(SonarIntegrationTest):
     codemod = SonarRemoveAssertionInPytestRaises
     code_path = "tests/samples/remove_assertion_in_pytest_raises.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (5, """    assert 1\n"""),
-            (6, """    assert 2\n"""),
-        ],
-    )
-    sonar_issues_json = "tests/samples/sonar_issues.json"
+    replacement_lines = [
+        (5, """    assert 1\n"""),
+        (6, """    assert 2\n"""),
+    ]
 
     # fmt: off
     expected_diff =(
