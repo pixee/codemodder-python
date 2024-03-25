@@ -8,6 +8,7 @@ from textwrap import dedent
 import pytest
 
 from codemodder.codemods.test.integration_utils import SAMPLES_DIR
+from security import safe_command
 
 
 class TestDependencyManager:
@@ -69,8 +70,7 @@ class TestDependencyManager:
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
             shell=False,
             capture_output=True,
@@ -92,8 +92,7 @@ class TestDependencyManager:
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
             shell=False,
             capture_output=True,
@@ -117,8 +116,7 @@ class TestDependencyManager:
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
             shell=False,
             capture_output=True,
@@ -142,8 +140,7 @@ class TestDependencyManager:
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
             shell=False,
             capture_output=True,

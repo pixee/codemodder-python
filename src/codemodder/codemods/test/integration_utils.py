@@ -13,6 +13,7 @@ import jsonschema
 from codemodder import __version__, registry
 
 from .validations import execute_code
+from security import safe_command
 
 
 class DependencyTestMixin:
@@ -218,8 +219,7 @@ class BaseIntegrationTest(DependencyTestMixin):
         self.write_original_code()
         self.write_original_dependencies()
 
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
             shell=False,
         )
@@ -232,8 +232,7 @@ class BaseIntegrationTest(DependencyTestMixin):
 
     def _run_idempotency_check(self, command):
         # idempotency test, run it again and assert no files changed
-        completed_process = subprocess.run(
-            command,
+        completed_process = safe_command.run(subprocess.run, command,
             check=False,
         )
         assert completed_process.returncode == 0
