@@ -6,7 +6,7 @@ test:
 	COVERAGE_CORE=sysmon ${PYTEST} ${COV_FLAGS} tests ${XDIST_FLAGS}
 
 integration-test:
-	${PYTEST} integration_tests
+	${PYTEST} integration_tests ${XDIST_FLAGS}
 
 pygoat-test:
 	${PYTEST} -v ci_tests/test_pygoat_findings.py
