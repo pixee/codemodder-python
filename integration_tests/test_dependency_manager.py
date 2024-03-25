@@ -70,7 +70,9 @@ class TestDependencyManager:
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = safe_command.run(subprocess.run, command,
+        completed_process = safe_command.run(
+            subprocess.run,
+            command,
             check=False,
             shell=False,
             capture_output=True,
@@ -92,7 +94,9 @@ class TestDependencyManager:
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = safe_command.run(subprocess.run, command,
+        completed_process = safe_command.run(
+            subprocess.run,
+            command,
             check=False,
             shell=False,
             capture_output=True,
@@ -116,7 +120,9 @@ class TestDependencyManager:
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = safe_command.run(subprocess.run, command,
+        completed_process = safe_command.run(
+            subprocess.run,
+            command,
             check=False,
             shell=False,
             capture_output=True,
@@ -140,7 +146,9 @@ class TestDependencyManager:
             "--codemod-include=url-sandbox",
             "--verbose",
         ]
-        completed_process = safe_command.run(subprocess.run, command,
+        completed_process = safe_command.run(
+            subprocess.run,
+            command,
             check=False,
             shell=False,
             capture_output=True,
