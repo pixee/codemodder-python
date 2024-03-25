@@ -10,40 +10,14 @@ on:
 jobs:
   auto-update:
     runs-on: ubuntu-latest
-    outputs:
-      diff: ${{ steps.check-diff.outputs.diff }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
       - uses: browniebroke/pre-commit-autoupdate-action@main
       - uses: peter-evans/create-pull-request@v6
-        id: pr-create
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: update/pre-commit-hooks
           title: Update pre-commit hooks
           commit-message: "chore: update pre-commit hooks"
           body: Update versions of pre-commit hooks to latest version.
-      - name: Set outputs
-        id: check-diff
-        if: |
-          (steps.pr-create.outputs.pull-request-operation == 'created' ||
-          steps.pr-create.outputs.pull-request-operation == 'updated') &&
-          steps.pr-create.outputs.pull-request-number
-        run: |
-          echo "diff=true" >> "$GITHUB_OUTPUT"
-          echo "PR status: ${{ steps.pr-create.outputs.pull-request-operation }}"
-          echo "PR number: ${{ steps.pr-create.outputs.pull-request-number }}"
-          echo "Running workflows for ${{ steps.pr-create.outputs.pull-request-url }}"
-
-  lint-workflow:
-    name: Run lint
-    needs: auto-update
-    if: ${{ needs.auto-update.outputs.diff }}
-    uses: ./.github/workflows/lint.yml
-
-  test-workflow:
-    name: run tests on diff
-    needs: auto-update
-    if: ${{ needs.auto-update.outputs.diff }}
-    uses: ./.github/workflows/test.yml
