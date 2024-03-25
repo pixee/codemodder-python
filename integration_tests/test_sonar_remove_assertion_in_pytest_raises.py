@@ -11,12 +11,12 @@ class TestSonarRemoveAssertionInPytestRaises(SonarIntegrationTest):
     codemod = SonarRemoveAssertionInPytestRaises
     code_path = "tests/samples/remove_assertion_in_pytest_raises.py"
     replacement_lines = [
-        (5, """    assert 1\n"""),
-        (6, """    assert 2\n"""),
+        (6, """    assert 1\n"""),
+        (7, """    assert 2\n"""),
     ]
 
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -3,5 +3,5 @@\n"""

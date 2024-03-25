@@ -10,11 +10,11 @@ class TestJwtDecodeVerify(SonarIntegrationTest):
     code_path = "tests/samples/jwt_decode_verify.py"
     replacement_lines = [
         (
-            10,
+            11,
             """decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)\n""",
         ),
         (
-            11,
+            12,
             """decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": True})\n""",
         ),
     ]

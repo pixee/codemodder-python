@@ -6,7 +6,7 @@ from core_codemods.sonar.sonar_fix_assert_tuple import SonarFixAssertTuple
 class TestFixAssertTuple(SonarIntegrationTest):
     codemod = SonarFixAssertTuple
     code_path = "tests/samples/fix_assert_tuple.py"
-    replacement_lines = [(0, "assert 1 == 1\n"), (1, "assert 2 == 2\n")]
+    replacement_lines = [(1, "assert 1 == 1\n"), (2, "assert 2 == 2\n")]
     expected_diff = "--- \n+++ \n@@ -1 +1,2 @@\n-assert (1 == 1, 2 == 2)\n+assert 1 == 1\n+assert 2 == 2\n"
     sonar_issues_json = "tests/samples/sonar_issues.json"
     expected_line_change = "1"

@@ -10,13 +10,13 @@ class TestSonarFlaskJsonResponseType(SonarIntegrationTest):
     code_path = "tests/samples/flask_json_response_type.py"
     replacement_lines = [
         (
-            8,
+            9,
             """    return make_response(json_response, {'Content-Type': 'application/json'})\n""",
         ),
     ]
 
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -6,4 +6,4 @@\n"""

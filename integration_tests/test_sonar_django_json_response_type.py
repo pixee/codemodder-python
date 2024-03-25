@@ -10,13 +10,13 @@ class TestSonarDjangoJsonResponseType(SonarIntegrationTest):
     code_path = "tests/samples/django_json_response_type.py"
     replacement_lines = [
         (
-            5,
+            6,
             """    return HttpResponse(json_response, content_type="application/json")\n""",
         ),
     ]
 
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -3,4 +3,4 @@\n"""

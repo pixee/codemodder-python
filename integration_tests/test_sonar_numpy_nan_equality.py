@@ -7,7 +7,7 @@ class TestNumpyNanEquality(SonarIntegrationTest):
     codemod = SonarNumpyNanEquality
     code_path = "tests/samples/numpy_nan_equality.py"
     replacement_lines = [
-        (3, """if np.isnan(a):\n"""),
+        (4, """if np.isnan(a):\n"""),
     ]
 
     # fmt: off

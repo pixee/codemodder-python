@@ -7,10 +7,10 @@ class TestSonarExceptionWithoutRaise(SonarIntegrationTest):
     codemod = SonarExceptionWithoutRaise
     code_path = "tests/samples/exception_without_raise.py"
     replacement_lines = [
-        (1, """    raise ValueError\n"""),
+        (2, """    raise ValueError\n"""),
     ]
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -1,4 +1,4 @@\n"""
