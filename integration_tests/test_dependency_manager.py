@@ -1,19 +1,26 @@
 import os
+import pathlib
 import shutil
 import subprocess
+import tempfile
 from textwrap import dedent
 
 import pytest
 
-from codemodder.codemods.test.integration_utils import SAMPLES_DIR, CleanRepoMixin
+from codemodder.codemods.test.integration_utils import SAMPLES_DIR
 
 
-class TestDependencyManager(CleanRepoMixin):
-    output_path = "test-codetf.txt"
+class TestDependencyManager:
+    output_path = tempfile.mkstemp()[1]
 
     toml_file = "pyproject.toml"
     requirements_file = "requirements.txt"
     setup_file = "setup.py"
+
+    @classmethod
+    def teardown_class(cls):
+        """Ensure any re-written file is undone after integration test class"""
+        pathlib.Path(cls.output_path).unlink(missing_ok=True)
 
     @pytest.fixture
     def tmp_repo(self, tmp_path):
