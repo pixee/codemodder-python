@@ -1,5 +1,5 @@
 # ruff: noqa: F401
-from .integration_utils import BaseIntegrationTest, original_and_expected_from_code_path
+from .integration_utils import BaseIntegrationTest, SonarIntegrationTest
 from .utils import (
     BaseCodemodTest,
     BaseDjangoCodemodTest,
