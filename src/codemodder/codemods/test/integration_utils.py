@@ -15,17 +15,6 @@ from codemodder import __version__, registry
 from .validations import execute_code
 
 
-class CleanRepoMixin:
-    @classmethod
-    def teardown_class(cls):
-        """Ensure any re-written file is undone after integration test class"""
-        pathlib.Path(cls.output_path).unlink(missing_ok=True)
-        pathlib.Path(cls.code_path).unlink(missing_ok=True)
-
-        if cls.requirements_file_name:
-            pathlib.Path(cls.dependency_path).unlink(missing_ok=True)
-
-
 class DependencyTestMixin:
     # Only for codemods that modify requirements should these be overridden
     requirements_file_name = ""
@@ -34,7 +23,7 @@ class DependencyTestMixin:
 
     def write_original_dependencies(self):
         if self.requirements_file_name:
-            with open(self.dependency_path, "w", encoding="utf-8") as f:  # type: ignore
+            with open(self.dependency_path, "w", encoding="utf-8") as f:
                 f.write(self.original_requirements)
 
     def check_dependencies_after(self):
@@ -44,7 +33,7 @@ class DependencyTestMixin:
             assert new_requirements_txt == self.expected_requirements
 
 
-class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
+class BaseIntegrationTest(DependencyTestMixin):
     codemod = NotImplementedError
     original_code = NotImplementedError
     replacement_lines = NotImplementedError
@@ -57,23 +46,21 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
     @classmethod
     def setup_class(cls):
         cls.codemod_registry = registry.load_registered_codemods()
-        # TODO: dedupe
-        if hasattr(cls, "code_filename"):
-            # Only a few codemods require the analyzed file to have a specific filename
-            cls.code_dir = tempfile.mkdtemp()
-            cls.code_path = os.path.join(cls.code_dir, cls.code_filename)
-
-            if cls.code_filename == "settings.py" and "Django" in str(cls):
-                # manage.py must be in the directory above settings.py for this codemod to run
-                parent_dir = Path(cls.code_dir).parent
-                manage_py_path = parent_dir / "manage.py"
-                manage_py_path.touch()
-        else:
-            cls.code_filename = "code.py"
-            cls.code_dir = tempfile.mkdtemp()
-            cls.code_path = os.path.join(cls.code_dir, cls.code_filename)
-
         cls.output_path = tempfile.mkstemp()[1]
+        cls.code_dir = tempfile.mkdtemp()
+
+        if not hasattr(cls, "code_filename"):
+            # Only a few codemods require the analyzed file to have a specific filename
+            # All others can just be `code.py`
+            cls.code_filename = "code.py"
+
+        cls.code_path = os.path.join(cls.code_dir, cls.code_filename)
+
+        if cls.code_filename == "settings.py" and "Django" in str(cls):
+            # manage.py must be in the directory above settings.py for this codemod to run
+            parent_dir = Path(cls.code_dir).parent
+            manage_py_path = parent_dir / "manage.py"
+            manage_py_path.touch()
 
         if hasattr(cls, "expected_new_code"):
             # Some tests are easier to understand with the expected new code provided
@@ -88,8 +75,16 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         if cls.requirements_file_name:
             cls.dependency_path = os.path.join(cls.code_dir, cls.requirements_file_name)
 
+    @classmethod
+    def teardown_class(cls):
+        """Ensure any re-written file is undone after integration test class"""
+        pathlib.Path(cls.output_path).unlink(missing_ok=True)
+        pathlib.Path(cls.code_path).unlink(missing_ok=True)
+
+        if cls.requirements_file_name:
+            pathlib.Path(cls.dependency_path).unlink(missing_ok=True)
+
     def setup_method(self):
-        # todo move to stup class?
         try:
             name = (
                 self.codemod().name
@@ -188,15 +183,15 @@ class BaseIntegrationTest(DependencyTestMixin, CleanRepoMixin):
         self._assert_results_fields(results, self.code_filename)
 
     def write_original_code(self):
-        with open(self.code_path, "w", encoding="utf-8") as f:  # type: ignore
+        with open(self.code_path, "w", encoding="utf-8") as f:
             f.write(self.original_code)
 
     def check_code_after(self) -> ModuleType:
-        with open(self.code_path, "r", encoding="utf-8") as f:  # type: ignore
+        with open(self.code_path, "r", encoding="utf-8") as f:
             new_code = f.read()
-        assert new_code == self.expected_new_code  # type: ignore
+        assert new_code == self.expected_new_code
         return execute_code(
-            path=self.code_path, allowed_exceptions=self.allowed_exceptions  # type: ignore
+            path=self.code_path, allowed_exceptions=self.allowed_exceptions
         )
 
     def test_file_rewritten(self, codetf_schema):
@@ -258,6 +253,11 @@ sys.path.append(SAMPLES_DIR)
 
 
 class SonarIntegrationTest(BaseIntegrationTest):
+    """
+    Sonar integration tests must use code from a file in tests/samples
+    because those files are what appears in sonar_issues.json
+    """
+
     code_path = NotImplementedError
     sonar_issues_json = "tests/samples/sonar_issues.json"
 
@@ -271,6 +271,12 @@ class SonarIntegrationTest(BaseIntegrationTest):
         cls.code_filename = os.path.relpath(cls.code_path, SAMPLES_DIR)
         cls.code_dir = SAMPLES_DIR
         cls.output_path = tempfile.mkstemp()[1]
+
+        # TODO: support sonar integration tests that add a dependency to
+        # `requirements_file_name`. These tests would not be able to run
+        # in parallel at this time since they would all override the same
+        # tests/samples/requirements.txt file, unless we change that to
+        # a temporary file.
 
     @classmethod
     def teardown_class(cls):
@@ -297,9 +303,6 @@ def _lines_from_codepath(code_path):
 
 
 def original_and_expected(original_code, replacements):
-    """
-    TODO:
-    """
     original_code = dedent(original_code).strip("\n")
     lines = original_code.split("\n")
     lines = [line + "\n" for line in lines]
