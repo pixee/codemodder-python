@@ -29,8 +29,7 @@ repos:
      exclude: |
        (?x)^(
            tests/samples/.*|
-           integration_tests/.*|
-           src/codemodder/codemods/test/integration_utils.py
+           integration_tests/.*
        )$
      args: [--disable-error-code=has-type,--disable-error-code=import-not-found]
      additional_dependencies:

@@ -187,11 +187,11 @@ class BaseIntegrationTest(DependencyTestMixin):
             f.write(self.original_code)
 
     def check_code_after(self) -> ModuleType:
-        with open(self.code_path, "r", encoding="utf-8") as f:
+        with open(self.code_path, "r", encoding="utf-8") as f:  # type: ignore
             new_code = f.read()
-        assert new_code == self.expected_new_code
+        assert new_code == self.expected_new_code  # type: ignore
         return execute_code(
-            path=self.code_path, allowed_exceptions=self.allowed_exceptions
+            path=self.code_path, allowed_exceptions=self.allowed_exceptions  # type: ignore
         )
 
     def test_file_rewritten(self, codetf_schema):
