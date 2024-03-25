@@ -8,11 +8,11 @@ class TestSonarFixMissingSelfOrCls(SonarIntegrationTest):
     code_path = "tests/samples/fix_missing_self_or_cls.py"
     replacement_lines = [
         (
-            1,
+            2,
             """    def instance_method(self):\n""",
         ),
         (
-            5,
+            6,
             """    def class_method(cls):\n""",
         ),
     ]

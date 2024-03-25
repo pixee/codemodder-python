@@ -11,7 +11,7 @@ class TestLiteralOrNewObjectIdentity(SonarIntegrationTest):
     codemod = SonarLiteralOrNewObjectIdentity
     code_path = "tests/samples/literal_or_new_object_identity.py"
     replacement_lines = [
-        (1, """    return l == [1,2,3]\n"""),
+        (2, """    return l == [1,2,3]\n"""),
     ]
 
     # fmt: off

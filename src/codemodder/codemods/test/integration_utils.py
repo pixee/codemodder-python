@@ -260,15 +260,12 @@ sys.path.append(SAMPLES_DIR)
 class SonarIntegrationTest(BaseIntegrationTest):
     code_path = NotImplementedError
     sonar_issues_json = "tests/samples/sonar_issues.json"
-    original_raw_code = ""
 
     @classmethod
     def setup_class(cls):
         cls.codemod_registry = registry.load_registered_codemods()
-        cls.original_code, cls.expected_new_code = (
-            cls.original_and_expected_from_code_path(
-                cls.code_path, cls.replacement_lines
-            )
+        cls.original_code, cls.expected_new_code = original_and_expected_from_code_path(
+            cls.code_path, cls.replacement_lines
         )
 
         cls.code_filename = os.path.relpath(cls.code_path, SAMPLES_DIR)
@@ -281,32 +278,22 @@ class SonarIntegrationTest(BaseIntegrationTest):
         pathlib.Path(cls.output_path).unlink(missing_ok=True)
         # Revert code file
         with open(cls.code_path, mode="w", encoding="utf-8") as f:
-            f.write(cls.original_raw_code)
+            f.write(cls.original_code)
 
-    @classmethod
-    def original_and_expected_from_code_path(cls, code_path, replacements):
-        """
-        Returns a pair (original_code, expected) where original_code contains the contents of the code_path file and expected contains the code_path file where, for each (i,replacement) in replacements, the lines numbered i in original_code are replaced with replacement.
-        """
-        lines = cls._lines_from_codepath(code_path)
-        cls.original_raw_code = "".join(lines)
-        cls._replace_lines_with(lines, replacements)
-        return (cls.original_raw_code, "".join(lines))
 
-    @classmethod
-    def _lines_from_codepath(cls, code_path):
-        with open(code_path, mode="r", encoding="utf-8") as f:
-            return f.readlines()
+def original_and_expected_from_code_path(code_path, replacements):
+    """
+    Returns a pair (original_code, expected) where original_code contains the contents of the code_path file and expected contains the code_path file where, for each (i,replacement) in replacements, the lines numbered i in original_code are replaced with replacement.
+    """
+    lines = _lines_from_codepath(code_path)
+    original_raw_code = "".join(lines)
+    _replace_lines_with(lines, replacements)
+    return (original_raw_code, "".join(lines))
 
-    @staticmethod
-    def _replace_lines_with(lines, replacements):
-        total_lines = len(lines)
-        for lineno, replacement in replacements:
-            if lineno >= total_lines:
-                lines.extend(replacement)
-                continue
-            lines[lineno] = replacement
-        return lines
+
+def _lines_from_codepath(code_path):
+    with open(code_path, mode="r", encoding="utf-8") as f:
+        return f.readlines()
 
 
 def original_and_expected(original_code, replacements):

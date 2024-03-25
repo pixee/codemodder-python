@@ -7,11 +7,11 @@ class TestDjangoReceiverOnTop(SonarIntegrationTest):
     codemod = SonarDjangoReceiverOnTop
     code_path = "tests/samples/django_receiver_on_top.py"
     replacement_lines = [
-        (4, """@receiver(request_finished)\n"""),
-        (5, """@csrf_exempt\n"""),
+        (5, """@receiver(request_finished)\n"""),
+        (6, """@csrf_exempt\n"""),
     ]
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -2,7 +2,7 @@\n"""
