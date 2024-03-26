@@ -30,10 +30,12 @@ class TestRun:
     @mock.patch("libcst.parse_module")
     def test_no_files_matched(self, mock_parse, tmpdir):
         codetf = tmpdir / "result.codetf"
+        code_dir = tmpdir.mkdir("code")
+        code_dir.join("code.py").write("# anything")
         assert not codetf.exists()
 
         args = [
-            "tests/samples/",
+            str(code_dir),
             "--output",
             str(codetf),
             "--codemod-include=url-sandbox",
@@ -48,13 +50,17 @@ class TestRun:
 
     @mock.patch("libcst.parse_module", side_effect=Exception)
     @mock.patch("codemodder.codetf.CodeTF.build")
-    def test_cst_parsing_fails(self, build_report, mock_parse):
+    def test_cst_parsing_fails(self, build_report, mock_parse, tmpdir):
+        code_dir = tmpdir.mkdir("code")
+        code_file = code_dir.join("test_request.py")
+        code_file.write("# anything")
+
         args = [
-            "tests/samples/",
+            str(code_dir),
             "--output",
-            "here.txt",
+            str(tmpdir / "result.codetf"),
             "--codemod-include",
-            "requests-verify",
+            "fix-assert-tuple",
             "--path-include",
             "*request.py",
         ]
@@ -74,7 +80,7 @@ class TestRun:
         assert requests_report.changeset == []
         assert len(requests_report.failedFiles) == 1
         assert sorted(requests_report.failedFiles) == [
-            "tests/samples/unverified_request.py",
+            str(code_file),
         ]
 
         build_report.return_value.write_report.assert_called_once()
