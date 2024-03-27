@@ -92,10 +92,10 @@ Security = Dependency(
 )
 
 Fickling = Dependency(
-    Requirement("fickling~=0.1.0"),
+    Requirement("fickling~=0.1.0,>=0.1.3"),
     hashes=[
-        "a5bb5982e2c0e86d41fceaf9576929f0e7bfeef53998248f69c885224cf45739",
-        "1d74a9ef84e56ecd3114563907166bfa65e17e3a00190157c1514fff08e086b4",
+        "c7ad5885cd97f8c693cf7824fdbcf9d103dbacbce36546e5a031805a7261bb74",
+        "606b3153ad4b2c0338930d08a739f7f10a560f996e0bd3a4b46544417254b0d0",
     ],
     description="""This package provides analysis of pickled data to help identify potential security vulnerabilities.""",
     _license=License(
