@@ -17,14 +17,14 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         input_code = """
         import subprocess
 
-        subprocess.run("echo 'hi'", shell=True)
+        subprocess.run(cmd, shell=True)
         var = "hello"
         """
         expected = """
         import subprocess
         from security import safe_command
 
-        safe_command.run(subprocess.run, "echo 'hi'", shell=True)
+        safe_command.run(subprocess.run, cmd, shell=True)
         var = "hello"
         """
         self.run_and_assert(tmpdir, input_code, expected)
@@ -34,14 +34,14 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         input_code = """
         import subprocess as sub
 
-        sub.run("echo 'hi'", shell=True)
+        sub.run(cmd, shell=True)
         var = "hello"
         """
         expected = """
         import subprocess as sub
         from security import safe_command
 
-        safe_command.run(sub.run, "echo 'hi'", shell=True)
+        safe_command.run(sub.run, cmd, shell=True)
         var = "hello"
         """
         self.run_and_assert(tmpdir, input_code, expected)
@@ -51,14 +51,14 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         input_code = """
         from subprocess import run
 
-        run("echo 'hi'", shell=True)
+        run(cmd, shell=True)
         var = "hello"
         """
         expected = """
         from subprocess import run
         from security import safe_command
 
-        safe_command.run(run, "echo 'hi'", shell=True)
+        safe_command.run(run, cmd, shell=True)
         var = "hello"
         """
         self.run_and_assert(tmpdir, input_code, expected)
@@ -66,7 +66,7 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
 
     def test_subprocess_nameerror(self, _, tmpdir):
         input_code = """
-        subprocess.run("echo 'hi'", shell=True)
+        subprocess.run(cmd, shell=True)
 
         import subprocess
         """
@@ -80,7 +80,7 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
                 """
                 import subprocess
                 import csv
-                subprocess.run("echo 'hi'", shell=True)
+                subprocess.run(cmd, shell=True)
                 csv.excel
                 """,
                 """
@@ -88,7 +88,7 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
                 import csv
                 from security import safe_command
 
-                safe_command.run(subprocess.run, "echo 'hi'", shell=True)
+                safe_command.run(subprocess.run, cmd, shell=True)
                 csv.excel
                 """,
             ),
@@ -96,7 +96,7 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
                 """
                 import subprocess
                 from csv import excel
-                subprocess.run("echo 'hi'", shell=True)
+                subprocess.run(cmd, shell=True)
                 excel
                 """,
                 """
@@ -104,7 +104,7 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
                 from csv import excel
                 from security import safe_command
 
-                safe_command.run(subprocess.run, "echo 'hi'", shell=True)
+                safe_command.run(subprocess.run, cmd, shell=True)
                 excel
                 """,
             ),
@@ -123,15 +123,15 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         input_code = """
         import subprocess
 
-        subprocess.run("echo 'hi'", shell=True)
-        subprocess.check_output(["ls", "-l"])"""
+        subprocess.run(cmd, shell=True)
+        subprocess.check_output([cmd2, "-l"])"""
 
         expected = """
         import subprocess
         from security import safe_command
 
-        safe_command.run(subprocess.run, "echo 'hi'", shell=True)
-        subprocess.check_output(["ls", "-l"])"""
+        safe_command.run(subprocess.run, cmd, shell=True)
+        subprocess.check_output([cmd2, "-l"])"""
 
         self.run_and_assert(tmpdir, input_code, expected)
         adds_dependency.assert_called_once_with(Security)
@@ -140,7 +140,7 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         input_code = """
         from app_funcs import run
 
-        run("echo 'hi'", shell=True)"""
+        run(cmd, shell=True)"""
         expected = input_code
         self.run_and_assert(tmpdir, input_code, expected)
 
@@ -148,13 +148,13 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         input_code = """
         import subprocess
 
-        subprocess.call(["ls", "-l"])
+        subprocess.call([cmd, "-l"])
         """
         expected = """
         import subprocess
         from security import safe_command
 
-        safe_command.run(subprocess.call, ["ls", "-l"])
+        safe_command.run(subprocess.call, [cmd, "-l"])
         """
         self.run_and_assert(tmpdir, input_code, expected)
         adds_dependency.assert_called_once_with(Security)
@@ -163,13 +163,56 @@ class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
         input_code = """
         import subprocess
 
-        subprocess.Popen(["ls", "-l"])
+        subprocess.Popen([cmd, "-l"])
         """
         expected = """
         import subprocess
         from security import safe_command
 
-        safe_command.run(subprocess.Popen, ["ls", "-l"])
+        safe_command.run(subprocess.Popen, [cmd, "-l"])
         """
         self.run_and_assert(tmpdir, input_code, expected)
         adds_dependency.assert_called_once_with(Security)
+
+    def test_hardcoded_string(self, _, tmpdir):
+        input_code = (
+            expected
+        ) = """
+        import subprocess
+
+        subprocess.Popen("ls -l", shell=True)
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_hardcoded_string_propagation(self, _, tmpdir):
+        input_code = (
+            expected
+        ) = """
+        import subprocess
+
+        cmd = "ls -l"
+        subprocess.Popen(cmd, shell=True)
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_hardcoded_array(self, _, tmpdir):
+        input_code = (
+            expected
+        ) = """
+        import subprocess
+
+        subprocess.Popen(["ls", "-l"])
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    @pytest.mark.xfail(reason="Semgrep doesn't seem to support array propagation")
+    def test_hardcoded_array_propagation(self, _, tmpdir):
+        input_code = (
+            expected
+        ) = """
+        import subprocess
+
+        cmd = ["ls", "-l"]
+        subprocess.Popen(cmd)
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
