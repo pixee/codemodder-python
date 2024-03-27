@@ -29,9 +29,7 @@ class RequirementsTxtParser(BaseParser):
             logger.debug("Unknown encoding for file: %s", file)
             return None
 
-        dependencies = set(
-            line.split("#")[0].strip() for line in lines if not line.startswith("#")
-        )
+        dependencies = self._clean_lines(lines)
 
         return PackageStore(
             type=self.file_type,
@@ -41,4 +39,14 @@ class RequirementsTxtParser(BaseParser):
             # though we could create a heuristic by analyzing each dependency
             # and extracting py versions from them.
             py_versions=[],
+        )
+
+    def _clean_lines(self, lines: list[str]) -> set[str]:
+        """Return a set of dependency `lines` excluding any lines
+        that may be comments or may be pointers to other requirement files (-r ..._
+        """
+        return set(
+            line.split("#")[0].strip()
+            for line in lines
+            if not (line.startswith("#") or line.startswith("-r "))
         )

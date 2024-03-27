@@ -46,6 +46,17 @@ def pkg_with_reqs_txt(tmp_path_factory):
 
 
 @pytest.fixture(scope="module")
+def pkg_with_reqs_r_line(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp("foo")
+    req_file = base_dir / "requirements.txt"
+    second_req_file = base_dir / "more_requirements.txt"
+    second_req_file.write_text("django<5")
+    reqs = "# comment\nrequests==2.31.0\nblack==23.7.*\nmypy~=1.4\npylint>1\n-r more_requirements.txt\n"
+    req_file.write_text(reqs)
+    return base_dir
+
+
+@pytest.fixture(scope="module")
 def pkg_with_reqs_txt_and_comments(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("foo")
     req_file = base_dir / "requirements.txt"
