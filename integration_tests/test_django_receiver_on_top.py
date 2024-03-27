@@ -1,7 +1,4 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.django_receiver_on_top import (
     DjangoReceiverOnTop,
     DjangoReceiverOnTopTransformer,
@@ -10,17 +7,23 @@ from core_codemods.django_receiver_on_top import (
 
 class TestDjangoReceiverOnTop(BaseIntegrationTest):
     codemod = DjangoReceiverOnTop
-    code_path = "tests/samples/django_receiver_on_top.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (4, """@receiver(request_finished)\n"""),
-            (5, """@csrf_exempt\n"""),
-        ],
-    )
+    original_code = """
+    from django.dispatch import receiver
+    from django.views.decorators.csrf import csrf_exempt
+    from django.core.signals import request_finished
+    
+    @csrf_exempt
+    @receiver(request_finished)
+    def foo():
+        pass
+    """
+    replacement_lines = [
+        (5, """@receiver(request_finished)\n"""),
+        (6, """@csrf_exempt\n"""),
+    ]
 
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -2,7 +2,7 @@\n"""

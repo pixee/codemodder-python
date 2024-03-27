@@ -1,7 +1,4 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.flask_json_response_type import (
     FlaskJsonResponseType,
     FlaskJsonResponseTypeTransformer,
@@ -10,19 +7,25 @@ from core_codemods.flask_json_response_type import (
 
 class TestFlaskJsonResponseType(BaseIntegrationTest):
     codemod = FlaskJsonResponseType
-    code_path = "tests/samples/flask_json_response_type.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (
-                8,
-                """    return make_response(json_response, {'Content-Type': 'application/json'})\n""",
-            ),
-        ],
-    )
-
+    original_code = """
+    from flask import make_response, Flask
+    import json
+    
+    app = Flask(__name__)
+    
+    @app.route("/test")
+    def foo(request):
+        json_response = json.dumps({ "user_input": request.GET.get("input") })
+        return make_response(json_response)
+    """
+    replacement_lines = [
+        (
+            9,
+            """    return make_response(json_response, {'Content-Type': 'application/json'})\n""",
+        ),
+    ]
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -6,4 +6,4 @@\n"""

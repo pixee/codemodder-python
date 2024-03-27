@@ -1,7 +1,4 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.file_resource_leak import (
     FileResourceLeak,
     FileResourceLeakTransformer,
@@ -10,18 +7,20 @@ from core_codemods.file_resource_leak import (
 
 class TestFileResourceLeak(BaseIntegrationTest):
     codemod = FileResourceLeak
-    code_path = "tests/samples/file_resource_leak.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (2, """with open(path, 'w', encoding='utf-8') as file:\n"""),
-            (3, """    pass\n"""),
-            (4, """    file.write('Hello World')\n"""),
-        ],
-    )
-
+    original_code = """
+    import tempfile
+    path = tempfile.NamedTemporaryFile().name
+    file = open(path, 'w', encoding='utf-8')
+    pass
+    file.write('Hello World')
+    """
+    replacement_lines = [
+        (3, """with open(path, 'w', encoding='utf-8') as file:\n"""),
+        (4, """    pass\n"""),
+        (5, """    file.write('Hello World')\n"""),
+    ]
     # fmt: off
-    expected_diff =(
+    expected_diff = (
     """--- \n"""
     """+++ \n"""
     """@@ -1,5 +1,5 @@\n"""

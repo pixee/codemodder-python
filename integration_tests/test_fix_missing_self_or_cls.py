@@ -1,7 +1,4 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.fix_missing_self_or_cls import (
     FixMissingSelfOrCls,
     FixMissingSelfOrClsTransformer,
@@ -10,21 +7,25 @@ from core_codemods.fix_missing_self_or_cls import (
 
 class TestFixMissingSelfOrCls(BaseIntegrationTest):
     codemod = FixMissingSelfOrCls
-    code_path = "tests/samples/fix_missing_self_or_cls.py"
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path,
-        [
-            (
-                1,
-                """    def instance_method(self):\n""",
-            ),
-            (
-                5,
-                """    def class_method(cls):\n""",
-            ),
-        ],
-    )
-
+    original_code = """
+    class MyClass:
+        def instance_method():
+            print("instance_method")
+    
+        @classmethod
+        def class_method():
+            print("class_method")
+    """
+    replacement_lines = [
+        (
+            2,
+            """    def instance_method(self):\n""",
+        ),
+        (
+            6,
+            """    def class_method(cls):\n""",
+        ),
+    ]
     # fmt: off
     expected_diff = (
     """--- \n"""

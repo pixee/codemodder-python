@@ -1,17 +1,26 @@
-from codemodder.codemods.test import (
-    BaseIntegrationTest,
-    original_and_expected_from_code_path,
-)
+from codemodder.codemods.test import BaseIntegrationTest
 from core_codemods.django_session_cookie_secure_off import DjangoSessionCookieSecureOff
 
 
 class TestDjangoSessionCookieSecureOff(BaseIntegrationTest):
     codemod = DjangoSessionCookieSecureOff
-    code_path = "tests/samples/django-project/mysite/mysite/settings.py"
+    code_filename = "settings.py"
 
-    original_code, expected_new_code = original_and_expected_from_code_path(
-        code_path, [(124, "SESSION_COOKIE_SECURE = True\n")]
+    original_code = """
+    # django settings
+    # SESSION_COOKIE_SECURE is not defined
+    """
+    replacement_lines = [(3, "SESSION_COOKIE_SECURE = True\n")]
+
+    # fmt: off
+    expected_diff = (
+        """--- \n"""
+        """+++ \n"""
+        """@@ -1,2 +1,3 @@\n"""
+        """ # django settings\n"""
+        """ # SESSION_COOKIE_SECURE is not defined\n"""
+        """+SESSION_COOKIE_SECURE = True\n"""
     )
-    expected_diff = '--- \n+++ \n@@ -121,3 +121,4 @@\n # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field\n \n DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"\n+SESSION_COOKIE_SECURE = True\n'
-    expected_line_change = "124"
+    # fmt: on
+    expected_line_change = "3"
     change_description = DjangoSessionCookieSecureOff.change_description
