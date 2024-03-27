@@ -7,3 +7,4 @@
 defusedxml==0.7.1
 flask-wtf==1.2.0
 security==1.2.1
+fickling==0.1.3
