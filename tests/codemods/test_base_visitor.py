@@ -115,5 +115,3 @@ class TestNodePosition:
             start=CodePosition(line=3, column=4), end=CodePosition(line=3, column=26)
         )
         self.run_and_assert(input_code, expected_pos)
-
-    # todo: class def too

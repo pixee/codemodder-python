@@ -292,3 +292,18 @@ class TestFixMutableParams(BaseCodemodTest):
                 pass
         """
         self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_exclude_line(self, tmpdir):
+        input_code = (
+            expected
+        ) = """
+        def foo(one, *args, bar=[]):
+            print(bar)
+        """
+        lines_to_exclude = [2]
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            lines_to_exclude=lines_to_exclude,
+        )
