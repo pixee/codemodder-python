@@ -48,5 +48,5 @@ class RequirementsTxtParser(BaseParser):
         return set(
             line.split("#")[0].strip()
             for line in lines
-            if not (line.startswith("#") or line.startswith("-r "))
+            if not line.startswith(("#", "-r "))
         )
