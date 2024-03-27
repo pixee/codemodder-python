@@ -11,11 +11,12 @@ from codemodder.codemods.test.integration_utils import SAMPLES_DIR
 
 
 class TestDependencyManager:
-    output_path = tempfile.mkstemp()[1]
-
-    toml_file = "pyproject.toml"
-    requirements_file = "requirements.txt"
-    setup_file = "setup.py"
+    @classmethod
+    def setup_class(cls):
+        cls.output_path = tempfile.mkstemp()[1]
+        cls.toml_file = "pyproject.toml"
+        cls.requirements_file = "requirements.txt"
+        cls.setup_file = "setup.py"
 
     @classmethod
     def teardown_class(cls):
