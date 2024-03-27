@@ -1,6 +1,8 @@
 from collections import defaultdict
+from textwrap import dedent
 
 import libcst as cst
+from libcst._position import CodePosition, CodeRange
 from libcst.codemod import CodemodContext
 from libcst.metadata import PositionProvider
 
@@ -27,6 +29,30 @@ class DeleteStatementLinesCodemod(BaseTransformer):
         ) and self.filter_by_path_includes_or_excludes(pos_to_match):
             return cst.RemovalSentinel.REMOVE
         return original_node
+
+
+class AssertPositionCodemod(BaseTransformer):
+    METADATA_DEPENDENCIES = (PositionProvider,)
+
+    def __init__(
+        self,
+        context,
+        results,
+        expected_node_position,
+        line_exclude=None,
+        line_include=None,
+    ):
+        BaseTransformer.__init__(
+            self, context, results, line_include or [], line_exclude or []
+        )
+        self.expected_node_position = expected_node_position
+
+    def leave_FunctionDef(
+        self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
+    ) -> cst.FunctionDef:
+        pos_to_match = self.node_position(original_node)
+        assert pos_to_match == self.expected_node_position
+        return updated_node
 
 
 class TestBaseVisitor:
@@ -59,3 +85,35 @@ class TestBaseVisitor:
         line_exclude = [1]
         line_include = [1]
         self.run_and_assert(input_code, expected, line_exclude, line_include)
+
+
+class TestNodePosition:
+    def run_and_assert(self, input_code, expected_pos):
+        input_tree = cst.parse_module(dedent(input_code))
+        command_instance = AssertPositionCodemod(
+            CodemodContext(), defaultdict(list), expected_pos
+        )
+        command_instance.transform_module(input_tree)
+
+    def test_funcdef(self):
+        input_code = """
+        def hello():
+            pass
+        """
+        expected_pos = CodeRange(
+            start=CodePosition(line=2, column=0), end=CodePosition(line=2, column=12)
+        )
+        self.run_and_assert(input_code, expected_pos)
+
+    def test_instance(self):
+        input_code = """
+        class MyClass:
+            def instance_method():
+                print("instance_method")
+        """
+        expected_pos = CodeRange(
+            start=CodePosition(line=3, column=4), end=CodePosition(line=3, column=26)
+        )
+        self.run_and_assert(input_code, expected_pos)
+
+    # todo: class def too

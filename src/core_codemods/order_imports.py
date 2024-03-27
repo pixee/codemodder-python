@@ -1,4 +1,5 @@
 import libcst as cst
+from libcst._position import CodePosition, CodeRange
 from libcst.metadata import PositionProvider
 
 from codemodder.codemods.transformations.clean_imports import (
@@ -60,7 +61,18 @@ class OrderImports(SimpleCodemod):
 
     def node_position(self, node):
         # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
-        return self.get_metadata(PositionProvider, node)
+        match node:
+            case cst.FunctionDef():
+                # By default a function's position includes the entire
+                # function definition. Instead, we will only use the first line
+                # of the function definition.
+                params_end = self.get_metadata(PositionProvider, node.params).end
+                return CodeRange(
+                    start=self.get_metadata(PositionProvider, node).start,
+                    end=CodePosition(params_end.line, params_end.column + 1),
+                )
+            case _:
+                return self.get_metadata(PositionProvider, node)
 
 
 def match_line(pos, line):
