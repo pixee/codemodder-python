@@ -101,7 +101,7 @@ class TestNodePosition:
             pass
         """
         expected_pos = CodeRange(
-            start=CodePosition(line=2, column=0), end=CodePosition(line=2, column=12)
+            start=CodePosition(line=2, column=0), end=CodePosition(line=2, column=11)
         )
         self.run_and_assert(input_code, expected_pos)
 
@@ -112,6 +112,6 @@ class TestNodePosition:
                 print("instance_method")
         """
         expected_pos = CodeRange(
-            start=CodePosition(line=3, column=4), end=CodePosition(line=3, column=26)
+            start=CodePosition(line=3, column=4), end=CodePosition(line=3, column=25)
         )
         self.run_and_assert(input_code, expected_pos)
