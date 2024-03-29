@@ -1,5 +1,5 @@
 {
-  "total":35,
+  "total":37,
   "p":1,
   "ps":500,
   "paging":{
@@ -10,6 +10,78 @@
   "effortTotal":1010,
   "debtTotal":1010,
   "issues":[
+    {
+      "key": "AY5_zeRwqkyzjj5fBCfH",
+      "rule": "python:S5719",
+      "severity": "BLOCKER",
+      "component": "pixee_codemodder-python:fix_missing_self_or_cls.py",
+      "project": "pixee_codemodder-python",
+      "line": 2,
+      "hash": "755b45e1ce3925b38846166df4cf5336",
+      "textRange": {
+        "startLine": 2,
+        "endLine": 2,
+        "startOffset": 4,
+        "endOffset": 25
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Add a \"self\" or class parameter",
+      "effort": "5min",
+      "debt": "5min",
+            "author":"danalitovsky+git@gmail.com",
+      "tags":[
+        "tests"
+      ],
+      "creationDate": "2024-03-27T13:05:32+0100",
+      "updateDate": "2024-03-27T13:05:53+0100",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AY5_zeRwqkyzjj5fBCfI",
+      "rule": "python:S5719",
+      "severity": "BLOCKER",
+      "component": "pixee_codemodder-python:fix_missing_self_or_cls.py",
+      "project": "pixee_codemodder-python",
+      "line": 6,
+      "hash": "cd77b347ec74d1b10e372774147ea204",
+      "textRange": {
+        "startLine": 6,
+        "endLine": 6,
+        "startOffset": 4,
+        "endOffset": 22
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Add a class parameter",
+      "effort": "5min",
+      "debt": "5min",
+            "author":"danalitovsky+git@gmail.com",
+      "tags":[
+        "tests"
+      ],
+      "creationDate": "2024-03-27T13:05:32+0100",
+      "updateDate": "2024-03-27T13:05:53+0100",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "HIGH"
+        }
+      ]
+    },
     {
       "key":"AY079772vDBaEBzdYL0s",
       "rule":"python:S5905",
@@ -2407,6 +2479,16 @@
       "name":"test_ancestorpatterns_mixin.py",
       "longName":"tests/test_ancestorpatterns_mixin.py",
       "path":"tests/test_ancestorpatterns_mixin.py"
+    },
+    {
+      "organization":"pixee",
+      "key":"pixee_codemodder-python:fix_missing_self_or_cls.py",
+      "uuid":"AY0797sgvDBaEBzdYL0o",
+      "enabled":true,
+      "qualifier":"FIL",
+      "name":"fix_missing_self_or_cls.py",
+      "longName":"fix_missing_self_or_cls.py",
+      "path":"fix_missing_self_or_cls.py"
     }
   ],
   "organizations":[

@@ -14,20 +14,20 @@ class TestSonarFixMissingSelfOrCls(BaseSASTCodemodTest):
     def test_simple(self, tmpdir):
         input_code = """
         class A:
-            def method():
+            def instance_method():
                 pass
             
             @classmethod
-            def clsmethod():
+            def class_method():
                 pass
         """
         expected_output = """
         class A:
-            def method(self):
+            def instance_method(self):
                 pass
             
             @classmethod
-            def clsmethod(cls):
+            def class_method(cls):
                 pass
         """
         issues = {
@@ -37,8 +37,8 @@ class TestSonarFixMissingSelfOrCls(BaseSASTCodemodTest):
                     "status": "OPEN",
                     "component": "code.py",
                     "textRange": {
-                        "startLine": 2,
-                        "endLine": 2,
+                        "startLine": 3,
+                        "endLine": 3,
                         "startOffset": 4,
                         "endOffset": 25,
                     },
@@ -48,8 +48,8 @@ class TestSonarFixMissingSelfOrCls(BaseSASTCodemodTest):
                     "status": "OPEN",
                     "component": "code.py",
                     "textRange": {
-                        "startLine": 6,
-                        "endLine": 6,
+                        "startLine": 7,
+                        "endLine": 7,
                         "startOffset": 4,
                         "endOffset": 22,
                     },

@@ -135,3 +135,19 @@ class TestFixMissingSelfOrCls(BaseCodemodTest):
                pass
            """
         self.run_and_assert(tmpdir, input_code, input_code)
+
+    def test_exclude_line(self, tmpdir):
+        input_code = (
+            expected
+        ) = """
+        class A:
+            def method():
+                pass
+        """
+        lines_to_exclude = [3]
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            lines_to_exclude=lines_to_exclude,
+        )

@@ -17,8 +17,8 @@ class FixMissingSelfOrClsTransformer(
     def leave_FunctionDef(
         self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
     ) -> cst.FunctionDef:
-        # TODO: add filter by include or exclude that works for nodes
-        # that that have different start/end numbers.
+        if not self.node_is_selected(original_node):
+            return original_node
 
         if not self.find_immediate_class_def(original_node):
             # If `original_node` is not inside a class, nothing to do.
