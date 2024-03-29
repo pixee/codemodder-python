@@ -115,3 +115,13 @@ class TestNodePosition:
             start=CodePosition(line=3, column=4), end=CodePosition(line=3, column=25)
         )
         self.run_and_assert(input_code, expected_pos)
+
+    def test_funcdef_args(self):
+        input_code = """
+        def hello(one, *args, **kwargs):
+            pass
+        """
+        expected_pos = CodeRange(
+            start=CodePosition(line=2, column=0), end=CodePosition(line=2, column=31)
+        )
+        self.run_and_assert(input_code, expected_pos)
