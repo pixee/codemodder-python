@@ -115,19 +115,6 @@ class BaseIntegrationTest(DependencyTestMixin):
         assert run["directory"] == os.path.abspath(self.code_dir)
         assert run["sarifs"] == []
 
-    def _assert_sonar_fields(self, result):
-        assert result["detectionTool"]["name"] == "Sonar"
-        assert (
-            result["detectionTool"]["rule"]["id"]
-            == self.codemod_instance._metadata.tool.rule_id
-        )
-        assert (
-            result["detectionTool"]["rule"]["name"]
-            == self.codemod_instance._metadata.tool.rule_name
-        )
-        # TODO: empty array until we add findings metadata
-        assert result["detectionTool"]["findings"] == []
-
     def _assert_results_fields(self, results, output_path):
         assert len(results) == 1
         result = results[0]
@@ -146,13 +133,7 @@ class BaseIntegrationTest(DependencyTestMixin):
         ]:
             assert reference["url"] == reference["description"]
 
-        if self.sonar_issues_json:
-            assert self.codemod_instance._metadata.tool is not None
-            assert (
-                result["references"][-1]["description"]
-                == self.codemod_instance._metadata.tool.rule_name
-            )
-            self._assert_sonar_fields(result)
+        self._assert_sonar_fields(result)
 
         assert len(result["changeset"]) == self.num_changed_files
 
@@ -168,6 +149,9 @@ class BaseIntegrationTest(DependencyTestMixin):
         line_change = change["changes"][0]
         assert line_change["lineNumber"] == int(self.expected_line_change)
         assert line_change["description"] == self.change_description
+
+    def _assert_sonar_fields(self, result):
+        del result
 
     def _assert_codetf_output(self, codetf_schema):
         with open(self.output_path, "r", encoding="utf-8") as f:
@@ -285,6 +269,24 @@ class SonarIntegrationTest(BaseIntegrationTest):
         # Revert code file
         with open(cls.code_path, mode="w", encoding="utf-8") as f:
             f.write(cls.original_code)
+
+    def _assert_sonar_fields(self, result):
+        assert self.codemod_instance._metadata.tool is not None
+        assert (
+            result["references"][-1]["description"]
+            == self.codemod_instance._metadata.tool.rule_name
+        )
+        assert result["detectionTool"]["name"] == "Sonar"
+        assert (
+            result["detectionTool"]["rule"]["id"]
+            == self.codemod_instance._metadata.tool.rule_id
+        )
+        assert (
+            result["detectionTool"]["rule"]["name"]
+            == self.codemod_instance._metadata.tool.rule_name
+        )
+        # TODO: empty array until we add findings metadata
+        assert result["detectionTool"]["findings"] == []
 
 
 def original_and_expected_from_code_path(code_path, replacements):
