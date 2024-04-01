@@ -11,6 +11,7 @@ from types import ModuleType
 import jsonschema
 
 from codemodder import __version__, registry
+from codemodder.sonar_results import SonarResultSet
 
 from .validations import execute_code
 
@@ -261,6 +262,7 @@ class SonarIntegrationTest(BaseIntegrationTest):
         # in parallel at this time since they would all override the same
         # tests/samples/requirements.txt file, unless we change that to
         # a temporary file.
+        cls.check_sonar_issues()
 
     @classmethod
     def teardown_class(cls):
@@ -269,6 +271,19 @@ class SonarIntegrationTest(BaseIntegrationTest):
         # Revert code file
         with open(cls.code_path, mode="w", encoding="utf-8") as f:
             f.write(cls.original_code)
+
+    @classmethod
+    def check_sonar_issues(cls):
+        sonar_results = SonarResultSet.from_json(cls.sonar_issues_json)
+
+        assert (
+            cls.codemod.rule_id in sonar_results
+        ), f"Make sure to add a sonar issue for {cls.codemod.rule_id} in {cls.sonar_issues_json}"
+        results_for_codemod = sonar_results[cls.codemod.rule_id]
+        file_path = pathlib.Path(cls.code_filename)
+        assert (
+            file_path in results_for_codemod
+        ), f"Make sure to add a sonar issue for file `{cls.code_filename}` under rule `{cls.codemod.rule_id}` in {cls.sonar_issues_json}"
 
     def _assert_sonar_fields(self, result):
         assert self.codemod_instance._metadata.tool is not None
