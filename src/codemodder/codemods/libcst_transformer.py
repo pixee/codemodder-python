@@ -5,7 +5,6 @@ from libcst import matchers
 from libcst._position import CodeRange
 from libcst.codemod import CodemodContext
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
-from libcst.metadata import PositionProvider
 
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
 from codemodder.codemods.base_visitor import BaseTransformer
@@ -97,10 +96,6 @@ class LibcstResultTransformer(BaseTransformer):
         self, original_node: cst.ClassDef, updated_node: cst.ClassDef
     ) -> cst.ClassDef:
         return self._new_or_updated_node(original_node, updated_node)
-
-    def node_position(self, node):
-        # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
-        return self.get_metadata(PositionProvider, node)
 
     def add_change(self, node, description: str, start: bool = True):
         position = self.node_position(node)

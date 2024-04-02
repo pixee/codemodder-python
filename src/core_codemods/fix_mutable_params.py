@@ -167,8 +167,8 @@ class FixMutableParamsTransformer(SimpleCodemod):
         updated_node: cst.FunctionDef,
     ):
         """Transforms function definitions with mutable default parameters"""
-        # TODO: add filter by include or exclude that works for nodes
-        # that that have different start/end numbers.
+        if not self.node_is_selected(original_node):
+            return updated_node
 
         (
             updated_params,
