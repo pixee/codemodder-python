@@ -3,16 +3,16 @@ import subprocess
 from core_codemods.remove_assertion_in_pytest_raises import (
     RemoveAssertionInPytestRaises,
 )
+from security import safe_command
 
 
 class TestProgramFails:
     def test_no_project_dir_provided(self):
-        completed_process = subprocess.run(["codemodder"], check=False)
+        completed_process = safe_command.run(subprocess.run, ["codemodder"], check=False)
         assert completed_process.returncode == 3
 
     def test_codemods_include_exclude_conflict(self):
-        completed_process = subprocess.run(
-            [
+        completed_process = safe_command.run(subprocess.run, [
                 "codemodder",
                 "some/path",
                 "--output",
@@ -29,8 +29,7 @@ class TestProgramFails:
     def test_load_sast_only_by_flag(self, tmp_path):
         tmp_file_path = tmp_path / "sonar.json"
         tmp_file_path.touch()
-        completed_process = subprocess.run(
-            [
+        completed_process = safe_command.run(subprocess.run, [
                 "codemodder",
                 "tests/samples/",
                 "--sonar-issues-json",
