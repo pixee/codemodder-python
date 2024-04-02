@@ -16,8 +16,8 @@ if TYPE_CHECKING:
 @dataclass
 class LineInfo:
     line: int
-    column: int
-    snippet: str | None
+    column: int = -1
+    snippet: str | None = None
 
 
 @dataclass

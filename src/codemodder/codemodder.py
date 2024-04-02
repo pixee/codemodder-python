@@ -156,22 +156,13 @@ def run(original_args) -> int:
     logger.info("codemodder: python/%s", __version__)
     logger.info("command: %s %s", Path(sys.argv[0]).name, " ".join(original_args))
 
-    # TODO: sonar files should be _parsed_ here as well
     # TODO: this should be dict[str, list[Path]]
-
     tool_result_files_map: DefaultDict[str, list[str]] = detect_sarif_tools(
         [Path(name) for name in argv.sarif or []]
     )
-    (
-        tool_result_files_map["sonar"].extend(argv.sonar_issues_json)
-        if argv.sonar_issues_json
-        else None
-    )
-    (
-        tool_result_files_map["sonar"].extend(argv.sonar_hotspots_json)
-        if argv.sonar_hotspots_json
-        else None
-    )
+    tool_result_files_map["sonar"].extend(argv.sonar_issues_json or [])
+    tool_result_files_map["sonar"].extend(argv.sonar_hotspots_json or [])
+    tool_result_files_map["defectdojo"] = argv.defectdojo_findings_json
 
     repo_manager = PythonRepoManager(Path(argv.directory))
     context = CodemodExecutionContext(
