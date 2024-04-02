@@ -30,7 +30,7 @@ class TestParseArgs:
         [
             ["--help"],
             [
-                "tests/samples/",
+                "some/path",
                 "--output",
                 "here.txt",
                 "--codemod-include=url-sandbox",
@@ -51,7 +51,7 @@ class TestParseArgs:
         [
             ["--version"],
             [
-                "tests/samples/",
+                "some/path",
                 "--output",
                 "here.txt",
                 "--codemod-include=url-sandbox",
@@ -72,7 +72,7 @@ class TestParseArgs:
         [
             ["--list"],
             [
-                "tests/samples/",
+                "some/path",
                 "--output",
                 "here.txt",
                 "--list",
@@ -112,7 +112,7 @@ class TestParseArgs:
         with pytest.raises(SystemExit) as err:
             parse_args(
                 [
-                    "tests/samples/",
+                    "some/path",
                     "--output",
                     "here.txt",
                     "--output-format",
@@ -132,7 +132,7 @@ class TestParseArgs:
         with pytest.raises(SystemExit) as err:
             parse_args(
                 [
-                    "tests/samples/",
+                    "some/path",
                     "--output",
                     "here.txt",
                     "--codemod=url-sandbox",
@@ -152,7 +152,7 @@ class TestParseArgs:
     def test_codemod_name_or_id(self, codemod):
         parse_args(
             [
-                "tests/samples/",
+                "some/path",
                 "--output",
                 "here.txt",
                 f"--codemod-include={codemod}",
