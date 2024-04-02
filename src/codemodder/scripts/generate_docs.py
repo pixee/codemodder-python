@@ -314,6 +314,11 @@ METADATA = CORE_METADATA | {
         guidance_explained=CORE_METADATA["fix-missing-self-or-cls"].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
+    "secure-tempfile-S5445": DocMetadata(
+        importance=CORE_METADATA["secure-tempfile"].importance,
+        guidance_explained=CORE_METADATA["secure-tempfile"].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 
