@@ -33,7 +33,9 @@ class TestMultipleCodemods:
             '--path-exclude=""',
         ]
 
-        completed_process = safe_command.run(subprocess.run, command,
+        completed_process = safe_command.run(
+            subprocess.run,
+            command,
             check=False,
             shell=False,
         )
