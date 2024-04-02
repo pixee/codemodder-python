@@ -18,9 +18,6 @@ class TestSonarSecureRandom(BaseSASTCodemodTest):
         random.getrandbits(1)
         random.randint(0, 9)
         random.random()
-        random.sample(["a", "b"], 1)
-        random.choice(["a", "b"])
-        random.choices(["a", "b"])
         """
         expected_output = """
         import secrets
@@ -28,30 +25,48 @@ class TestSonarSecureRandom(BaseSASTCodemodTest):
         secrets.SystemRandom().getrandbits(1)
         secrets.SystemRandom().randint(0, 9)
         secrets.SystemRandom().random()
-        secrets.SystemRandom().sample(["a", "b"], 1)
-        secrets.choice(["a", "b"])
-        secrets.SystemRandom().choices(["a", "b"])
         """
-        # todo: not issues, notspots
-        issues = {
-            "issues": [
+        hotspots = {
+            "hotspots": [
                 {
-                    "rule": "python:S5905",
+                    "rule": "python:S2245",
                     "status": "OPEN",
                     "component": "code.py",
                     "textRange": {
-                        "startLine": 2,
-                        "endLine": 2,
-                        "startOffset": 8,
+                        "startLine": 4,
+                        "endLine": 4,
+                        "startOffset": 0,
+                        "endOffset": 21,
+                    },
+                },
+                {
+                    "rule": "python:S2245",
+                    "status": "OPEN",
+                    "component": "code.py",
+                    "textRange": {
+                        "startLine": 5,
+                        "endLine": 5,
+                        "startOffset": 0,
+                        "endOffset": 20,
+                    },
+                },
+                {
+                    "rule": "python:S2245",
+                    "status": "OPEN",
+                    "component": "code.py",
+                    "textRange": {
+                        "startLine": 6,
+                        "endLine": 6,
+                        "startOffset": 0,
                         "endOffset": 15,
                     },
-                }
+                },
             ]
         }
         self.run_and_assert(
             tmpdir,
             input_code,
             expected_output,
-            results=json.dumps(issues),
+            results=json.dumps(hotspots),
             num_changes=3,
         )
