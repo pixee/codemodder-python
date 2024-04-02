@@ -8,25 +8,29 @@ class TestProcessSandbox(BaseIntegrationTest):
     original_code = """
     import subprocess
 
-    subprocess.run("echo 'hi'", shell=True)
-    subprocess.run(["ls", "-l"])
+    cmd = " ".join(["ls"])
+
+    subprocess.run(cmd, shell=True)
+    subprocess.run([cmd, "-l"])
     
-    subprocess.call("echo 'hi'", shell=True)
-    subprocess.call(["ls", "-l"])
+    subprocess.call(cmd, shell=True)
+    subprocess.call([cmd, "-l"])
     
-    subprocess.check_output(["ls", "-l"])
+    subprocess.check_output([cmd, "-l"])
     
+    subprocess.run("ls -l", shell=True)
+
     var = "hello"
     """
     replacement_lines = [
         (2, """from security import safe_command\n\n"""),
-        (3, """safe_command.run(subprocess.run, "echo 'hi'", shell=True)\n"""),
-        (4, """safe_command.run(subprocess.run, ["ls", "-l"])\n"""),
-        (6, """safe_command.run(subprocess.call, "echo 'hi'", shell=True)\n"""),
-        (7, """safe_command.run(subprocess.call, ["ls", "-l"])\n"""),
+        (5, """safe_command.run(subprocess.run, cmd, shell=True)\n"""),
+        (6, """safe_command.run(subprocess.run, [cmd, "-l"])\n"""),
+        (8, """safe_command.run(subprocess.call, cmd, shell=True)\n"""),
+        (9, """safe_command.run(subprocess.call, [cmd, "-l"])\n"""),
     ]
-    expected_diff = '--- \n+++ \n@@ -1,10 +1,11 @@\n import subprocess\n+from security import safe_command\n \n-subprocess.run("echo \'hi\'", shell=True)\n-subprocess.run(["ls", "-l"])\n+safe_command.run(subprocess.run, "echo \'hi\'", shell=True)\n+safe_command.run(subprocess.run, ["ls", "-l"])\n \n-subprocess.call("echo \'hi\'", shell=True)\n-subprocess.call(["ls", "-l"])\n+safe_command.run(subprocess.call, "echo \'hi\'", shell=True)\n+safe_command.run(subprocess.call, ["ls", "-l"])\n \n subprocess.check_output(["ls", "-l"])\n \n'
-    expected_line_change = "3"
+    expected_diff = '--- \n+++ \n@@ -1,12 +1,13 @@\n import subprocess\n+from security import safe_command\n \n cmd = " ".join(["ls"])\n \n-subprocess.run(cmd, shell=True)\n-subprocess.run([cmd, "-l"])\n+safe_command.run(subprocess.run, cmd, shell=True)\n+safe_command.run(subprocess.run, [cmd, "-l"])\n \n-subprocess.call(cmd, shell=True)\n-subprocess.call([cmd, "-l"])\n+safe_command.run(subprocess.call, cmd, shell=True)\n+safe_command.run(subprocess.call, [cmd, "-l"])\n \n subprocess.check_output([cmd, "-l"])\n \n'
+    expected_line_change = "5"
     num_changes = 4
     num_changed_files = 2
     change_description = ProcessSandbox.change_description

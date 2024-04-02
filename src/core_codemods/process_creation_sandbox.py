@@ -27,21 +27,20 @@ class ProcessSandbox(SimpleCodemod):
         rules:
             - pattern-either:
               - patterns:
-                - pattern: subprocess.run(...)
+                - pattern: subprocess.$FUNC(...)
+                - pattern-not: subprocess.$FUNC("...", ...)
+                - pattern-not: subprocess.$FUNC(["...", ...], ...)
+                - metavariable-pattern:
+                    metavariable: $FUNC
+                    patterns:
+                    - pattern-either:
+                      - pattern: run
+                      - pattern: call
+                      - pattern: Popen
                 - pattern-inside: |
                     import subprocess
                     ...
-              - patterns:
-                - pattern: subprocess.call(...)
-                - pattern-inside: |
-                    import subprocess
-                    ...
-              - patterns:
-                - pattern: subprocess.Popen(...)
-                - pattern-inside: |
-                    import subprocess
-                    ...
-        """
+    """
 
     def on_result_found(self, original_node, updated_node):
         self.add_needed_import("security", "safe_command")
