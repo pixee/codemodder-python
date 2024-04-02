@@ -6,7 +6,6 @@ from codemodder.codemodder import find_semgrep_results, run
 from codemodder.diff import create_diff_from_tree
 from codemodder.registry import load_registered_codemods
 from codemodder.result import ResultSet
-from codemodder.semgrep import run as semgrep_run
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -21,19 +20,44 @@ def disable_codemod_apply(mocker, request):
     run all of codemodder but we most often don't need to actually apply codemods.
     """
     # Skip mocking only for specific tests that need to apply codemods.
-    if request.function.__name__ == "test_cst_parsing_fails":
+    if request.function.__name__ in (
+        "test_cst_parsing_fails",
+        "test_dry_run",
+        "test_run_codemod_name_or_id",
+    ):
         return
     mocker.patch("codemodder.codemods.base_codemod.BaseCodemod.apply")
 
 
+@pytest.fixture(scope="function")
+def dir_structure(tmp_path_factory):
+    code_dir = tmp_path_factory.mktemp("code")
+    (code_dir / "test_request.py").write_text(
+        """
+    from test_sources import untrusted_data
+    import requests
+
+    url = untrusted_data()
+    requests.get(url)
+    var = "hello"
+    """
+    )
+    (code_dir / "test_random.py").write_text(
+        """
+    import random
+    def func(foo=[]):
+        return random.random()
+    """
+    )
+    codetf = code_dir / "result.codetf"
+    assert not codetf.exists()
+    return code_dir, codetf
+
+
 class TestRun:
     @mock.patch("libcst.parse_module")
-    def test_no_files_matched(self, mock_parse, tmpdir):
-        codetf = tmpdir / "result.codetf"
-        code_dir = tmpdir.mkdir("code")
-        code_dir.join("code.py").write("# anything")
-        assert not codetf.exists()
-
+    def test_no_files_matched(self, mock_parse, dir_structure):
+        code_dir, codetf = dir_structure
         args = [
             str(code_dir),
             "--output",
@@ -50,15 +74,12 @@ class TestRun:
 
     @mock.patch("libcst.parse_module", side_effect=Exception)
     @mock.patch("codemodder.codetf.CodeTF.build")
-    def test_cst_parsing_fails(self, build_report, mock_parse, tmpdir):
-        code_dir = tmpdir.mkdir("code")
-        code_file = code_dir.join("test_request.py")
-        code_file.write("# anything")
-
+    def test_cst_parsing_fails(self, build_report, mock_parse, dir_structure):
+        code_dir, codetf = dir_structure
         args = [
             str(code_dir),
             "--output",
-            str(tmpdir / "result.codetf"),
+            str(codetf),
             "--codemod-include",
             "fix-assert-tuple",
             "--path-include",
@@ -80,17 +101,21 @@ class TestRun:
         assert requests_report.changeset == []
         assert len(requests_report.failedFiles) == 1
         assert sorted(requests_report.failedFiles) == [
-            str(code_file),
+            str(code_dir / "test_request.py"),
         ]
 
         build_report.return_value.write_report.assert_called_once()
 
     @mock.patch("codemodder.codemods.libcst_transformer.update_code")
-    @mock.patch("codemodder.codemods.semgrep.semgrep_run", side_effect=semgrep_run)
-    def test_dry_run(self, _, mock_update_code, tmpdir):
-        codetf = tmpdir / "result.codetf"
+    @mock.patch(
+        "codemodder.codemods.libcst_transformer.LibcstTransformerPipeline.apply",
+        new_callable=mock.PropertyMock,
+    )
+    @mock.patch("codemodder.context.CodemodExecutionContext.compile_results")
+    def test_dry_run(self, _, transform_apply, mock_update_code, dir_structure):
+        code_dir, codetf = dir_structure
         args = [
-            "tests/samples/",
+            str(code_dir),
             "--output",
             str(codetf),
             "--dry-run",
@@ -103,16 +128,17 @@ class TestRun:
         res = run(args)
         assert res == 0
         assert codetf.exists()
-
+        transform_apply.assert_called()
         mock_update_code.assert_not_called()
 
     @pytest.mark.parametrize("dry_run", [True, False])
     @mock.patch("codemodder.codetf.CodeTF.build")
-    def test_reporting(self, mock_reporting, dry_run):
+    def test_reporting(self, mock_reporting, dry_run, dir_structure):
+        code_dir, codetf = dir_structure
         args = [
-            "tests/samples/",
+            str(code_dir),
             "--output",
-            "here.txt",
+            str(codetf),
             # Make this test faster by restricting the number of codemods
             "--codemod-include=use-generator,use-defusedxml,use-walrus-if",
         ]
@@ -132,21 +158,33 @@ class TestRun:
         mock_reporting.return_value.write_report.assert_called_once()
 
     @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
+    @mock.patch(
+        "codemodder.codemods.libcst_transformer.LibcstTransformerPipeline.apply",
+        new_callable=mock.PropertyMock,
+    )
     @mock.patch("codemodder.context.CodemodExecutionContext.compile_results")
     @mock.patch("codemodder.codetf.CodeTF.write_report")
-    def test_run_codemod_name_or_id(self, write_report, mock_compile_results, codemod):
+    def test_run_codemod_name_or_id(
+        self,
+        write_report,
+        mock_compile_results,
+        transform_apply,
+        codemod,
+        dir_structure,
+    ):
         del write_report
+        code_dir, codetf = dir_structure
         args = [
-            "tests/samples/",
+            str(code_dir),
             "--output",
-            "here.txt",
+            str(codetf),
             f"--codemod-include={codemod}",
         ]
 
         exit_code = run(args)
         assert exit_code == 0
-        # todo: if no codemods run do we still compile results?
         mock_compile_results.assert_called()
+        transform_apply.assert_called()
 
 
 class TestCodemodIncludeExclude:
@@ -154,12 +192,15 @@ class TestCodemodIncludeExclude:
     @mock.patch("codemodder.registry.logger.warning")
     @mock.patch("codemodder.codemodder.logger.info")
     @mock.patch("codemodder.codetf.CodeTF.write_report")
-    def test_codemod_include_no_match(self, write_report, info_logger, warning_logger):
+    def test_codemod_include_no_match(
+        self, write_report, info_logger, warning_logger, dir_structure
+    ):
         bad_codemod = "doesntexist"
+        code_dir, codetf = dir_structure
         args = [
-            "tests/samples/",
+            str(code_dir),
             "--output",
-            "here.txt",
+            str(codetf),
             f"--codemod-include={bad_codemod}",
         ]
         run(args)
@@ -177,14 +218,15 @@ class TestCodemodIncludeExclude:
     @mock.patch("codemodder.codemodder.logger.info")
     @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_codemod_include_some_match(
-        self, write_report, info_logger, warning_logger
+        self, write_report, info_logger, warning_logger, dir_structure
     ):
         bad_codemod = "doesntexist"
         good_codemod = "secure-random"
+        code_dir, codetf = dir_structure
         args = [
-            "tests/samples/",
+            str(code_dir),
             "--output",
-            "here.txt",
+            str(codetf),
             f"--codemod-include={bad_codemod},{good_codemod}",
         ]
         run(args)
@@ -199,14 +241,15 @@ class TestCodemodIncludeExclude:
     @mock.patch("codemodder.codemodder.logger.info")
     @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_codemod_exclude_some_match(
-        self, write_report, info_logger, warning_logger
+        self, write_report, info_logger, warning_logger, dir_structure
     ):
         bad_codemod = "doesntexist"
         good_codemod = "secure-random"
+        code_dir, codetf = dir_structure
         args = [
-            "tests/samples/",
+            str(code_dir),
             "--output",
-            "here.txt",
+            str(codetf),
             f"--codemod-exclude={bad_codemod},{good_codemod}",
         ]
         run(args)
@@ -229,13 +272,14 @@ class TestCodemodIncludeExclude:
     @mock.patch("codemodder.codetf.CodeTF.write_report")
     @mock.patch("codemodder.codemods.base_codemod.BaseCodemod.apply")
     def test_codemod_exclude_no_match(
-        self, apply, write_report, info_logger, warning_logger
+        self, apply, write_report, info_logger, warning_logger, dir_structure
     ):
         bad_codemod = "doesntexist"
+        code_dir, codetf = dir_structure
         args = [
-            "tests/samples/",
+            str(code_dir),
             "--output",
-            "here.txt",
+            str(codetf),
             f"--codemod-exclude={bad_codemod}",
         ]
 
@@ -248,14 +292,14 @@ class TestCodemodIncludeExclude:
         )
 
     @mock.patch("codemodder.codemods.semgrep.semgrep_run")
-    def test_exclude_all_registered_codemods(self, mock_semgrep_run, tmpdir):
-        codetf = tmpdir / "result.codetf"
+    def test_exclude_all_registered_codemods(self, mock_semgrep_run, dir_structure):
+        code_dir, codetf = dir_structure
         assert not codetf.exists()
 
         registry = load_registered_codemods()
         names = ",".join(registry.names)
         args = [
-            "tests/samples/",
+            str(code_dir),
             "--output",
             str(codetf),
             f"--codemod-exclude={names}",
@@ -269,10 +313,11 @@ class TestCodemodIncludeExclude:
 
 class TestExitCode:
     @mock.patch("codemodder.codetf.CodeTF.write_report")
-    def test_success_0(self, mock_report):
+    def test_no_changes_success_0(self, mock_report, dir_structure):
         del mock_report
+        code_dir, codetf = dir_structure
         args = [
-            "tests/samples/",
+            str(code_dir),
             "--output",
             "here.txt",
             "--codemod-include=url-sandbox",
@@ -300,7 +345,7 @@ class TestExitCode:
     def test_conflicting_include_exclude(self, mock_report):
         del mock_report
         args = [
-            "tests/samples/",
+            "anything",
             "--output",
             "here.txt",
             "--codemod-exclude",

@@ -14,7 +14,7 @@ class TestProgramFails:
         completed_process = subprocess.run(
             [
                 "codemodder",
-                "tests/samples/",
+                "some/path",
                 "--output",
                 "doesntmatter.txt",
                 "--codemod-exclude",
