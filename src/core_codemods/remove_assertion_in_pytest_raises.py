@@ -93,10 +93,6 @@ class RemoveAssertionInPytestRaisesTransformer(
     ) -> Union[
         cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel
     ]:
-        # TODO: add filter by include or exclude that works for nodes
-        # that that have different start/end numbers.
-
-        # Are all items pytest.raises?
         if not self._all_pytest_raises(original_node):
             return updated_node
 
