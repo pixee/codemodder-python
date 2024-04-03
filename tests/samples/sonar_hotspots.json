@@ -1,0 +1,68 @@
+{
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 2
+  },
+  "hotspots": [
+    {
+      "key": "AY6fXn2rzaaymEtIucTd",
+      "component": "pixee_codemodder-python:secure_random.py",
+      "project": "pixee_codemodder-python",
+      "securityCategory": "weak-cryptography",
+      "vulnerabilityProbability": "MEDIUM",
+      "status": "TO_REVIEW",
+      "line": 3,
+      "message": "Make sure that using this pseudorandom number generator is safe here.",
+      "assignee": "AY02ClhIe4Bh2XgBg3RU",
+      "creationDate": "2024-04-02T17:11:46+0200",
+      "updateDate": "2024-04-02T17:12:18+0200",
+      "textRange": {
+        "startLine": 3,
+        "endLine": 3,
+        "startOffset": 0,
+        "endOffset": 15
+      },
+      "flows": [],
+      "ruleKey": "python:S2245"
+    },
+    {
+      "key": "AY6fXn2rzaaymEtIucTe",
+      "component": "pixee_codemodder-python:secure_random.py",
+      "project": "pixee_codemodder-python",
+      "securityCategory": "weak-cryptography",
+      "vulnerabilityProbability": "MEDIUM",
+      "status": "TO_REVIEW",
+      "line": 4,
+      "message": "Make sure that using this pseudorandom number generator is safe here.",
+      "assignee": "AY02ClhIe4Bh2XgBg3RU",
+      "creationDate": "2024-04-02T17:11:46+0200",
+      "updateDate": "2024-04-02T17:12:18+0200",
+      "textRange": {
+        "startLine": 4,
+        "endLine": 4,
+        "startOffset": 0,
+        "endOffset": 21
+      },
+      "flows": [],
+      "ruleKey": "python:S2245"
+    }
+  ],
+  "components": [
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python",
+      "qualifier": "TRK",
+      "name": "codemodder-python",
+      "longName": "codemodder-python"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:secure_random.py",
+      "qualifier": "FIL",
+      "name": "secure_random.py",
+      "longName": "secure_random.py",
+      "path": "secure_random.py"
+    }
+  ]
+}
