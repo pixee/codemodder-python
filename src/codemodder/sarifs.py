@@ -1,8 +1,9 @@
 import json
 from abc import ABCMeta, abstractmethod
+from collections import defaultdict
 from importlib.metadata import entry_points
 from pathlib import Path
-from typing import Optional
+from typing import DefaultDict, Optional
 
 from typing_extensions import Self
 
@@ -18,8 +19,8 @@ class AbstractSarifToolDetector(metaclass=ABCMeta):
         pass
 
 
-def detect_sarif_tools(filenames: list[Path]) -> dict[str, list[str]]:
-    results: dict[str, list[str]] = {}
+def detect_sarif_tools(filenames: list[Path]) -> DefaultDict[str, list[str]]:
+    results: DefaultDict[str, list[str]] = defaultdict(list)
 
     logger.debug("loading registered SARIF tool detectors")
     detectors = {
@@ -33,7 +34,7 @@ def detect_sarif_tools(filenames: list[Path]) -> dict[str, list[str]]:
                 try:
                     if det.detect(run):
                         logger.debug("detected %s sarif: %s", name, fname)
-                        results.setdefault(name, []).append(str(fname))
+                        results[name].append(str(fname))
                 except (KeyError, AttributeError, ValueError):
                     continue
 

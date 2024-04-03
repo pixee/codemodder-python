@@ -12,23 +12,23 @@ from codemodder.result import LineInfo, Location, Result, ResultSet
 
 class SonarLocation(Location):
     @classmethod
-    def from_issue(cls, issue) -> Self:
-        location = issue.get("textRange")
+    def from_result(cls, result) -> Self:
+        location = result.get("textRange")
         start = LineInfo(location.get("startLine"), location.get("startOffset"), "")
         end = LineInfo(location.get("endLine"), location.get("endOffset"), "")
-        file = Path(issue.get("component").split(":")[-1])
+        file = Path(result.get("component").split(":")[-1])
         return cls(file=file, start=start, end=end)
 
 
 class SonarResult(Result):
 
     @classmethod
-    def from_issue(cls, issue) -> Self:
-        rule_id = issue.get("rule", None)
-        if not rule_id:
+    def from_result(cls, result) -> Self:
+        # Sonar issues have `rule` as key while hotspots call it `ruleKey`
+        if not (rule_id := result.get("rule", None) or result.get("ruleKey", None)):
             raise ValueError("Could not extract rule id from sarif result.")
 
-        locations: list[Location] = [SonarLocation.from_issue(issue)]
+        locations: list[Location] = [SonarLocation.from_result(result)]
         return cls(rule_id=rule_id, locations=locations)
 
     def match_location(self, pos, node):
@@ -51,9 +51,9 @@ class SonarResultSet(ResultSet):
                 data = json.load(file)
 
             result_set = cls()
-            for issue in data.get("issues"):
-                if issue["status"].lower() == "open":
-                    result_set.add_result(SonarResult.from_issue(issue))
+            for result in data.get("issues") or [] + data.get("hotspots") or []:
+                if result["status"].lower() in ("open", "to_review"):
+                    result_set.add_result(SonarResult.from_result(result))
 
             return result_set
         except Exception:

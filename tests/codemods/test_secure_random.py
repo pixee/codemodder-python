@@ -15,16 +15,18 @@ class TestSecureRandom(BaseSemgrepCodemodTest):
         import random
 
         random.random()
+        random.getrandbits(1)
         var = "hello"
         """
         expected_output = """
         import secrets
 
         secrets.SystemRandom().random()
+        secrets.SystemRandom().getrandbits(1)
         var = "hello"
         """
 
-        self.run_and_assert(tmpdir, input_code, expected_output)
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
 
     def test_from_random(self, tmpdir):
         input_code = """
@@ -199,3 +201,35 @@ class TestSecureRandom(BaseSemgrepCodemodTest):
         rand = domran.SystemRandom()
         """
         self.run_and_assert(tmpdir, input_code, input_code)
+
+    def test_sampling(self, tmpdir):
+        input_code = """
+        import random
+
+        random.sample(["a", "b"], 1)
+        random.choice(["a", "b"])
+        random.choices(["a", "b"])
+        """
+        expected_output = """
+        import secrets
+
+        secrets.SystemRandom().sample(["a", "b"], 1)
+        secrets.choice(["a", "b"])
+        secrets.SystemRandom().choices(["a", "b"])
+        """
+
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=3)
+
+    def test_from_import_choice(self, tmpdir):
+        input_code = """
+        from random import choice
+
+        choice(["a", "b"])
+        """
+        expected_output = """
+        import secrets
+
+        secrets.choice(["a", "b"])
+        """
+
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=1)

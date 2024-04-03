@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Sequence
+from typing import DefaultDict, Sequence
 
 from codemodder import __version__, registry
 from codemodder.cli import parse_args
@@ -158,10 +158,20 @@ def run(original_args) -> int:
 
     # TODO: sonar files should be _parsed_ here as well
     # TODO: this should be dict[str, list[Path]]
-    tool_result_files_map: dict[str, list[str]] = detect_sarif_tools(
+
+    tool_result_files_map: DefaultDict[str, list[str]] = detect_sarif_tools(
         [Path(name) for name in argv.sarif or []]
     )
-    tool_result_files_map["sonar"] = argv.sonar_issues_json
+    (
+        tool_result_files_map["sonar"].extend(argv.sonar_issues_json)
+        if argv.sonar_issues_json
+        else None
+    )
+    (
+        tool_result_files_map["sonar"].extend(argv.sonar_hotspots_json)
+        if argv.sonar_hotspots_json
+        else None
+    )
 
     repo_manager = PythonRepoManager(Path(argv.directory))
     context = CodemodExecutionContext(
