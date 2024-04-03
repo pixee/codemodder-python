@@ -319,6 +319,11 @@ METADATA = CORE_METADATA | {
         guidance_explained=CORE_METADATA["secure-tempfile"].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
+    "secure-random-S2245": DocMetadata(
+        importance=CORE_METADATA["secure-random"].importance,
+        guidance_explained=CORE_METADATA["secure-random"].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 
