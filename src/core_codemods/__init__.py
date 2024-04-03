@@ -57,6 +57,7 @@ from .sonar.sonar_numpy_nan_equality import SonarNumpyNanEquality
 from .sonar.sonar_remove_assertion_in_pytest_raises import (
     SonarRemoveAssertionInPytestRaises,
 )
+from .sonar.sonar_secure_random import SonarSecureRandom
 from .sonar.sonar_tempfile_mktemp import SonarTempfileMktemp
 from .sql_parameterization import SQLQueryParameterization
 from .str_concat_in_seq_literal import StrConcatInSeqLiteral
@@ -148,5 +149,6 @@ sonar_registry = CodemodCollection(
         SonarJwtDecodeVerify,
         SonarFixMissingSelfOrCls,
         SonarTempfileMktemp,
+        SonarSecureRandom,
     ],
 )

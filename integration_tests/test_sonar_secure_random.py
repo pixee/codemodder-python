@@ -1,33 +1,29 @@
 from codemodder.codemods.test import SonarIntegrationTest
-from core_codemods.django_json_response_type import DjangoJsonResponseTypeTransformer
-from core_codemods.sonar.sonar_django_json_response_type import (
-    SonarDjangoJsonResponseType,
-)
+from core_codemods.secure_random import SecureRandomTransformer
+from core_codemods.sonar.sonar_secure_random import SonarSecureRandom
 
 
 class TestSonarDjangoJsonResponseType(SonarIntegrationTest):
-    codemod = SonarDjangoJsonResponseType
-    code_path = "tests/samples/django_json_response_type.py"
+    codemod = SonarSecureRandom
+    code_path = "tests/samples/secure_random.py"
     replacement_lines = [
-        (
-            6,
-            """    return HttpResponse(json_response, content_type="application/json")\n""",
-        ),
+        (1, """import secrets\n"""),
+        (3, """secrets.SystemRandom().random()\n"""),
+        (4, """secrets.SystemRandom().getrandbits(1)\n"""),
     ]
-
     # fmt: off
     expected_diff = (
-    """--- \n"""
-    """+++ \n"""
-    """@@ -3,4 +3,4 @@\n"""
-    """ \n"""
-    """ def foo(request):\n"""
-    """     json_response = json.dumps({ "user_input": request.GET.get("input") })\n"""
-    """-    return HttpResponse(json_response)\n"""
-    """+    return HttpResponse(json_response, content_type="application/json")\n"""
-    )
+        """--- \n"""
+        """+++ \n"""
+        """@@ -1,4 +1,4 @@\n"""
+        """-import random\n"""
+        """+import secrets\n"""
+        """ \n"""
+        """-random.random()\n"""
+        """-random.getrandbits(1)\n"""
+        """+secrets.SystemRandom().random()\n"""
+        """+secrets.SystemRandom().getrandbits(1)\n""")
     # fmt: on
-
-    expected_line_change = "6"
-    change_description = DjangoJsonResponseTypeTransformer.change_description
-    num_changed_files = 1
+    expected_line_change = "3"
+    change_description = SecureRandomTransformer.change_description
+    num_changes = 2

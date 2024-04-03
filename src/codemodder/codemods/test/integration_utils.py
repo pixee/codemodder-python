@@ -11,7 +11,6 @@ from types import ModuleType
 import jsonschema
 
 from codemodder import __version__, registry
-from codemodder.sonar_results import SonarResultSet
 
 from .validations import execute_code
 
@@ -43,6 +42,7 @@ class BaseIntegrationTest(DependencyTestMixin):
     num_changed_files = 1
     allowed_exceptions = ()
     sonar_issues_json: str | None = None
+    sonar_hotspots_json: str | None = None
 
     @classmethod
     def setup_class(cls):
@@ -112,6 +112,10 @@ class BaseIntegrationTest(DependencyTestMixin):
             f" --sonar-issues-json={self.sonar_issues_json}"
             if self.sonar_issues_json
             else ""
+        ) + (
+            f" --sonar-hotspots-json={self.sonar_hotspots_json}"
+            if self.sonar_hotspots_json
+            else ""
         )
         assert run["directory"] == os.path.abspath(self.code_dir)
         assert run["sarifs"] == []
@@ -126,11 +130,12 @@ class BaseIntegrationTest(DependencyTestMixin):
         ]
 
         assert ("detectionTool" in result) == bool(self.sonar_issues_json)
+        assert ("detectionTool" in result) == bool(self.sonar_hotspots_json)
 
         # TODO: if/when we add description for each url
         for reference in result["references"][
             # Last reference for Sonar has a different description
-            : (-1 if self.sonar_issues_json else None)
+            : (-1 if self.sonar_issues_json or self.sonar_hotspots_json else None)
         ]:
             assert reference["url"] == reference["description"]
 
@@ -199,6 +204,8 @@ class BaseIntegrationTest(DependencyTestMixin):
 
         if self.sonar_issues_json:
             command.append(f"--sonar-issues-json={self.sonar_issues_json}")
+        if self.sonar_hotspots_json:
+            command.append(f"--sonar-hotspots-json={self.sonar_hotspots_json}")
 
         self.write_original_code()
         self.write_original_dependencies()
@@ -245,6 +252,7 @@ class SonarIntegrationTest(BaseIntegrationTest):
 
     code_path = NotImplementedError
     sonar_issues_json = "tests/samples/sonar_issues.json"
+    sonar_hotspots_json = "tests/samples/sonar_hotspots.json"
 
     @classmethod
     def setup_class(cls):
@@ -274,16 +282,20 @@ class SonarIntegrationTest(BaseIntegrationTest):
 
     @classmethod
     def check_sonar_issues(cls):
-        sonar_results = SonarResultSet.from_json(cls.sonar_issues_json)
+        from codemodder.codemods.sonar import process_sonar_findings
+
+        sonar_results = process_sonar_findings(
+            [cls.sonar_issues_json, cls.sonar_hotspots_json]
+        )
 
         assert (
             cls.codemod.rule_id in sonar_results
-        ), f"Make sure to add a sonar issue for {cls.codemod.rule_id} in {cls.sonar_issues_json}"
+        ), f"Make sure to add a sonar issue/hotspot for {cls.codemod.rule_id} in {cls.sonar_issues_json} or {cls.sonar_hotspots_json}"
         results_for_codemod = sonar_results[cls.codemod.rule_id]
         file_path = pathlib.Path(cls.code_filename)
         assert (
             file_path in results_for_codemod
-        ), f"Make sure to add a sonar issue for file `{cls.code_filename}` under rule `{cls.codemod.rule_id}` in {cls.sonar_issues_json}"
+        ), f"Make sure to add a sonar issue/hotspot for file `{cls.code_filename}` under rule `{cls.codemod.rule_id}`in {cls.sonar_issues_json} or {cls.sonar_hotspots_json}"
 
     def _assert_sonar_fields(self, result):
         assert self.codemod_instance._metadata.tool is not None

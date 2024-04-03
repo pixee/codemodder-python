@@ -24,8 +24,8 @@ class SonarResult(Result):
 
     @classmethod
     def from_result(cls, result) -> Self:
-        rule_id = result.get("rule", None)
-        if not rule_id:
+        # Sonar issues have `rule` as key while hotspots call it `ruleKey`
+        if not (rule_id := result.get("rule", None) or result.get("ruleKey", None)):
             raise ValueError("Could not extract rule id from sarif result.")
 
         locations: list[Location] = [SonarLocation.from_result(result)]
