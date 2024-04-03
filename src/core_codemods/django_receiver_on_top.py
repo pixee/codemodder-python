@@ -19,8 +19,6 @@ class DjangoReceiverOnTopTransformer(LibcstResultTransformer, NameResolutionMixi
     ) -> Union[
         cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel
     ]:
-        # TODO: add filter by include or exclude that works for nodes
-        # that that have different start/end numbers.
         maybe_receiver_with_index = None
         for i, decorator in enumerate(original_node.decorators):
             if self.find_base_name(decorator.decorator) == "django.dispatch.receiver":
