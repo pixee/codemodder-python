@@ -81,6 +81,7 @@ all = [
 [project.entry-points.codemods]
 core = "core_codemods:registry"
 sonar = "core_codemods:sonar_registry"
+defectdojo = "core_codemods:defectdojo_registry"
 
 [tool.setuptools]
 
