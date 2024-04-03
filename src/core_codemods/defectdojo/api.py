@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import cache
 from pathlib import Path
 from typing import cast
 
@@ -21,11 +22,18 @@ class DefectDojoDetector(BaseDetector):
         context: CodemodExecutionContext,
         files_to_analyze: list[Path],
     ) -> ResultSet:
-        result_set = DefectDojoResultSet()
-        for filename in context.tool_result_files_map.get("defectdojo", []):
-            result_set |= DefectDojoResultSet.from_json(filename)
+        del codemod_id
+        del files_to_analyze
+        result_files = tuple(context.tool_result_files_map.get("defectdojo", ()))
+        return _process_results(result_files)
 
-        return result_set
+
+@cache
+def _process_results(result_files: tuple[str]) -> ResultSet:
+    result_set = DefectDojoResultSet()
+    for filename in result_files:
+        result_set |= DefectDojoResultSet.from_json(filename)
+    return result_set
 
 
 class DefectDojoCodemod(SASTCodemod):

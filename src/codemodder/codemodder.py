@@ -162,7 +162,7 @@ def run(original_args) -> int:
     )
     tool_result_files_map["sonar"].extend(argv.sonar_issues_json or [])
     tool_result_files_map["sonar"].extend(argv.sonar_hotspots_json or [])
-    tool_result_files_map["defectdojo"] = argv.defectdojo_findings_json
+    tool_result_files_map["defectdojo"] = argv.defectdojo_findings_json or []
 
     repo_manager = PythonRepoManager(Path(argv.directory))
     context = CodemodExecutionContext(

@@ -1,13 +1,110 @@
-from typing import Union, cast
+from typing import Protocol, Union, cast
 
 import libcst as cst
 
+from codemodder.codemods.libcst_transformer import (
+    LibcstResultTransformer,
+    LibcstTransformerPipeline,
+)
+from codemodder.codemods.semgrep import SemgrepRuleDetector
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
+from core_codemods.api import CoreCodemod, Metadata, Reference, ReviewGuidance
+
+YAML_MODULE_NAME = "yaml"
 
 
-class HardenPyyaml(SimpleCodemod, NameResolutionMixin):
-    metadata = Metadata(
+class CodemodProtocol(Protocol):
+    def add_needed_import(self, module: str, obj=None): ...
+    def get_aliased_prefix_name(self, node: cst.CSTNode, module: str): ...
+    def parse_expression(self, code: str) -> cst.BaseExpression: ...
+    def update_arg_target(
+        self, node: cst.Call, new_args: list[cst.Arg]
+    ) -> cst.Call: ...
+
+
+class HardenPyyamlCallMixin:
+    def update_call(
+        self: CodemodProtocol, original_node: cst.Call, updated_node: cst.Call
+    ) -> cst.Call:
+        maybe_name = self.get_aliased_prefix_name(original_node, YAML_MODULE_NAME)
+        if (maybe_name := maybe_name or YAML_MODULE_NAME) == YAML_MODULE_NAME:
+            self.add_needed_import(YAML_MODULE_NAME)
+        updated_node = cast(cst.Call, updated_node)  # satisfy the type checker
+        new_args = [
+            *updated_node.args[:1],
+            # This is the case where the arg is present but a bad value
+            (
+                updated_node.args[1].with_changes(
+                    value=self.parse_expression(f"{maybe_name}.SafeLoader")
+                )
+                if len(updated_node.args) > 1
+                # This is the case where the arg is not present
+                # Note that this case is deprecated in PyYAML 5.1 since the default is unsafe
+                else cst.Arg(
+                    keyword=cst.Name("Loader"),
+                    value=self.parse_expression(f"{maybe_name}.SafeLoader"),
+                    equal=cst.AssignEqual(
+                        whitespace_before=cst.SimpleWhitespace(""),
+                        whitespace_after=cst.SimpleWhitespace(""),
+                    ),
+                )
+            ),
+        ]
+        return self.update_arg_target(updated_node, new_args)
+
+
+class HardenPyyamlTransformer(
+    LibcstResultTransformer,
+    NameResolutionMixin,
+    HardenPyyamlCallMixin,
+    CodemodProtocol,
+):
+    change_description = "Replace unsafe `pyyaml` loader with `SafeLoader` in calls to `yaml.load` or custom loader classes."
+
+    def on_result_found(
+        self,
+        original_node: Union[cst.Call, cst.ClassDef],
+        updated_node: Union[cst.Call, cst.ClassDef],
+    ):
+        # TODO: provide different change description for each case.
+        match original_node, updated_node:
+            case cst.Call(), cst.Call():
+                return self.update_call(original_node, updated_node)
+            case cst.ClassDef(), _:
+                return updated_node.with_changes(
+                    bases=self._update_bases(original_node)
+                )
+        return updated_node
+
+    def _update_bases(self, original_node: cst.ClassDef) -> list[cst.Arg]:
+        new = []
+        base_names = [
+            f"yaml.{klas}"
+            for klas in ("UnsafeLoader", "Loader", "BaseLoader", "FullLoader")
+        ]
+        for base_arg in original_node.bases:
+            base_name = self.find_base_name(base_arg.value)
+            if base_name not in base_names:
+                new.append(base_arg)
+                continue
+
+            match base_arg.value:
+                case cst.Name():
+                    self.add_needed_import(YAML_MODULE_NAME, "SafeLoader")
+                    self.remove_unused_import(base_arg.value)
+                    base_arg = base_arg.with_changes(
+                        value=base_arg.value.with_changes(value="SafeLoader")
+                    )
+                case cst.Attribute():
+                    base_arg = base_arg.with_changes(
+                        value=base_arg.value.with_changes(attr=cst.Name("SafeLoader"))
+                    )
+            new.append(base_arg)
+        return new
+
+
+HardenPyyaml = CoreCodemod(
+    metadata=Metadata(
         name="harden-pyyaml",
         summary="Replace unsafe `pyyaml` loader with `SafeLoader`",
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
@@ -19,11 +116,9 @@ class HardenPyyaml(SimpleCodemod, NameResolutionMixin):
                 url="https://github.com/yaml/pyyaml/wiki/PyYAML-yaml.load(input)-Deprecation"
             ),
         ],
-    )
-    change_description = "Replace unsafe `pyyaml` loader with `SafeLoader` in calls to `yaml.load` or custom loader classes."
-
-    _module_name = "yaml"
-    detector_pattern = """
+    ),
+    detector=SemgrepRuleDetector(
+        """
         rules:
             - pattern-either:
               - patterns:
@@ -73,70 +168,6 @@ class HardenPyyaml(SimpleCodemod, NameResolutionMixin):
                             - pattern: yaml.FullLoader
                             - pattern: yaml.UnsafeLoader
         """
-
-    def on_result_found(
-        self,
-        original_node: Union[cst.Call, cst.ClassDef],
-        updated_node: Union[cst.Call, cst.ClassDef],
-    ):
-        # TODO: provide different change description for each case.
-        match original_node:
-            case cst.Call():
-                maybe_name = self.get_aliased_prefix_name(
-                    original_node, self._module_name
-                )
-                if (maybe_name := maybe_name or self._module_name) == self._module_name:
-                    self.add_needed_import(self._module_name)
-                updated_node = cast(cst.Call, updated_node)  # satisfy the type checker
-                new_args = [
-                    *updated_node.args[:1],
-                    # This is the case where the arg is present but a bad value
-                    (
-                        updated_node.args[1].with_changes(
-                            value=self.parse_expression(f"{maybe_name}.SafeLoader")
-                        )
-                        if len(updated_node.args) > 1
-                        # This is the case where the arg is not present
-                        # Note that this case is deprecated in PyYAML 5.1 since the default is unsafe
-                        else cst.Arg(
-                            keyword=cst.Name("Loader"),
-                            value=self.parse_expression(f"{maybe_name}.SafeLoader"),
-                            equal=cst.AssignEqual(
-                                whitespace_before=cst.SimpleWhitespace(""),
-                                whitespace_after=cst.SimpleWhitespace(""),
-                            ),
-                        )
-                    ),
-                ]
-                return self.update_arg_target(updated_node, new_args)
-            case cst.ClassDef():
-                return updated_node.with_changes(
-                    bases=self._update_bases(original_node)
-                )
-        return updated_node
-
-    def _update_bases(self, original_node: cst.ClassDef) -> list[cst.Arg]:
-        new = []
-        base_names = [
-            f"yaml.{klas}"
-            for klas in ("UnsafeLoader", "Loader", "BaseLoader", "FullLoader")
-        ]
-        for base_arg in original_node.bases:
-            base_name = self.find_base_name(base_arg.value)
-            if base_name not in base_names:
-                new.append(base_arg)
-                continue
-
-            match base_arg.value:
-                case cst.Name():
-                    self.add_needed_import(self._module_name, "SafeLoader")
-                    self.remove_unused_import(base_arg.value)
-                    base_arg = base_arg.with_changes(
-                        value=base_arg.value.with_changes(value="SafeLoader")
-                    )
-                case cst.Attribute():
-                    base_arg = base_arg.with_changes(
-                        value=base_arg.value.with_changes(attr=cst.Name("SafeLoader"))
-                    )
-            new.append(base_arg)
-        return new
+    ),
+    transformer=LibcstTransformerPipeline(HardenPyyamlTransformer),
+)

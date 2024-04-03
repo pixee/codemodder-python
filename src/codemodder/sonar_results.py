@@ -1,5 +1,6 @@
 import json
 from dataclasses import replace
+from functools import cache
 from pathlib import Path
 
 import libcst as cst
@@ -45,6 +46,7 @@ class SonarResult(Result):
 
 class SonarResultSet(ResultSet):
     @classmethod
+    @cache
     def from_json(cls, json_file: str | Path) -> Self:
         try:
             with open(json_file, "r", encoding="utf-8") as file:

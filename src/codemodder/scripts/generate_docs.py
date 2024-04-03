@@ -334,6 +334,11 @@ METADATA = CORE_METADATA | {
         guidance_explained="Our change provides the most secure way to create cookies in Django. However, it's possible you have configured your Django application configurations to use secure cookies. In these cases, using the default parameters for `set_cookie` is safe.",
         need_sarif="Yes (DefectDojo)",
     ),
+    "avoid-insecure-deserialization": DocMetadata(
+        importance="High",
+        guidance_explained="This change is generally safe and will prevent deserialization vulnerabilities.",
+        need_sarif="Yes (DefectDojo)",
+    ),
 }
 
 

@@ -118,10 +118,13 @@ class LibcstResultTransformer(BaseTransformer):
     def add_dependency(self, dependency: Dependency):
         self.file_context.add_dependency(dependency)
 
-    def report_change(self, original_node):
+    def report_change(self, original_node, description: str | None = None):
         line_number = self.lineno_for_node(original_node)
         self.file_context.codemod_changes.append(
-            Change(lineNumber=line_number, description=self.change_description)
+            Change(
+                lineNumber=line_number,
+                description=description or self.change_description,
+            )
         )
 
     def remove_unused_import(self, original_node):

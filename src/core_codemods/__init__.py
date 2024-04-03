@@ -2,6 +2,9 @@ from codemodder.registry import CodemodCollection
 
 from .add_requests_timeouts import AddRequestsTimeouts
 from .combine_startswith_endswith import CombineStartswithEndswith
+from .defectdojo.semgrep.avoid_insecure_deserialization import (
+    AvoidInsecureDeserialization,
+)
 from .defectdojo.semgrep.django_secure_set_cookie import DjangoSecureSetCookie
 from .django_debug_flag_on import DjangoDebugFlagOn
 from .django_json_response_type import DjangoJsonResponseType
@@ -159,6 +162,7 @@ sonar_registry = CodemodCollection(
 defectdojo_registry = CodemodCollection(
     origin="defectdojo",
     codemods=[
+        AvoidInsecureDeserialization,
         DjangoSecureSetCookie,
     ],
 )
