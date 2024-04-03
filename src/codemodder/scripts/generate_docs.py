@@ -324,6 +324,11 @@ METADATA = CORE_METADATA | {
         guidance_explained=CORE_METADATA["secure-random"].guidance_explained,
         need_sarif="Yes (Sonar)",
     ),
+    "enable-jinja2-autoescape-S5247": DocMetadata(
+        importance=CORE_METADATA["enable-jinja2-autoescape"].importance,
+        guidance_explained=CORE_METADATA["enable-jinja2-autoescape"].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 
