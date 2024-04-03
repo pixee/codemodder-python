@@ -285,7 +285,7 @@ class SonarIntegrationTest(BaseIntegrationTest):
         from codemodder.codemods.sonar import process_sonar_findings
 
         sonar_results = process_sonar_findings(
-            [cls.sonar_issues_json, cls.sonar_hotspots_json]
+            (cls.sonar_issues_json, cls.sonar_hotspots_json)
         )
 
         assert (

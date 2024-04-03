@@ -1,3 +1,4 @@
+from functools import cache
 from pathlib import Path
 
 from codemodder.codemods.base_codemod import Metadata, Reference, ToolMetadata
@@ -52,23 +53,23 @@ class SonarCodemod(SASTCodemod):
 
 
 class SonarDetector(BaseDetector):
-    _lazy_cache = None
-
     def apply(
         self,
         codemod_id: str,
         context: CodemodExecutionContext,
         files_to_analyze: list[Path],
     ) -> ResultSet:
-        if not self._lazy_cache:
-            self._lazy_cache = process_sonar_findings(
-                context.tool_result_files_map.get("sonar", [])
-            )
-        return self._lazy_cache
+        sonar_findings = process_sonar_findings(
+            tuple(
+                context.tool_result_files_map.get("sonar", ())
+            )  # Convert list to tuple for cache hashability
+        )
+        return sonar_findings
 
 
-def process_sonar_findings(sonar_json_files: list[str]) -> SonarResultSet:
+@cache
+def process_sonar_findings(sonar_json_files: tuple[str]) -> SonarResultSet:
     combined_result_set = SonarResultSet()
-    for file in sonar_json_files or []:
+    for file in sonar_json_files or ():
         combined_result_set |= SonarResultSet.from_json(file)
     return combined_result_set
