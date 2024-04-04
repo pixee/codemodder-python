@@ -1,5 +1,5 @@
 {
-  "total":37,
+  "total":38,
   "p":1,
   "ps":500,
   "paging":{
@@ -1606,6 +1606,78 @@
         {
           "softwareQuality":"SECURITY",
           "severity":"HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AY6o8XTbdw-0_54hqn7F",
+      "rule": "pythonsecurity:S5144",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:flask_request.py",
+      "project": "pixee_codemodder-python",
+      "line": 10,
+      "hash": "c864c19608fe39f9e580a5deefb67381",
+      "textRange": {
+        "startLine": 10,
+        "endLine": 10,
+        "startOffset": 4,
+        "endOffset": 21
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "pixee_codemodder-python:flask_request.py",
+              "textRange": {
+                "startLine": 10,
+                "endLine": 10,
+                "startOffset": 4,
+                "endOffset": 21
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "pixee_codemodder-python:flask_request.py",
+              "textRange": {
+                "startLine": 9,
+                "endLine": 9,
+                "startOffset": 4,
+                "endOffset": 29
+              },
+              "msg": "A malicious value can be assigned to variable ‘url’"
+            },
+            {
+              "component": "pixee_codemodder-python:flask_request.py",
+              "textRange": {
+                "startLine": 9,
+                "endLine": 9,
+                "startOffset": 10,
+                "endOffset": 29
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct the URL from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "assignee": "clavedeluna@github",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2024-04-04T13:49:07+0200",
+      "updateDate": "2024-04-04T13:49:25+0200",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "pullRequest": "445",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "MEDIUM"
         }
       ]
     }

@@ -1,6 +1,6 @@
 from codemodder.codemods.test import BaseIntegrationTest
 from codemodder.dependency import Security
-from core_codemods.url_sandbox import UrlSandbox
+from core_codemods.url_sandbox import UrlSandbox, UrlSandboxTransformer
 
 
 class TestUrlSandbox(BaseIntegrationTest):
@@ -32,7 +32,7 @@ class TestUrlSandbox(BaseIntegrationTest):
 """
 
     expected_line_change = "5"
-    change_description = UrlSandbox.change_description
+    change_description = UrlSandboxTransformer.change_description
     num_changed_files = 2
 
     requirements_file_name = "requirements.txt"

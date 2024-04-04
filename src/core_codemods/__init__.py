@@ -64,6 +64,7 @@ from .sonar.sonar_remove_assertion_in_pytest_raises import (
 )
 from .sonar.sonar_secure_random import SonarSecureRandom
 from .sonar.sonar_tempfile_mktemp import SonarTempfileMktemp
+from .sonar.sonar_url_sandbox import SonarUrlSandbox
 from .sql_parameterization import SQLQueryParameterization
 from .str_concat_in_seq_literal import StrConcatInSeqLiteral
 from .subprocess_shell_false import SubprocessShellFalse
@@ -156,6 +157,7 @@ sonar_registry = CodemodCollection(
         SonarTempfileMktemp,
         SonarSecureRandom,
         SonarEnableJinja2Autoescape,
+        SonarUrlSandbox,
     ],
 )
 
