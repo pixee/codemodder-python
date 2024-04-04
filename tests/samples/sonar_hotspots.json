@@ -2,7 +2,7 @@
   "paging": {
     "pageIndex": 1,
     "pageSize": 100,
-    "total": 2
+    "total": 4
   },
   "hotspots": [
     {
@@ -46,6 +46,48 @@
       },
       "flows": [],
       "ruleKey": "python:S2245"
+    },
+        {
+      "key": "AY6kv10AuTMtKzHrIief",
+      "component": "pixee_codemodder-python:jinja2_autoescape.py",
+      "project": "pixee_codemodder-python",
+      "securityCategory": "xss",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 3,
+      "message": "Make sure disabling auto-escaping feature is safe here.",
+      "assignee": "AY02ClhIe4Bh2XgBg3RU",
+      "creationDate": "2024-04-03T18:15:42+0200",
+      "updateDate": "2024-04-03T18:16:07+0200",
+      "textRange": {
+        "startLine": 3,
+        "endLine": 3,
+        "startOffset": 6,
+        "endOffset": 19
+      },
+      "flows": [],
+      "ruleKey": "python:S5247"
+    },
+    {
+      "key": "AY6kv10AuTMtKzHrIieg",
+      "component": "pixee_codemodder-python:jinja2_autoescape.py",
+      "project": "pixee_codemodder-python",
+      "securityCategory": "xss",
+      "vulnerabilityProbability": "HIGH",
+      "status": "TO_REVIEW",
+      "line": 4,
+      "message": "Make sure disabling auto-escaping feature is safe here.",
+      "assignee": "AY02ClhIe4Bh2XgBg3RU",
+      "creationDate": "2024-04-03T18:15:42+0200",
+      "updateDate": "2024-04-03T18:16:07+0200",
+      "textRange": {
+        "startLine": 4,
+        "endLine": 4,
+        "startOffset": 6,
+        "endOffset": 35
+      },
+      "flows": [],
+      "ruleKey": "python:S5247"
     }
   ],
   "components": [
@@ -63,6 +105,14 @@
       "name": "secure_random.py",
       "longName": "secure_random.py",
       "path": "secure_random.py"
+    },
+        {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:jinja2_autoescape.py",
+      "qualifier": "FIL",
+      "name": "jinja2_autoescape.py",
+      "longName": "jinja2_autoescape.py",
+      "path": "jinja2_autoescape.py"
     }
   ]
 }

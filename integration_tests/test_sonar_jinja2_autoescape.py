@@ -1,18 +1,13 @@
-from codemodder.codemods.test import BaseIntegrationTest
-from core_codemods.enable_jinja2_autoescape import (
-    EnableJinja2Autoescape,
-    EnableJinja2AutoescapeTransformer,
+from codemodder.codemods.test import SonarIntegrationTest
+from core_codemods.enable_jinja2_autoescape import EnableJinja2AutoescapeTransformer
+from core_codemods.sonar.sonar_enable_jinja2_autoescape import (
+    SonarEnableJinja2Autoescape,
 )
 
 
-class TestEnableJinja2Autoescape(BaseIntegrationTest):
-    codemod = EnableJinja2Autoescape
-    original_code = """
-    from jinja2 import Environment
-
-    env = Environment()
-    env = Environment(autoescape=False)
-    """
+class TestSonarEnableJinja2Autoescape(SonarIntegrationTest):
+    codemod = SonarEnableJinja2Autoescape
+    code_path = "tests/samples/jinja2_autoescape.py"
     replacement_lines = [
         (3, "env = Environment(autoescape=True)\n"),
         (4, "env = Environment(autoescape=True)\n"),
