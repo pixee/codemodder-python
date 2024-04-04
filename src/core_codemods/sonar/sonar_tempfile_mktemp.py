@@ -1,4 +1,4 @@
-from codemodder.codemods.sonar import SonarCodemod
+from core_codemods.sonar.api import SonarCodemod
 from core_codemods.tempfile_mktemp import TempfileMktemp
 
 SonarTempfileMktemp = SonarCodemod.from_core_codemod(

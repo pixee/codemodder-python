@@ -1,5 +1,5 @@
-from codemodder.codemods.sonar import SonarCodemod
 from core_codemods.fix_missing_self_or_cls import FixMissingSelfOrCls
+from core_codemods.sonar.api import SonarCodemod
 
 SonarFixMissingSelfOrCls = SonarCodemod.from_core_codemod(
     name="fix-missing-self-or-cls-S5719",

@@ -1,5 +1,5 @@
-from codemodder.codemods.sonar import SonarCodemod
 from core_codemods.exception_without_raise import ExceptionWithoutRaise
+from core_codemods.sonar.api import SonarCodemod
 
 SonarExceptionWithoutRaise = SonarCodemod.from_core_codemod(
     name="exception-without-raise-S3984",

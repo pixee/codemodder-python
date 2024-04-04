@@ -1,5 +1,5 @@
-from codemodder.codemods.sonar import SonarCodemod
 from core_codemods.literal_or_new_object_identity import LiteralOrNewObjectIdentity
+from core_codemods.sonar.api import SonarCodemod
 
 SonarLiteralOrNewObjectIdentity = SonarCodemod.from_core_codemod(
     name="literal-or-new-object-identity-S5796",

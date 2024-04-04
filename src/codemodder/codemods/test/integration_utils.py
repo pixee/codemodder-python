@@ -282,7 +282,7 @@ class SonarIntegrationTest(BaseIntegrationTest):
 
     @classmethod
     def check_sonar_issues(cls):
-        from codemodder.codemods.sonar import process_sonar_findings
+        from core_codemods.sonar.api import process_sonar_findings
 
         sonar_results = process_sonar_findings(
             (cls.sonar_issues_json, cls.sonar_hotspots_json)

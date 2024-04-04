@@ -1,7 +1,7 @@
-from codemodder.codemods.sonar import SonarCodemod
 from core_codemods.remove_assertion_in_pytest_raises import (
     RemoveAssertionInPytestRaises,
 )
+from core_codemods.sonar.api import SonarCodemod
 
 SonarRemoveAssertionInPytestRaises = SonarCodemod.from_core_codemod(
     name="remove-assertion-in-pytest-raises-S5915",

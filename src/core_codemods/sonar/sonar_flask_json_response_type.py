@@ -1,5 +1,5 @@
-from codemodder.codemods.sonar import SonarCodemod
 from core_codemods.flask_json_response_type import FlaskJsonResponseType
+from core_codemods.sonar.api import SonarCodemod
 
 SonarFlaskJsonResponseType = SonarCodemod.from_core_codemod(
     name="flask-json-response-type-S5131",
