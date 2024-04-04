@@ -7,4 +7,4 @@ app = Flask(__name__)
 @app.route("/example")
 def example():
     url = request.args["url"]
-    requests.get(url)
+    requests.get(url, timeout=60)
