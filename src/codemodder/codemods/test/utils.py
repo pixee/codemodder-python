@@ -146,9 +146,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
         tmp_file_path.write_text(dedent(input_code))
 
         tmp_results_file_path = Path(tmpdir) / "sast_results"
-
-        with open(tmp_results_file_path, "w", encoding="utf-8") as results_file:
-            results_file.write(results)
+        tmp_results_file_path.write_text(results)
 
         files_to_check = files or [tmp_file_path]
 
