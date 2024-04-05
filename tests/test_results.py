@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from codemodder.sonar_results import SonarResultSet
+from core_codemods.sonar.results import SonarResultSet
 
 
 class TestResults:

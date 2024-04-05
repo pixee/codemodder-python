@@ -15,7 +15,7 @@ class DocMetadata:
 
 
 # codemod-specific metadata that's used only for docs, not for codemod API
-CORE_METADATA = {
+CORE_CODEMODS = {
     "add-requests-timeouts": DocMetadata(
         importance="Medium",
         guidance_explained="This change makes your code safer but in some cases it may be necessary to adjust the timeout value for your particular application.",
@@ -256,79 +256,7 @@ If you want to allow those protocols, change the incoming PR to look more like t
         guidance_explained="This change is safe and will prevent errors when calling on these instance or class methods..",
     ),
 }
-
-METADATA = CORE_METADATA | {
-    "numpy-nan-equality-S6725": DocMetadata(
-        importance=CORE_METADATA["numpy-nan-equality"].importance,
-        guidance_explained=CORE_METADATA["numpy-nan-equality"].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "literal-or-new-object-identity-S5796": DocMetadata(
-        importance=CORE_METADATA["literal-or-new-object-identity"].importance,
-        guidance_explained=CORE_METADATA[
-            "literal-or-new-object-identity"
-        ].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "django-receiver-on-top-S6552": DocMetadata(
-        importance=CORE_METADATA["django-receiver-on-top"].importance,
-        guidance_explained=CORE_METADATA["django-receiver-on-top"].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "exception-without-raise-S3984": DocMetadata(
-        importance=CORE_METADATA["exception-without-raise"].importance,
-        guidance_explained=CORE_METADATA["exception-without-raise"].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "fix-assert-tuple-S5905": DocMetadata(
-        importance=CORE_METADATA["fix-assert-tuple"].importance,
-        guidance_explained=CORE_METADATA["fix-assert-tuple"].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "remove-assertion-in-pytest-raises-S5915": DocMetadata(
-        importance=CORE_METADATA["remove-assertion-in-pytest-raises"].importance,
-        guidance_explained=CORE_METADATA[
-            "remove-assertion-in-pytest-raises"
-        ].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "flask-json-response-type-S5131": DocMetadata(
-        importance=CORE_METADATA["flask-json-response-type"].importance,
-        guidance_explained=CORE_METADATA["flask-json-response-type"].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "django-json-response-type-S5131": DocMetadata(
-        importance=CORE_METADATA["django-json-response-type"].importance,
-        guidance_explained=CORE_METADATA[
-            "django-json-response-type"
-        ].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "jwt-decode-verify-S5659": DocMetadata(
-        importance=CORE_METADATA["jwt-decode-verify"].importance,
-        guidance_explained=CORE_METADATA["jwt-decode-verify"].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "fix-missing-self-or-cls-S5719": DocMetadata(
-        importance=CORE_METADATA["fix-missing-self-or-cls"].importance,
-        guidance_explained=CORE_METADATA["fix-missing-self-or-cls"].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "secure-tempfile-S5445": DocMetadata(
-        importance=CORE_METADATA["secure-tempfile"].importance,
-        guidance_explained=CORE_METADATA["secure-tempfile"].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "secure-random-S2245": DocMetadata(
-        importance=CORE_METADATA["secure-random"].importance,
-        guidance_explained=CORE_METADATA["secure-random"].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
-    "enable-jinja2-autoescape-S5247": DocMetadata(
-        importance=CORE_METADATA["enable-jinja2-autoescape"].importance,
-        guidance_explained=CORE_METADATA["enable-jinja2-autoescape"].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
+DEFECTDOJO_CODEMODS = {
     "django-secure-set-cookie": DocMetadata(
         importance="Medium",
         guidance_explained="Our change provides the most secure way to create cookies in Django. However, it's possible you have configured your Django application configurations to use secure cookies. In these cases, using the default parameters for `set_cookie` is safe.",
@@ -339,19 +267,43 @@ METADATA = CORE_METADATA | {
         guidance_explained="This change is generally safe and will prevent deserialization vulnerabilities.",
         need_sarif="Yes (DefectDojo)",
     ),
-    "url-sandbox-S5144": DocMetadata(
-        importance=CORE_METADATA["url-sandbox"].importance,
-        guidance_explained=CORE_METADATA["url-sandbox"].guidance_explained,
-        need_sarif="Yes (Sonar)",
-    ),
 }
+
+SONAR_CODEMOD_NAMES = [
+    "numpy-nan-equality-S6725",
+    "literal-or-new-object-identity-S5796",
+    "django-receiver-on-top-S6552",
+    "exception-without-raise-S3984",
+    "fix-assert-tuple-S5905",
+    "remove-assertion-in-pytest-raises-S5915",
+    "flask-json-response-type-S5131",
+    "django-json-response-type-S5131",
+    "jwt-decode-verify-S5659",
+    "fix-missing-self-or-cls-S5719",
+    "secure-tempfile-S5445",
+    "secure-random-S2245",
+    "enable-jinja2-autoescape-S5247",
+    "url-sandbox-S5144",
+]
+SONAR_CODEMODS = {
+    name: DocMetadata(
+        importance=CORE_CODEMODS[
+            core_codemod_name := "-".join(name.split("-")[:-1])
+        ].importance,
+        guidance_explained=CORE_CODEMODS[core_codemod_name].guidance_explained,
+        need_sarif="Yes (Sonar)",
+    )
+    for name in SONAR_CODEMOD_NAMES
+}
+
+ALL_CODEMODS_METADATA = CORE_CODEMODS | DEFECTDOJO_CODEMODS | SONAR_CODEMODS
 
 
 def generate_docs(codemod):
     try:
-        codemod_data = METADATA[codemod.name]
+        codemod_data = ALL_CODEMODS_METADATA[codemod.name]
     except KeyError as exc:
-        raise KeyError(f"Must add {codemod.name} to METADATA") from exc
+        raise KeyError(f"Must add {codemod.name} to ALL_CODEMODS_METADATA") from exc
 
     formatted_references = [
         f"* [{ref.description or ref.url}]({ref.url})" for ref in codemod.references

@@ -1,5 +1,5 @@
-from codemodder.codemods.sonar import SonarCodemod
 from core_codemods.django_receiver_on_top import DjangoReceiverOnTop
+from core_codemods.sonar.api import SonarCodemod
 
 SonarDjangoReceiverOnTop = SonarCodemod.from_core_codemod(
     name="django-receiver-on-top-S6552",

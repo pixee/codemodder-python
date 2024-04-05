@@ -6,8 +6,8 @@ from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
 from codemodder.context import CodemodExecutionContext
 from codemodder.result import ResultSet
-from codemodder.sonar_results import SonarResultSet
 from core_codemods.api.core_codemod import CoreCodemod, SASTCodemod
+from core_codemods.sonar.results import SonarResultSet
 
 
 class SonarCodemod(SASTCodemod):

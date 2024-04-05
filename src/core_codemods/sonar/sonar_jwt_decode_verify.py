@@ -1,9 +1,9 @@
 import libcst as cst
 
 from codemodder.codemods.libcst_transformer import LibcstTransformerPipeline
-from codemodder.codemods.sonar import SonarCodemod
 from codemodder.result import fuzzy_column_match, same_line
 from core_codemods.jwt_decode_verify import JwtDecodeVerify, JwtDecodeVerifyTransformer
+from core_codemods.sonar.api import SonarCodemod
 
 
 class JwtDecodeVerifySonarTransformer(JwtDecodeVerifyTransformer):

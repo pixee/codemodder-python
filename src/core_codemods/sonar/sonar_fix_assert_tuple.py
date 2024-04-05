@@ -1,5 +1,5 @@
-from codemodder.codemods.sonar import SonarCodemod
 from core_codemods.fix_assert_tuple import FixAssertTuple
+from core_codemods.sonar.api import SonarCodemod
 
 SonarFixAssertTuple = SonarCodemod.from_core_codemod(
     name="fix-assert-tuple-S5905",
