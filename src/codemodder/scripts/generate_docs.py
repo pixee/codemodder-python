@@ -288,7 +288,7 @@ SONAR_CODEMOD_NAMES = [
 SONAR_CODEMODS = {
     name: DocMetadata(
         importance=CORE_CODEMODS[
-            core_codemod_name := "-".join("numpy-nan-equality-S6725".split("-")[:-1])
+            core_codemod_name := "-".join(name.split("-")[:-1])
         ].importance,
         guidance_explained=CORE_CODEMODS[core_codemod_name].guidance_explained,
         need_sarif="Yes (Sonar)",
