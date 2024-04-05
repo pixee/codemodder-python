@@ -11,7 +11,7 @@ class WithThreadingLock(SimpleCodemod, NameResolutionMixin):
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[
             Reference(
-                url="https://pylint.pycqa.org/en/latest/user_guide/messages/warning/useless-with-lock."
+                url="https://pylint.pycqa.org/en/latest/user_guide/messages/warning/useless-with-lock.html"
             ),
             Reference(
                 url="https://docs.python.org/3/library/threading.html#using-locks-conditions-and-semaphores-in-the-with-statement"
