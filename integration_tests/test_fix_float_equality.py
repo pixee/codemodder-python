@@ -17,10 +17,6 @@ class TestFixFloatEquality(BaseIntegrationTest):
     def foo(a, b):
         return math.isclose(a, b - 0.1, rel_tol=1e-09, abs_tol=0.0)
     """
-    replacement_lines = [
-        (1, "import math\n\n"),
-        (3, "return math.isclose(a, b - 0.1, rel_tol=1e-09, abs_tol=0.0)\n"),
-    ]
     # fmt: off
     expected_diff = (
         """--- \n"""
