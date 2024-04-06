@@ -61,7 +61,7 @@ class TestNumpyNanEquality(BaseCodemodTest):
         if a != b:
             pass
         
-        assert a == b
+        assert a == b and 1 + a != b
         assert a != b 
         """
         expected = """
@@ -72,10 +72,10 @@ class TestNumpyNanEquality(BaseCodemodTest):
         if not math.isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
             pass
         
-        assert math.isclose(a, b, rel_tol=1e-09, abs_tol=0.0)
+        assert math.isclose(a, b, rel_tol=1e-09, abs_tol=0.0) and not math.isclose(1 + a, b, rel_tol=1e-09, abs_tol=0.0)
         assert not math.isclose(a, b, rel_tol=1e-09, abs_tol=0.0) 
         """
-        self.run_and_assert(tmpdir, input_code, expected, num_changes=3)
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=4)
 
     def test_change_math_already_imported(self, tmpdir):
         input_code = """
@@ -98,6 +98,8 @@ class TestNumpyNanEquality(BaseCodemodTest):
         b = 3
         if a != b:
             pass
+        
+        a is b - 0.11
         """
         self.run_and_assert(tmpdir, input_code, input_code)
 

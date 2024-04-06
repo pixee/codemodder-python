@@ -84,12 +84,13 @@ class FixFloatEqualityTransformer(
 FixFloatEquality = CoreCodemod(
     metadata=Metadata(
         name="fix-float-equality",
-        summary="TODOReplace `is` with `==` for literal or new object comparisons",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        summary="Replace `==` or `!=` with `math.isclose` Call for Floats or Arithmetic Operations with Floats",
+        review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
         references=[
             Reference(
-                url="TODOhttps://docs.python.org/3/library/stdtypes.html#comparisons"
+                url="https://docs.python.org/3/tutorial/floatingpoint.html#floating-point-arithmetic-issues-and-limitations"
             ),
+            Reference(url="https://docs.python.org/3/library/math.html#math.isclose"),
         ],
     ),
     transformer=LibcstTransformerPipeline(FixFloatEqualityTransformer),
