@@ -9,7 +9,7 @@ class TestSonarFixFloatEquality(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "fix-float-equality-S905"
+        assert self.codemod.name == "fix-float-equality-S1244"
 
     def test_simple(self, tmpdir):
         input_code = """
@@ -25,7 +25,7 @@ class TestSonarFixFloatEquality(BaseSASTCodemodTest):
         issues = {
             "issues": [
                 {
-                    "rule": "python:S905",
+                    "rule": "python:S1244",
                     "status": "OPEN",
                     "component": "code.py",
                     "textRange": {

@@ -75,9 +75,9 @@ class FixFloatEqualityTransformer(
             case (cst.Float(), _) | (_, cst.Float()):
                 return True
             case (cst.BinaryOperation(), _):
-                return self.at_least_one_float(left.left, left.right)
+                return self.at_least_one_float(left_type.left, left_type.right)
             case (_, cst.BinaryOperation()):
-                return self.at_least_one_float(right.left, right.right)
+                return self.at_least_one_float(right_type.left, right_type.right)
         return False
 
 
