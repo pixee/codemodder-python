@@ -54,6 +54,42 @@ class TestNumpyNanEquality(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected, num_changes=2)
 
+    def test_change_if_asserts(self, tmpdir):
+        input_code = """
+        a = 1.0
+        b = 3.111
+        if a != b:
+            pass
+        
+        assert a == b
+        assert a != b 
+        """
+        expected = """
+        import math
+
+        a = 1.0
+        b = 3.111
+        if not math.isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+            pass
+        
+        assert math.isclose(a, b, rel_tol=1e-09, abs_tol=0.0)
+        assert not math.isclose(a, b, rel_tol=1e-09, abs_tol=0.0) 
+        """
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=3)
+
+    def test_change_math_already_imported(self, tmpdir):
+        input_code = """
+        import math
+
+        math.e != 3 - 0.1
+        """
+        expected = """
+        import math
+
+        not math.isclose(math.e, 3 - 0.1, rel_tol=1e-09, abs_tol=0.0)
+        """
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=1)
+
     def test_no_change(self, tmpdir):
         input_code = """
         2 == 1 + 1
@@ -79,12 +115,16 @@ class TestNumpyNanEquality(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, input_code)
 
-    """
-            a = 1.0
-        b = 3.111
-        if a != b:
-            pass
-        #todo assert not, from !=, function too
-    """
-    # todo: math already imported,
-    # TODO; EXCLUDE
+    def test_exclude_line(self, tmpdir):
+        input_code = (
+            expected
+        ) = """
+        0.2 == 2 - 0.1
+        """
+        lines_to_exclude = [2]
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            lines_to_exclude=lines_to_exclude,
+        )
