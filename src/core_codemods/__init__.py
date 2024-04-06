@@ -20,6 +20,7 @@ from .fix_dataclass_defaults import FixDataclassDefaults
 from .fix_deprecated_abstractproperty import FixDeprecatedAbstractproperty
 from .fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 from .fix_empty_sequence_comparison import FixEmptySequenceComparison
+from .fix_float_equality import FixFloatEquality
 from .fix_hasattr_call import TransformFixHasattrCall
 from .fix_missing_self_or_cls import FixMissingSelfOrCls
 from .fix_mutable_params import FixMutableParams
@@ -131,6 +132,7 @@ registry = CodemodCollection(
         FixEmptySequenceComparison,
         RemoveAssertionInPytestRaises,
         FixAssertTuple,
+        FixFloatEquality,
         LazyLogging,
         StrConcatInSeqLiteral,
         FixAsyncTaskInstantiation,
