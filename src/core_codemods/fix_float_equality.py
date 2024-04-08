@@ -84,7 +84,7 @@ class FixFloatEqualityTransformer(
 FixFloatEquality = CoreCodemod(
     metadata=Metadata(
         name="fix-float-equality",
-        summary="Replace `==` or `!=` with `math.isclose` Call for Floats or Arithmetic Operations with Floats",
+        summary="Use `math.isclose` Instead of Direct Equality for Floats",
         review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
         references=[
             Reference(
