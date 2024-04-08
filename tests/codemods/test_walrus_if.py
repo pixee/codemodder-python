@@ -40,6 +40,18 @@ class TestUseWalrusIf(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
+    def test_walrus_if_not(self, tmpdir):
+        input_code = """
+        val = do_something()
+        if not val:
+            do_something_else(val)
+        """
+        expected_output = """
+        if not (val := do_something()):
+            do_something_else(val)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
     def test_walrus_if_preserve_comments(self, tmpdir):
         input_code = """
         val = do_something() # comment

@@ -3,7 +3,6 @@ from collections import namedtuple
 from typing import List, Optional, Tuple
 
 import libcst as cst
-from libcst import matchers as m
 from libcst._position import CodeRange
 from libcst.metadata import ParentNodeProvider, ScopeProvider
 
@@ -88,8 +87,9 @@ class UseWalrusIf(SimpleCodemod):
                 continue
 
             assign, target, value = found_assign
-            # If test can be a comparison expression
+
             match if_test:
+                # If test can be a comparison expression
                 case cst.Comparison(
                     left=cst.Name() as left,
                     comparisons=[
@@ -100,15 +100,21 @@ class UseWalrusIf(SimpleCodemod):
                         )
                     ],
                 ):
+
                     if left.value == target.value:
                         named_expr = self._build_named_expr(target, value, parens=True)
                         self.assigns[assign] = named_expr
-                # If test can also be a bare name
                 case cst.Name() as name:
+                    # If test can also be a bare name
                     if name.value == target.value:
                         named_expr = self._build_named_expr(target, value, parens=False)
                         self.assigns[assign] = named_expr
-
+                case cst.UnaryOperation(
+                    operator=cst.Not(), expression=cst.Name() as name
+                ):
+                    if name.value == target.value:
+                        named_expr = self._build_named_expr(target, value, parens=True)
+                        self.assigns[assign] = named_expr
         return super().on_visit(node)
 
     def visit_If(self, node: cst.If):
@@ -120,17 +126,21 @@ class UseWalrusIf(SimpleCodemod):
     def leave_If(self, original_node, updated_node):
         # TODO: add filter by include or exclude that works for nodes
         # that that have different start/end numbers.
+
         if (result := self._if_stack.pop()) is not None:
             position, named_expr = result
-            is_name = m.matches(updated_node.test, m.Name())
             self.add_change_from_position(position, self.change_description)
-            return (
-                updated_node.with_changes(test=named_expr)
-                if is_name
-                else updated_node.with_changes(
-                    test=updated_node.test.with_changes(left=named_expr)
-                )
-            )
+            match updated_node.test:
+                case cst.Name():
+                    return updated_node.with_changes(test=named_expr)
+                case cst.UnaryOperation():
+                    return updated_node.with_changes(
+                        test=updated_node.test.with_changes(expression=named_expr)
+                    )
+                case _:
+                    return updated_node.with_changes(
+                        test=updated_node.test.with_changes(left=named_expr)
+                    )
 
         return original_node
 
