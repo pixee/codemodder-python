@@ -12,7 +12,7 @@ from core_codemods.api.core_codemod import CoreCodemod
 class FixFloatEqualityTransformer(
     LibcstResultTransformer, NameAndAncestorResolutionMixin
 ):
-    change_description = "Replace `==` or `!=` with `math.isclose` callz"
+    change_description = "Replace `==` or `!=` with `math.isclose`"
 
     def leave_Comparison(
         self, original_node: cst.Comparison, updated_node: cst.Comparison
