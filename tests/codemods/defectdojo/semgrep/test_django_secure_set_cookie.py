@@ -24,6 +24,7 @@ class TestDjangoSecureSetCookie(BaseSASTCodemodTest):
         findings = {
             "results": [
                 {
+                    "id": 1,
                     "title": "python.django.security.audit.secure-cookies.django-secure-set-cookie",
                     "file_path": "code.py",
                     "line": 2,

@@ -288,9 +288,9 @@ class SonarIntegrationTest(BaseIntegrationTest):
         )
 
         assert (
-            cls.codemod.rule_id in sonar_results
+            cls.codemod.requested_rules[-1] in sonar_results
         ), f"Make sure to add a sonar issue/hotspot for {cls.codemod.rule_id} in {cls.sonar_issues_json} or {cls.sonar_hotspots_json}"
-        results_for_codemod = sonar_results[cls.codemod.rule_id]
+        results_for_codemod = sonar_results[cls.codemod.requested_rules[-1]]
         file_path = pathlib.Path(cls.code_filename)
         assert (
             file_path in results_for_codemod
@@ -303,16 +303,6 @@ class SonarIntegrationTest(BaseIntegrationTest):
             == self.codemod_instance._metadata.tool.rule_name
         )
         assert result["detectionTool"]["name"] == "Sonar"
-        assert (
-            result["detectionTool"]["rule"]["id"]
-            == self.codemod_instance._metadata.tool.rule_id
-        )
-        assert (
-            result["detectionTool"]["rule"]["name"]
-            == self.codemod_instance._metadata.tool.rule_name
-        )
-        # TODO: empty array until we add findings metadata
-        assert result["detectionTool"]["findings"] == []
 
 
 def original_and_expected_from_code_path(code_path, replacements):

@@ -6,7 +6,7 @@ import libcst as cst
 from libcst._position import CodeRange
 from typing_extensions import Self, override
 
-from codemodder.result import LineInfo, Location, Result, ResultSet
+from codemodder.result import LineInfo, Location, ResultSet, SASTResult
 
 
 class DefectDojoLocation(Location):
@@ -20,10 +20,11 @@ class DefectDojoLocation(Location):
         )
 
 
-class DefectDojoResult(Result):
+class DefectDojoResult(SASTResult):
     @classmethod
     def from_finding(cls, finding: dict) -> Self:
         return cls(
+            finding_id=finding["id"],
             rule_id=finding["title"],
             locations=[DefectDojoLocation.from_finding(finding)],
         )
