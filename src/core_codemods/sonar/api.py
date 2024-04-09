@@ -15,10 +15,6 @@ class SonarCodemod(SASTCodemod):
     def origin(self):
         return "sonar"
 
-    @property
-    def rule_id(self):
-        return self._metadata.tool.rule_id
-
     @classmethod
     def from_core_codemod(
         cls,

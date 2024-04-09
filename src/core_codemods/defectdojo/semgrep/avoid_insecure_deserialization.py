@@ -20,14 +20,22 @@ class AvoidInsecureDeserializationTransformer(
     def leave_Call(
         self, original_node: cst.Call, updated_node: cst.Call
     ) -> cst.Call | None:
-        if (
-            self.node_is_selected(original_node)
-            and self.find_base_name(original_node) == "yaml.load"
-        ):
-            self.report_change(
-                original_node, description="Use SafeLoader in pyyaml.load calls"
-            )
-            return self.update_call(original_node, updated_node)
+        if not self.node_is_selected(original_node):
+            return updated_node
+
+        match self.find_base_name(original_node):
+            case "pickle.loads":
+                self.report_unfixed(
+                    original_node,
+                    reason="`fickling` does not yet support `pickle.loads`",
+                )
+                return updated_node
+            case "yaml.load":
+                self.report_change(
+                    original_node,
+                    description="Use SafeLoader in pyyaml.load calls",
+                )
+                return self.update_call(original_node, updated_node)
 
         return updated_node
 

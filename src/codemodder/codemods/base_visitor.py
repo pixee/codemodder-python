@@ -1,4 +1,5 @@
-from typing import ClassVar, Collection
+from functools import cache
+from typing import ClassVar, Collection, cast
 
 import libcst as cst
 from libcst import MetadataDependent
@@ -23,13 +24,22 @@ class UtilsMixin(MetadataDependent):
         self.line_exclude = line_exclude
         self.line_include = line_include
 
-    def filter_by_result(self, node):
+    def filter_by_result(self, node: cst.CSTNode) -> bool:
+        # Codemods with detectors will only run their transformations if there are results.
+        return self.results is None or any(self.results_for_node(node))
+
+    @cache
+    def results_for_node(self, node: cst.CSTNode) -> list[Result]:
         pos_to_match = self.node_position(node)
-        if self.results is None:
-            # Returning True here means codemods without detectors (and results)
-            # will still run their transformations.
-            return True
-        return any(result.match_location(pos_to_match, node) for result in self.results)
+        return (
+            [
+                result
+                for result in self.results
+                if result.match_location(pos_to_match, node)
+            ]
+            if self.results
+            else []
+        )
 
     def filter_by_path_includes_or_excludes(self, pos_to_match):
         """
@@ -55,13 +65,17 @@ class UtilsMixin(MetadataDependent):
                 # By default a function's position includes the entire
                 # function definition. Instead, we will only use the first line
                 # of the function definition.
-                params_end = self.get_metadata(PositionProvider, node.params).end
+                params_end = cast(
+                    CodeRange, self.get_metadata(PositionProvider, node.params)
+                ).end
                 return CodeRange(
-                    start=self.get_metadata(PositionProvider, node).start,
+                    start=cast(
+                        CodeRange, self.get_metadata(PositionProvider, node)
+                    ).start,
                     end=CodePosition(params_end.line, params_end.column + 1),
                 )
             case _:
-                return self.get_metadata(PositionProvider, node)
+                return cast(CodeRange, self.get_metadata(PositionProvider, node))
 
     def lineno_for_node(self, node):
         return self.node_position(node).start.line
