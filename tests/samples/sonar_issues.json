@@ -1,5 +1,5 @@
 {
-  "total":38,
+  "total":39,
   "p":1,
   "ps":500,
   "paging":{
@@ -1677,6 +1677,39 @@
       "impacts": [
         {
           "softwareQuality": "SECURITY",
+          "severity": "MEDIUM"
+        }
+      ]
+    },
+    {
+      "key": "AY606lcc6hXAwyuO7dPZ",
+      "rule": "python:S1244",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:fix_float_equality.py",
+      "project": "pixee_codemodder-python",
+      "line": 7,
+      "hash": "4f98731d8aeb7e5d80e02d5ab1fd1ad8",
+      "textRange": {
+        "startLine": 2,
+        "endLine": 2,
+        "startOffset": 11,
+        "endOffset": 23
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Do not perform equality checks with floating point values.",
+      "effort": "5min",
+      "debt": "5min",
+      "assignee": "clavedeluna@github",
+      "tags": [],
+      "creationDate": "2024-04-06T21:36:46+0200",
+      "updateDate": "2024-04-06T21:37:06+0200",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
           "severity": "MEDIUM"
         }
       ]

@@ -255,6 +255,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="This change is safe and will prevent errors when calling on these instance or class methods..",
     ),
+    "fix-float-equality": DocMetadata(
+        importance="Medium",
+        guidance_explained="This change makes your code more accurate but in some cases it may be necessary to adjust the `abs_tol` and `rel_tol` parameter values for your particular calculations.",
+    ),
 }
 DEFECTDOJO_CODEMODS = {
     "django-secure-set-cookie": DocMetadata(
@@ -284,6 +288,7 @@ SONAR_CODEMOD_NAMES = [
     "secure-random-S2245",
     "enable-jinja2-autoescape-S5247",
     "url-sandbox-S5144",
+    "fix-float-equality-S1244",
 ]
 SONAR_CODEMODS = {
     name: DocMetadata(
