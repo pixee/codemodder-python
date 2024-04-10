@@ -15,9 +15,9 @@ class LimitReadline(SimpleCodemod):
         ],
     )
     change_description = "Adds a size limit argument to readline() calls."
-    detector_pattern = """
+    detector_pattern = f"""
         rules:
-          - id: limit-readline
+          - id: {metadata.name}
             mode: taint
             pattern-sources:
               - pattern-either:

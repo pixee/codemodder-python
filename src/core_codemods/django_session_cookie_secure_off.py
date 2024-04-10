@@ -19,9 +19,9 @@ class DjangoSessionCookieSecureOff(SimpleCodemod):
         ],
     )
     change_description = "Sets Django's `SESSION_COOKIE_SECURE` flag if off or missing."
-    detector_pattern = """
+    detector_pattern = f"""
         rules:
-          - id: django-session-cookie-secure-off
+          - id: {metadata.name}
             # This pattern creates one finding with no text for settings.py file.
             pattern-regex: ^
             paths:

@@ -19,9 +19,9 @@ class DjangoDebugFlagOn(SimpleCodemod):
         ],
     )
     change_description = "Flip `Django` debug flag to off."
-    detector_pattern = """
+    detector_pattern = f"""
         rules:
-          - id: django-debug-flag-on
+          - id: {metadata.name}
             pattern: DEBUG = True
             paths:
               include:

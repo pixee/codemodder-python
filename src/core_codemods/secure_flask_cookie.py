@@ -17,9 +17,9 @@ class SecureFlaskCookie(SimpleCodemod, SecureCookieMixin):
         ],
     )
     change_description = "Flask response `set_cookie` call should be called with `secure=True`, `httponly=True`, and `samesite='Lax'`."
-    detector_pattern = """
+    detector_pattern = f"""
         rules:
-          - id: secure-flask-cookie
+          - id: {metadata.name}
             mode: taint
             pattern-sources:
               - pattern-either:
