@@ -19,6 +19,7 @@ from .fix_async_task_instantiation import FixAsyncTaskInstantiation
 from .fix_dataclass_defaults import FixDataclassDefaults
 from .fix_deprecated_abstractproperty import FixDeprecatedAbstractproperty
 from .fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
+from .fix_deprecated_pkg_resources import FixDeprecatedPkgResources
 from .fix_empty_sequence_comparison import FixEmptySequenceComparison
 from .fix_float_equality import FixFloatEquality
 from .fix_hasattr_call import TransformFixHasattrCall
@@ -141,6 +142,7 @@ registry = CodemodCollection(
         TransformFixHasattrCall,
         FixDataclassDefaults,
         FixMissingSelfOrCls,
+        FixDeprecatedPkgResources,
     ],
 )
 
