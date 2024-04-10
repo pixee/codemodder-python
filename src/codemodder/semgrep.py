@@ -10,6 +10,16 @@ from typing_extensions import Self
 from codemodder.context import CodemodExecutionContext
 from codemodder.logging import logger
 from codemodder.result import LineInfo, Location, Result, ResultSet
+from codemodder.sarifs import AbstractSarifToolDetector
+
+
+class SemgrepSarifToolDetector(AbstractSarifToolDetector):
+    @classmethod
+    def detect(cls, run_data: dict) -> bool:
+        return (
+            "tool" in run_data
+            and "semgrep" in run_data["tool"]["driver"]["name"].lower()
+        )
 
 
 def extract_rule_id(result, sarif_run) -> Optional[str]:
