@@ -1,6 +1,7 @@
 import io
 import os
 import tempfile
+from functools import cache
 from pathlib import Path
 
 import yaml
@@ -8,6 +9,7 @@ import yaml
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.context import CodemodExecutionContext
 from codemodder.result import ResultSet
+from codemodder.semgrep import SemgrepResultSet
 from codemodder.semgrep import run as semgrep_run
 
 
@@ -47,3 +49,25 @@ class SemgrepRuleDetector(BaseDetector):
         yaml_files = self.get_yaml_files(codemod_id)
         with context.timer.measure("semgrep"):
             return semgrep_run(context, yaml_files, files_to_analyze)
+
+
+class SemgrepSarifFileDetector(BaseDetector):
+    def apply(
+        self,
+        codemod_id: str,
+        context: CodemodExecutionContext,
+        files_to_analyze: list[Path],
+    ) -> ResultSet:
+        del codemod_id
+        del files_to_analyze
+        return process_semgrep_findings(
+            tuple(context.tool_result_files_map.get("semgrep", ()))
+        )  # Convert list to tuple for cache hashability
+
+
+@cache
+def process_semgrep_findings(semgrep_sarif_files: tuple[str]) -> ResultSet:
+    results = SemgrepResultSet()
+    for file in semgrep_sarif_files or ():
+        results |= SemgrepResultSet.from_sarif(file)
+    return results

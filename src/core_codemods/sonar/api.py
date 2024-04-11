@@ -59,6 +59,8 @@ class SonarDetector(BaseDetector):
         context: CodemodExecutionContext,
         files_to_analyze: list[Path],
     ) -> ResultSet:
+        del codemod_id
+        del files_to_analyze
         sonar_findings = process_sonar_findings(
             tuple(
                 context.tool_result_files_map.get("sonar", ())

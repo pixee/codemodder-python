@@ -2,7 +2,7 @@ import json
 import subprocess
 from pathlib import Path
 
-from codemodder.sarifs import SarifResultSet, extract_rule_id
+from codemodder.semgrep import SemgrepResultSet, extract_rule_id
 
 
 class TestSarifProcessing:
@@ -31,7 +31,7 @@ class TestSarifProcessing:
     def test_results_by_rule_id(self):
         sarif_file = Path("tests") / "samples" / "semgrep.sarif"
 
-        results = SarifResultSet.from_sarif(sarif_file)
+        results = SemgrepResultSet.from_sarif(sarif_file)
         expected_rule = "secure-random"
         assert list(results.keys()) == [expected_rule]
 
