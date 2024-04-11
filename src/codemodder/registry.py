@@ -83,15 +83,18 @@ class CodemodRegistry:
                     base_codemods[codemod.id] = codemod
 
             # Remove duplicates and preserve order
-            return list(dict.fromkeys(base_codemods.values()))
+            return list(base_codemods.values())
 
         matched_codemods = []
         for name in codemod_include:
             if "*" in name:
                 pat = re.compile(name.replace("*", ".*"))
-                matched_codemods.extend(
-                    [codemod for codemod in self.codemods if pat.match(codemod.id)]
-                )
+                pattern_matches = [code for code in self.codemods if pat.match(code.id)]
+                matched_codemods.extend(pattern_matches)
+                if not pattern_matches:
+                    logger.warning(
+                        "Given codemod pattern '%s' does not match any codemods.", name
+                    )
                 continue
 
             try:

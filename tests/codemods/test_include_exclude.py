@@ -105,6 +105,13 @@ class TestMatchCodemods:
             c for c in self.registry.codemods if c.origin == "sonar"
         ]
 
+    def test_warn_pattern_no_match(self, caplog):
+        assert self.registry.match_codemods(["*doesntexist*"], None) == []
+        assert (
+            "Given codemod pattern '*doesntexist*' does not match any codemods"
+            in caplog.text
+        )
+
     def test_exclude_with_pattern(self):
         assert self.registry.match_codemods(None, ["*django*"], sast_only=False) == [
             c
