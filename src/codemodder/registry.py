@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from importlib.metadata import entry_points
 from typing import TYPE_CHECKING, Optional
@@ -64,36 +65,44 @@ class CodemodRegistry:
 
         if codemod_exclude and not codemod_include:
             base_codemods = {}
+            patterns = [
+                re.compile(exclude.replace("*", ".*"))
+                for exclude in codemod_exclude
+                if "*" in exclude
+            ]
+            names = set(name for name in codemod_exclude if "*" not in name)
             for codemod in self.codemods:
-                if (sast_only and codemod.origin != "pixee") or (
-                    not sast_only and codemod.origin == "pixee"
+                if (
+                    codemod.id in names
+                    or (codemod.origin == "pixee" and codemod.name in names)
+                    or any(pat.match(codemod.id) for pat in patterns)
                 ):
-                    base_codemods[codemod.id] = codemod
-                    base_codemods[codemod.name] = codemod
-
-            for name_or_id in codemod_exclude:
-                try:
-                    codemod = base_codemods[name_or_id]
-                except KeyError:
-                    logger.warning(
-                        f"Requested codemod to exclude'{name_or_id}' does not exist."
-                    )
                     continue
 
-                # remove both by name and id since we don't know which `name_or_id` represented
-                base_codemods.pop(codemod.name, None)
-                base_codemods.pop(codemod.id, None)
+                if bool(sast_only) != bool(codemod.origin == "pixee"):
+                    base_codemods[codemod.id] = codemod
+
             # Remove duplicates and preserve order
-            return list(dict.fromkeys(base_codemods.values()))
+            return list(base_codemods.values())
 
         matched_codemods = []
         for name in codemod_include:
+            if "*" in name:
+                pat = re.compile(name.replace("*", ".*"))
+                pattern_matches = [code for code in self.codemods if pat.match(code.id)]
+                matched_codemods.extend(pattern_matches)
+                if not pattern_matches:
+                    logger.warning(
+                        "Given codemod pattern '%s' does not match any codemods.", name
+                    )
+                continue
+
             try:
                 matched_codemods.append(
                     self._codemods_by_name.get(name) or self._codemods_by_id[name]
                 )
             except KeyError:
-                logger.warning(f"Requested codemod to include'{name}' does not exist.")
+                logger.warning(f"Requested codemod to include '{name}' does not exist.")
         return matched_codemods
 
     def describe_codemods(

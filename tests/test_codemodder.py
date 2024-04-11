@@ -210,7 +210,7 @@ class TestCodemodIncludeExclude:
         assert any(x[0] == ("scanned: %s files", 0) for x in info_logger.call_args_list)
 
         assert any(
-            f"Requested codemod to include'{bad_codemod}' does not exist." in x[0][0]
+            f"Requested codemod to include '{bad_codemod}' does not exist." in x[0][0]
             for x in warning_logger.call_args_list
         )
 
@@ -233,7 +233,7 @@ class TestCodemodIncludeExclude:
         write_report.assert_called_once()
         assert any("running codemod %s" in x[0][0] for x in info_logger.call_args_list)
         assert any(
-            f"Requested codemod to include'{bad_codemod}' does not exist." in x[0][0]
+            f"Requested codemod to include '{bad_codemod}' does not exist." in x[0][0]
             for x in warning_logger.call_args_list
         )
 
@@ -262,10 +262,6 @@ class TestCodemodIncludeExclude:
 
         assert f"pixee:python/{good_codemod}" not in codemods_that_ran
         assert any("running codemod %s" in x[0][0] for x in info_logger.call_args_list)
-        assert any(
-            f"Requested codemod to exclude'{bad_codemod}' does not exist." in x[0][0]
-            for x in warning_logger.call_args_list
-        )
 
     @mock.patch("codemodder.registry.logger.warning")
     @mock.patch("codemodder.codemodder.logger.info")
@@ -286,10 +282,6 @@ class TestCodemodIncludeExclude:
         run(args)
         write_report.assert_called_once()
         assert any("running codemod %s" in x[0][0] for x in info_logger.call_args_list)
-        assert any(
-            f"Requested codemod to exclude'{bad_codemod}' does not exist." in x[0][0]
-            for x in warning_logger.call_args_list
-        )
 
     @mock.patch("codemodder.codemods.semgrep.semgrep_run")
     def test_exclude_all_registered_codemods(self, mock_semgrep_run, dir_structure):

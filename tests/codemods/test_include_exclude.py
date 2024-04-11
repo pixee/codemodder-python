@@ -89,3 +89,50 @@ class TestMatchCodemods:
             for c in self.registry.codemods
             if c.name not in "secure-random" and c.id in self.all_ids
         ]
+
+    def test_include_with_pattern(self):
+        assert self.registry.match_codemods(["*django*"], None) == [
+            c for c in self.registry.codemods if "django" in c.id
+        ]
+
+    def test_include_with_pattern_and_another(self):
+        assert self.registry.match_codemods(["*django*", "use-defusedxml"], None) == [
+            c for c in self.registry.codemods if "django" in c.id
+        ] + [self.codemod_map["use-defusedxml"]]
+
+    def test_include_sast_with_prefix(self):
+        assert self.registry.match_codemods(["sonar*"], None, sast_only=False) == [
+            c for c in self.registry.codemods if c.origin == "sonar"
+        ]
+
+    def test_warn_pattern_no_match(self, caplog):
+        assert self.registry.match_codemods(["*doesntexist*"], None) == []
+        assert (
+            "Given codemod pattern '*doesntexist*' does not match any codemods"
+            in caplog.text
+        )
+
+    def test_exclude_with_pattern(self):
+        assert self.registry.match_codemods(None, ["*django*"], sast_only=False) == [
+            c
+            for c in self.registry.codemods
+            if "django" not in c.id and c.id in self.all_ids
+        ]
+
+    def test_exclude_with_pattern_and_another(self):
+        assert self.registry.match_codemods(
+            None, ["*django*", "use-defusedxml"], sast_only=False
+        ) == [
+            c
+            for c in self.registry.codemods
+            if "django" not in c.id
+            and c.id in self.all_ids
+            and c.name != "use-defusedxml"
+        ]
+
+    def test_exclude_pixee_with_prefix(self):
+        assert self.registry.match_codemods(None, ["pixee*"], sast_only=False) == [
+            c
+            for c in self.registry.codemods
+            if not c.origin == "pixee" and c.id in self.all_ids
+        ]
