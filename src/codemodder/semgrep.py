@@ -113,7 +113,9 @@ def run(
         )
         command.extend(map(str, files_to_analyze or [execution_context.directory]))
         logger.debug("semgrep command: `%s`", " ".join(command))
-        call = safe_command.run(subprocess.run, command,
+        call = safe_command.run(
+            subprocess.run,
+            command,
             shell=False,
             check=False,
             stdout=None if execution_context.verbose else subprocess.PIPE,
