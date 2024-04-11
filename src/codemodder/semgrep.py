@@ -116,7 +116,6 @@ def run(
         command = [
             "semgrep",
             "scan",
-            "--legacy",
             "--no-error",
             "--dataflow-traces",
             "--sarif",
