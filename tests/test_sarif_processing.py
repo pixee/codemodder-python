@@ -2,7 +2,9 @@ import json
 import subprocess
 from pathlib import Path
 
-from codemodder.semgrep import SemgrepResultSet, extract_rule_id
+import pytest
+
+from codemodder.semgrep import SemgrepResult, SemgrepResultSet
 
 
 class TestSarifProcessing:
@@ -14,7 +16,9 @@ class TestSarifProcessing:
 
         sarif_run = data["runs"][0]
         result = sarif_run["results"][0]
-        rule_id = extract_rule_id(result, sarif_run)
+        rule_id = SemgrepResult.extract_rule_id(
+            result, sarif_run, truncate_rule_id=True
+        )
         assert rule_id == "java/ssrf"
 
     def test_extract_rule_id_semgrep(self):
@@ -25,14 +29,19 @@ class TestSarifProcessing:
 
         sarif_run = data["runs"][0]
         result = sarif_run["results"][0]
-        rule_id = extract_rule_id(result, sarif_run)
+        rule_id = SemgrepResult.extract_rule_id(
+            result, sarif_run, truncate_rule_id=True
+        )
         assert rule_id == "secure-random"
 
-    def test_results_by_rule_id(self):
+    @pytest.mark.parametrize("truncate", [True, False])
+    def test_results_by_rule_id(self, truncate):
         sarif_file = Path("tests") / "samples" / "semgrep.sarif"
 
-        results = SemgrepResultSet.from_sarif(sarif_file)
-        expected_rule = "secure-random"
+        results = SemgrepResultSet.from_sarif(sarif_file, truncate_rule_id=truncate)
+        expected_rule = (
+            "secure-random" if truncate else "codemodder.codemods.semgrep.secure-random"
+        )
         assert list(results.keys()) == [expected_rule]
 
         expected_path = Path("tests/samples/insecure_random.py")

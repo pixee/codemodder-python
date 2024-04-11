@@ -76,8 +76,7 @@ class ResultSet(dict[str, dict[Path, list[Result]]]):
 
         Some implementers may need to use the context to compute paths that are relative to the target directory.
         """
-        del context
-        return self.get(rule_id, {}).get(file, [])
+        return self.get(rule_id, {}).get(file.relative_to(context.directory), [])
 
     def files_for_rule(self, rule_id: str) -> list[Path]:
         return list(self.get(rule_id, {}).keys())
