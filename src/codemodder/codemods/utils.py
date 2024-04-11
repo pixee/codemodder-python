@@ -192,3 +192,15 @@ def is_assigned_to_True(original_node: cst.Assign):
         isinstance(original_node.value, cst.Name)
         and original_node.value.value == "True"
     )
+
+
+def is_zero(node: cst.CSTNode) -> bool:
+    match node:
+        case cst.Integer() | cst.Float():
+            try:
+                return float(node.value) == 0
+            except (ValueError, TypeError):
+                return False
+        # todo: add float(), int() etc
+        case _:
+            return False
