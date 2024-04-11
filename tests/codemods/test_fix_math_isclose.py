@@ -33,29 +33,28 @@ class TestFixMathIsClose(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected, num_changes=4)
 
-    # def test_change_resolves_to_zero(self, tmpdir):
-    #     input_code = """
-    #     import math
-    #
-    #     a = 0
-    #     math.isclose(a, b)
-    #
-    #     c = 3 - 3
-    #     math.isclose(c, d)
-    #
-    #     math.isclose(float(0.0), d)
-    #     math.isclose(1, int(0.0))
-    #     """
-    #     expected = """
-    #     import math
-    #
-    #     a = 0
-    #     math.isclose(a, b, abs_tol=1e-09)
-    #
-    #     c = 3 - 3
-    #     math.isclose(c, d, abs_tol=1e-09)
-    #     """
-    #     self.run_and_assert(tmpdir, input_code, expected, num_changes=2)
+    def test_change_resolves_to_zero(self, tmpdir):
+        input_code = """
+        import math
+
+        a = 0
+        math.isclose(a, b)
+
+        c = float(0.0)
+        math.isclose(c, d)
+        math.isclose(1, int(0.0))
+        """
+        expected = """
+        import math
+
+        a = 0
+        math.isclose(a, b, abs_tol=1e-09)
+
+        c = float(0.0)
+        math.isclose(c, d, abs_tol=1e-09)
+        math.isclose(1, int(0.0), abs_tol=1e-09)
+        """
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=3)
 
     def test_no_change(self, tmpdir):
         input_code = """

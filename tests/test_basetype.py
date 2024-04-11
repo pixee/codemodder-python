@@ -55,12 +55,14 @@ class TestIsZero:
         assert is_zero(cst.parse_expression("0"))
         assert is_zero(cst.parse_expression("0.0"))
         assert is_zero(cst.parse_expression("0.00000"))
-        # assert is_zero(cst.parse_expression("int(False)"))
-        # assert is_zero(cst.parse_expression("float(0)"))
+        assert is_zero(cst.parse_expression("int()"))
+        assert is_zero(cst.parse_expression("float()"))
+        assert is_zero(cst.parse_expression("int(False)"))
+        assert is_zero(cst.parse_expression("float(0)"))
 
     def test_not_zero(self):
         assert not is_zero(cst.parse_expression("1"))
         assert not is_zero(cst.parse_expression("0.1"))
         assert not is_zero(cst.parse_expression("a"))
-        # assert not is_zero(cst.parse_expression("int(True)"))
-        # assert not is_zero(cst.parse_expression("float(0.02)"))
+        assert not is_zero(cst.parse_expression("int(True)"))
+        assert not is_zero(cst.parse_expression("float(0.02)"))
