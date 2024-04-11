@@ -22,6 +22,7 @@ from .fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 from .fix_empty_sequence_comparison import FixEmptySequenceComparison
 from .fix_float_equality import FixFloatEquality
 from .fix_hasattr_call import TransformFixHasattrCall
+from .fix_math_isclose import FixMathIsClose
 from .fix_missing_self_or_cls import FixMissingSelfOrCls
 from .fix_mutable_params import FixMutableParams
 from .flask_enable_csrf_protection import FlaskEnableCSRFProtection
@@ -141,6 +142,7 @@ registry = CodemodCollection(
         TransformFixHasattrCall,
         FixDataclassDefaults,
         FixMissingSelfOrCls,
+        FixMathIsClose,
     ],
 )
 

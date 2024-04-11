@@ -52,15 +52,10 @@ class FixMathIsCloseTransformer(
 FixMathIsClose = CoreCodemod(
     metadata=Metadata(
         name="fix-math-isclose",
-        summary="TODOUse `math.isclose` Instead of Direct Equality for Floats",
+        summary="Add `abs_tol` to `math.isclose` Call",
         review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
         references=[
-            Reference(
-                url="TODOhttps://docs.python.org/3/tutorial/floatingpoint.html#floating-point-arithmetic-issues-and-limitations"
-            ),
-            Reference(
-                url="TODOhttps://docs.python.org/3/library/math.html#math.isclose"
-            ),
+            Reference(url="https://docs.python.org/3/library/math.html#math.isclose"),
         ],
     ),
     transformer=LibcstTransformerPipeline(FixMathIsCloseTransformer),
