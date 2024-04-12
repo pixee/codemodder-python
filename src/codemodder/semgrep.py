@@ -63,7 +63,7 @@ class SemgrepResult(Result):
         cls, sarif_result, sarif_run, truncate_rule_id: bool = False
     ) -> Self:
         rule_id = cls.extract_rule_id(sarif_result, sarif_run, truncate_rule_id)
-        if not rule_id:
+        if not (rule_id := cls.extract_rule_id(sarif_result, sarif_run, truncate_rule_id)):
             raise ValueError("Could not extract rule id from sarif result.")
 
         locations: list[Location] = []
