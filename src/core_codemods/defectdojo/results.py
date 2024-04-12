@@ -6,7 +6,6 @@ import libcst as cst
 from libcst._position import CodeRange
 from typing_extensions import Self, override
 
-from codemodder.context import CodemodExecutionContext
 from codemodder.result import LineInfo, Location, Result, ResultSet
 
 
@@ -56,10 +55,3 @@ class DefectDojoResultSet(ResultSet):
             result_set.add_result(DefectDojoResult.from_finding(finding))
 
         return result_set
-
-    @override
-    def results_for_rule_and_file(
-        self, context: CodemodExecutionContext, rule_id: str, file: Path
-    ) -> list[Result]:
-        paths_for_rule = self.get(rule_id, {})
-        return paths_for_rule.get(file.relative_to(context.directory), [])

@@ -33,5 +33,8 @@ def test_semgrep_sarif_codemode_detector(mocker):
     }
     results = detector.apply(codemod_id="foo", context=context, files_to_analyze=[])
     assert isinstance(results, SemgrepResultSet)
-    assert len(results) == 24
-    assert "django-secure-set-cookie" in results
+    assert len(results) == 25
+    assert (
+        "python.django.security.audit.secure-cookies.django-secure-set-cookie"
+        in results
+    )
