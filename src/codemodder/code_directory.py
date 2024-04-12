@@ -88,5 +88,5 @@ def match_files(
     return [
         path
         for p in sorted(list(included_files - excluded_files))
-        if (path := Path(parent_path).joinpath(p)).is_file() and path.suffix == ".py"
+        if (path := Path(parent_path).joinpath(p)).is_file()
     ]
