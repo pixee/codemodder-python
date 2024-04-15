@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import itertools
 import logging
+import os
 from pathlib import Path
 from textwrap import indent
 from typing import TYPE_CHECKING, Iterator, List
@@ -20,7 +21,15 @@ from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.registry import CodemodRegistry
 from codemodder.utils.timer import Timer
 
+try:
+    from openai import Client
+except ImportError:
+    Client = None
+
+
 if TYPE_CHECKING:
+    from openai import Client
+
     from codemodder.codemods.base_codemod import BaseCodemod
 
 
@@ -39,6 +48,7 @@ class CodemodExecutionContext:
     path_exclude: list[str]
     max_workers: int = 1
     tool_result_files_map: dict[str, list[str]]
+    llm_client: Client | None = None
 
     def __init__(
         self,
@@ -65,6 +75,18 @@ class CodemodExecutionContext:
         self.path_exclude = path_exclude
         self.max_workers = max_workers
         self.tool_result_files_map = tool_result_files_map or {}
+        self.llm_client = self._setup_llm_client()
+
+    def _setup_llm_client(self) -> Client | None:
+        if not Client:
+            logger.debug("OpenAI API client not available")
+            return None
+
+        if not (api_key := os.getenv("CODEMODDER_OPENAI_API_KEY")):
+            logger.debug("OpenAI API key not found")
+            return None
+
+        return Client(api_key=api_key)
 
     def add_results(self, codemod_name: str, change_sets: List[ChangeSet]):
         self._results_by_codemod.setdefault(codemod_name, []).extend(change_sets)
