@@ -293,6 +293,7 @@ SONAR_CODEMOD_NAMES = [
     "enable-jinja2-autoescape-S5247",
     "url-sandbox-S5144",
     "fix-float-equality-S1244",
+    "fix-math-isclose-S6727",
 ]
 SONAR_CODEMODS = {
     name: DocMetadata(
