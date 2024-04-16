@@ -20,7 +20,7 @@ class FixMathIsCloseTransformer(
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         if (
             not self.node_is_selected(original_node)
-            or not self.find_base_name(original_node.func) == "math.isclose"
+            or self.find_base_name(original_node.func) != "math.isclose"
             or len(original_node.args) < 2
         ):
             return updated_node
