@@ -77,7 +77,7 @@ class UseWalrusIf(SimpleCodemod, NameResolutionMixin):
                 return test
         return None
 
-    def _single_access(self, original_node: cst.CSTNode) -> bool:
+    def _single_access(self, original_node: cst.IfExp) -> bool:
         match original_node.test:
             case cst.Name():
                 access = self.find_accesses(original_node.test)
@@ -98,7 +98,6 @@ class UseWalrusIf(SimpleCodemod, NameResolutionMixin):
                 continue
 
             assign, target, value = found_assign
-            # breakpoint()
             match if_test:
                 # If test can be a comparison expression
                 case cst.Comparison(
@@ -165,7 +164,6 @@ class UseWalrusIf(SimpleCodemod, NameResolutionMixin):
 
     def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign):
         del updated_node
-        # breakpoint()
         if named_expr := self.assigns.get(original_node):
             position = self.node_position(original_node)
             self._modify_next_if.append((position, named_expr))
