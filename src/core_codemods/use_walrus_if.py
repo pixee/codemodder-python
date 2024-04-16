@@ -6,6 +6,7 @@ import libcst as cst
 from libcst._position import CodeRange
 from libcst.metadata import ParentNodeProvider, ScopeProvider
 
+from codemodder.codemods.utils_mixin import NameResolutionMixin
 from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 FoundAssign = namedtuple("FoundAssign", ["assign", "target", "value"])
@@ -17,7 +18,7 @@ def pairwise(iterable):
     return zip(a, b)
 
 
-class UseWalrusIf(SimpleCodemod):
+class UseWalrusIf(SimpleCodemod, NameResolutionMixin):
     metadata = Metadata(
         name="use-walrus-if",
         summary="Use Assignment Expression (Walrus) In Conditional",
@@ -76,6 +77,16 @@ class UseWalrusIf(SimpleCodemod):
                 return test
         return None
 
+    def _single_access(self, original_node: cst.IfExp) -> bool:
+        match original_node.test:
+            case cst.Name():
+                access = self.find_accesses(original_node.test)
+            case cst.UnaryOperation():
+                access = self.find_accesses(original_node.test.expression)
+            case _:
+                access = self.find_accesses(original_node.test.left)
+        return len(access) == 1
+
     def on_visit(self, node: cst.CSTNode) -> Optional[bool]:
         if len(node.children) < 2:
             return super().on_visit(node)
@@ -87,7 +98,6 @@ class UseWalrusIf(SimpleCodemod):
                 continue
 
             assign, target, value = found_assign
-
             match if_test:
                 # If test can be a comparison expression
                 case cst.Comparison(
@@ -130,16 +140,24 @@ class UseWalrusIf(SimpleCodemod):
         if (result := self._if_stack.pop()) is not None:
             position, named_expr = result
             self.add_change_from_position(position, self.change_description)
+
+            # If a variable has a single access, it means it's only assigned and not used again.
+            # In this case, do not use a walrus named expr to prevent unused variable warnings.
+            # Instead, move the variable's rhs directly into the if statement.
+            new_expression = (
+                named_expr.value if self._single_access(original_node) else named_expr
+            )
+
             match updated_node.test:
                 case cst.Name():
-                    return updated_node.with_changes(test=named_expr)
+                    return updated_node.with_changes(test=new_expression)
                 case cst.UnaryOperation():
                     return updated_node.with_changes(
-                        test=updated_node.test.with_changes(expression=named_expr)
+                        test=updated_node.test.with_changes(expression=new_expression)
                     )
                 case _:
                     return updated_node.with_changes(
-                        test=updated_node.test.with_changes(left=named_expr)
+                        test=updated_node.test.with_changes(left=new_expression)
                     )
 
         return original_node
