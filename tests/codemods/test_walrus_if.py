@@ -225,3 +225,47 @@ if val is not None:
         assert changes[0].lineNumber == 2
         assert changes[1].lineNumber == 5
         assert changes[2].lineNumber == 8
+
+    def test_no_walrus_if_unused_variable(self, tmpdir):
+        input_code = """
+        test = (
+            1
+            if True
+            else 0
+        )
+        if test:
+            print("var will not be reused")
+        """
+        expected_output = """
+        if (
+            1
+            if True
+            else 0
+        ):
+            print("var will not be reused")
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_no_walrus_if_not(self, tmpdir):
+        input_code = """
+        val = do_something()
+        if not val:
+            print("something")
+        """
+        expected_output = """
+        if not do_something():
+            print("something")
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_no_walrus_if(self, tmpdir):
+        input_code = """
+        val = do_something()
+        if val is None:
+            print("hi")
+        """
+        expected_output = """
+        if do_something() is None:
+            print("hi")
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
