@@ -67,6 +67,7 @@ class BaseCodemod(metaclass=ABCMeta):
     _metadata: Metadata
     detector: BaseDetector | None
     transformer: BaseTransformerPipeline
+    default_extensions: list[str] | None
 
     def __init__(
         self,
@@ -74,11 +75,13 @@ class BaseCodemod(metaclass=ABCMeta):
         metadata: Metadata,
         detector: BaseDetector | None = None,
         transformer: BaseTransformerPipeline,
+        default_extensions: list[str] | None = None,
     ):
         # Metadata should only be accessed via properties
         self._metadata = metadata
         self.detector = detector
         self.transformer = transformer
+        self.default_extensions = default_extensions or [".py"]
 
     @property
     @abstractmethod
@@ -152,6 +155,16 @@ class BaseCodemod(metaclass=ABCMeta):
             self.detector.apply(self.name, context, files_to_analyze)
             if self.detector
             else None
+        )
+
+        files_to_analyze = (
+            [
+                path
+                for path in files_to_analyze
+                if path.suffix in self.default_extensions
+            ]
+            if self.default_extensions
+            else files_to_analyze
         )
 
         process_file = functools.partial(

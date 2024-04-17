@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass
 from importlib.metadata import entry_points
+from itertools import chain
 from typing import TYPE_CHECKING, Optional
 
 from codemodder.logging import logger
@@ -31,10 +33,12 @@ class CodemodCollection:
 class CodemodRegistry:
     _codemods_by_name: dict[str, BaseCodemod]
     _codemods_by_id: dict[str, BaseCodemod]
+    _default_include_paths: set[str]
 
     def __init__(self):
         self._codemods_by_name = {}
         self._codemods_by_id = {}
+        self._default_include_paths = set()
 
     @property
     def names(self):
@@ -48,11 +52,23 @@ class CodemodRegistry:
     def codemods(self):
         return list(self._codemods_by_name.values())
 
+    @property
+    def default_include_paths(self) -> list[str]:
+        return list(self._default_include_paths)
+
     def add_codemod_collection(self, collection: CodemodCollection):
         for codemod in collection.codemods:
             wrapper = codemod() if isinstance(codemod, type) else codemod
             self._codemods_by_name[wrapper.name] = wrapper
             self._codemods_by_id[wrapper.id] = wrapper
+            self._default_include_paths.update(
+                chain(
+                    *[
+                        (f"*{ext}", os.path.join("**", f"*{ext}"))
+                        for ext in wrapper.default_extensions
+                    ]
+                )
+            )
 
     def match_codemods(
         self,
