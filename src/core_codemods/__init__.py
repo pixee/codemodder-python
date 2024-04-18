@@ -22,6 +22,7 @@ from .fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 from .fix_empty_sequence_comparison import FixEmptySequenceComparison
 from .fix_float_equality import FixFloatEquality
 from .fix_hasattr_call import TransformFixHasattrCall
+from .fix_math_isclose import FixMathIsClose
 from .fix_missing_self_or_cls import FixMissingSelfOrCls
 from .fix_mutable_params import FixMutableParams
 from .flask_enable_csrf_protection import FlaskEnableCSRFProtection
@@ -56,6 +57,7 @@ from .sonar.sonar_enable_jinja2_autoescape import SonarEnableJinja2Autoescape
 from .sonar.sonar_exception_without_raise import SonarExceptionWithoutRaise
 from .sonar.sonar_fix_assert_tuple import SonarFixAssertTuple
 from .sonar.sonar_fix_float_equality import SonarFixFloatEquality
+from .sonar.sonar_fix_math_isclose import SonarFixMathIsClose
 from .sonar.sonar_fix_missing_self_or_cls import SonarFixMissingSelfOrCls
 from .sonar.sonar_flask_json_response_type import SonarFlaskJsonResponseType
 from .sonar.sonar_jwt_decode_verify import SonarJwtDecodeVerify
@@ -141,6 +143,7 @@ registry = CodemodCollection(
         TransformFixHasattrCall,
         FixDataclassDefaults,
         FixMissingSelfOrCls,
+        FixMathIsClose,
     ],
 )
 
@@ -162,6 +165,7 @@ sonar_registry = CodemodCollection(
         SonarEnableJinja2Autoescape,
         SonarUrlSandbox,
         SonarFixFloatEquality,
+        SonarFixMathIsClose,
     ],
 )
 

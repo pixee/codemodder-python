@@ -1,5 +1,5 @@
 {
-  "total":39,
+  "total":40,
   "p":1,
   "ps":500,
   "paging":{
@@ -1711,6 +1711,63 @@
         {
           "softwareQuality": "RELIABILITY",
           "severity": "MEDIUM"
+        }
+      ]
+    },
+    {
+      "key": "AY7mo4uMdwhiaVaz19i0",
+      "rule": "python:S6727",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:fix_math_isclose.py",
+      "project": "pixee_codemodder-python",
+      "line": 5,
+      "hash": "04f9f1004f2e54235471579aa2ac32c3",
+      "textRange": {
+        "startLine": 5,
+        "endLine": 5,
+        "startOffset": 11,
+        "endOffset": 23
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "pixee_codemodder-python:src/codemodder/temp.py",
+              "textRange": {
+                "startLine": 5,
+                "endLine": 5,
+                "startOffset": 27,
+                "endOffset": 28
+              },
+              "msg": "This argument evaluates to zero."
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Provide the \"abs_tol\" parameter when using \"math.isclose\" to compare a value to 0.",
+      "effort": "5min",
+      "debt": "5min",
+      "assignee": "clavedeluna@github",
+      "tags": [],
+      "creationDate": "2024-04-16T13:19:59+0200",
+      "updateDate": "2024-04-16T13:20:38+0200",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
+        },
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "HIGH"
+        },
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "LOW"
         }
       ]
     }
