@@ -34,6 +34,7 @@ class Metadata:
     references: list[Reference] = field(default_factory=list)
     description: str | None = None
     tool: ToolMetadata | None = None
+    language: str = "python"
 
 
 @dataclass
@@ -93,8 +94,12 @@ class BaseCodemod(metaclass=ABCMeta):
         return self._metadata.name
 
     @property
+    def language(self) -> str:
+        return self._metadata.language
+
+    @property
     def id(self) -> str:
-        return f"{self.origin}:python/{self.name}"
+        return f"{self.origin}:{self.language}/{self.name}"
 
     @property
     def summary(self):
