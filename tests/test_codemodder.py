@@ -106,13 +106,16 @@ class TestRun:
 
         build_report.return_value.write_report.assert_called_once()
 
-    @mock.patch("codemodder.codemods.libcst_transformer.update_code")
-    @mock.patch(
-        "codemodder.codemods.libcst_transformer.LibcstTransformerPipeline.apply",
-        new_callable=mock.PropertyMock,
-    )
-    @mock.patch("codemodder.context.CodemodExecutionContext.compile_results")
-    def test_dry_run(self, _, transform_apply, mock_update_code, dir_structure):
+    def test_dry_run(self, mocker, dir_structure):
+        mock_update_code = mocker.patch(
+            "codemodder.codemods.libcst_transformer.update_code"
+        )
+        transform_apply = mocker.patch(
+            "codemodder.codemods.libcst_transformer.LibcstTransformerPipeline.apply",
+            new_callable=mock.PropertyMock,
+        )
+        mocker.patch("codemodder.context.CodemodExecutionContext.compile_results")
+
         code_dir, codetf = dir_structure
         args = [
             str(code_dir),
@@ -120,7 +123,7 @@ class TestRun:
             str(codetf),
             "--dry-run",
             # Make this test faster by restricting the number of codemods
-            "--codemod-include=url-sandbox",
+            "--codemod-include=use-defusedxml",
         ]
 
         assert not codetf.exists()
@@ -157,7 +160,9 @@ class TestRun:
 
         mock_reporting.return_value.write_report.assert_called_once()
 
-    @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
+    @pytest.mark.parametrize(
+        "codemod", ["use-defusedxml", "pixee:python/use-defusedxml"]
+    )
     @mock.patch(
         "codemodder.codemods.libcst_transformer.LibcstTransformerPipeline.apply",
         new_callable=mock.PropertyMock,
