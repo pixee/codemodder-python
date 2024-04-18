@@ -66,6 +66,15 @@ class UtilsMixin(MetadataDependent):
     def lineno_for_node(self, node):
         return self.node_position(node).start.line
 
+    def code(self, node: cst.CSTNode) -> str:
+        """
+        Only a cst.Module node has a `code` attribute which converts the node
+        back to the original code as a str. To get the code for any node,
+        the suggested approach is to wrap this node in a `cst.Module` node.
+        """
+        module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=node)])])
+        return module.code
+
 
 class BaseTransformer(VisitorBasedCodemodCommand, UtilsMixin):
     def __init__(

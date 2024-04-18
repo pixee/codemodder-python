@@ -36,22 +36,43 @@ class FixDataclassDefaults(SimpleCodemod, NameAndAncestorResolutionMixin, UtilsM
             return updated_node
 
         match original_node.value:
-            # TODO: add support for populated elements
             case cst.List(elements=[]) | cst.Dict(elements=[]) | cst.Tuple(elements=[]):
-                self.add_needed_import("dataclasses", "field")
-                self.report_change(original_node)
-                return updated_node.with_changes(
-                    value=cst.parse_expression(
-                        f"field(default_factory={ type(original_node.value).__name__.lower()})"
-                    )
+                return self.field_with_default_factory(original_node, updated_node)
+            case (
+                cst.List(elements=[_, *_])
+                | cst.Dict(elements=[_, *_])
+                | cst.Tuple(elements=[_, *_])
+            ):
+                return self.field_with_default_factory(
+                    original_node, updated_node, empty=False
                 )
             case cst.Call(func=cst.Name(value="set"), args=[]):
-                self.add_needed_import("dataclasses", "field")
-                self.report_change(original_node)
-                return updated_node.with_changes(
-                    value=cst.parse_expression("field(default_factory=set)")
+                return self.field_with_default_factory(original_node, updated_node)
+            case cst.Call(func=cst.Name(value="set"), args=[_, *_]):
+                return self.field_with_default_factory(
+                    original_node, updated_node, empty=False
                 )
         return updated_node
+
+    def field_with_default_factory(
+        self,
+        original_node: cst.List | cst.Tuple | cst.Dict | cst.Call,
+        updated_node: cst.List | cst.Tuple | cst.Dict | cst.Call,
+        empty=True,
+    ):
+        self.add_needed_import("dataclasses", "field")
+        self.report_change(original_node)
+        value = original_node.value
+        if empty:
+            expr = (
+                "field(default_factory=set)"
+                if isinstance(value, cst.Call)
+                else f"field(default_factory={type(value).__name__.lower()})"
+            )
+            return updated_node.with_changes(value=cst.parse_expression(expr))
+
+        expr = f"field(default_factory=lambda: {self.code(value).strip()})"
+        return updated_node.with_changes(value=cst.parse_expression(expr))
 
     def _has_dataclass_decorator(self, node: cst.ClassDef) -> bool:
         for decorator in node.decorators:

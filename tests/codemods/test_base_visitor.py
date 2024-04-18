@@ -55,6 +55,34 @@ class AssertPositionCodemod(BaseTransformer):
         return updated_node
 
 
+class AssertNodeCode(BaseTransformer):
+    def __init__(
+        self,
+        context,
+        results,
+        expected_code,
+        node_type,
+        line_exclude=None,
+        line_include=None,
+    ):
+        BaseTransformer.__init__(
+            self, context, results, line_include or [], line_exclude or []
+        )
+        self.expected_code = expected_code
+        self.node_type = node_type
+        self.checked = False
+
+    def on_leave(
+        self, original_node: cst.CSTNode, updated_node: cst.CSTNode
+    ) -> cst.CSTNode:
+        match original_node:
+            case self.node_type():
+                assert self.code(original_node).strip() == self.expected_code.strip()
+                self.checked = True
+
+        return updated_node
+
+
 class TestBaseVisitor:
     def run_and_assert(self, input_code, expected, line_exclude, line_include):
         input_tree = cst.parse_module(input_code)
@@ -125,3 +153,35 @@ class TestNodePosition:
             start=CodePosition(line=2, column=0), end=CodePosition(line=2, column=31)
         )
         self.run_and_assert(input_code, expected_pos)
+
+
+class TestCodeForNode:
+    def run_and_assert(self, input_code, expected_code, node_type):
+        input_tree = cst.parse_module(dedent(input_code))
+        command_instance = AssertNodeCode(
+            CodemodContext(), defaultdict(list), expected_code, node_type
+        )
+        command_instance.transform_module(input_tree)
+        if not command_instance.checked:
+            raise Exception(f"Input code does not contain a {node_type}")
+
+    def test_annAssign(self):
+        input_code = "phones: list = [1, 2, 3]"
+        self.run_and_assert(input_code, input_code, cst.AnnAssign)
+
+    def test_list(self):
+        input_code = "[1, 'two', Exception]"
+        self.run_and_assert(input_code, input_code, cst.List)
+
+    def test_dict(self):
+        self.run_and_assert('dict = {"friend": "one"}', '{"friend": "one"}', cst.Dict)
+
+    def test_module(self):
+        input_code = dedent(
+            """
+        # comment
+        var = 1
+        print(var)
+        """
+        )
+        self.run_and_assert(input_code, input_code, cst.Module)
