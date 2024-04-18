@@ -34,9 +34,15 @@ class SASTCodemod(CoreCodemod):
         metadata: Metadata,
         detector: BaseDetector | None = None,
         transformer: BaseTransformerPipeline,
+        default_extensions: list[str] | None = None,
         requested_rules: list[str] | None = None,
     ):
-        super().__init__(metadata=metadata, detector=detector, transformer=transformer)
+        super().__init__(
+            metadata=metadata,
+            detector=detector,
+            transformer=transformer,
+            default_extensions=default_extensions,
+        )
         self.requested_rules = [self.name]
         if requested_rules:
             self.requested_rules.extend(requested_rules)

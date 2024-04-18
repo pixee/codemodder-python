@@ -1,8 +1,12 @@
+from pathlib import Path
+
 import libcst as cst
 import mock
+import pytest
 from libcst.codemod import CodemodContext
 
 from codemodder.codemods.api import Metadata, ReviewGuidance, SimpleCodemod
+from core_codemods.api import CoreCodemod
 
 
 class DoNothingCodemod(SimpleCodemod):
@@ -32,3 +36,21 @@ class TestEmptyResults:
     def test_empty_results(self):
         input_code = """print('Hello World')"""
         self.run_and_assert(input_code, input_code)
+
+
+@pytest.mark.parametrize("ext,call_count", [(".py", 2), (".txt", 1), (".js", 1)])
+def test_filter_apply_by_extension(mocker, ext, call_count):
+    process_file = mocker.patch("core_codemods.api.CoreCodemod._process_file")
+
+    codemod = CoreCodemod(
+        metadata=mocker.MagicMock(),
+        transformer=mocker.MagicMock(),
+        default_extensions=[ext],
+    )
+
+    codemod.apply(
+        mocker.MagicMock(),
+        [Path("file.py"), Path("file.txt"), Path("file.js"), Path("file2.py")],
+    )
+
+    assert process_file.call_count == call_count

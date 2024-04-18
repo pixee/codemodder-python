@@ -186,13 +186,17 @@ def run(original_args) -> int:
         sast_only=argv.sonar_issues_json or argv.sarif,
     )
 
+    included_paths = argv.path_include or codemod_registry.default_include_paths
+
     log_section("setup")
     log_list(logging.INFO, "running", codemods_to_run, predicate=lambda c: c.id)
-    log_list(logging.INFO, "including paths", argv.path_include)
+    log_list(logging.INFO, "including paths", included_paths)
     log_list(logging.INFO, "excluding paths", argv.path_exclude)
 
     files_to_analyze: list[Path] = match_files(
-        context.directory, argv.path_exclude, argv.path_include
+        context.directory,
+        argv.path_exclude,
+        included_paths,
     )
 
     full_names = [str(path) for path in files_to_analyze]
