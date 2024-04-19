@@ -1,6 +1,6 @@
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional, TypeAlias
+from typing import Any, Iterator, Optional, Type, TypeAlias, TypeVar
 
 import libcst as cst
 from libcst import MetadataDependent, matchers
@@ -216,3 +216,23 @@ def is_zero(node: cst.CSTNode) -> bool:
         case cst.Call(func=cst.Name("int")) | cst.Call(func=cst.Name("float")):
             return is_zero(node.args[0].value)
     return False
+
+
+_CSTNode = TypeVar("_CSTNode", bound=cst.CSTNode)
+
+
+def extract_boolean_operands(
+    node: cst.BooleanOperation, ensure_type: Type[_CSTNode] = cst.CSTNode
+) -> Iterator[_CSTNode]:
+    """
+    Recursively extract operands from a cst.BooleanOperation node from left to right as an iterator of nodes.
+    """
+    if isinstance(node.left, cst.BooleanOperation):
+        # Recursively yield operands from the boolean operation on the left
+        yield from extract_boolean_operands(node.left, ensure_type)
+    else:
+        # Yield left operand
+        yield cst.ensure_type(node.left, ensure_type)
+
+    # Yield right operand
+    yield cst.ensure_type(node.right, ensure_type)
