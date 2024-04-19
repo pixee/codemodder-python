@@ -1,6 +1,6 @@
 import libcst as cst
 
-from codemodder.codemods.api import Metadata, ReviewGuidance, ToolMetadata
+from codemodder.codemods.api import Metadata, ReviewGuidance, ToolMetadata, ToolRule
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
@@ -47,9 +47,13 @@ AvoidInsecureDeserialization = DefectDojoCodemod(
         review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         tool=ToolMetadata(
             name="DefectDojo",
-            rule_id="python.django.security.audit.avoid-insecure-deserialization.avoid-insecure-deserialization",
-            rule_name="avoid-insecure-deserialization",
-            rule_url="https://semgrep.dev/playground/r/python.django.security.audit.avoid-insecure-deserialization.avoid-insecure-deserialization",
+            rules=[
+                ToolRule(
+                    id="python.django.security.audit.avoid-insecure-deserialization.avoid-insecure-deserialization",
+                    name="avoid-insecure-deserialization",
+                    url="https://semgrep.dev/playground/r/python.django.security.audit.avoid-insecure-deserialization.avoid-insecure-deserialization",
+                )
+            ],
         ),
         references=[],
     ),
