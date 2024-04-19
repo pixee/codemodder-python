@@ -48,6 +48,39 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected)
 
+    def test_multiple_injectable_calls(self, tmpdir):
+        input_code = """
+        import sqlite3
+
+        def f(user):
+            sql = '''SELECT user FROM users WHERE user = \'%s\' '''
+
+            conn = sqlite3.connect('example')
+            conn.cursor().execute(sql % (user))
+
+        def g(user):
+            sql = "SELECT user FROM users WHERE user = '" + user + "'"
+
+            conn = sqlite3.connect('example')
+            conn.cursor().execute(sql)
+        """
+        expected = """
+        import sqlite3
+
+        def f(user):
+            sql = '''SELECT user FROM users WHERE user = ? '''
+
+            conn = sqlite3.connect('example')
+            conn.cursor().execute(sql, ((user), ))
+
+        def g(user):
+            sql = "SELECT user FROM users WHERE user = ?"
+
+            conn = sqlite3.connect('example')
+            conn.cursor().execute(sql, (user, ))
+        """
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=2)
+
     def test_simple_with_quotes_in_middle(self, tmpdir):
         input_code = """
         import sqlite3
