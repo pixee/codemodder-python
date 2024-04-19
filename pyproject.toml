@@ -24,6 +24,7 @@ dependencies = [
     "tomlkit~=0.12.0",
     "wrapt~=1.16.0",
     "chardet~=5.2.0",
+    "security==1.2.1",
 ]
 keywords = ["codemod", "codemods", "security", "fix", "fixes"]
 classifiers = [
