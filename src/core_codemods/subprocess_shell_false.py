@@ -1,5 +1,5 @@
 import libcst as cst
-from libcst import matchers
+from libcst import matchers as m
 from libcst.metadata import ParentNodeProvider
 
 from codemodder.codemods.check_annotations import is_disabled_by_annotations
@@ -35,17 +35,22 @@ class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
     )
     IGNORE_ANNOTATIONS = ["S603"]
 
-    def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
+    def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
         if not self.node_is_selected(original_node):
             return updated_node
 
-        if self.find_base_name(original_node.func) in self.SUBPROCESS_FUNCS:
+        if (
+            self.find_base_name(original_node.func) in self.SUBPROCESS_FUNCS
+        ) and not m.matches(
+            original_node.args[0],
+            m.Arg(
+                value=m.SimpleString() | m.ConcatenatedString() | m.FormattedString()
+            ),  # First argument to subprocess.<func> cannot be a string or setting shell=False will cause a FileNotFoundError
+        ):
             for arg in original_node.args:
-                if matchers.matches(
+                if m.matches(
                     arg,
-                    matchers.Arg(
-                        keyword=matchers.Name("shell"), value=matchers.Name("True")
-                    ),
+                    m.Arg(keyword=m.Name("shell"), value=m.Name("True")),
                 ) and not is_disabled_by_annotations(
                     original_node,
                     self.metadata,  # type: ignore
@@ -57,4 +62,5 @@ class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
                         [NewArg(name="shell", value="False", add_if_missing=False)],
                     )
                     return self.update_arg_target(updated_node, new_args)
+
         return updated_node
