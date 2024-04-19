@@ -14,6 +14,10 @@ from codemodder.semgrep import run as semgrep_run
 class BaseCodemodTest:
     codemod: ClassVar = NotImplemented
 
+    @property
+    def file_extension(self) -> str:
+        return "py"
+
     def setup_method(self):
         if isinstance(self.codemod, type):
             self.codemod = self.codemod()
@@ -30,7 +34,9 @@ class BaseCodemodTest:
         lines_to_exclude: list[int] | None = None,
     ):
         root = root or tmpdir
-        tmp_file_path = files[0] if files else Path(tmpdir) / "code.py"
+        tmp_file_path = (
+            files[0] if files else Path(tmpdir) / f"code.{self.file_extension}"
+        )
         tmp_file_path.write_text(dedent(input_code))
 
         files_to_check = files or [tmp_file_path]
@@ -142,7 +148,9 @@ class BaseSASTCodemodTest(BaseCodemodTest):
         results: str = "",
     ):
         root = root or tmpdir
-        tmp_file_path = files[0] if files else Path(tmpdir) / "code.py"
+        tmp_file_path = (
+            files[0] if files else Path(tmpdir) / f"code.{self.file_extension}"
+        )
         tmp_file_path.write_text(dedent(input_code))
 
         tmp_results_file_path = Path(tmpdir) / "sast_results"
