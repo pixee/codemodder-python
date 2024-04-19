@@ -13,7 +13,7 @@ from pathlib import Path
 from codemodder.code_directory import file_line_patterns
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
-from codemodder.codetf import DetectionTool, Reference, Rule
+from codemodder.codetf import DetectionTool, Reference
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from codemodder.logging import logger
@@ -38,11 +38,20 @@ class Metadata:
 
 
 @dataclass
+class ToolRule:
+    id: str
+    name: str
+    url: str | None = None
+
+
+@dataclass
 class ToolMetadata:
     name: str
-    rule_id: str
-    rule_name: str
-    rule_url: str | None = None
+    rules: list[ToolRule]
+
+    @property
+    def rule_ids(self):
+        return [rule.id for rule in self.rules]
 
 
 class BaseCodemod(metaclass=ABCMeta):
@@ -115,11 +124,6 @@ class BaseCodemod(metaclass=ABCMeta):
 
         return DetectionTool(
             name=self._metadata.tool.name,
-            rule=Rule(
-                id=self._metadata.tool.rule_id,
-                name=self._metadata.tool.rule_name,
-                url=self._metadata.tool.rule_url,
-            ),
         )
 
     @cached_property

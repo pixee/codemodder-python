@@ -1,6 +1,6 @@
 import libcst as cst
 
-from codemodder.codemods.api import Metadata, ReviewGuidance, ToolMetadata
+from codemodder.codemods.api import Metadata, ReviewGuidance, ToolMetadata, ToolRule
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
@@ -41,9 +41,13 @@ DjangoSecureSetCookie = DefectDojoCodemod(
         review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         tool=ToolMetadata(
             name="DefectDojo",
-            rule_id="python.django.security.audit.secure-cookies.django-secure-set-cookie",
-            rule_name="django-secure-set-cookie",
-            rule_url="https://semgrep.dev/playground/r/python.django.security.audit.secure-cookies.django-secure-set-cookie",
+            rules=[
+                ToolRule(
+                    id="python.django.security.audit.secure-cookies.django-secure-set-cookie",
+                    name="django-secure-set-cookie",
+                    url="https://semgrep.dev/playground/r/python.django.security.audit.secure-cookies.django-secure-set-cookie",
+                )
+            ],
         ),
         references=[],
     ),

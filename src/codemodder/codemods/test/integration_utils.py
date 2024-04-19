@@ -300,7 +300,7 @@ class SonarIntegrationTest(BaseIntegrationTest):
         assert self.codemod_instance._metadata.tool is not None
         assert (
             result["references"][-1]["description"]
-            == self.codemod_instance._metadata.tool.rule_name
+            == self.codemod_instance._metadata.tool.rules[0].name
         )
         assert result["detectionTool"]["name"] == "Sonar"
 

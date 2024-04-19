@@ -1,7 +1,7 @@
 from functools import cache
 from pathlib import Path
 
-from codemodder.codemods.base_codemod import Metadata, Reference, ToolMetadata
+from codemodder.codemods.base_codemod import Metadata, Reference, ToolMetadata, ToolRule
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
 from codemodder.context import CodemodExecutionContext
@@ -37,9 +37,13 @@ class SonarCodemod(SASTCodemod):
                 + other.description,
                 tool=ToolMetadata(
                     name="Sonar",
-                    rule_id=rule_id,
-                    rule_name=rule_name,
-                    rule_url=rule_url,
+                    rules=[
+                        ToolRule(
+                            id=rule_id,
+                            name=rule_name,
+                            url=rule_url,
+                        )
+                    ],
                 ),
             ),
             transformer=transformer if transformer else other.transformer,

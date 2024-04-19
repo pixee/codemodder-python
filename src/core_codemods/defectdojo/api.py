@@ -6,7 +6,7 @@ from typing import cast
 
 from typing_extensions import override
 
-from codemodder.codemods.api import Metadata, Reference, ToolMetadata
+from codemodder.codemods.api import Metadata, Reference, ToolMetadata, ToolRule
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.context import CodemodExecutionContext
 from codemodder.result import ResultSet
@@ -62,9 +62,13 @@ class DefectDojoCodemod(SASTCodemod):
                 + other.description,
                 tool=ToolMetadata(
                     name="DefectDojo",
-                    rule_id=rule_id,
-                    rule_name=rule_name,
-                    rule_url=rule_url,
+                    rules=[
+                        ToolRule(
+                            id=rule_id,
+                            name=rule_name,
+                            url=rule_url,
+                        )
+                    ],
                 ),
             ),
             transformer=other.transformer,
@@ -82,5 +86,5 @@ class DefectDojoCodemod(SASTCodemod):
             context,
             files_to_analyze,
             # We know this has a tool because we created it with `from_core_codemod`
-            [cast(ToolMetadata, self._metadata.tool).rule_id],
+            cast(ToolMetadata, self._metadata.tool).rule_ids,
         )

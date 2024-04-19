@@ -9,6 +9,7 @@ from codemodder.codemods.base_codemod import (  # noqa: F401
     Reference,
     ReviewGuidance,
     ToolMetadata,
+    ToolRule,
 )
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
