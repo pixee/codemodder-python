@@ -16,7 +16,7 @@ class CombineIsinstanceIssubclass(SimpleCodemod, NameResolutionMixin):
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[],
     )
-    change_description = "Use tuple of matches instead of boolean expression"
+    change_description = "Use tuple of matches instead of boolean expression with `isinstance` or `issubclass`"
 
     @check_filter_by_path_includes_or_excludes
     def leave_BooleanOperation(
