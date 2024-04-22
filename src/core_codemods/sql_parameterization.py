@@ -126,7 +126,7 @@ class SQLQueryParameterizationTransformer(
         LibcstResultTransformer.__init__(self, *codemod_args, **codemod_kwargs)
         UtilsMixin.__init__(
             self,
-            [],
+            codemod_args[1],
             line_exclude=self.file_context.line_exclude,
             line_include=self.file_context.line_include,
         )
@@ -175,9 +175,8 @@ class SQLQueryParameterizationTransformer(
         tree.visit(find_queries)
 
         for call, linearized_query in find_queries.calls.items():
-            # filter by line includes/excludes
-            call_pos = self.node_position(call)
-            if not self.filter_by_path_includes_or_excludes(call_pos):
+            # filter node
+            if not self.node_is_selected(call):
                 return tree
 
             # Step (2)
