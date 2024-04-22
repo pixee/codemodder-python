@@ -39,14 +39,9 @@ class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
         if not self.node_is_selected(original_node):
             return updated_node
 
-        if (
-            self.find_base_name(original_node.func) in self.SUBPROCESS_FUNCS
-        ) and not m.matches(
-            original_node.args[0],
-            m.Arg(
-                value=m.SimpleString() | m.ConcatenatedString() | m.FormattedString()
-            ),  # First argument to subprocess.<func> cannot be a string or setting shell=False will cause a FileNotFoundError
-        ):
+        if self.find_base_name(
+            original_node.func
+        ) in self.SUBPROCESS_FUNCS and self.first_arg_is_not_string(original_node):
             for arg in original_node.args:
                 if m.matches(
                     arg,
@@ -64,3 +59,12 @@ class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
                     return self.update_arg_target(updated_node, new_args)
 
         return updated_node
+
+    def first_arg_is_not_string(self, original_node: cst.Call) -> bool:
+        # First argument to subprocess.<func> cannot be a string or setting shell=False will cause a FileNotFoundError
+        return not m.matches(
+            original_node.args[0],
+            m.Arg(
+                value=m.SimpleString() | m.ConcatenatedString() | m.FormattedString()
+            ),
+        )
