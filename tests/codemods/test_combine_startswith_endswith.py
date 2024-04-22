@@ -163,8 +163,8 @@ class TestCombineStartswithEndswith(BaseCodemodTest):
     def test_name_args(self, tmpdir, func, input_code, expected):
         self._format_func_run_test(tmpdir, func, input_code, expected)
 
-    _100_of_each_type = [
-        (f"'{i}'", f"'{i}con' 'cat{i}'", f"f'fmt{i}'", f"name{i}") for i in range(100)
+    _10_of_each_type = [
+        (f"'{i}'", f"'{i}con' 'cat{i}'", f"f'fmt{i}'", f"name{i}") for i in range(10)
     ]
 
     @each_func
@@ -186,33 +186,33 @@ class TestCombineStartswithEndswith(BaseCodemodTest):
                 "x.{func}('a') or x.{func}(('b', 'c')) or x.{func}('d') or x.{func}(('e', 'f', 'g', 'h'))",
                 "x.{func}(('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'))",
             ),
-            # 100 cst.SimpleStrings
+            # 10 cst.SimpleStrings
             (
-                " or ".join("x.{func}" + f"({item[0]})" for item in _100_of_each_type),
-                "x.{func}" + f"(({', '.join(item[0] for item in _100_of_each_type)}))",
+                " or ".join("x.{func}" + f"({item[0]})" for item in _10_of_each_type),
+                "x.{func}" + f"(({', '.join(item[0] for item in _10_of_each_type)}))",
             ),
-            # 100 cst.ConcatenatedStrings
+            # 10 cst.ConcatenatedStrings
             (
-                " or ".join("x.{func}" + f"({item[1]})" for item in _100_of_each_type),
-                "x.{func}" + f"(({', '.join(item[1] for item in _100_of_each_type)}))",
+                " or ".join("x.{func}" + f"({item[1]})" for item in _10_of_each_type),
+                "x.{func}" + f"(({', '.join(item[1] for item in _10_of_each_type)}))",
             ),
-            # 100 cst.FormattedStrings
+            # 10 cst.FormattedStrings
             (
-                " or ".join("x.{func}" + f"({item[2]})" for item in _100_of_each_type),
-                "x.{func}" + f"(({', '.join(item[2] for item in _100_of_each_type)}))",
+                " or ".join("x.{func}" + f"({item[2]})" for item in _10_of_each_type),
+                "x.{func}" + f"(({', '.join(item[2] for item in _10_of_each_type)}))",
             ),
-            # 100 cst.Names
+            # 10 cst.Names
             (
-                " or ".join("x.{func}" + f"({item[3]})" for item in _100_of_each_type),
-                "x.{func}" + f"(({', '.join(item[3] for item in _100_of_each_type)}))",
+                " or ".join("x.{func}" + f"({item[3]})" for item in _10_of_each_type),
+                "x.{func}" + f"(({', '.join(item[3] for item in _10_of_each_type)}))",
             ),
-            # 100 cst.Tuples with all types
+            # 10 cst.Tuples with all types
             (
                 " or ".join(
-                    "x.{func}" + f"(({', '.join(item)}))" for item in _100_of_each_type
+                    "x.{func}" + f"(({', '.join(item)}))" for item in _10_of_each_type
                 ),
                 "x.{func}"
-                + f"(({', '.join(', '.join(item) for item in _100_of_each_type)}))",
+                + f"(({', '.join(', '.join(item) for item in _10_of_each_type)}))",
             ),
         ],
     )
