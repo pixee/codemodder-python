@@ -5,7 +5,7 @@ def f(user):
     sql = """SELECT user FROM users WHERE user = ?"""
 
     conn = sqlite3.connect("example")
-    conn.cursor().execute(sql, ((user), ))  # Noncompliant
+    conn.cursor().execute(sql, ((user),))  # Noncompliant
 
 
 def g(user):
