@@ -321,6 +321,27 @@ class TestLazyLoggingModulo(BaseSemgrepCodemodTest):
             import logging
             logging.info("% something", "hi")
             """,
+            """
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.debug(
+                "At depth %d, updating best step: %s (score: %f).",
+                10,
+                [swap] + next_step.swaps_added,
+                next_score,
+            )
+            """,
+            """
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.log(
+                logging.INFO,
+                "At depth %d, updating best step: %s (score: %f).",
+                10,
+                [swap] + next_step.swaps_added,
+                next_score,
+            )
+            """,
         ],
     )
     def test_no_change(self, tmpdir, code):
