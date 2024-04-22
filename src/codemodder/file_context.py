@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from codemodder.codetf import Change, ChangeSet
+from codemodder.codetf import Change, ChangeSet, UnfixedFinding
 from codemodder.dependency import Dependency
 from codemodder.result import Result
 from codemodder.utils.timer import Timer
@@ -20,6 +20,7 @@ class FileContext:
     findings: list[Result] | None = field(default_factory=list)
     dependencies: set[Dependency] = field(default_factory=set)
     codemod_changes: list[Change] = field(default_factory=list)
+    unfixed_findings: list[UnfixedFinding] = field(default_factory=list)
     results: list[ChangeSet] = field(default_factory=list)
     failures: list[Path] = field(default_factory=list)
     timer: Timer = field(default_factory=Timer)

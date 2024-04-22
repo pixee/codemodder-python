@@ -33,6 +33,7 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
         findings = {
             "results": [
                 {
+                    "id": 1,
                     "title": RULE_ID,
                     "file_path": "code.py",
                     "line": 4,
@@ -58,6 +59,7 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
         findings = {
             "results": [
                 {
+                    "id": 2,
                     "title": RULE_ID,
                     "file_path": "code.py",
                     "line": 4,
@@ -88,11 +90,13 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
         findings = {
             "results": [
                 {
+                    "id": 3,
                     "title": RULE_ID,
                     "file_path": "code.py",
                     "line": 5,
                 },
                 {
+                    "id": 4,
                     "title": RULE_ID,
                     "file_path": "code.py",
                     "line": 6,
@@ -108,3 +112,27 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
             num_changes=2,
         )
         adds_dependency.assert_called_once_with(Fickling)
+
+    @mock.patch("codemodder.codemods.api.FileContext.add_dependency")
+    def test_pickle_loads(self, adds_dependency, tmpdir):
+        input_code = (
+            expected
+        ) = """
+        import pickle
+
+        result = pickle.loads("data")
+        """
+
+        findings = {
+            "results": [
+                {
+                    "id": 5,
+                    "title": RULE_ID,
+                    "file_path": "code.py",
+                    "line": 4,
+                },
+            ]
+        }
+
+        self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(findings))
+        adds_dependency.assert_not_called()

@@ -27,7 +27,7 @@ class Location(ABCDataclass):
     end: LineInfo
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Result(ABCDataclass):
     rule_id: str
     locations: list[Location]
@@ -45,6 +45,11 @@ class Result(ABCDataclass):
             )
             for location in self.locations
         )
+
+
+@dataclass(kw_only=True)
+class SASTResult(Result):
+    finding_id: str
 
 
 def same_line(pos: CodeRange, location: Location) -> bool:
