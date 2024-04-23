@@ -130,9 +130,9 @@ class LibcstResultTransformer(BaseTransformer):
         )
 
     def report_unfixed(self, original_node: cst.CSTNode, reason: str):
-        pass
-        # results = self.results_for_node(original_node)
-        # self.file_context.unfixed_findings.extend(results)
+        line_number = self.lineno_for_node(original_node)
+        findings = self.file_context.get_findings_for_location(line_number)
+        self.file_context.add_unfixed_findings(findings, reason, line_number)
 
     def remove_unused_import(self, original_node):
         RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)

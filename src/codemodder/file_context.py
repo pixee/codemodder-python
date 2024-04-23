@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from codemodder.codetf import Change, ChangeSet, UnfixedFinding
+from codemodder.codetf import Change, ChangeSet, Finding, UnfixedFinding
 from codemodder.dependency import Dependency
 from codemodder.result import Result
 from codemodder.utils.timer import Timer
@@ -33,6 +33,20 @@ class FileContext:
 
     def add_failure(self, filename: Path):
         self.failures.append(filename)
+
+    def add_unfixed_findings(
+        self, findings: list[Finding], reason: str, line_number: int | None = None
+    ):
+        self.unfixed_findings.extend(
+            [
+                finding.to_unfixed_finding(
+                    path=str(self.file_path.relative_to(self.base_directory)),
+                    line_number=line_number,
+                    reason=reason,
+                )
+                for finding in findings
+            ]
+        )
 
     def get_findings_for_location(self, line_number: int):
         return [

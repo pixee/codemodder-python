@@ -158,3 +158,11 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
 
         self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(findings))
         adds_dependency.assert_not_called()
+
+        unfixed = self.execution_context.get_unfixed_findings(self.codemod.id)
+        assert len(unfixed) == 1
+        assert unfixed[0].id == "5"
+        assert unfixed[0].rule.id == RULE_ID
+        assert unfixed[0].lineNumber == 4
+        assert unfixed[0].reason == "`fickling` does not yet support `pickle.loads`"
+        assert unfixed[0].path == "code.py"

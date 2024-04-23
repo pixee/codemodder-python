@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Iterator, List
 
 from codemodder.codetf import ChangeSet
 from codemodder.codetf import Result as CodeTFResult
+from codemodder.codetf import UnfixedFinding
 from codemodder.dependency import (
     Dependency,
     build_dependency_notification,
@@ -37,6 +38,7 @@ class CodemodExecutionContext:
     _results_by_codemod: dict[str, list[ChangeSet]] = {}
     _failures_by_codemod: dict[str, list[Path]] = {}
     _dependency_update_by_codemod: dict[str, PackageStore | None] = {}
+    _unfixed_findings_by_codemod: dict[str, list[UnfixedFinding]] = {}
     dependencies: dict[str, set[Dependency]] = {}
     directory: Path
     dry_run: bool = False
@@ -107,15 +109,18 @@ class CodemodExecutionContext:
             for change_set in changes
         ]
 
-    def get_failures(self, codemod_name: str):
+    def get_failures(self, codemod_name: str) -> list[Path]:
         return self._failures_by_codemod.get(codemod_name, [])
 
-    def get_failed_files(self):
+    def get_failed_files(self) -> list[Path]:
         return list(
             itertools.chain.from_iterable(
                 failures for failures in self._failures_by_codemod.values()
             )
         )
+
+    def get_unfixed_findings(self, codemod_name: str) -> list[UnfixedFinding]:
+        return self._unfixed_findings_by_codemod.get(codemod_name, [])
 
     def process_dependencies(
         self, codemod_id: str
@@ -166,11 +171,19 @@ class CodemodExecutionContext:
 
         return description
 
+    def add_unfixed_findings(
+        self, codemod_id: str, unfixed_findings: list[UnfixedFinding]
+    ):
+        self._unfixed_findings_by_codemod.setdefault(codemod_id, []).extend(
+            unfixed_findings
+        )
+
     def process_results(self, codemod_id: str, results: Iterator[FileContext]):
         for file_context in results:
             self.add_changesets(codemod_id, file_context.changesets)
             self.add_failures(codemod_id, file_context.failures)
             self.add_dependencies(codemod_id, file_context.dependencies)
+            self.add_unfixed_findings(codemod_id, file_context.unfixed_findings)
             self.timer.aggregate(file_context.timer)
 
     def compile_results(self, codemods: list[BaseCodemod]) -> list[CodeTFResult]:
@@ -185,6 +198,7 @@ class CodemodExecutionContext:
                 properties={},
                 failedFiles=[str(file) for file in self.get_failures(codemod.id)],
                 changeset=self.get_changesets(codemod.id),
+                unfixedFindings=self.get_unfixed_findings(codemod.id),
             )
 
             results.append(result)
