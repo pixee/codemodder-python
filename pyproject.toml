@@ -48,7 +48,7 @@ get-hashes = 'codemodder.scripts.get_hashes:main'
 
 [project.optional-dependencies]
 test = [
-    "coverage>=7.3,<7.5",
+    "coverage>=7.5,<7.6",
     "Flask<4",
     "Jinja2~=3.1.2",
     "jsonschema~=4.21.0",
