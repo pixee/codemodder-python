@@ -294,6 +294,7 @@ SONAR_CODEMOD_NAMES = [
     "url-sandbox-S5144",
     "fix-float-equality-S1244",
     "fix-math-isclose-S6727",
+    "sql-parameterization-S3649",
 ]
 SONAR_CODEMODS = {
     name: DocMetadata(

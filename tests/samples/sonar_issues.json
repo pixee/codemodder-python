@@ -1,15 +1,15 @@
 {
-  "total":40,
-  "p":1,
-  "ps":500,
-  "paging":{
-    "pageIndex":1,
-    "pageSize":500,
-    "total":170
+  "total": 41,
+  "p": 1,
+  "ps": 500,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 500,
+    "total": 170
   },
-  "effortTotal":1010,
-  "debtTotal":1010,
-  "issues":[
+  "effortTotal": 1040,
+  "debtTotal": 1040,
+  "issues": [
     {
       "key": "AY5_zeRwqkyzjj5fBCfH",
       "rule": "python:S5719",
@@ -29,8 +29,8 @@
       "message": "Add a \"self\" or class parameter",
       "effort": "5min",
       "debt": "5min",
-            "author":"danalitovsky+git@gmail.com",
-      "tags":[
+      "author": "danalitovsky+git@gmail.com",
+      "tags": [
         "tests"
       ],
       "creationDate": "2024-03-27T13:05:32+0100",
@@ -65,8 +65,8 @@
       "message": "Add a class parameter",
       "effort": "5min",
       "debt": "5min",
-            "author":"danalitovsky+git@gmail.com",
-      "tags":[
+      "author": "danalitovsky+git@gmail.com",
+      "tags": [
         "tests"
       ],
       "creationDate": "2024-03-27T13:05:32+0100",
@@ -83,1529 +83,1529 @@
       ]
     },
     {
-      "key":"AY079772vDBaEBzdYL0s",
-      "rule":"python:S5905",
-      "severity":"BLOCKER",
-      "component":"pixee_codemodder-python:fix_assert_tuple.py",
-      "project":"pixee_codemodder-python",
-      "line":1,
-      "hash":"a1b3bcd3961a8ca09c917951eded0f80",
-      "textRange":{
-        "startLine":1,
-        "endLine":1,
-        "startOffset":7,
-        "endOffset":23
+      "key": "AY079772vDBaEBzdYL0s",
+      "rule": "python:S5905",
+      "severity": "BLOCKER",
+      "component": "pixee_codemodder-python:fix_assert_tuple.py",
+      "project": "pixee_codemodder-python",
+      "line": 1,
+      "hash": "a1b3bcd3961a8ca09c917951eded0f80",
+      "textRange": {
+        "startLine": 1,
+        "endLine": 1,
+        "startOffset": 7,
+        "endOffset": 23
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Fix this assertion on a tuple literal.",
-      "effort":"1min",
-      "debt":"1min",
-      "author":"danalitovsky+git@gmail.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Fix this assertion on a tuple literal.",
+      "effort": "1min",
+      "debt": "1min",
+      "author": "danalitovsky+git@gmail.com",
+      "tags": [
         "tests"
       ],
-      "creationDate":"2024-01-24T15:38:54+0100",
-      "updateDate":"2024-01-24T15:54:39+0100",
-      "type":"BUG",
-      "organization":"pixee",
-      "cleanCodeAttribute":"LOGICAL",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2024-01-24T15:38:54+0100",
+      "updateDate": "2024-01-24T15:54:39+0100",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"RELIABILITY",
-          "severity":"HIGH"
+          "softwareQuality": "RELIABILITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AY079772vDBaEBzdYL0t",
-      "rule":"python:S1764",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:fix_assert_tuple.py",
-      "project":"pixee_codemodder-python",
-      "line":1,
-      "hash":"a1b3bcd3961a8ca09c917951eded0f80",
-      "textRange":{
-        "startLine":1,
-        "endLine":1,
-        "startOffset":13,
-        "endOffset":14
+      "key": "AY079772vDBaEBzdYL0t",
+      "rule": "python:S1764",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:fix_assert_tuple.py",
+      "project": "pixee_codemodder-python",
+      "line": 1,
+      "hash": "a1b3bcd3961a8ca09c917951eded0f80",
+      "textRange": {
+        "startLine": 1,
+        "endLine": 1,
+        "startOffset": 13,
+        "endOffset": 14
       },
-      "flows":[
+      "flows": [
         {
-          "locations":[
+          "locations": [
             {
-              "component":"pixee_codemodder-python:fix_assert_tuple.py",
-              "textRange":{
-                "startLine":1,
-                "endLine":1,
-                "startOffset":8,
-                "endOffset":9
+              "component": "pixee_codemodder-python:fix_assert_tuple.py",
+              "textRange": {
+                "startLine": 1,
+                "endLine": 1,
+                "startOffset": 8,
+                "endOffset": 9
               }
             }
           ]
         }
       ],
-      "status":"OPEN",
-      "message":"Correct one of the identical sub-expressions on both sides of operator \"==\".",
-      "effort":"2min",
-      "debt":"2min",
-      "author":"danalitovsky+git@gmail.com",
-      "tags":[ ],
-      "creationDate":"2024-01-24T15:38:54+0100",
-      "updateDate":"2024-01-24T15:54:39+0100",
-      "type":"BUG",
-      "organization":"pixee",
-      "cleanCodeAttribute":"LOGICAL",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "status": "OPEN",
+      "message": "Correct one of the identical sub-expressions on both sides of operator \"==\".",
+      "effort": "2min",
+      "debt": "2min",
+      "author": "danalitovsky+git@gmail.com",
+      "tags": [],
+      "creationDate": "2024-01-24T15:38:54+0100",
+      "updateDate": "2024-01-24T15:54:39+0100",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"RELIABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AY079772vDBaEBzdYL0u",
-      "rule":"python:S1764",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:gfix_assert_tuple.py",
-      "project":"pixee_codemodder-python",
-      "line":1,
-      "hash":"a1b3bcd3961a8ca09c917951eded0f80",
-      "textRange":{
-        "startLine":1,
-        "endLine":1,
-        "startOffset":21,
-        "endOffset":22
+      "key": "AY079772vDBaEBzdYL0u",
+      "rule": "python:S1764",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:gfix_assert_tuple.py",
+      "project": "pixee_codemodder-python",
+      "line": 1,
+      "hash": "a1b3bcd3961a8ca09c917951eded0f80",
+      "textRange": {
+        "startLine": 1,
+        "endLine": 1,
+        "startOffset": 21,
+        "endOffset": 22
       },
-      "flows":[
+      "flows": [
         {
-          "locations":[
+          "locations": [
             {
-              "component":"pixee_codemodder-python:fix_assert_tuple.py",
-              "textRange":{
-                "startLine":1,
-                "endLine":1,
-                "startOffset":16,
-                "endOffset":17
+              "component": "pixee_codemodder-python:fix_assert_tuple.py",
+              "textRange": {
+                "startLine": 1,
+                "endLine": 1,
+                "startOffset": 16,
+                "endOffset": 17
               }
             }
           ]
         }
       ],
-      "status":"OPEN",
-      "message":"Correct one of the identical sub-expressions on both sides of operator \"==\".",
-      "effort":"2min",
-      "debt":"2min",
-      "author":"danalitovsky+git@gmail.com",
-      "tags":[ ],
-      "creationDate":"2024-01-24T15:38:54+0100",
-      "updateDate":"2024-01-24T15:54:39+0100",
-      "type":"BUG",
-      "organization":"pixee",
-      "cleanCodeAttribute":"LOGICAL",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "status": "OPEN",
+      "message": "Correct one of the identical sub-expressions on both sides of operator \"==\".",
+      "effort": "2min",
+      "debt": "2min",
+      "author": "danalitovsky+git@gmail.com",
+      "tags": [],
+      "creationDate": "2024-01-24T15:38:54+0100",
+      "updateDate": "2024-01-24T15:54:39+0100",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"RELIABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AY0xAM4LB_d5H_ALZKAI",
-      "rule":"python:S1481",
-      "severity":"MINOR",
-      "component":"pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
-      "project":"pixee_codemodder-python",
-      "line":5,
-      "hash":"bcbd5cbf2a1b9625b6c884ee7b01e3f5",
-      "textRange":{
-        "startLine":5,
-        "endLine":5,
-        "startOffset":8,
-        "endOffset":13
+      "key": "AY0xAM4LB_d5H_ALZKAI",
+      "rule": "python:S1481",
+      "severity": "MINOR",
+      "component": "pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
+      "project": "pixee_codemodder-python",
+      "line": 5,
+      "hash": "bcbd5cbf2a1b9625b6c884ee7b01e3f5",
+      "textRange": {
+        "startLine": 5,
+        "endLine": 5,
+        "startOffset": 8,
+        "endOffset": 13
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Remove the unused local variable \"error\".",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove the unused local variable \"error\".",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "unused"
       ],
-      "creationDate":"2024-01-22T12:32:43+0100",
-      "updateDate":"2024-01-22T12:48:28+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"CLEAR",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2024-01-22T12:32:43+0100",
+      "updateDate": "2024-01-22T12:48:28+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"LOW"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
         }
       ]
     },
     {
-      "key":"AY0xAM4LB_d5H_ALZKAK",
-      "rule":"python:S5914",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
-      "project":"pixee_codemodder-python",
-      "line":6,
-      "hash":"1c7df0147a586eaa38edb8516e1b2296",
-      "textRange":{
-        "startLine":6,
-        "endLine":6,
-        "startOffset":15,
-        "endOffset":16
+      "key": "AY0xAM4LB_d5H_ALZKAK",
+      "rule": "python:S5914",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
+      "project": "pixee_codemodder-python",
+      "line": 6,
+      "hash": "1c7df0147a586eaa38edb8516e1b2296",
+      "textRange": {
+        "startLine": 6,
+        "endLine": 6,
+        "startOffset": 15,
+        "endOffset": 16
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Replace this expression; its boolean value is constant.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Replace this expression; its boolean value is constant.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "confusing",
         "suspicious",
         "tests"
       ],
-      "creationDate":"2024-01-22T12:32:43+0100",
-      "updateDate":"2024-01-22T12:48:28+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"LOGICAL",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2024-01-22T12:32:43+0100",
+      "updateDate": "2024-01-22T12:48:28+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AY0xAM4LB_d5H_ALZKAJ",
-      "rule":"python:S5915",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
-      "project":"pixee_codemodder-python",
-      "line":7,
-      "hash":"463bff137b4046798e74e1f9e1b3f06a",
-      "textRange":{
-        "startLine":7,
-        "endLine":7,
-        "startOffset":8,
-        "endOffset":16
+      "key": "AY0xAM4LB_d5H_ALZKAJ",
+      "rule": "python:S5915",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
+      "project": "pixee_codemodder-python",
+      "line": 7,
+      "hash": "463bff137b4046798e74e1f9e1b3f06a",
+      "textRange": {
+        "startLine": 7,
+        "endLine": 7,
+        "startOffset": 8,
+        "endOffset": 16
       },
-      "flows":[
+      "flows": [
         {
-          "locations":[
+          "locations": [
             {
-              "component":"pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
-              "textRange":{
-                "startLine":4,
-                "endLine":4,
-                "startOffset":4,
-                "endOffset":42
+              "component": "pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
+              "textRange": {
+                "startLine": 4,
+                "endLine": 4,
+                "startOffset": 4,
+                "endOffset": 42
               },
-              "msg":"An exception is expected to be raised in this block."
+              "msg": "An exception is expected to be raised in this block."
             }
           ]
         }
       ],
-      "status":"OPEN",
-      "message":"Don’t perform an assertion here; An exception is expected to be raised before its execution.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "status": "OPEN",
+      "message": "Don’t perform an assertion here; An exception is expected to be raised before its execution.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "pitfall",
         "tests",
         "unused"
       ],
-      "creationDate":"2024-01-22T12:32:43+0100",
-      "updateDate":"2024-01-22T12:48:28+0100",
-      "type":"BUG",
-      "organization":"pixee",
-      "cleanCodeAttribute":"TESTED",
-      "cleanCodeAttributeCategory":"ADAPTABLE",
-      "impacts":[
+      "creationDate": "2024-01-22T12:32:43+0100",
+      "updateDate": "2024-01-22T12:48:28+0100",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "TESTED",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
         {
-          "softwareQuality":"RELIABILITY",
-          "severity":"HIGH"
+          "softwareQuality": "RELIABILITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AY0xAM4LB_d5H_ALZKAL",
-      "rule":"python:S5914",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
-      "project":"pixee_codemodder-python",
-      "line":7,
-      "hash":"463bff137b4046798e74e1f9e1b3f06a",
-      "textRange":{
-        "startLine":7,
-        "endLine":7,
-        "startOffset":15,
-        "endOffset":16
+      "key": "AY0xAM4LB_d5H_ALZKAL",
+      "rule": "python:S5914",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
+      "project": "pixee_codemodder-python",
+      "line": 7,
+      "hash": "463bff137b4046798e74e1f9e1b3f06a",
+      "textRange": {
+        "startLine": 7,
+        "endLine": 7,
+        "startOffset": 15,
+        "endOffset": 16
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Replace this expression; its boolean value is constant.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Replace this expression; its boolean value is constant.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "confusing",
         "suspicious",
         "tests"
       ],
-      "creationDate":"2024-01-22T12:32:43+0100",
-      "updateDate":"2024-01-22T12:48:28+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"LOGICAL",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2024-01-22T12:32:43+0100",
+      "updateDate": "2024-01-22T12:48:28+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AY0d7TmfEG2C8jSks9oQ",
-      "rule":"python:S108",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:fix_empty_sequence_comparison.py",
-      "project":"pixee_codemodder-python",
-      "line":3,
-      "hash":"1a1dc91c907325c69271ddf0c944bc72",
-      "textRange":{
-        "startLine":3,
-        "endLine":3,
-        "startOffset":4,
-        "endOffset":8
+      "key": "AY0d7TmfEG2C8jSks9oQ",
+      "rule": "python:S108",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:fix_empty_sequence_comparison.py",
+      "project": "pixee_codemodder-python",
+      "line": 3,
+      "hash": "1a1dc91c907325c69271ddf0c944bc72",
+      "textRange": {
+        "startLine": 3,
+        "endLine": 3,
+        "startOffset": 4,
+        "endOffset": 8
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Either remove or fill this block of code.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"danalitovsky+git@gmail.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Either remove or fill this block of code.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "danalitovsky+git@gmail.com",
+      "tags": [
         "suspicious"
       ],
-      "creationDate":"2024-01-18T19:38:20+0100",
-      "updateDate":"2024-01-18T19:54:25+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"CLEAR",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2024-01-18T19:38:20+0100",
+      "updateDate": "2024-01-18T19:54:25+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AY0YiS6BnUftKtTnYgua",
-      "rule":"pythonsecurity:S2083",
-      "severity":"BLOCKER",
-      "component":"pixee_codemodder-python:replace_flask_send_file.py",
-      "project":"pixee_codemodder-python",
-      "line":7,
-      "hash":"280ddce9cade03989946d64c25aac1c8",
-      "textRange":{
-        "startLine":7,
-        "endLine":7,
-        "startOffset":11,
-        "endOffset":43
+      "key": "AY0YiS6BnUftKtTnYgua",
+      "rule": "pythonsecurity:S2083",
+      "severity": "BLOCKER",
+      "component": "pixee_codemodder-python:replace_flask_send_file.py",
+      "project": "pixee_codemodder-python",
+      "line": 7,
+      "hash": "280ddce9cade03989946d64c25aac1c8",
+      "textRange": {
+        "startLine": 7,
+        "endLine": 7,
+        "startOffset": 11,
+        "endOffset": 43
       },
-      "flows":[
+      "flows": [
         {
-          "locations":[
+          "locations": [
             {
-              "component":"pixee_codemodder-python:replace_flask_send_file.py",
-              "textRange":{
-                "startLine":7,
-                "endLine":7,
-                "startOffset":11,
-                "endOffset":43
+              "component": "pixee_codemodder-python:replace_flask_send_file.py",
+              "textRange": {
+                "startLine": 7,
+                "endLine": 7,
+                "startOffset": 11,
+                "endOffset": 43
               },
-              "msg":"Sink: this invocation is not safe; a malicious value can be used as argument"
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
             },
             {
-              "component":"pixee_codemodder-python:replace_flask_send_file.py",
-              "textRange":{
-                "startLine":7,
-                "endLine":7,
-                "startOffset":21,
-                "endOffset":42
+              "component": "pixee_codemodder-python:replace_flask_send_file.py",
+              "textRange": {
+                "startLine": 7,
+                "endLine": 7,
+                "startOffset": 21,
+                "endOffset": 42
               },
-              "msg":"This concatenation can propagate malicious content to the newly created string"
+              "msg": "This concatenation can propagate malicious content to the newly created string"
             },
             {
-              "component":"pixee_codemodder-python:replace_flask_send_file.py",
-              "textRange":{
-                "startLine":7,
-                "endLine":7,
-                "startOffset":32,
-                "endOffset":36
+              "component": "pixee_codemodder-python:replace_flask_send_file.py",
+              "textRange": {
+                "startLine": 7,
+                "endLine": 7,
+                "startOffset": 32,
+                "endOffset": 36
               },
-              "msg":"The malicious content is concatenated into the string"
+              "msg": "The malicious content is concatenated into the string"
             },
             {
-              "component":"pixee_codemodder-python:replace_flask_send_file.py",
-              "textRange":{
-                "startLine":6,
-                "endLine":6,
-                "startOffset":18,
-                "endOffset":22
+              "component": "pixee_codemodder-python:replace_flask_send_file.py",
+              "textRange": {
+                "startLine": 6,
+                "endLine": 6,
+                "startOffset": 18,
+                "endOffset": 22
               },
-              "msg":"Source: a user can craft an HTTP request with malicious content"
+              "msg": "Source: a user can craft an HTTP request with malicious content"
             }
           ]
         }
       ],
-      "status":"OPEN",
-      "message":"Change this code to not construct the path from user-controlled data.",
-      "effort":"30min",
-      "debt":"30min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "status": "OPEN",
+      "message": "Change this code to not construct the path from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "cwe"
       ],
-      "creationDate":"2024-01-17T18:31:25+0100",
-      "updateDate":"2024-01-17T18:47:12+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"COMPLETE",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2024-01-17T18:31:25+0100",
+      "updateDate": "2024-01-17T18:47:12+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYyNYmSRtQSch1Q6S8EM",
-      "rule":"python:S5796",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:literal_or_new_object_identity.py",
-      "project":"pixee_codemodder-python",
-      "line":2,
-      "hash":"5f91740da6697d58cdb69e089d79d894",
-      "textRange":{
-        "startLine":2,
-        "endLine":2,
-        "startOffset":13,
-        "endOffset":15
+      "key": "AYyNYmSRtQSch1Q6S8EM",
+      "rule": "python:S5796",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:literal_or_new_object_identity.py",
+      "project": "pixee_codemodder-python",
+      "line": 2,
+      "hash": "5f91740da6697d58cdb69e089d79d894",
+      "textRange": {
+        "startLine": 2,
+        "endLine": 2,
+        "startOffset": 13,
+        "endOffset": 15
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Replace this \"is\" operator with \"==\".",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[ ],
-      "creationDate":"2023-12-21T18:02:41+0100",
-      "updateDate":"2023-12-21T18:17:26+0100",
-      "type":"BUG",
-      "organization":"pixee",
-      "cleanCodeAttribute":"LOGICAL",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Replace this \"is\" operator with \"==\".",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [],
+      "creationDate": "2023-12-21T18:02:41+0100",
+      "updateDate": "2023-12-21T18:17:26+0100",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"RELIABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AYyIPymKXBzB3YbychxI",
-      "rule":"python:S2208",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:future_imports.py",
-      "project":"pixee_codemodder-python",
-      "line":2,
-      "hash":"a56a786938a93ed7d67121ef75d2f5a1",
-      "textRange":{
-        "startLine":2,
-        "endLine":2,
-        "startOffset":0,
-        "endOffset":24
+      "key": "AYyIPymKXBzB3YbychxI",
+      "rule": "python:S2208",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:future_imports.py",
+      "project": "pixee_codemodder-python",
+      "line": 2,
+      "hash": "a56a786938a93ed7d67121ef75d2f5a1",
+      "textRange": {
+        "startLine": 2,
+        "endLine": 2,
+        "startOffset": 0,
+        "endOffset": 24
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Import only needed names or import the module and then use its members.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"dan.davella@pixee.ai",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Import only needed names or import the module and then use its members.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "dan.davella@pixee.ai",
+      "tags": [
         "pitfall"
       ],
-      "creationDate":"2023-12-20T18:06:01+0100",
-      "updateDate":"2023-12-20T18:21:04+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"CLEAR",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-12-20T18:06:01+0100",
+      "updateDate": "2023-12-20T18:21:04+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"HIGH"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYyDTMeq9YnBY2081K9I",
-      "rule":"python:S1192",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:requests_timeout.py",
-      "project":"pixee_codemodder-python",
-      "line":3,
-      "hash":"2fd7c126440d981f3ce18829c9c03933",
-      "textRange":{
-        "startLine":3,
-        "endLine":3,
-        "startOffset":13,
-        "endOffset":34
+      "key": "AYyDTMeq9YnBY2081K9I",
+      "rule": "python:S1192",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:requests_timeout.py",
+      "project": "pixee_codemodder-python",
+      "line": 3,
+      "hash": "2fd7c126440d981f3ce18829c9c03933",
+      "textRange": {
+        "startLine": 3,
+        "endLine": 3,
+        "startOffset": 13,
+        "endOffset": 34
       },
-      "flows":[
+      "flows": [
         {
-          "locations":[
+          "locations": [
             {
-              "component":"pixee_codemodder-python:requests_timeout.py",
-              "textRange":{
-                "startLine":4,
-                "endLine":4,
-                "startOffset":13,
-                "endOffset":34
+              "component": "pixee_codemodder-python:requests_timeout.py",
+              "textRange": {
+                "startLine": 4,
+                "endLine": 4,
+                "startOffset": 13,
+                "endOffset": 34
               },
-              "msg":"Duplication"
+              "msg": "Duplication"
             }
           ]
         },
         {
-          "locations":[
+          "locations": [
             {
-              "component":"pixee_codemodder-python:requests_timeout.py",
-              "textRange":{
-                "startLine":5,
-                "endLine":5,
-                "startOffset":13,
-                "endOffset":34
+              "component": "pixee_codemodder-python:requests_timeout.py",
+              "textRange": {
+                "startLine": 5,
+                "endLine": 5,
+                "startOffset": 13,
+                "endOffset": 34
               },
-              "msg":"Duplication"
+              "msg": "Duplication"
             }
           ]
         },
         {
-          "locations":[
+          "locations": [
             {
-              "component":"pixee_codemodder-python:requests_timeout.py",
-              "textRange":{
-                "startLine":6,
-                "endLine":6,
-                "startOffset":14,
-                "endOffset":35
+              "component": "pixee_codemodder-python:requests_timeout.py",
+              "textRange": {
+                "startLine": 6,
+                "endLine": 6,
+                "startOffset": 14,
+                "endOffset": 35
               },
-              "msg":"Duplication"
+              "msg": "Duplication"
             }
           ]
         }
       ],
-      "status":"OPEN",
-      "message":"Define a constant instead of duplicating this literal \"https://example.com\" 4 times.",
-      "effort":"8min",
-      "debt":"8min",
-      "author":"dan.davella@pixee.ai",
-      "tags":[
+      "status": "OPEN",
+      "message": "Define a constant instead of duplicating this literal \"https://example.com\" 4 times.",
+      "effort": "8min",
+      "debt": "8min",
+      "author": "dan.davella@pixee.ai",
+      "tags": [
         "design"
       ],
-      "creationDate":"2023-12-19T19:03:18+0100",
-      "updateDate":"2023-12-19T19:17:55+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"DISTINCT",
-      "cleanCodeAttributeCategory":"ADAPTABLE",
-      "impacts":[
+      "creationDate": "2023-12-19T19:03:18+0100",
+      "updateDate": "2023-12-19T19:17:55+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "DISTINCT",
+      "cleanCodeAttributeCategory": "ADAPTABLE",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"HIGH"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYyDTMeq9YnBY2081K9J",
-      "rule":"python:S4830",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:requests_timeout.py",
-      "project":"pixee_codemodder-python",
-      "line":5,
-      "hash":"02caea87886dd9bc3563d522a2bbd30b",
-      "textRange":{
-        "startLine":5,
-        "endLine":5,
-        "startOffset":60,
-        "endOffset":65
+      "key": "AYyDTMeq9YnBY2081K9J",
+      "rule": "python:S4830",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:requests_timeout.py",
+      "project": "pixee_codemodder-python",
+      "line": 5,
+      "hash": "02caea87886dd9bc3563d522a2bbd30b",
+      "textRange": {
+        "startLine": 5,
+        "endLine": 5,
+        "startOffset": 60,
+        "endOffset": 65
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Enable server certificate validation on this SSL/TLS connection.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"dan.davella@pixee.ai",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Enable server certificate validation on this SSL/TLS connection.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "dan.davella@pixee.ai",
+      "tags": [
         "cwe",
         "privacy",
         "ssl"
       ],
-      "creationDate":"2023-12-19T19:03:18+0100",
-      "updateDate":"2023-12-19T19:17:55+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"TRUSTWORTHY",
-      "cleanCodeAttributeCategory":"RESPONSIBLE",
-      "impacts":[
+      "creationDate": "2023-12-19T19:03:18+0100",
+      "updateDate": "2023-12-19T19:17:55+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "TRUSTWORTHY",
+      "cleanCodeAttributeCategory": "RESPONSIBLE",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYyDTMeq9YnBY2081K9K",
-      "rule":"python:S4830",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:requests_timeout.py",
-      "project":"pixee_codemodder-python",
-      "line":6,
-      "hash":"78f1767a2f00e6bfe8fca45347545b27",
-      "textRange":{
-        "startLine":6,
-        "endLine":6,
-        "startOffset":44,
-        "endOffset":49
+      "key": "AYyDTMeq9YnBY2081K9K",
+      "rule": "python:S4830",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:requests_timeout.py",
+      "project": "pixee_codemodder-python",
+      "line": 6,
+      "hash": "78f1767a2f00e6bfe8fca45347545b27",
+      "textRange": {
+        "startLine": 6,
+        "endLine": 6,
+        "startOffset": 44,
+        "endOffset": 49
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Enable server certificate validation on this SSL/TLS connection.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"dan.davella@pixee.ai",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Enable server certificate validation on this SSL/TLS connection.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "dan.davella@pixee.ai",
+      "tags": [
         "cwe",
         "privacy",
         "ssl"
       ],
-      "creationDate":"2023-12-19T19:03:18+0100",
-      "updateDate":"2023-12-19T19:17:55+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"TRUSTWORTHY",
-      "cleanCodeAttributeCategory":"RESPONSIBLE",
-      "impacts":[
+      "creationDate": "2023-12-19T19:03:18+0100",
+      "updateDate": "2023-12-19T19:17:55+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "TRUSTWORTHY",
+      "cleanCodeAttributeCategory": "RESPONSIBLE",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxucfoczDN-BIKbpNg9",
-      "rule":"python:S3984",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:exception_without_raise.py",
-      "project":"pixee_codemodder-python",
-      "line":2,
-      "hash":"5a2cfd89b7b171fd7b4794b08023d04f",
-      "textRange":{
-        "startLine":2,
-        "endLine":2,
-        "startOffset":4,
-        "endOffset":14
+      "key": "AYxucfoczDN-BIKbpNg9",
+      "rule": "python:S3984",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:exception_without_raise.py",
+      "project": "pixee_codemodder-python",
+      "line": 2,
+      "hash": "5a2cfd89b7b171fd7b4794b08023d04f",
+      "textRange": {
+        "startLine": 2,
+        "endLine": 2,
+        "startOffset": 4,
+        "endOffset": 14
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Raise this exception or remove this useless statement.",
-      "effort":"2min",
-      "debt":"2min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Raise this exception or remove this useless statement.",
+      "effort": "2min",
+      "debt": "2min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "error-handling"
       ],
-      "creationDate":"2023-12-15T17:52:35+0100",
-      "updateDate":"2023-12-15T18:06:30+0100",
-      "type":"BUG",
-      "organization":"pixee",
-      "cleanCodeAttribute":"CLEAR",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-12-15T17:52:35+0100",
+      "updateDate": "2023-12-15T18:06:30+0100",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"RELIABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AYxucfoczDN-BIKbpNg8",
-      "rule":"python:S5754",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:exception_without_raise.py",
-      "project":"pixee_codemodder-python",
-      "line":3,
-      "hash":"3e264f5fbab10735799511f21ca70842",
-      "textRange":{
-        "startLine":3,
-        "endLine":3,
-        "startOffset":0,
-        "endOffset":6
+      "key": "AYxucfoczDN-BIKbpNg8",
+      "rule": "python:S5754",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:exception_without_raise.py",
+      "project": "pixee_codemodder-python",
+      "line": 3,
+      "hash": "3e264f5fbab10735799511f21ca70842",
+      "textRange": {
+        "startLine": 3,
+        "endLine": 3,
+        "startOffset": 0,
+        "endOffset": 6
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Specify an exception class to catch or reraise the exception",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Specify an exception class to catch or reraise the exception",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "bad-practice",
         "error-handling",
         "suspicious"
       ],
-      "creationDate":"2023-12-15T17:52:35+0100",
-      "updateDate":"2023-12-15T18:06:30+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"COMPLETE",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-12-15T17:52:35+0100",
+      "updateDate": "2023-12-15T18:06:30+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"HIGH"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxj7ouw4lHJ-oyJdvm9",
-      "rule":"pythonsecurity:S5131",
-      "severity":"BLOCKER",
-      "component":"pixee_codemodder-python:flask_json_response_type.py",
-      "project":"pixee_codemodder-python",
-      "line":9,
-      "hash":"f5c6bfa8a2dcb7b05d6672e18cfc052b",
-      "textRange":{
-        "startLine":9,
-        "endLine":9,
-        "startOffset":11,
-        "endOffset":39
+      "key": "AYxj7ouw4lHJ-oyJdvm9",
+      "rule": "pythonsecurity:S5131",
+      "severity": "BLOCKER",
+      "component": "pixee_codemodder-python:flask_json_response_type.py",
+      "project": "pixee_codemodder-python",
+      "line": 9,
+      "hash": "f5c6bfa8a2dcb7b05d6672e18cfc052b",
+      "textRange": {
+        "startLine": 9,
+        "endLine": 9,
+        "startOffset": 11,
+        "endOffset": 39
       },
-      "flows":[
+      "flows": [
         {
-          "locations":[
+          "locations": [
             {
-              "component":"pixee_codemodder-python:flask_json_response_type.py",
-              "textRange":{
-                "startLine":9,
-                "endLine":9,
-                "startOffset":11,
-                "endOffset":39
+              "component": "pixee_codemodder-python:flask_json_response_type.py",
+              "textRange": {
+                "startLine": 9,
+                "endLine": 9,
+                "startOffset": 11,
+                "endOffset": 39
               },
-              "msg":"Sink: this invocation is not safe; a malicious value can be used as argument"
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
             },
             {
-              "component":"pixee_codemodder-python:flask_json_response_type.py",
-              "textRange":{
-                "startLine":8,
-                "endLine":8,
-                "startOffset":4,
-                "endOffset":74
+              "component": "pixee_codemodder-python:flask_json_response_type.py",
+              "textRange": {
+                "startLine": 8,
+                "endLine": 8,
+                "startOffset": 4,
+                "endOffset": 74
               },
-              "msg":"A malicious value can be assigned to variable ‘json_response’"
+              "msg": "A malicious value can be assigned to variable ‘json_response’"
             },
             {
-              "component":"pixee_codemodder-python:flask_json_response_type.py",
-              "textRange":{
-                "startLine":8,
-                "endLine":8,
-                "startOffset":20,
-                "endOffset":74
+              "component": "pixee_codemodder-python:flask_json_response_type.py",
+              "textRange": {
+                "startLine": 8,
+                "endLine": 8,
+                "startOffset": 20,
+                "endOffset": 74
               },
-              "msg":"This invocation can propagate malicious content to its return value"
+              "msg": "This invocation can propagate malicious content to its return value"
             },
             {
-              "component":"pixee_codemodder-python:flask_json_response_type.py",
-              "textRange":{
-                "startLine":8,
-                "endLine":8,
-                "startOffset":33,
-                "endOffset":71
+              "component": "pixee_codemodder-python:flask_json_response_type.py",
+              "textRange": {
+                "startLine": 8,
+                "endLine": 8,
+                "startOffset": 33,
+                "endOffset": 71
               },
-              "msg":"A malicious value can be assigned to this data structure"
+              "msg": "A malicious value can be assigned to this data structure"
             },
             {
-              "component":"pixee_codemodder-python:flask_json_response_type.py",
-              "textRange":{
-                "startLine":8,
-                "endLine":8,
-                "startOffset":47,
-                "endOffset":71
+              "component": "pixee_codemodder-python:flask_json_response_type.py",
+              "textRange": {
+                "startLine": 8,
+                "endLine": 8,
+                "startOffset": 47,
+                "endOffset": 71
               },
-              "msg":"Source: a user can craft an HTTP request with malicious content"
+              "msg": "Source: a user can craft an HTTP request with malicious content"
             }
           ]
         }
       ],
-      "status":"OPEN",
-      "message":"Change this code to not reflect user-controlled data.",
-      "effort":"30min",
-      "debt":"30min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "status": "OPEN",
+      "message": "Change this code to not reflect user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "cwe"
       ],
-      "creationDate":"2023-12-13T16:52:51+0100",
-      "updateDate":"2023-12-13T17:06:46+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"COMPLETE",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-12-13T16:52:51+0100",
+      "updateDate": "2023-12-13T17:06:46+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxfQ0RmEf9ui_Mxcb9w",
-      "rule":"python:S1186",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:deprecated_abstractproperty.py",
-      "project":"pixee_codemodder-python",
-      "line":6,
-      "hash":"bb3f753715558573f191a0cdb10ec88b",
-      "textRange":{
-        "startLine":6,
-        "endLine":6,
-        "startOffset":8,
-        "endOffset":11
+      "key": "AYxfQ0RmEf9ui_Mxcb9w",
+      "rule": "python:S1186",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:deprecated_abstractproperty.py",
+      "project": "pixee_codemodder-python",
+      "line": 6,
+      "hash": "bb3f753715558573f191a0cdb10ec88b",
+      "textRange": {
+        "startLine": 6,
+        "endLine": 6,
+        "startOffset": 8,
+        "endOffset": 11
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Add a nested comment explaining why this method is empty, or complete the implementation.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"dan.davella@pixee.ai",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Add a nested comment explaining why this method is empty, or complete the implementation.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "dan.davella@pixee.ai",
+      "tags": [
         "suspicious"
       ],
-      "creationDate":"2023-12-08T15:49:12+0100",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"COMPLETE",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-12-08T15:49:12+0100",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"HIGH"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxfQ0SEEf9ui_Mxcb92",
-      "rule":"pythonsecurity:S5131",
-      "severity":"BLOCKER",
-      "component":"pixee_codemodder-python:django_json_response_type.py",
-      "project":"pixee_codemodder-python",
-      "line":6,
-      "hash":"f98eff13752659c4ee0276aa8f13a71d",
-      "textRange":{
-        "startLine":6,
-        "endLine":6,
-        "startOffset":11,
-        "endOffset":38
+      "key": "AYxfQ0SEEf9ui_Mxcb92",
+      "rule": "pythonsecurity:S5131",
+      "severity": "BLOCKER",
+      "component": "pixee_codemodder-python:django_json_response_type.py",
+      "project": "pixee_codemodder-python",
+      "line": 6,
+      "hash": "f98eff13752659c4ee0276aa8f13a71d",
+      "textRange": {
+        "startLine": 6,
+        "endLine": 6,
+        "startOffset": 11,
+        "endOffset": 38
       },
-      "flows":[
+      "flows": [
         {
-          "locations":[
+          "locations": [
             {
-              "component":"pixee_codemodder-python:django_json_response_type.py",
-              "textRange":{
-                "startLine":6,
-                "endLine":6,
-                "startOffset":11,
-                "endOffset":38
+              "component": "pixee_codemodder-python:django_json_response_type.py",
+              "textRange": {
+                "startLine": 6,
+                "endLine": 6,
+                "startOffset": 11,
+                "endOffset": 38
               },
-              "msg":"Sink: this invocation is not safe; a malicious value can be used as argument"
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
             },
             {
-              "component":"pixee_codemodder-python:django_json_response_type.py",
-              "textRange":{
-                "startLine":5,
-                "endLine":5,
-                "startOffset":4,
-                "endOffset":74
+              "component": "pixee_codemodder-python:django_json_response_type.py",
+              "textRange": {
+                "startLine": 5,
+                "endLine": 5,
+                "startOffset": 4,
+                "endOffset": 74
               },
-              "msg":"A malicious value can be assigned to variable ‘json_response’"
+              "msg": "A malicious value can be assigned to variable ‘json_response’"
             },
             {
-              "component":"pixee_codemodder-python:django_json_response_type.py",
-              "textRange":{
-                "startLine":5,
-                "endLine":5,
-                "startOffset":20,
-                "endOffset":74
+              "component": "pixee_codemodder-python:django_json_response_type.py",
+              "textRange": {
+                "startLine": 5,
+                "endLine": 5,
+                "startOffset": 20,
+                "endOffset": 74
               },
-              "msg":"This invocation can propagate malicious content to its return value"
+              "msg": "This invocation can propagate malicious content to its return value"
             },
             {
-              "component":"pixee_codemodder-python:django_json_response_type.py",
-              "textRange":{
-                "startLine":5,
-                "endLine":5,
-                "startOffset":33,
-                "endOffset":71
+              "component": "pixee_codemodder-python:django_json_response_type.py",
+              "textRange": {
+                "startLine": 5,
+                "endLine": 5,
+                "startOffset": 33,
+                "endOffset": 71
               },
-              "msg":"A malicious value can be assigned to this data structure"
+              "msg": "A malicious value can be assigned to this data structure"
             },
             {
-              "component":"pixee_codemodder-python:django_json_response_type.py",
-              "textRange":{
-                "startLine":5,
-                "endLine":5,
-                "startOffset":47,
-                "endOffset":71
+              "component": "pixee_codemodder-python:django_json_response_type.py",
+              "textRange": {
+                "startLine": 5,
+                "endLine": 5,
+                "startOffset": 47,
+                "endOffset": 71
               },
-              "msg":"Source: a user can craft an HTTP request with malicious content"
+              "msg": "Source: a user can craft an HTTP request with malicious content"
             }
           ]
         }
       ],
-      "status":"OPEN",
-      "message":"Change this code to not reflect user-controlled data.",
-      "effort":"30min",
-      "debt":"30min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "status": "OPEN",
+      "message": "Change this code to not reflect user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "cwe"
       ],
-      "creationDate":"2023-12-05T11:56:30+0100",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"COMPLETE",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-12-05T11:56:30+0100",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxfQ0RcEf9ui_Mxcb9t",
-      "rule":"python:S6725",
-      "severity":"BLOCKER",
-      "component":"pixee_codemodder-python:numpy_nan_equality.py",
-      "project":"pixee_codemodder-python",
-      "line":4,
-      "hash":"75f47436b9576613efd85cdfeaf157ce",
-      "textRange":{
-        "startLine":4,
-        "endLine":4,
-        "startOffset":3,
-        "endOffset":14
+      "key": "AYxfQ0RcEf9ui_Mxcb9t",
+      "rule": "python:S6725",
+      "severity": "BLOCKER",
+      "component": "pixee_codemodder-python:numpy_nan_equality.py",
+      "project": "pixee_codemodder-python",
+      "line": 4,
+      "hash": "75f47436b9576613efd85cdfeaf157ce",
+      "textRange": {
+        "startLine": 4,
+        "endLine": 4,
+        "startOffset": 3,
+        "endOffset": 14
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Don't perform an equality/inequality check against \"numpy.nan\".",
-      "effort":"2min",
-      "debt":"2min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Don't perform an equality/inequality check against \"numpy.nan\".",
+      "effort": "2min",
+      "debt": "2min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "numpy",
         "python3"
       ],
-      "creationDate":"2023-12-01T18:12:37+0100",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"BUG",
-      "organization":"pixee",
-      "cleanCodeAttribute":"LOGICAL",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-12-01T18:12:37+0100",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"HIGH"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxfQ0RcEf9ui_Mxcb9u",
-      "rule":"python:S108",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:numpy_nan_equality.py",
-      "project":"pixee_codemodder-python",
-      "line":5,
-      "hash":"1a1dc91c907325c69271ddf0c944bc72",
-      "textRange":{
-        "startLine":5,
-        "endLine":5,
-        "startOffset":4,
-        "endOffset":8
+      "key": "AYxfQ0RcEf9ui_Mxcb9u",
+      "rule": "python:S108",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:numpy_nan_equality.py",
+      "project": "pixee_codemodder-python",
+      "line": 5,
+      "hash": "1a1dc91c907325c69271ddf0c944bc72",
+      "textRange": {
+        "startLine": 5,
+        "endLine": 5,
+        "startOffset": 4,
+        "endOffset": 8
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Either remove or fill this block of code.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Either remove or fill this block of code.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "suspicious"
       ],
-      "creationDate":"2023-12-01T18:12:37+0100",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"CLEAR",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-12-01T18:12:37+0100",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AYxfQ0SOEf9ui_Mxcb96",
-      "rule":"python:S6552",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:django_receiver_on_top.py",
-      "project":"pixee_codemodder-python",
-      "line":6,
-      "hash":"91d1a8baa6977afdf844ab3f2870df56",
-      "textRange":{
-        "startLine":6,
-        "endLine":6,
-        "startOffset":0,
-        "endOffset":27
+      "key": "AYxfQ0SOEf9ui_Mxcb96",
+      "rule": "python:S6552",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:django_receiver_on_top.py",
+      "project": "pixee_codemodder-python",
+      "line": 6,
+      "hash": "91d1a8baa6977afdf844ab3f2870df56",
+      "textRange": {
+        "startLine": 6,
+        "endLine": 6,
+        "startOffset": 0,
+        "endOffset": 27
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Move this '@receiver' decorator to the top of the other decorators.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[ ],
-      "creationDate":"2023-11-30T19:59:21+0100",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"BUG",
-      "organization":"pixee",
-      "cleanCodeAttribute":"LOGICAL",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Move this '@receiver' decorator to the top of the other decorators.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [],
+      "creationDate": "2023-11-30T19:59:21+0100",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"RELIABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AYxfQ0SOEf9ui_Mxcb95",
-      "rule":"python:S1186",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:django_receiver_on_top.py",
-      "project":"pixee_codemodder-python",
-      "line":7,
-      "hash":"255d126a347bf5b478ac390dd2032abc",
-      "textRange":{
-        "startLine":7,
-        "endLine":7,
-        "startOffset":4,
-        "endOffset":7
+      "key": "AYxfQ0SOEf9ui_Mxcb95",
+      "rule": "python:S1186",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:django_receiver_on_top.py",
+      "project": "pixee_codemodder-python",
+      "line": 7,
+      "hash": "255d126a347bf5b478ac390dd2032abc",
+      "textRange": {
+        "startLine": 7,
+        "endLine": 7,
+        "startOffset": 4,
+        "endOffset": 7
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Add a nested comment explaining why this function is empty, or complete the implementation.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Add a nested comment explaining why this function is empty, or complete the implementation.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "suspicious"
       ],
-      "creationDate":"2023-11-30T19:59:21+0100",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"COMPLETE",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-11-30T19:59:21+0100",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"HIGH"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxfQ0RrEf9ui_Mxcb9x",
-      "rule":"python:S2772",
-      "severity":"MINOR",
-      "component":"pixee_codemodder-python:file_resource_leak.py",
-      "project":"pixee_codemodder-python",
-      "line":4,
-      "hash":"1a1dc91c907325c69271ddf0c944bc72",
-      "textRange":{
-        "startLine":4,
-        "endLine":4,
-        "startOffset":0,
-        "endOffset":4
+      "key": "AYxfQ0RrEf9ui_Mxcb9x",
+      "rule": "python:S2772",
+      "severity": "MINOR",
+      "component": "pixee_codemodder-python:file_resource_leak.py",
+      "project": "pixee_codemodder-python",
+      "line": 4,
+      "hash": "1a1dc91c907325c69271ddf0c944bc72",
+      "textRange": {
+        "startLine": 4,
+        "endLine": 4,
+        "startOffset": 0,
+        "endOffset": 4
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Remove this unneeded \"pass\".",
-      "effort":"2min",
-      "debt":"2min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this unneeded \"pass\".",
+      "effort": "2min",
+      "debt": "2min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "unused"
       ],
-      "creationDate":"2023-11-27T17:22:20+0100",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"CLEAR",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-11-27T17:22:20+0100",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"LOW"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "LOW"
         }
       ]
     },
     {
-      "key":"AYxfQ0StEf9ui_Mxcb-C",
-      "rule":"python:S905",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:unordered_imports.py",
-      "project":"pixee_codemodder-python",
-      "line":21,
-      "hash":"a69ecad8d4c393f07611b4a373a17690",
-      "textRange":{
-        "startLine":21,
-        "endLine":21,
-        "startOffset":0,
-        "endOffset":8
+      "key": "AYxfQ0StEf9ui_Mxcb-C",
+      "rule": "python:S905",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:unordered_imports.py",
+      "project": "pixee_codemodder-python",
+      "line": 21,
+      "hash": "a69ecad8d4c393f07611b4a373a17690",
+      "textRange": {
+        "startLine": 21,
+        "endLine": 21,
+        "startOffset": 0,
+        "endOffset": 8
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Remove or refactor this statement; it has no side effects.",
-      "effort":"10min",
-      "debt":"10min",
-      "author":"112832187+clavedeluna@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove or refactor this statement; it has no side effects.",
+      "effort": "10min",
+      "debt": "10min",
+      "author": "112832187+clavedeluna@users.noreply.github.com",
+      "tags": [
         "cwe",
         "unused"
       ],
-      "creationDate":"2023-10-11T13:20:03+0200",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"BUG",
-      "organization":"pixee",
-      "cleanCodeAttribute":"CLEAR",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-10-11T13:20:03+0200",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "BUG",
+      "organization": "pixee",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"RELIABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "RELIABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AYxfQ0R_Ef9ui_Mxcb90",
-      "rule":"python:S4830",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:unverified_request.py",
-      "project":"pixee_codemodder-python",
-      "line":3,
-      "hash":"ea3b3f3aef1af2433a70e2aa07fb5b73",
-      "textRange":{
-        "startLine":3,
-        "endLine":3,
-        "startOffset":46,
-        "endOffset":51
+      "key": "AYxfQ0R_Ef9ui_Mxcb90",
+      "rule": "python:S4830",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:unverified_request.py",
+      "project": "pixee_codemodder-python",
+      "line": 3,
+      "hash": "ea3b3f3aef1af2433a70e2aa07fb5b73",
+      "textRange": {
+        "startLine": 3,
+        "endLine": 3,
+        "startOffset": 46,
+        "endOffset": 51
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Enable server certificate validation on this SSL/TLS connection.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"112832187+clavedeluna@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Enable server certificate validation on this SSL/TLS connection.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "112832187+clavedeluna@users.noreply.github.com",
+      "tags": [
         "cwe",
         "privacy",
         "ssl"
       ],
-      "creationDate":"2023-10-11T13:20:03+0200",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"TRUSTWORTHY",
-      "cleanCodeAttributeCategory":"RESPONSIBLE",
-      "impacts":[
+      "creationDate": "2023-10-11T13:20:03+0200",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "TRUSTWORTHY",
+      "cleanCodeAttributeCategory": "RESPONSIBLE",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxfQ0R_Ef9ui_Mxcb91",
-      "rule":"python:S4830",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:unverified_request.py",
-      "project":"pixee_codemodder-python",
-      "line":4,
-      "hash":"84aa604144fc14abffd3885b983ff327",
-      "textRange":{
-        "startLine":4,
-        "endLine":4,
-        "startOffset":74,
-        "endOffset":79
+      "key": "AYxfQ0R_Ef9ui_Mxcb91",
+      "rule": "python:S4830",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:unverified_request.py",
+      "project": "pixee_codemodder-python",
+      "line": 4,
+      "hash": "84aa604144fc14abffd3885b983ff327",
+      "textRange": {
+        "startLine": 4,
+        "endLine": 4,
+        "startOffset": 74,
+        "endOffset": 79
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Enable server certificate validation on this SSL/TLS connection.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"112832187+clavedeluna@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Enable server certificate validation on this SSL/TLS connection.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "112832187+clavedeluna@users.noreply.github.com",
+      "tags": [
         "cwe",
         "privacy",
         "ssl"
       ],
-      "creationDate":"2023-10-11T13:20:03+0200",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"TRUSTWORTHY",
-      "cleanCodeAttributeCategory":"RESPONSIBLE",
-      "impacts":[
+      "creationDate": "2023-10-11T13:20:03+0200",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "TRUSTWORTHY",
+      "cleanCodeAttributeCategory": "RESPONSIBLE",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxfQ0SYEf9ui_Mxcb99",
-      "rule":"python:S1172",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:multiple_codemods.py",
-      "project":"pixee_codemodder-python",
-      "line":4,
-      "hash":"897fcddf59670aac30c79a7627e74ca4",
-      "textRange":{
-        "startLine":4,
-        "endLine":4,
-        "startOffset":9,
-        "endOffset":15
+      "key": "AYxfQ0SYEf9ui_Mxcb99",
+      "rule": "python:S1172",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:multiple_codemods.py",
+      "project": "pixee_codemodder-python",
+      "line": 4,
+      "hash": "897fcddf59670aac30c79a7627e74ca4",
+      "textRange": {
+        "startLine": 4,
+        "endLine": 4,
+        "startOffset": 9,
+        "endOffset": 15
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Remove the unused function parameter \"foo\".",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"dan.davella@pixee.ai",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove the unused function parameter \"foo\".",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "dan.davella@pixee.ai",
+      "tags": [
         "unused"
       ],
-      "creationDate":"2023-10-06T15:44:38+0200",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"CLEAR",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-10-06T15:44:38+0200",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "CLEAR",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AYxfQ0RDEf9ui_Mxcb9p",
-      "rule":"python:S5717",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:mutable_params.py",
-      "project":"pixee_codemodder-python",
-      "line":1,
-      "hash":"167abb9ce3c4bf099dd3608f2d2d5726",
-      "textRange":{
-        "startLine":1,
-        "endLine":1,
-        "startOffset":11,
-        "endOffset":15
+      "key": "AYxfQ0RDEf9ui_Mxcb9p",
+      "rule": "python:S5717",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:mutable_params.py",
+      "project": "pixee_codemodder-python",
+      "line": 1,
+      "hash": "167abb9ce3c4bf099dd3608f2d2d5726",
+      "textRange": {
+        "startLine": 1,
+        "endLine": 1,
+        "startOffset": 11,
+        "endOffset": 15
       },
-      "flows":[
+      "flows": [
         {
-          "locations":[
+          "locations": [
             {
-              "component":"pixee_codemodder-python:mutable_params.py",
-              "textRange":{
-                "startLine":2,
-                "endLine":2,
-                "startOffset":4,
-                "endOffset":12
+              "component": "pixee_codemodder-python:mutable_params.py",
+              "textRange": {
+                "startLine": 2,
+                "endLine": 2,
+                "startOffset": 4,
+                "endOffset": 12
               },
-              "msg":"The parameter is modified."
+              "msg": "The parameter is modified."
             }
           ]
         }
       ],
-      "status":"OPEN",
-      "message":"Change this default value to \"None\" and initialize this parameter inside the function/method.",
-      "effort":"5min",
-      "debt":"5min",
-      "author":"dan.davella@pixee.ai",
-      "tags":[ ],
-      "creationDate":"2023-09-27T14:52:11+0200",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"LOGICAL",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "status": "OPEN",
+      "message": "Change this default value to \"None\" and initialize this parameter inside the function/method.",
+      "effort": "5min",
+      "debt": "5min",
+      "author": "dan.davella@pixee.ai",
+      "tags": [],
+      "creationDate": "2023-09-27T14:52:11+0200",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"HIGH"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxfQ0SjEf9ui_Mxcb-A",
-      "rule":"python:S5659",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:jwt_decode_verify.py",
-      "project":"pixee_codemodder-python",
-      "line":11,
-      "hash":"8598834dd9e7ac08ec3cbeffb8e78ae9",
-      "textRange":{
-        "startLine":11,
-        "endLine":11,
-        "startOffset":76,
-        "endOffset":88
+      "key": "AYxfQ0SjEf9ui_Mxcb-A",
+      "rule": "python:S5659",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:jwt_decode_verify.py",
+      "project": "pixee_codemodder-python",
+      "line": 11,
+      "hash": "8598834dd9e7ac08ec3cbeffb8e78ae9",
+      "textRange": {
+        "startLine": 11,
+        "endLine": 11,
+        "startOffset": 76,
+        "endOffset": 88
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Don't use a JWT token without verifying its signature.",
-      "effort":"30min",
-      "debt":"30min",
-      "author":"112832187+clavedeluna@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Don't use a JWT token without verifying its signature.",
+      "effort": "30min",
+      "debt": "30min",
+      "author": "112832187+clavedeluna@users.noreply.github.com",
+      "tags": [
         "cwe",
         "privacy"
       ],
-      "creationDate":"2023-09-26T18:18:34+0200",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"TRUSTWORTHY",
-      "cleanCodeAttributeCategory":"RESPONSIBLE",
-      "impacts":[
+      "creationDate": "2023-09-26T18:18:34+0200",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "TRUSTWORTHY",
+      "cleanCodeAttributeCategory": "RESPONSIBLE",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYyIBKdtVtacBRIiFKMS",
-      "rule":"python:S5659",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:jwt_decode_verify.py",
-      "project":"pixee_codemodder-python",
-      "line":12,
-      "hash":"bef94023c8d8195d89e511078a8c1a3d",
-      "textRange":{
-        "startLine":12,
-        "endLine":12,
-        "startOffset":84,
-        "endOffset":111
+      "key": "AYyIBKdtVtacBRIiFKMS",
+      "rule": "python:S5659",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:jwt_decode_verify.py",
+      "project": "pixee_codemodder-python",
+      "line": 12,
+      "hash": "bef94023c8d8195d89e511078a8c1a3d",
+      "textRange": {
+        "startLine": 12,
+        "endLine": 12,
+        "startOffset": 84,
+        "endOffset": 111
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Don't use a JWT token without verifying its signature.",
-      "effort":"30min",
-      "debt":"30min",
-      "author":"112832187+clavedeluna@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Don't use a JWT token without verifying its signature.",
+      "effort": "30min",
+      "debt": "30min",
+      "author": "112832187+clavedeluna@users.noreply.github.com",
+      "tags": [
         "cwe",
         "privacy"
       ],
-      "creationDate":"2023-09-26T18:18:34+0200",
-      "updateDate":"2023-12-20T17:17:13+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"TRUSTWORTHY",
-      "cleanCodeAttributeCategory":"RESPONSIBLE",
-      "impacts":[
+      "creationDate": "2023-09-26T18:18:34+0200",
+      "updateDate": "2023-12-20T17:17:13+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "TRUSTWORTHY",
+      "cleanCodeAttributeCategory": "RESPONSIBLE",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxfQ0SoEf9ui_Mxcb-B",
-      "rule":"python:S3457",
-      "severity":"MAJOR",
-      "component":"pixee_codemodder-python:unnecessary_f_str.py",
-      "project":"pixee_codemodder-python",
-      "line":1,
-      "hash":"c39e32ff2d055f520e3af7fd51508c08",
-      "textRange":{
-        "startLine":1,
-        "endLine":1,
-        "startOffset":6,
-        "endOffset":14
+      "key": "AYxfQ0SoEf9ui_Mxcb-B",
+      "rule": "python:S3457",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:unnecessary_f_str.py",
+      "project": "pixee_codemodder-python",
+      "line": 1,
+      "hash": "c39e32ff2d055f520e3af7fd51508c08",
+      "textRange": {
+        "startLine": 1,
+        "endLine": 1,
+        "startOffset": 6,
+        "endOffset": 14
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Add replacement fields or use a normal string instead of an f-string.",
-      "effort":"1min",
-      "debt":"1min",
-      "author":"dan.davella@pixee.ai",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Add replacement fields or use a normal string instead of an f-string.",
+      "effort": "1min",
+      "debt": "1min",
+      "author": "dan.davella@pixee.ai",
+      "tags": [
         "confusing"
       ],
-      "creationDate":"2023-09-21T16:16:47+0200",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"CODE_SMELL",
-      "organization":"pixee",
-      "cleanCodeAttribute":"LOGICAL",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-09-21T16:16:47+0200",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"MAINTAINABILITY",
-          "severity":"MEDIUM"
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
         }
       ]
     },
     {
-      "key":"AYxfQ0RhEf9ui_Mxcb9v",
-      "rule":"python:S5445",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:tempfile_mktemp.py",
-      "project":"pixee_codemodder-python",
-      "line":3,
-      "hash":"8195d0462d01b50e04cc6ec8ac1afaf6",
-      "textRange":{
-        "startLine":3,
-        "endLine":3,
-        "startOffset":0,
-        "endOffset":17
+      "key": "AYxfQ0RhEf9ui_Mxcb9v",
+      "rule": "python:S5445",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:tempfile_mktemp.py",
+      "project": "pixee_codemodder-python",
+      "line": 3,
+      "hash": "8195d0462d01b50e04cc6ec8ac1afaf6",
+      "textRange": {
+        "startLine": 3,
+        "endLine": 3,
+        "startOffset": 0,
+        "endOffset": 17
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"'tempfile.mktemp' is insecure. Use 'tempfile.TemporaryFile' instead",
-      "effort":"10min",
-      "debt":"10min",
-      "author":"112832187+clavedeluna@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "'tempfile.mktemp' is insecure. Use 'tempfile.TemporaryFile' instead",
+      "effort": "10min",
+      "debt": "10min",
+      "author": "112832187+clavedeluna@users.noreply.github.com",
+      "tags": [
         "cwe"
       ],
-      "creationDate":"2023-09-01T14:59:16+0200",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"COMPLETE",
-      "cleanCodeAttributeCategory":"INTENTIONAL",
-      "impacts":[
+      "creationDate": "2023-09-01T14:59:16+0200",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxfQ0SeEf9ui_Mxcb9_",
-      "rule":"python:S4423",
-      "severity":"CRITICAL",
-      "component":"pixee_codemodder-python:weak_tls.py",
-      "project":"pixee_codemodder-python",
-      "line":3,
-      "hash":"1bec38d2dee4147c97dbfa87ca0fce14",
-      "textRange":{
-        "startLine":3,
-        "endLine":3,
-        "startOffset":19,
-        "endOffset":33
+      "key": "AYxfQ0SeEf9ui_Mxcb9_",
+      "rule": "python:S4423",
+      "severity": "CRITICAL",
+      "component": "pixee_codemodder-python:weak_tls.py",
+      "project": "pixee_codemodder-python",
+      "line": 3,
+      "hash": "1bec38d2dee4147c97dbfa87ca0fce14",
+      "textRange": {
+        "startLine": 3,
+        "endLine": 3,
+        "startOffset": 19,
+        "endOffset": 33
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Change this code to use a stronger protocol.",
-      "effort":"2min",
-      "debt":"2min",
-      "author":"dan.davella@pixee.ai",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Change this code to use a stronger protocol.",
+      "effort": "2min",
+      "debt": "2min",
+      "author": "dan.davella@pixee.ai",
+      "tags": [
         "cwe",
         "privacy"
       ],
-      "creationDate":"2023-08-24T17:43:16+0200",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"TRUSTWORTHY",
-      "cleanCodeAttributeCategory":"RESPONSIBLE",
-      "impacts":[
+      "creationDate": "2023-08-24T17:43:16+0200",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "TRUSTWORTHY",
+      "cleanCodeAttributeCategory": "RESPONSIBLE",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
     {
-      "key":"AYxfQ0QqEf9ui_Mxcb9o",
-      "rule":"secrets:S6687",
-      "severity":"BLOCKER",
-      "component":"pixee_codemodder-python:django-project/mysite/mysite/settings.py",
-      "project":"pixee_codemodder-python",
-      "line":23,
-      "hash":"a676f5d04724d58e9b504e8520fee947",
-      "textRange":{
-        "startLine":23,
-        "endLine":23,
-        "startOffset":14,
-        "endOffset":80
+      "key": "AYxfQ0QqEf9ui_Mxcb9o",
+      "rule": "secrets:S6687",
+      "severity": "BLOCKER",
+      "component": "pixee_codemodder-python:django-project/mysite/mysite/settings.py",
+      "project": "pixee_codemodder-python",
+      "line": 23,
+      "hash": "a676f5d04724d58e9b504e8520fee947",
+      "textRange": {
+        "startLine": 23,
+        "endLine": 23,
+        "startOffset": 14,
+        "endOffset": 80
       },
-      "flows":[ ],
-      "status":"OPEN",
-      "message":"Make sure this Django key gets revoked, changed, and removed from the code.",
-      "effort":"30min",
-      "debt":"30min",
-      "author":"12188364+andrecsilva@users.noreply.github.com",
-      "tags":[
+      "flows": [],
+      "status": "OPEN",
+      "message": "Make sure this Django key gets revoked, changed, and removed from the code.",
+      "effort": "30min",
+      "debt": "30min",
+      "author": "12188364+andrecsilva@users.noreply.github.com",
+      "tags": [
         "cwe"
       ],
-      "creationDate":"2023-08-09T13:48:41+0200",
-      "updateDate":"2023-12-12T19:21:07+0100",
-      "type":"VULNERABILITY",
-      "organization":"pixee",
-      "cleanCodeAttribute":"TRUSTWORTHY",
-      "cleanCodeAttributeCategory":"RESPONSIBLE",
-      "impacts":[
+      "creationDate": "2023-08-09T13:48:41+0200",
+      "updateDate": "2023-12-12T19:21:07+0100",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "cleanCodeAttribute": "TRUSTWORTHY",
+      "cleanCodeAttributeCategory": "RESPONSIBLE",
+      "impacts": [
         {
-          "softwareQuality":"SECURITY",
-          "severity":"HIGH"
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
         }
       ]
     },
@@ -1770,894 +1770,1007 @@
           "severity": "LOW"
         }
       ]
+    },
+    {
+      "key": "AY8FpVQc1la452LTqYsq",
+      "rule": "pythonsecurity:S3649",
+      "severity": "BLOCKER",
+      "component": "pixee_codemodder-python:fix_sonar_sql_parameterization.py",
+      "project": "pixee_codemodder-python",
+      "line": 14,
+      "hash": "feab9c264091bb1fe2f1c0950c977135",
+      "textRange": {
+        "startLine": 14,
+        "endLine": 14,
+        "startOffset": 4,
+        "endOffset": 39
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "pixee_codemodder-python:fix_sonar_sql_parameterization.py",
+              "textRange": {
+                "startLine": 14,
+                "endLine": 14,
+                "startOffset": 4,
+                "endOffset": 39
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "pixee_codemodder-python:fix_sonar_sql_parameterization.py",
+              "textRange": {
+                "startLine": 14,
+                "endLine": 14,
+                "startOffset": 26,
+                "endOffset": 38
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "pixee_codemodder-python:fix_sonar_sql_parameterization.py",
+              "textRange": {
+                "startLine": 14,
+                "endLine": 14,
+                "startOffset": 32,
+                "endOffset": 38
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "pixee_codemodder-python:fix_sonar_sql_parameterization.py",
+              "textRange": {
+                "startLine": 10,
+                "endLine": 10,
+                "startOffset": 4,
+                "endOffset": 31
+              },
+              "msg": "A malicious value can be assigned to variable ‘user’"
+            },
+            {
+              "component": "pixee_codemodder-python:fix_sonar_sql_parameterization.py",
+              "textRange": {
+                "startLine": 10,
+                "endLine": 10,
+                "startOffset": 11,
+                "endOffset": 31
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct SQL queries directly from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe",
+        "sql"
+      ],
+      "creationDate": "2024-04-22T13:50:36+0200",
+      "updateDate": "2024-04-22T13:50:36+0200",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "pullRequest": "495",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ]
     }
   ],
-  "components":[
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/project_analysis/file_parsers/test_pyproject_toml_file_parser.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb64",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_pyproject_toml_file_parser.py",
-      "longName":"tests/project_analysis/file_parsers/test_pyproject_toml_file_parser.py",
-      "path":"tests/project_analysis/file_parsers/test_pyproject_toml_file_parser.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/report/codetf_reporter.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8u",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"codetf_reporter.py",
-      "longName":"src/codemodder/report/codetf_reporter.py",
-      "path":"src/codemodder/report/codetf_reporter.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/change.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8n",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"change.py",
-      "longName":"src/codemodder/change.py",
-      "path":"src/codemodder/change.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:fix_empty_sequence_comparison.py",
-      "uuid":"AY0d7TSKEG2C8jSks9oM",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"fix_empty_sequence_comparison.py",
-      "longName":"fix_empty_sequence_comparison.py",
-      "path":"fix_empty_sequence_comparison.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:future_imports.py",
-      "uuid":"AYyIPybKXBzB3YbychxE",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"future_imports.py",
-      "longName":"future_imports.py",
-      "path":"future_imports.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/fix_empty_sequence_comparison.py",
-      "uuid":"AY0d7TSKEG2C8jSks9oO",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"fix_empty_sequence_comparison.py",
-      "longName":"src/core_codemods/fix_empty_sequence_comparison.py",
-      "path":"src/core_codemods/fix_empty_sequence_comparison.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/replace_flask_send_file.py",
-      "uuid":"AY0YiSgsnUftKtTnYguX",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"replace_flask_send_file.py",
-      "longName":"src/core_codemods/replace_flask_send_file.py",
-      "path":"src/core_codemods/replace_flask_send_file.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/project_analysis/file_parsers/setup_py_file_parser.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8h",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"setup_py_file_parser.py",
-      "longName":"src/codemodder/project_analysis/file_parsers/setup_py_file_parser.py",
-      "path":"src/codemodder/project_analysis/file_parsers/setup_py_file_parser.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_remove_debug_breakpoint.py",
-      "uuid":"AYzV6vSVdKxbEY19iqLk",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_remove_debug_breakpoint.py",
-      "longName":"tests/codemods/test_remove_debug_breakpoint.py",
-      "path":"tests/codemods/test_remove_debug_breakpoint.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/cli.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8Z",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"cli.py",
-      "longName":"src/codemodder/cli.py",
-      "path":"src/codemodder/cli.py"
-    },
+  "components": [
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/project_analysis/file_parsers/test_pyproject_toml_file_parser.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb64",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_pyproject_toml_file_parser.py",
+      "longName": "tests/project_analysis/file_parsers/test_pyproject_toml_file_parser.py",
+      "path": "tests/project_analysis/file_parsers/test_pyproject_toml_file_parser.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/report/codetf_reporter.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8u",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "codetf_reporter.py",
+      "longName": "src/codemodder/report/codetf_reporter.py",
+      "path": "src/codemodder/report/codetf_reporter.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/change.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8n",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "change.py",
+      "longName": "src/codemodder/change.py",
+      "path": "src/codemodder/change.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:fix_empty_sequence_comparison.py",
+      "uuid": "AY0d7TSKEG2C8jSks9oM",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "fix_empty_sequence_comparison.py",
+      "longName": "fix_empty_sequence_comparison.py",
+      "path": "fix_empty_sequence_comparison.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:future_imports.py",
+      "uuid": "AYyIPybKXBzB3YbychxE",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "future_imports.py",
+      "longName": "future_imports.py",
+      "path": "future_imports.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/fix_empty_sequence_comparison.py",
+      "uuid": "AY0d7TSKEG2C8jSks9oO",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "fix_empty_sequence_comparison.py",
+      "longName": "src/core_codemods/fix_empty_sequence_comparison.py",
+      "path": "src/core_codemods/fix_empty_sequence_comparison.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/replace_flask_send_file.py",
+      "uuid": "AY0YiSgsnUftKtTnYguX",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "replace_flask_send_file.py",
+      "longName": "src/core_codemods/replace_flask_send_file.py",
+      "path": "src/core_codemods/replace_flask_send_file.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/project_analysis/file_parsers/setup_py_file_parser.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8h",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "setup_py_file_parser.py",
+      "longName": "src/codemodder/project_analysis/file_parsers/setup_py_file_parser.py",
+      "path": "src/codemodder/project_analysis/file_parsers/setup_py_file_parser.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_remove_debug_breakpoint.py",
+      "uuid": "AYzV6vSVdKxbEY19iqLk",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_remove_debug_breakpoint.py",
+      "longName": "tests/codemods/test_remove_debug_breakpoint.py",
+      "path": "tests/codemods/test_remove_debug_breakpoint.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/cli.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8Z",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "cli.py",
+      "longName": "src/codemodder/cli.py",
+      "path": "src/codemodder/cli.py"
+    },
     {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:django_receiver_on_top.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb56",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"django_receiver_on_top.py",
-      "longName":"django_receiver_on_top.py",
-      "path":"django_receiver_on_top.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/executor.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8Y",
-      "enabled":false,
-      "qualifier":"FIL",
-      "name":"executor.py",
-      "longName":"src/codemodder/executor.py",
-      "path":"src/codemodder/executor.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:multiple_codemods.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb58",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"multiple_codemods.py",
-      "longName":"multiple_codemods.py",
-      "path":"multiple_codemods.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/codemods/utils.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8V",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"utils.py",
-      "longName":"src/codemodder/codemods/utils.py",
-      "path":"src/codemodder/codemods/utils.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/fix_mutable_params.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7t",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"fix_mutable_params.py",
-      "longName":"src/core_codemods/fix_mutable_params.py",
-      "path":"src/core_codemods/fix_mutable_params.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/codemods/utils_mixin.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8U",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"utils_mixin.py",
-      "longName":"src/codemodder/codemods/utils_mixin.py",
-      "path":"src/codemodder/codemods/utils_mixin.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/codemods/transformations/remove_unused_imports.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8R",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"remove_unused_imports.py",
-      "longName":"src/codemodder/codemods/transformations/remove_unused_imports.py",
-      "path":"src/codemodder/codemods/transformations/remove_unused_imports.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/upgrade_sslcontext_tls.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7p",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"upgrade_sslcontext_tls.py",
-      "longName":"src/core_codemods/upgrade_sslcontext_tls.py",
-      "path":"src/core_codemods/upgrade_sslcontext_tls.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/codemods/base_codemod.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8T",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"base_codemod.py",
-      "longName":"src/codemodder/codemods/base_codemod.py",
-      "path":"src/codemodder/codemods/base_codemod.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:integration_tests/test_dependency_manager.py",
-      "uuid":"AYyBzlSuk8gmPHICGJKZ",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_dependency_manager.py",
-      "longName":"integration_tests/test_dependency_manager.py",
-      "path":"integration_tests/test_dependency_manager.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:django_json_response_type.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb50",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"django_json_response_type.py",
-      "longName":"django_json_response_type.py",
-      "path":"django_json_response_type.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/codemods/base_visitor.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8N",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"base_visitor.py",
-      "longName":"src/codemodder/codemods/base_visitor.py",
-      "path":"src/codemodder/codemods/base_visitor.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/codemods/transformations/clean_imports.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8O",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"clean_imports.py",
-      "longName":"src/codemodder/codemods/transformations/clean_imports.py",
-      "path":"src/codemodder/codemods/transformations/clean_imports.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/codemods/api/__init__.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8J",
-      "enabled":false,
-      "qualifier":"FIL",
-      "name":"__init__.py",
-      "longName":"src/codemodder/codemods/api/__init__.py",
-      "path":"src/codemodder/codemods/api/__init__.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/secure_flask_session_config.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7k",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"secure_flask_session_config.py",
-      "longName":"src/core_codemods/secure_flask_session_config.py",
-      "path":"src/core_codemods/secure_flask_session_config.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/codemods/api/helpers.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8K",
-      "enabled":false,
-      "qualifier":"FIL",
-      "name":"helpers.py",
-      "longName":"src/codemodder/codemods/api/helpers.py",
-      "path":"src/codemodder/codemods/api/helpers.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/django_receiver_on_top.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7e",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"django_receiver_on_top.py",
-      "longName":"src/core_codemods/django_receiver_on_top.py",
-      "path":"src/core_codemods/django_receiver_on_top.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:replace_flask_send_file.py",
-      "uuid":"AY0YiSgsnUftKtTnYguV",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"replace_flask_send_file.py",
-      "longName":"replace_flask_send_file.py",
-      "path":"replace_flask_send_file.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/sql_parameterization.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7g",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"sql_parameterization.py",
-      "longName":"src/core_codemods/sql_parameterization.py",
-      "path":"src/core_codemods/sql_parameterization.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/use_defused_xml.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7f",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"use_defused_xml.py",
-      "longName":"src/core_codemods/use_defused_xml.py",
-      "path":"src/core_codemods/use_defused_xml.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/dependency_management/setup_py_writer.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8C",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"setup_py_writer.py",
-      "longName":"src/codemodder/dependency_management/setup_py_writer.py",
-      "path":"src/codemodder/dependency_management/setup_py_writer.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_tempfile_mktemp.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6w",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_tempfile_mktemp.py",
-      "longName":"tests/codemods/test_tempfile_mktemp.py",
-      "path":"tests/codemods/test_tempfile_mktemp.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/remove_unused_imports.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7X",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"remove_unused_imports.py",
-      "longName":"src/core_codemods/remove_unused_imports.py",
-      "path":"src/core_codemods/remove_unused_imports.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/dependency_management/test_base_dependency_writer.py",
-      "uuid":"AYzLSl7Ow-2pRT_GdiJF",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_base_dependency_writer.py",
-      "longName":"tests/dependency_management/test_base_dependency_writer.py",
-      "path":"tests/dependency_management/test_base_dependency_writer.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:fix_assert_tuple.py",
-      "uuid":"AY0797sgvDBaEBzdYL0o",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"fix_assert_tuple.py",
-      "longName":"fix_assert_tuple.py",
-      "path":"fix_assert_tuple.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_django_session_cookie_secure_off.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6t",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_django_session_cookie_secure_off.py",
-      "longName":"tests/codemods/test_django_session_cookie_secure_off.py",
-      "path":"tests/codemods/test_django_session_cookie_secure_off.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/codemodder.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb85",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"codemodder.py",
-      "longName":"src/codemodder/codemodder.py",
-      "path":"src/codemodder/codemodder.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_fix_mutable_params.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6v",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_fix_mutable_params.py",
-      "longName":"tests/codemods/test_fix_mutable_params.py",
-      "path":"tests/codemods/test_fix_mutable_params.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python",
-      "uuid":"AYxfQs0GOSYcmd2jfSR-",
-      "enabled":true,
-      "qualifier":"TRK",
-      "name":"codemodder-python",
-      "longName":"codemodder-python"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/test_codemodder.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7V",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_codemodder.py",
-      "longName":"tests/test_codemodder.py",
-      "path":"tests/test_codemodder.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/test_cli.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7Q",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_cli.py",
-      "longName":"tests/test_cli.py",
-      "path":"tests/test_cli.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/scripts/generate_docs.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb82",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"generate_docs.py",
-      "longName":"src/codemodder/scripts/generate_docs.py",
-      "path":"src/codemodder/scripts/generate_docs.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:flask_json_response_type.py",
-      "uuid":"AYxj7oeI4lHJ-oyJdvm4",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"flask_json_response_type.py",
-      "longName":"flask_json_response_type.py",
-      "path":"flask_json_response_type.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/conftest.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7P",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"conftest.py",
-      "longName":"tests/conftest.py",
-      "path":"tests/conftest.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/flask_json_response_type.py",
-      "uuid":"AYxj7oeI4lHJ-oyJdvm6",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"flask_json_response_type.py",
-      "longName":"src/core_codemods/flask_json_response_type.py",
-      "path":"src/core_codemods/flask_json_response_type.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:integration_tests/base_test.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8-",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"base_test.py",
-      "longName":"integration_tests/base_test.py",
-      "path":"integration_tests/base_test.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/registry.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb80",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"registry.py",
-      "longName":"src/codemodder/registry.py",
-      "path":"src/codemodder/registry.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/test_results.py",
-      "uuid":"AY1VG-8R161Io1NpNnAN",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_results.py",
-      "longName":"tests/test_results.py",
-      "path":"tests/test_results.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_base_visitor.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6m",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_base_visitor.py",
-      "longName":"tests/codemods/test_base_visitor.py",
-      "path":"tests/codemods/test_base_visitor.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/test_code_directory.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7N",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_code_directory.py",
-      "longName":"tests/test_code_directory.py",
-      "path":"tests/test_code_directory.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_secure_flask_session_config.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6h",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_secure_flask_session_config.py",
-      "longName":"tests/codemods/test_secure_flask_session_config.py",
-      "path":"tests/codemods/test_secure_flask_session_config.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_fix_deprecated_logging_warn.py",
-      "uuid":"AYz0ezAExhWr-fomN9LX",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_fix_deprecated_logging_warn.py",
-      "longName":"tests/codemods/test_fix_deprecated_logging_warn.py",
-      "path":"tests/codemods/test_fix_deprecated_logging_warn.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_https_connection.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6j",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_https_connection.py",
-      "longName":"tests/codemods/test_https_connection.py",
-      "path":"tests/codemods/test_https_connection.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/transformations/test_remove_empty_string_concatenation.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7J",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_remove_empty_string_concatenation.py",
-      "longName":"tests/transformations/test_remove_empty_string_concatenation.py",
-      "path":"tests/transformations/test_remove_empty_string_concatenation.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:exception_without_raise.py",
-      "uuid":"AYxucfT3zDN-BIKbpNg4",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"exception_without_raise.py",
-      "longName":"exception_without_raise.py",
-      "path":"exception_without_raise.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/dependency_management/test_setupcfgt_writer.py",
-      "uuid":"AYzuEnP_VakZsqZiPQ33",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_setupcfgt_writer.py",
-      "longName":"tests/dependency_management/test_setupcfgt_writer.py",
-      "path":"tests/dependency_management/test_setupcfgt_writer.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/dependency_management/test_requirements_txt_writer.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7A",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_requirements_txt_writer.py",
-      "longName":"tests/dependency_management/test_requirements_txt_writer.py",
-      "path":"tests/dependency_management/test_requirements_txt_writer.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/dependency_management/setupcfg_writer.py",
-      "uuid":"AYzuEnP_VakZsqZiPQ34",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"setupcfg_writer.py",
-      "longName":"src/codemodder/dependency_management/setupcfg_writer.py",
-      "path":"src/codemodder/dependency_management/setupcfg_writer.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/dependency_management/test_setup_py_writer.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7C",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_setup_py_writer.py",
-      "longName":"tests/dependency_management/test_setup_py_writer.py",
-      "path":"tests/dependency_management/test_setup_py_writer.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_fix_deprecated_abstractproperty.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6a",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_fix_deprecated_abstractproperty.py",
-      "longName":"tests/codemods/test_fix_deprecated_abstractproperty.py",
-      "path":"tests/codemods/test_fix_deprecated_abstractproperty.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/dependency_management/test_pyproject_writer.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb7B",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_pyproject_writer.py",
-      "longName":"tests/dependency_management/test_pyproject_writer.py",
-      "path":"tests/dependency_management/test_pyproject_writer.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:unverified_request.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb5z",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"unverified_request.py",
-      "longName":"unverified_request.py",
-      "path":"unverified_request.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/codemods/libcst_transformer.py",
-      "uuid":"AY0Y-yudLcqyjLWX0n1E",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"libcst_transformer.py",
-      "longName":"src/codemodder/codemods/libcst_transformer.py",
-      "path":"src/codemodder/codemods/libcst_transformer.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/file_resource_leak.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb78",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"file_resource_leak.py",
-      "longName":"src/core_codemods/file_resource_leak.py",
-      "path":"src/core_codemods/file_resource_leak.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:file_resource_leak.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb5x",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"file_resource_leak.py",
-      "longName":"file_resource_leak.py",
-      "path":"file_resource_leak.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_django_debug_flag_on.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6Y",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_django_debug_flag_on.py",
-      "longName":"tests/codemods/test_django_debug_flag_on.py",
-      "path":"tests/codemods/test_django_debug_flag_on.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
-      "uuid":"AY0xAMmwB_d5H_ALZKAE",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"remove_assertion_in_pytest_raises.py",
-      "longName":"remove_assertion_in_pytest_raises.py",
-      "path":"remove_assertion_in_pytest_raises.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:numpy_nan_equality.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb5s",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"numpy_nan_equality.py",
-      "longName":"numpy_nan_equality.py",
-      "path":"numpy_nan_equality.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:deprecated_abstractproperty.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb5u",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"deprecated_abstractproperty.py",
-      "longName":"deprecated_abstractproperty.py",
-      "path":"deprecated_abstractproperty.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/use_walrus_if.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb77",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"use_walrus_if.py",
-      "longName":"src/core_codemods/use_walrus_if.py",
-      "path":"src/core_codemods/use_walrus_if.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tempfile_mktemp.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb5t",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"tempfile_mktemp.py",
-      "longName":"tempfile_mktemp.py",
-      "path":"tempfile_mktemp.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_secure_random.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6U",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_secure_random.py",
-      "longName":"tests/codemods/test_secure_random.py",
-      "path":"tests/codemods/test_secure_random.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/harden_pyyaml.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb71",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"harden_pyyaml.py",
-      "longName":"src/core_codemods/harden_pyyaml.py",
-      "path":"src/core_codemods/harden_pyyaml.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/remove_assertion_in_pytest_raises.py",
-      "uuid":"AY0xAMmwB_d5H_ALZKAG",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"remove_assertion_in_pytest_raises.py",
-      "longName":"src/core_codemods/remove_assertion_in_pytest_raises.py",
-      "path":"src/core_codemods/remove_assertion_in_pytest_raises.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/core_codemods/with_threading_lock.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb73",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"with_threading_lock.py",
-      "longName":"src/core_codemods/with_threading_lock.py",
-      "path":"src/core_codemods/with_threading_lock.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_remove_assertion_in_pytest_raises.py",
-      "uuid":"AY0xAMmwB_d5H_ALZKAF",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_remove_assertion_in_pytest_raises.py",
-      "longName":"tests/codemods/test_remove_assertion_in_pytest_raises.py",
-      "path":"tests/codemods/test_remove_assertion_in_pytest_raises.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:mutable_params.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb5p",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"mutable_params.py",
-      "longName":"mutable_params.py",
-      "path":"mutable_params.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:django-project/mysite/mysite/settings.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb5k",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"settings.py",
-      "longName":"django-project/mysite/mysite/settings.py",
-      "path":"django-project/mysite/mysite/settings.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:requests_timeout.py",
-      "uuid":"AYyDTMRz9YnBY2081K9E",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"requests_timeout.py",
-      "longName":"requests_timeout.py",
-      "path":"requests_timeout.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/codemods/test_enable_jinja2_autoescape.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6N",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_enable_jinja2_autoescape.py",
-      "longName":"tests/codemods/test_enable_jinja2_autoescape.py",
-      "path":"tests/codemods/test_enable_jinja2_autoescape.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:unordered_imports.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6I",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"unordered_imports.py",
-      "longName":"unordered_imports.py",
-      "path":"unordered_imports.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:literal_or_new_object_identity.py",
-      "uuid":"AYyNYl-QtQSch1Q6S8EI",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"literal_or_new_object_identity.py",
-      "longName":"literal_or_new_object_identity.py",
-      "path":"literal_or_new_object_identity.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:jwt_decode_verify.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6D",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"jwt_decode_verify.py",
-      "longName":"jwt_decode_verify.py",
-      "path":"jwt_decode_verify.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:weak_tls.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6C",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"weak_tls.py",
-      "longName":"weak_tls.py",
-      "path":"weak_tls.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:unnecessary_f_str.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb6F",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"unnecessary_f_str.py",
-      "longName":"unnecessary_f_str.py",
-      "path":"unnecessary_f_str.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:src/codemodder/code_directory.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb8y",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"code_directory.py",
-      "longName":"src/codemodder/code_directory.py",
-      "path":"src/codemodder/code_directory.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:tests/test_ancestorpatterns_mixin.py",
-      "uuid":"AYxfQ0IfEf9ui_Mxcb69",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"test_ancestorpatterns_mixin.py",
-      "longName":"tests/test_ancestorpatterns_mixin.py",
-      "path":"tests/test_ancestorpatterns_mixin.py"
-    },
-    {
-      "organization":"pixee",
-      "key":"pixee_codemodder-python:fix_missing_self_or_cls.py",
-      "uuid":"AY0797sgvDBaEBzdYL0o",
-      "enabled":true,
-      "qualifier":"FIL",
-      "name":"fix_missing_self_or_cls.py",
-      "longName":"fix_missing_self_or_cls.py",
-      "path":"fix_missing_self_or_cls.py"
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:django_receiver_on_top.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb56",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "django_receiver_on_top.py",
+      "longName": "django_receiver_on_top.py",
+      "path": "django_receiver_on_top.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/executor.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8Y",
+      "enabled": false,
+      "qualifier": "FIL",
+      "name": "executor.py",
+      "longName": "src/codemodder/executor.py",
+      "path": "src/codemodder/executor.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:multiple_codemods.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb58",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "multiple_codemods.py",
+      "longName": "multiple_codemods.py",
+      "path": "multiple_codemods.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/codemods/utils.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8V",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "utils.py",
+      "longName": "src/codemodder/codemods/utils.py",
+      "path": "src/codemodder/codemods/utils.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/fix_mutable_params.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7t",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "fix_mutable_params.py",
+      "longName": "src/core_codemods/fix_mutable_params.py",
+      "path": "src/core_codemods/fix_mutable_params.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/codemods/utils_mixin.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8U",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "utils_mixin.py",
+      "longName": "src/codemodder/codemods/utils_mixin.py",
+      "path": "src/codemodder/codemods/utils_mixin.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/codemods/transformations/remove_unused_imports.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8R",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "remove_unused_imports.py",
+      "longName": "src/codemodder/codemods/transformations/remove_unused_imports.py",
+      "path": "src/codemodder/codemods/transformations/remove_unused_imports.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/upgrade_sslcontext_tls.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7p",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "upgrade_sslcontext_tls.py",
+      "longName": "src/core_codemods/upgrade_sslcontext_tls.py",
+      "path": "src/core_codemods/upgrade_sslcontext_tls.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/codemods/base_codemod.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8T",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "base_codemod.py",
+      "longName": "src/codemodder/codemods/base_codemod.py",
+      "path": "src/codemodder/codemods/base_codemod.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:integration_tests/test_dependency_manager.py",
+      "uuid": "AYyBzlSuk8gmPHICGJKZ",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_dependency_manager.py",
+      "longName": "integration_tests/test_dependency_manager.py",
+      "path": "integration_tests/test_dependency_manager.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:django_json_response_type.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb50",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "django_json_response_type.py",
+      "longName": "django_json_response_type.py",
+      "path": "django_json_response_type.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/codemods/base_visitor.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8N",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "base_visitor.py",
+      "longName": "src/codemodder/codemods/base_visitor.py",
+      "path": "src/codemodder/codemods/base_visitor.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/codemods/transformations/clean_imports.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8O",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "clean_imports.py",
+      "longName": "src/codemodder/codemods/transformations/clean_imports.py",
+      "path": "src/codemodder/codemods/transformations/clean_imports.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/codemods/api/__init__.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8J",
+      "enabled": false,
+      "qualifier": "FIL",
+      "name": "__init__.py",
+      "longName": "src/codemodder/codemods/api/__init__.py",
+      "path": "src/codemodder/codemods/api/__init__.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/secure_flask_session_config.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7k",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "secure_flask_session_config.py",
+      "longName": "src/core_codemods/secure_flask_session_config.py",
+      "path": "src/core_codemods/secure_flask_session_config.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/codemods/api/helpers.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8K",
+      "enabled": false,
+      "qualifier": "FIL",
+      "name": "helpers.py",
+      "longName": "src/codemodder/codemods/api/helpers.py",
+      "path": "src/codemodder/codemods/api/helpers.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/django_receiver_on_top.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7e",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "django_receiver_on_top.py",
+      "longName": "src/core_codemods/django_receiver_on_top.py",
+      "path": "src/core_codemods/django_receiver_on_top.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:replace_flask_send_file.py",
+      "uuid": "AY0YiSgsnUftKtTnYguV",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "replace_flask_send_file.py",
+      "longName": "replace_flask_send_file.py",
+      "path": "replace_flask_send_file.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/sql_parameterization.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7g",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "sql_parameterization.py",
+      "longName": "src/core_codemods/sql_parameterization.py",
+      "path": "src/core_codemods/sql_parameterization.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/use_defused_xml.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7f",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "use_defused_xml.py",
+      "longName": "src/core_codemods/use_defused_xml.py",
+      "path": "src/core_codemods/use_defused_xml.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/dependency_management/setup_py_writer.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8C",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "setup_py_writer.py",
+      "longName": "src/codemodder/dependency_management/setup_py_writer.py",
+      "path": "src/codemodder/dependency_management/setup_py_writer.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_tempfile_mktemp.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6w",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_tempfile_mktemp.py",
+      "longName": "tests/codemods/test_tempfile_mktemp.py",
+      "path": "tests/codemods/test_tempfile_mktemp.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/remove_unused_imports.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7X",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "remove_unused_imports.py",
+      "longName": "src/core_codemods/remove_unused_imports.py",
+      "path": "src/core_codemods/remove_unused_imports.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/dependency_management/test_base_dependency_writer.py",
+      "uuid": "AYzLSl7Ow-2pRT_GdiJF",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_base_dependency_writer.py",
+      "longName": "tests/dependency_management/test_base_dependency_writer.py",
+      "path": "tests/dependency_management/test_base_dependency_writer.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:fix_assert_tuple.py",
+      "uuid": "AY0797sgvDBaEBzdYL0o",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "fix_assert_tuple.py",
+      "longName": "fix_assert_tuple.py",
+      "path": "fix_assert_tuple.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_django_session_cookie_secure_off.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6t",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_django_session_cookie_secure_off.py",
+      "longName": "tests/codemods/test_django_session_cookie_secure_off.py",
+      "path": "tests/codemods/test_django_session_cookie_secure_off.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/codemodder.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb85",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "codemodder.py",
+      "longName": "src/codemodder/codemodder.py",
+      "path": "src/codemodder/codemodder.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_fix_mutable_params.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6v",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_fix_mutable_params.py",
+      "longName": "tests/codemods/test_fix_mutable_params.py",
+      "path": "tests/codemods/test_fix_mutable_params.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python",
+      "uuid": "AYxfQs0GOSYcmd2jfSR-",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "codemodder-python",
+      "longName": "codemodder-python"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/test_codemodder.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7V",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_codemodder.py",
+      "longName": "tests/test_codemodder.py",
+      "path": "tests/test_codemodder.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/test_cli.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7Q",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_cli.py",
+      "longName": "tests/test_cli.py",
+      "path": "tests/test_cli.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/scripts/generate_docs.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb82",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "generate_docs.py",
+      "longName": "src/codemodder/scripts/generate_docs.py",
+      "path": "src/codemodder/scripts/generate_docs.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:flask_json_response_type.py",
+      "uuid": "AYxj7oeI4lHJ-oyJdvm4",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "flask_json_response_type.py",
+      "longName": "flask_json_response_type.py",
+      "path": "flask_json_response_type.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/conftest.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7P",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "conftest.py",
+      "longName": "tests/conftest.py",
+      "path": "tests/conftest.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/flask_json_response_type.py",
+      "uuid": "AYxj7oeI4lHJ-oyJdvm6",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "flask_json_response_type.py",
+      "longName": "src/core_codemods/flask_json_response_type.py",
+      "path": "src/core_codemods/flask_json_response_type.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:integration_tests/base_test.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8-",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "base_test.py",
+      "longName": "integration_tests/base_test.py",
+      "path": "integration_tests/base_test.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/registry.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb80",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "registry.py",
+      "longName": "src/codemodder/registry.py",
+      "path": "src/codemodder/registry.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/test_results.py",
+      "uuid": "AY1VG-8R161Io1NpNnAN",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_results.py",
+      "longName": "tests/test_results.py",
+      "path": "tests/test_results.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_base_visitor.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6m",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_base_visitor.py",
+      "longName": "tests/codemods/test_base_visitor.py",
+      "path": "tests/codemods/test_base_visitor.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/test_code_directory.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7N",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_code_directory.py",
+      "longName": "tests/test_code_directory.py",
+      "path": "tests/test_code_directory.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_secure_flask_session_config.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6h",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_secure_flask_session_config.py",
+      "longName": "tests/codemods/test_secure_flask_session_config.py",
+      "path": "tests/codemods/test_secure_flask_session_config.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_fix_deprecated_logging_warn.py",
+      "uuid": "AYz0ezAExhWr-fomN9LX",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_fix_deprecated_logging_warn.py",
+      "longName": "tests/codemods/test_fix_deprecated_logging_warn.py",
+      "path": "tests/codemods/test_fix_deprecated_logging_warn.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_https_connection.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6j",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_https_connection.py",
+      "longName": "tests/codemods/test_https_connection.py",
+      "path": "tests/codemods/test_https_connection.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/transformations/test_remove_empty_string_concatenation.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7J",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_remove_empty_string_concatenation.py",
+      "longName": "tests/transformations/test_remove_empty_string_concatenation.py",
+      "path": "tests/transformations/test_remove_empty_string_concatenation.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:exception_without_raise.py",
+      "uuid": "AYxucfT3zDN-BIKbpNg4",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "exception_without_raise.py",
+      "longName": "exception_without_raise.py",
+      "path": "exception_without_raise.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/dependency_management/test_setupcfgt_writer.py",
+      "uuid": "AYzuEnP_VakZsqZiPQ33",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_setupcfgt_writer.py",
+      "longName": "tests/dependency_management/test_setupcfgt_writer.py",
+      "path": "tests/dependency_management/test_setupcfgt_writer.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/dependency_management/test_requirements_txt_writer.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7A",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_requirements_txt_writer.py",
+      "longName": "tests/dependency_management/test_requirements_txt_writer.py",
+      "path": "tests/dependency_management/test_requirements_txt_writer.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/dependency_management/setupcfg_writer.py",
+      "uuid": "AYzuEnP_VakZsqZiPQ34",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "setupcfg_writer.py",
+      "longName": "src/codemodder/dependency_management/setupcfg_writer.py",
+      "path": "src/codemodder/dependency_management/setupcfg_writer.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/dependency_management/test_setup_py_writer.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7C",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_setup_py_writer.py",
+      "longName": "tests/dependency_management/test_setup_py_writer.py",
+      "path": "tests/dependency_management/test_setup_py_writer.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_fix_deprecated_abstractproperty.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6a",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_fix_deprecated_abstractproperty.py",
+      "longName": "tests/codemods/test_fix_deprecated_abstractproperty.py",
+      "path": "tests/codemods/test_fix_deprecated_abstractproperty.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/dependency_management/test_pyproject_writer.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb7B",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_pyproject_writer.py",
+      "longName": "tests/dependency_management/test_pyproject_writer.py",
+      "path": "tests/dependency_management/test_pyproject_writer.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:unverified_request.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb5z",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "unverified_request.py",
+      "longName": "unverified_request.py",
+      "path": "unverified_request.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/codemods/libcst_transformer.py",
+      "uuid": "AY0Y-yudLcqyjLWX0n1E",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "libcst_transformer.py",
+      "longName": "src/codemodder/codemods/libcst_transformer.py",
+      "path": "src/codemodder/codemods/libcst_transformer.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/file_resource_leak.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb78",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "file_resource_leak.py",
+      "longName": "src/core_codemods/file_resource_leak.py",
+      "path": "src/core_codemods/file_resource_leak.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:file_resource_leak.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb5x",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "file_resource_leak.py",
+      "longName": "file_resource_leak.py",
+      "path": "file_resource_leak.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_django_debug_flag_on.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6Y",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_django_debug_flag_on.py",
+      "longName": "tests/codemods/test_django_debug_flag_on.py",
+      "path": "tests/codemods/test_django_debug_flag_on.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:remove_assertion_in_pytest_raises.py",
+      "uuid": "AY0xAMmwB_d5H_ALZKAE",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "remove_assertion_in_pytest_raises.py",
+      "longName": "remove_assertion_in_pytest_raises.py",
+      "path": "remove_assertion_in_pytest_raises.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:numpy_nan_equality.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb5s",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "numpy_nan_equality.py",
+      "longName": "numpy_nan_equality.py",
+      "path": "numpy_nan_equality.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:deprecated_abstractproperty.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb5u",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "deprecated_abstractproperty.py",
+      "longName": "deprecated_abstractproperty.py",
+      "path": "deprecated_abstractproperty.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/use_walrus_if.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb77",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "use_walrus_if.py",
+      "longName": "src/core_codemods/use_walrus_if.py",
+      "path": "src/core_codemods/use_walrus_if.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tempfile_mktemp.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb5t",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "tempfile_mktemp.py",
+      "longName": "tempfile_mktemp.py",
+      "path": "tempfile_mktemp.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_secure_random.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6U",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_secure_random.py",
+      "longName": "tests/codemods/test_secure_random.py",
+      "path": "tests/codemods/test_secure_random.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/harden_pyyaml.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb71",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "harden_pyyaml.py",
+      "longName": "src/core_codemods/harden_pyyaml.py",
+      "path": "src/core_codemods/harden_pyyaml.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/remove_assertion_in_pytest_raises.py",
+      "uuid": "AY0xAMmwB_d5H_ALZKAG",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "remove_assertion_in_pytest_raises.py",
+      "longName": "src/core_codemods/remove_assertion_in_pytest_raises.py",
+      "path": "src/core_codemods/remove_assertion_in_pytest_raises.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/core_codemods/with_threading_lock.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb73",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "with_threading_lock.py",
+      "longName": "src/core_codemods/with_threading_lock.py",
+      "path": "src/core_codemods/with_threading_lock.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_remove_assertion_in_pytest_raises.py",
+      "uuid": "AY0xAMmwB_d5H_ALZKAF",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_remove_assertion_in_pytest_raises.py",
+      "longName": "tests/codemods/test_remove_assertion_in_pytest_raises.py",
+      "path": "tests/codemods/test_remove_assertion_in_pytest_raises.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:mutable_params.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb5p",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "mutable_params.py",
+      "longName": "mutable_params.py",
+      "path": "mutable_params.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:django-project/mysite/mysite/settings.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb5k",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "settings.py",
+      "longName": "django-project/mysite/mysite/settings.py",
+      "path": "django-project/mysite/mysite/settings.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:requests_timeout.py",
+      "uuid": "AYyDTMRz9YnBY2081K9E",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "requests_timeout.py",
+      "longName": "requests_timeout.py",
+      "path": "requests_timeout.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/codemods/test_enable_jinja2_autoescape.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6N",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_enable_jinja2_autoescape.py",
+      "longName": "tests/codemods/test_enable_jinja2_autoescape.py",
+      "path": "tests/codemods/test_enable_jinja2_autoescape.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:unordered_imports.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6I",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "unordered_imports.py",
+      "longName": "unordered_imports.py",
+      "path": "unordered_imports.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:literal_or_new_object_identity.py",
+      "uuid": "AYyNYl-QtQSch1Q6S8EI",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "literal_or_new_object_identity.py",
+      "longName": "literal_or_new_object_identity.py",
+      "path": "literal_or_new_object_identity.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:jwt_decode_verify.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6D",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "jwt_decode_verify.py",
+      "longName": "jwt_decode_verify.py",
+      "path": "jwt_decode_verify.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:weak_tls.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6C",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "weak_tls.py",
+      "longName": "weak_tls.py",
+      "path": "weak_tls.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:unnecessary_f_str.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb6F",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "unnecessary_f_str.py",
+      "longName": "unnecessary_f_str.py",
+      "path": "unnecessary_f_str.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/code_directory.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb8y",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "code_directory.py",
+      "longName": "src/codemodder/code_directory.py",
+      "path": "src/codemodder/code_directory.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:tests/test_ancestorpatterns_mixin.py",
+      "uuid": "AYxfQ0IfEf9ui_Mxcb69",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "test_ancestorpatterns_mixin.py",
+      "longName": "tests/test_ancestorpatterns_mixin.py",
+      "path": "tests/test_ancestorpatterns_mixin.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:fix_missing_self_or_cls.py",
+      "uuid": "AY0797sgvDBaEBzdYL0o",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "fix_missing_self_or_cls.py",
+      "longName": "fix_missing_self_or_cls.py",
+      "path": "fix_missing_self_or_cls.py"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:fix_sonar_sql_parameterization.py",
+      "uuid": "AY8FnijmCVX_EdsW8-WC",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "fix_sonar_sql_parameterization.py",
+      "longName": "fix_sonar_sql_parameterization.py",
+      "path": "fix_sonar_sql_parameterization.py",
+      "pullRequest": "495"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python",
+      "uuid": "AY8FnbIG_u1xFsthu2wE",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "codemodder-python",
+      "longName": "codemodder-python",
+      "pullRequest": "495"
     }
   ],
-  "organizations":[
+  "organizations": [
     {
-      "key":"pixee",
-      "name":"Pixee"
+      "key": "pixee",
+      "name": "Pixee"
     }
   ],
-  "facets":[ ]
+  "facets": []
 }

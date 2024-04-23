@@ -126,7 +126,7 @@ class SQLQueryParameterizationTransformer(
         LibcstResultTransformer.__init__(self, *codemod_args, **codemod_kwargs)
         UtilsMixin.__init__(
             self,
-            [],
+            codemod_args[1],
             line_exclude=self.file_context.line_exclude,
             line_include=self.file_context.line_include,
         )
@@ -165,25 +165,25 @@ class SQLQueryParameterizationTransformer(
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         """
-        The transformation is composed of 3 steps, each step is done by a codemod/visitor: (1) FindQueryCalls, (2) ExtractParameters, and (3) SQLQueryParameterization.
+        The transformation is composed of 3 steps, each step is done by a codemod/visitor: (1) FindQueryCalls, (2) ExtractParameters, and (3) _fix_injection
         Step (1) finds the `execute` calls and linearizing the query argument. Step (2) extracts the expressions that are parameters to the query.
         Step (3) swaps the parameters in the query for `?` tokens and passes them as an arguments for the `execute` call. At the end of the transformation, the `CleanCode` codemod is executed to remove leftover empty strings and unused variables.
         """
+
+        # Step (1)
         find_queries = FindQueryCalls(self.context)
         tree.visit(find_queries)
 
-        result = tree
         for call, linearized_query in find_queries.calls.items():
-            # filter by line includes/excludes
-            call_pos = self.node_position(call)
-            if not self.filter_by_path_includes_or_excludes(call_pos):
-                break
+            # filter node
+            if not self.node_is_selected(call):
+                return tree
 
-            # Step (3)
+            # Step (2)
             ep = ExtractParameters(self.context, linearized_query)
             tree.visit(ep)
 
-            # Step (4) - build tuple elements and fix injection
+            # Step (3)
             params_elements: list[cst.Element] = []
             for start, middle, end in ep.injection_patterns:
                 prepend, append = self._fix_injection(
@@ -246,7 +246,7 @@ class SQLQueryParameterizationTransformer(
                                 value=new_raw_value
                             )
 
-                result = result.visit(ReplaceNodes(new_changed_nodes))
+                result = tree.visit(ReplaceNodes(new_changed_nodes))
                 self.changed_nodes = {}
                 line_number = self.get_metadata(PositionProvider, call).start.line
                 self.file_context.codemod_changes.append(
@@ -258,7 +258,12 @@ class SQLQueryParameterizationTransformer(
                 # Normalization and cleanup
                 result = CleanCode(self.context).transform_module(result)
 
-        return result
+                # return after a single change
+                return result
+        return tree
+
+    def should_allow_multiple_passes(self) -> bool:
+        return True
 
     def _fix_injection(
         self,
