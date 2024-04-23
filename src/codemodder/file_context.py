@@ -33,3 +33,14 @@ class FileContext:
 
     def add_failure(self, filename: Path):
         self.failures.append(filename)
+
+    def get_findings_for_location(self, line_number: int):
+        return [
+            result.finding
+            for result in (self.results or [])
+            if any(
+                location.start.line <= line_number <= location.end.line
+                for location in result.locations
+            )
+            and result.finding is not None
+        ]

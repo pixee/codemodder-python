@@ -188,3 +188,5 @@ class BaseSASTCodemodTest(BaseCodemodTest):
             expected,
             changes[0],
         )
+
+        return changes

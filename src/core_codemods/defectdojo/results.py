@@ -6,6 +6,7 @@ import libcst as cst
 from libcst._position import CodeRange
 from typing_extensions import Self, override
 
+from codemodder.codetf import Finding, Rule
 from codemodder.result import LineInfo, Location, ResultSet, SASTResult
 
 
@@ -27,6 +28,15 @@ class DefectDojoResult(SASTResult):
             finding_id=finding["id"],
             rule_id=finding["title"],
             locations=[DefectDojoLocation.from_finding(finding)],
+            finding=Finding(
+                id=str(finding["id"]),
+                rule=Rule(
+                    # TODO: it's possible that these fields actually come from the codemod and not the result
+                    id=str(finding["title"]),
+                    name=str(finding["title"]),
+                    url=None,
+                ),
+            ),
         )
 
     @override

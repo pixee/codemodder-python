@@ -120,11 +120,12 @@ class LibcstResultTransformer(BaseTransformer):
 
     def report_change(self, original_node, description: str | None = None):
         line_number = self.lineno_for_node(original_node)
+        findings = self.file_context.get_findings_for_location(line_number)
         self.file_context.codemod_changes.append(
             Change(
                 lineNumber=line_number,
                 description=description or self.change_description,
-                # TODO: add fixed findings
+                finding=findings[0] if findings else None,
             )
         )
 
