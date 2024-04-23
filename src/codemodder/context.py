@@ -128,8 +128,7 @@ class CodemodExecutionContext:
         """Write the dependencies a codemod added to the appropriate dependency
         file in the project. Returns a dict listing the locations the dependencies were added.
         """
-        dependencies = self.dependencies.get(codemod_id)
-        if not dependencies:
+        if not (dependencies := self.dependencies.get(codemod_id)):
             return {}
 
         # populate everything with None and then change the ones added
@@ -137,8 +136,7 @@ class CodemodExecutionContext:
         for dep in dependencies:
             record[dep] = None
 
-        store_list = self.repo_manager.package_stores
-        if not store_list:
+        if not (store_list := self.repo_manager.package_stores):
             logger.info(
                 "unable to write dependencies for %s: no dependency file found",
                 codemod_id,
