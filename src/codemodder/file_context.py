@@ -17,19 +17,19 @@ class FileContext:
     file_path: Path
     line_exclude: list[int] = field(default_factory=list)
     line_include: list[int] = field(default_factory=list)
-    findings: list[Result] | None = field(default_factory=list)
+    results: list[Result] | None = field(default_factory=list)
     dependencies: set[Dependency] = field(default_factory=set)
     codemod_changes: list[Change] = field(default_factory=list)
     unfixed_findings: list[UnfixedFinding] = field(default_factory=list)
-    results: list[ChangeSet] = field(default_factory=list)
+    changesets: list[ChangeSet] = field(default_factory=list)
     failures: list[Path] = field(default_factory=list)
     timer: Timer = field(default_factory=Timer)
 
     def add_dependency(self, dependency: Dependency):
         self.dependencies.add(dependency)
 
-    def add_result(self, result: ChangeSet):
-        self.results.append(result)
+    def add_changeset(self, result: ChangeSet):
+        self.changesets.append(result)
 
     def add_failure(self, filename: Path):
         self.failures.append(filename)

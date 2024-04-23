@@ -65,7 +65,7 @@ class CodemodExecutionContext:
         self.directory = directory
         self.dry_run = dry_run
         self.verbose = verbose
-        self._results_by_codemod = {}
+        self._changesets_by_codemod: dict[str, list[ChangeSet]] = {}
         self._failures_by_codemod = {}
         self.dependencies = {}
         self.registry = registry
@@ -88,8 +88,8 @@ class CodemodExecutionContext:
 
         return Client(api_key=api_key)
 
-    def add_results(self, codemod_name: str, change_sets: List[ChangeSet]):
-        self._results_by_codemod.setdefault(codemod_name, []).extend(change_sets)
+    def add_changesets(self, codemod_name: str, change_sets: List[ChangeSet]):
+        self._changesets_by_codemod.setdefault(codemod_name, []).extend(change_sets)
 
     def add_failures(self, codemod_name: str, failed_files: List[Path]):
         self._failures_by_codemod.setdefault(codemod_name, []).extend(failed_files)
@@ -97,13 +97,13 @@ class CodemodExecutionContext:
     def add_dependencies(self, codemod_id: str, dependencies: set[Dependency]):
         self.dependencies.setdefault(codemod_id, set()).update(dependencies)
 
-    def get_results(self, codemod_name: str):
-        return self._results_by_codemod.get(codemod_name, [])
+    def get_changesets(self, codemod_name: str) -> list[ChangeSet]:
+        return self._changesets_by_codemod.get(codemod_name, [])
 
     def get_changed_files(self):
         return [
             change_set.path
-            for changes in self._results_by_codemod.values()
+            for changes in self._changesets_by_codemod.values()
             for change_set in changes
         ]
 
@@ -146,7 +146,7 @@ class CodemodExecutionContext:
         for package_store in store_list:
             dm = DependencyManager(package_store, self.directory)
             if (changeset := dm.write(list(dependencies), self.dry_run)) is not None:
-                self.add_results(codemod_id, [changeset])
+                self.add_changesets(codemod_id, [changeset])
                 self._dependency_update_by_codemod[codemod_id] = package_store
                 for dep in dependencies:
                     record[dep] = package_store
@@ -168,7 +168,7 @@ class CodemodExecutionContext:
 
     def process_results(self, codemod_id: str, results: Iterator[FileContext]):
         for file_context in results:
-            self.add_results(codemod_id, file_context.results)
+            self.add_changesets(codemod_id, file_context.changesets)
             self.add_failures(codemod_id, file_context.failures)
             self.add_dependencies(codemod_id, file_context.dependencies)
             self.timer.aggregate(file_context.timer)
@@ -184,7 +184,7 @@ class CodemodExecutionContext:
                 references=codemod.references,
                 properties={},
                 failedFiles=[str(file) for file in self.get_failures(codemod.id)],
-                changeset=self.get_results(codemod.id),
+                changeset=self.get_changesets(codemod.id),
             )
 
             results.append(result)
@@ -194,7 +194,7 @@ class CodemodExecutionContext:
     def log_changes(self, codemod_id: str):
         if failures := self.get_failures(codemod_id):
             log_list(logging.INFO, "failed", failures)
-        if changes := self.get_results(codemod_id):
+        if changes := self.get_changesets(codemod_id):
             logger.info("changed:")
             for change in changes:
                 logger.info("  - %s", change.path)

@@ -54,7 +54,7 @@ class BaseCodemodTest:
         )
 
         self.codemod.apply(self.execution_context, files_to_check)
-        changes = self.execution_context.get_results(self.codemod.id)
+        changes = self.execution_context.get_changesets(self.codemod.id)
 
         self.changeset = changes
 
@@ -172,7 +172,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
         )
 
         self.codemod.apply(self.execution_context, files_to_check)
-        changes = self.execution_context.get_results(self.codemod.id)
+        changes = self.execution_context.get_changesets(self.codemod.id)
 
         if input_code == expected:
             assert not changes

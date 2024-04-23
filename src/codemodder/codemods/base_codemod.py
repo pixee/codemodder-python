@@ -248,6 +248,6 @@ class BaseCodemod(metaclass=ABCMeta):
         if change_set := self.transformer.apply(
             context, file_context, findings_for_rule
         ):
-            file_context.add_result(change_set)
+            file_context.add_changeset(change_set)
 
         return file_context
