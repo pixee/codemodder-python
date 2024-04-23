@@ -276,8 +276,7 @@ class LibcstTransformerPipeline(BaseTransformerPipeline):
         if not file_context.codemod_changes:
             return None
 
-        diff = create_diff_from_tree(source_tree, tree)
-        if not diff:
+        if not (diff := create_diff_from_tree(source_tree, tree)):
             return None
 
         change_set = ChangeSet(
