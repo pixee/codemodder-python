@@ -83,6 +83,21 @@ class Finding(BaseModel):
     id: str
     rule: Rule
 
+    def to_unfixed_finding(
+        self,
+        *,
+        path: str,
+        line_number: Optional[int] = None,
+        reason: str,
+    ) -> UnfixedFinding:
+        return UnfixedFinding(
+            id=self.id,
+            rule=self.rule,
+            path=path,
+            lineNumber=line_number,
+            reason=reason,
+        )
+
 
 class UnfixedFinding(Finding):
     path: str

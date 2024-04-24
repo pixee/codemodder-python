@@ -41,7 +41,14 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
             ]
         }
 
-        self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(findings))
+        changes = self.run_and_assert(
+            tmpdir, input_code, expected, results=json.dumps(findings)
+        )
+
+        assert changes is not None
+        assert changes[0].changes[0].finding is not None
+        assert changes[0].changes[0].finding.id == "1"
+        assert changes[0].changes[0].finding.rule.id == RULE_ID
 
     @mock.patch("codemodder.codemods.api.FileContext.add_dependency")
     def test_pickle_load(self, adds_dependency, tmpdir):
@@ -67,8 +74,15 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
             ]
         }
 
-        self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(findings))
+        changes = self.run_and_assert(
+            tmpdir, input_code, expected, results=json.dumps(findings)
+        )
         adds_dependency.assert_called_once_with(Fickling)
+
+        assert changes is not None
+        assert changes[0].changes[0].finding is not None
+        assert changes[0].changes[0].finding.id == "2"
+        assert changes[0].changes[0].finding.rule.id == RULE_ID
 
     @mock.patch("codemodder.codemods.api.FileContext.add_dependency")
     def test_pickle_and_yaml(self, adds_dependency, tmpdir):
@@ -104,7 +118,7 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
             ]
         }
 
-        self.run_and_assert(
+        changes = self.run_and_assert(
             tmpdir,
             input_code,
             expected,
@@ -112,6 +126,14 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
             num_changes=2,
         )
         adds_dependency.assert_called_once_with(Fickling)
+
+        assert changes is not None
+        assert changes[0].changes[0].finding is not None
+        assert changes[0].changes[0].finding.id == "4"
+        assert changes[0].changes[0].finding.rule.id == RULE_ID
+        assert changes[0].changes[1].finding is not None
+        assert changes[0].changes[1].finding.id == "3"
+        assert changes[0].changes[1].finding.rule.id == RULE_ID
 
     @mock.patch("codemodder.codemods.api.FileContext.add_dependency")
     def test_pickle_loads(self, adds_dependency, tmpdir):
@@ -136,3 +158,11 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
 
         self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(findings))
         adds_dependency.assert_not_called()
+
+        unfixed = self.execution_context.get_unfixed_findings(self.codemod.id)
+        assert len(unfixed) == 1
+        assert unfixed[0].id == "5"
+        assert unfixed[0].rule.id == RULE_ID
+        assert unfixed[0].lineNumber == 4
+        assert unfixed[0].reason == "`fickling` does not yet support `pickle.loads`"
+        assert unfixed[0].path == "code.py"

@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Any
 import libcst as cst
 from libcst._position import CodeRange
 
+from codemodder.codetf import Finding
+
 from .utils.abc_dataclass import ABCDataclass
 
 if TYPE_CHECKING:
@@ -31,6 +33,7 @@ class Location(ABCDataclass):
 class Result(ABCDataclass):
     rule_id: str
     locations: list[Location]
+    finding: Finding | None = None
 
     def match_location(self, pos: CodeRange, node: cst.CSTNode) -> bool:
         del node

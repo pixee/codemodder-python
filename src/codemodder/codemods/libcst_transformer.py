@@ -120,18 +120,19 @@ class LibcstResultTransformer(BaseTransformer):
 
     def report_change(self, original_node, description: str | None = None):
         line_number = self.lineno_for_node(original_node)
+        findings = self.file_context.get_findings_for_location(line_number)
         self.file_context.codemod_changes.append(
             Change(
                 lineNumber=line_number,
                 description=description or self.change_description,
-                # TODO: add fixed findings
+                finding=findings[0] if findings else None,
             )
         )
 
     def report_unfixed(self, original_node: cst.CSTNode, reason: str):
-        pass
-        # results = self.results_for_node(original_node)
-        # self.file_context.unfixed_findings.extend(results)
+        line_number = self.lineno_for_node(original_node)
+        findings = self.file_context.get_findings_for_location(line_number)
+        self.file_context.add_unfixed_findings(findings, reason, line_number)
 
     def remove_unused_import(self, original_node):
         RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
@@ -275,8 +276,7 @@ class LibcstTransformerPipeline(BaseTransformerPipeline):
         if not file_context.codemod_changes:
             return None
 
-        diff = create_diff_from_tree(source_tree, tree)
-        if not diff:
+        if not (diff := create_diff_from_tree(source_tree, tree)):
             return None
 
         change_set = ChangeSet(

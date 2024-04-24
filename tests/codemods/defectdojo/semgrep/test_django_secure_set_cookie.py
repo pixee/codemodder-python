@@ -32,4 +32,14 @@ class TestDjangoSecureSetCookie(BaseSASTCodemodTest):
             ]
         }
 
-        self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(findings))
+        changes = self.run_and_assert(
+            tmpdir, input_code, expected, results=json.dumps(findings)
+        )
+
+        assert changes is not None
+        assert changes[0].changes[0].finding is not None
+        assert changes[0].changes[0].finding.id == "1"
+        assert (
+            changes[0].changes[0].finding.rule.id
+            == "python.django.security.audit.secure-cookies.django-secure-set-cookie"
+        )
