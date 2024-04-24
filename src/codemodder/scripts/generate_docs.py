@@ -295,6 +295,7 @@ SONAR_CODEMOD_NAMES = [
     "fix-float-equality-S1244",
     "fix-math-isclose-S6727",
     "sql-parameterization-S3649",
+    "django-model-without-dunder-str-S6554",
 ]
 SONAR_CODEMODS = {
     name: DocMetadata(
