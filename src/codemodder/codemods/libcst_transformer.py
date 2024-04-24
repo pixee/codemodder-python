@@ -269,9 +269,15 @@ class LibcstTransformerPipeline(BaseTransformerPipeline):
             return None
 
         tree = source_tree
-        with file_context.timer.measure("transform"):
-            for transformer in self.transformers:
-                tree = transformer.transform(tree, results, file_context)
+
+        try:
+            with file_context.timer.measure("transform"):
+                for transformer in self.transformers:
+                    tree = transformer.transform(tree, results, file_context)
+        except Exception:
+            file_context.add_failure(file_path)
+            logger.exception("error transforming file %s", file_path)
+            return None
 
         if not file_context.codemod_changes:
             return None
