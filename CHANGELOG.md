@@ -1,7 +1,8 @@
 # CHANGELOG
 
-## 0.82.0 (in progress)
+This file contains change logs for v0.81.0 and earlier.
 
+See [GitHub Releases](https://github.com/pixee/codemodder-python/releases) for the most up-to-date change logs.
 
 ## 0.81.0 (2024-02-19)
 
