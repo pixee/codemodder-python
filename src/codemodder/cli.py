@@ -179,4 +179,9 @@ def parse_args(argv, codemod_registry: CodemodRegistry):
         action=CsvListAction,
         help="Comma-separated set of path(s) to DefectDojo's v2 Findings JSON file(s) to feed to the codemods",
     )
+    parser.add_argument(
+        "--contrast-vulnerabilities-xml",
+        action=CsvListAction,
+        help="Comma-separated set of path(s) to Contrast Security's vulnerabilities XML file(s) to feed to the codemods",
+    )
     return parser.parse_args(argv)
