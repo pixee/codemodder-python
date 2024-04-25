@@ -251,3 +251,6 @@ class BaseCodemod(metaclass=ABCMeta):
             file_context.add_changeset(change_set)
 
         return file_context
+
+    def __repr__(self) -> str:
+        return f"{self.id}"
