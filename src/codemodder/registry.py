@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import re
 from dataclasses import dataclass
+from functools import cached_property
 from importlib.metadata import entry_points
 from itertools import chain
 from typing import TYPE_CHECKING, Optional
@@ -56,6 +57,14 @@ class CodemodRegistry:
     def default_include_paths(self) -> list[str]:
         return list(self._default_include_paths)
 
+    @cached_property
+    def pixee_codemods_by_name(self) -> dict:
+        return {
+            name: codemod
+            for name, codemod in self._codemods_by_name.items()
+            if codemod.origin == "pixee"
+        }
+
     def add_codemod_collection(self, collection: CodemodCollection):
         for codemod in collection.codemods:
             wrapper = codemod() if isinstance(codemod, type) else codemod
@@ -87,6 +96,7 @@ class CodemodRegistry:
                 if "*" in exclude
             ]
             names = set(name for name in codemod_exclude if "*" not in name)
+
             for codemod in self.codemods:
                 if (
                     codemod.id in names
@@ -115,7 +125,7 @@ class CodemodRegistry:
 
             try:
                 matched_codemods.append(
-                    self._codemods_by_name.get(name) or self._codemods_by_id[name]
+                    self.pixee_codemods_by_name.get(name) or self._codemods_by_id[name]
                 )
             except KeyError:
                 logger.warning(f"Requested codemod to include '{name}' does not exist.")
