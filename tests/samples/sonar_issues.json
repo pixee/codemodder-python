@@ -1,5 +1,5 @@
 {
-  "total": 41,
+  "total": 42,
   "p": 1,
   "ps": 500,
   "paging": {
@@ -1860,6 +1860,41 @@
         {
           "softwareQuality": "SECURITY",
           "severity": "HIGH"
+        }
+      ]
+    },
+    {
+      "key": "AY8LdruyywzNF5GhDiHJ",
+      "rule": "python:S6554",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:django_model.py",
+      "project": "pixee_codemodder-python",
+      "line": 4,
+      "hash": "8eca309fd79127651d55034d0f9981ea",
+      "textRange": {
+        "startLine": 10,
+        "endLine": 10,
+        "startOffset": 6,
+        "endOffset": 10
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Define a \"__str__\" method for this Django model.",
+      "effort": "10min",
+      "debt": "10min",
+      "assignee": "clavedeluna@github",
+      "author": "danalitovsky+git@gmail.com",
+      "tags": [],
+      "creationDate": "2024-04-23T16:56:52+0200",
+      "updateDate": "2024-04-23T16:57:31+0200",
+      "type": "CODE_SMELL",
+      "organization": "pixee",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "MAINTAINABILITY",
+          "severity": "MEDIUM"
         }
       ]
     }

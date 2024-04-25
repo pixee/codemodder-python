@@ -52,6 +52,9 @@ from .secure_flask_cookie import SecureFlaskCookie
 from .secure_flask_session_config import SecureFlaskSessionConfig
 from .secure_random import SecureRandom
 from .sonar.sonar_django_json_response_type import SonarDjangoJsonResponseType
+from .sonar.sonar_django_model_without_dunder_str import (
+    SonarDjangoModelWithoutDunderStr,
+)
 from .sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
 from .sonar.sonar_enable_jinja2_autoescape import SonarEnableJinja2Autoescape
 from .sonar.sonar_exception_without_raise import SonarExceptionWithoutRaise
@@ -168,6 +171,7 @@ sonar_registry = CodemodCollection(
         SonarFixFloatEquality,
         SonarFixMathIsClose,
         SonarSQLParameterization,
+        SonarDjangoModelWithoutDunderStr,
     ],
 )
 
