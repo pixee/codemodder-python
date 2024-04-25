@@ -88,14 +88,12 @@ class BaseIntegrationTest(DependencyTestMixin):
 
     def setup_method(self):
         try:
-            name = (
-                self.codemod().name
-                if isinstance(self.codemod, type)
-                else self.codemod.name
+            codemod_id = (
+                self.codemod().id if isinstance(self.codemod, type) else self.codemod.id
             )
             # This is how we ensure that the codemod is actually in the registry
             self.codemod_instance = self.codemod_registry.match_codemods(
-                codemod_include=[name]
+                codemod_include=[codemod_id]
             )[0]
         except IndexError as exc:
             raise IndexError(
@@ -109,7 +107,7 @@ class BaseIntegrationTest(DependencyTestMixin):
         assert run["elapsed"] != ""
         assert run[
             "commandLine"
-        ] == f'codemodder {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.name} --path-include={self.code_filename} --path-exclude=""' + (
+        ] == f'codemodder {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.id} --path-include={self.code_filename} --path-exclude=""' + (
             f" --sonar-issues-json={self.sonar_issues_json}"
             if self.sonar_issues_json
             else ""
@@ -198,7 +196,7 @@ class BaseIntegrationTest(DependencyTestMixin):
             self.code_dir,
             "--output",
             self.output_path,
-            f"--codemod-include={self.codemod_instance.name}",
+            f"--codemod-include={self.codemod_instance.id}",
             f"--path-include={self.code_filename}",
             '--path-exclude=""',
         ]
