@@ -55,12 +55,19 @@ class Change(BaseModel):
     finding: Optional[Finding] = None
 
 
+class AIMetadata(BaseModel):
+    provider: str
+    model: str
+    tokens: int
+
+
 class ChangeSet(BaseModel):
     """A set of changes made to a file at `path`"""
 
     path: str
     diff: str
     changes: list[Change] = []
+    ai: Optional[AIMetadata] = None
 
 
 class Reference(BaseModel):
