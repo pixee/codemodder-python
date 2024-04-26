@@ -146,8 +146,7 @@ class NameResolutionMixin(MetadataDependent):
         Returns the alias name, otherwise just name, of the given import if its name matches name.
         """
         maybe_name = None
-        imp_name = get_full_name_for_node(import_alias.name)
-        if imp_name == name:
+        if (imp_name := get_full_name_for_node(import_alias.name)) == name:
             # AsName is always a Name for ImportAlias
             maybe_name = (
                 import_alias.asname.name.value if import_alias.asname else imp_name
