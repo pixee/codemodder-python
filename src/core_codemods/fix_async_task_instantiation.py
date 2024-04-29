@@ -39,13 +39,12 @@ class FixAsyncTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
             else None
         )
 
-        eager_start_type = (
+
+        if (
             infer_expression_type(self.resolve_expression(eager_start_arg.value))
             if eager_start_arg
             else None
-        )
-
-        if eager_start_type == BaseType.TRUE:
+        ) == BaseType.TRUE:
             if not loop_arg or self._is_invalid_loop_value(loop_type):
                 # asking for eager_start without a loop or incorrectly setting loop is bad.
                 # We won't do anything.

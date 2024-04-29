@@ -29,10 +29,9 @@ class FixDataclassDefaults(SimpleCodemod, NameAndAncestorResolutionMixin, UtilsM
             return updated_node
 
         maybe_classdef = self.find_immediate_class_def(original_node)
-        maybe_has_decorator = (
+        if not (
             self._has_dataclass_decorator(maybe_classdef) if maybe_classdef else False
-        )
-        if not maybe_has_decorator:
+        ):
             return updated_node
 
         match original_node.value:

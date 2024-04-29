@@ -36,7 +36,7 @@ def find_semgrep_results(
     files_to_analyze: list[Path] | None = None,
 ) -> ResultSet:
     """Run semgrep once with all configuration files from all codemods and return a set of applicable rule IDs"""
-    yaml_files = list(
+    if not (yaml_files := list(
         itertools.chain.from_iterable(
             [
                 codemod.detector.get_yaml_files(codemod.name)
@@ -45,8 +45,7 @@ def find_semgrep_results(
                 and isinstance(codemod.detector, SemgrepRuleDetector)
             ]
         )
-    )
-    if not yaml_files:
+    )):
         return ResultSet()
 
     return run_semgrep(context, yaml_files, files_to_analyze)

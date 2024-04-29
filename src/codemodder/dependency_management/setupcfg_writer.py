@@ -40,10 +40,9 @@ class SetupCfgWriter(DependencyWriter):
         with open(self.path, "r", encoding="utf-8") as f:
             original_lines = f.readlines()
 
-        new_lines = self.build_new_lines(
+        if not (new_lines := self.build_new_lines(
             original_lines, defined_dependencies, dependencies
-        )
-        if not new_lines:
+        )):
             logger.debug("Unable to add dependencies to setup.cfg file.")
             return None
 

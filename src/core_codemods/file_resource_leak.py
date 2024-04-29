@@ -376,14 +376,13 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
             if self.is_argument_of_call(node):
                 return True
             # out of block?
-            ancestors = self._filter_ancestors(node, block.body[index:])
             # TODO this only looks for accesses and not assignments
             # e.g.
             # out = None
             # if True:
             #    out = x
             # will pass
-            if not ancestors:
+            if not self._filter_ancestors(node, block.body[index:]):
                 return True
 
         return False
