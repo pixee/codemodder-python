@@ -3,7 +3,8 @@ from django.conf import settings
 from django.db import models
 
 # required to run this module standalone for testing
-settings.configure()
+if not settings.configured:
+    settings.configure()
 django.setup()
 
 
