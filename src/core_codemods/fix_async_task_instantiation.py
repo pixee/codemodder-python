@@ -39,7 +39,6 @@ class FixAsyncTaskInstantiation(SimpleCodemod, NameAndAncestorResolutionMixin):
             else None
         )
 
-
         if (
             infer_expression_type(self.resolve_expression(eager_start_arg.value))
             if eager_start_arg
