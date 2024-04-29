@@ -12,7 +12,8 @@ class TestDjangoModelWithoutDunderStr(BaseIntegrationTest):
     from django.conf import settings
     from django.db import models
     # required to run this module standalone for testing
-    settings.configure()
+    if not settings.configured:
+        settings.configure()
     django.setup()
     
     
@@ -24,21 +25,21 @@ class TestDjangoModelWithoutDunderStr(BaseIntegrationTest):
 
     """
     replacement_lines = [
-        (15, """\n"""),
-        (16, """    def __str__(self):\n"""),
-        (17, """        model_name = self.__class__.__name__\n"""),
+        (16, """\n"""),
+        (17, """    def __str__(self):\n"""),
+        (18, """        model_name = self.__class__.__name__\n"""),
         (
-            18,
+            19,
             """        fields_str = ", ".join((f"{field.name}={getattr(self, field.name)}" for field in self._meta.fields))\n""",
         ),
-        (19, """        return f"{model_name}({fields_str})"\n"""),
+        (20, """        return f"{model_name}({fields_str})"\n"""),
     ]
 
     # fmt: off
     expected_diff = (
     """--- \n"""
     """+++ \n"""
-    """@@ -11,3 +11,8 @@\n"""
+    """@@ -12,3 +12,8 @@\n"""
     """     content = models.CharField(max_length=200)\n"""
     """     class Meta:\n"""
     """         app_label = 'myapp'\n"""
@@ -50,7 +51,7 @@ class TestDjangoModelWithoutDunderStr(BaseIntegrationTest):
     )
     # fmt: on
 
-    expected_line_change = "9"
+    expected_line_change = "10"
     change_description = DjangoModelWithoutDunderStrTransformer.change_description
     num_changed_files = 1
 

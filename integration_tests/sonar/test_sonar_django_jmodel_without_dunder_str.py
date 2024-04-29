@@ -11,21 +11,21 @@ class TestSonarDjangoModelWithoutDunderStr(SonarIntegrationTest):
     codemod = SonarDjangoModelWithoutDunderStr
     code_path = "tests/samples/django_model.py"
     replacement_lines = [
-        (15, """\n"""),
-        (16, """    def __str__(self):\n"""),
-        (17, """        model_name = self.__class__.__name__\n"""),
+        (16, """\n"""),
+        (17, """    def __str__(self):\n"""),
+        (18, """        model_name = self.__class__.__name__\n"""),
         (
-            18,
+            19,
             """        fields_str = ", ".join((f"{field.name}={getattr(self, field.name)}" for field in self._meta.fields))\n""",
         ),
-        (19, """        return f"{model_name}({fields_str})"\n"""),
+        (20, """        return f"{model_name}({fields_str})"\n"""),
     ]
 
     # fmt: off
     expected_diff = (
     """--- \n"""
     """+++ \n"""
-    """@@ -12,3 +12,8 @@\n"""
+    """@@ -13,3 +13,8 @@\n"""
     """     phone = models.IntegerField(blank=True)\n"""
     """     class Meta:\n"""
     """         app_label = 'myapp'\n"""
@@ -37,6 +37,6 @@ class TestSonarDjangoModelWithoutDunderStr(SonarIntegrationTest):
     )
     # fmt: on
 
-    expected_line_change = "10"
+    expected_line_change = "11"
     change_description = DjangoModelWithoutDunderStrTransformer.change_description
     num_changed_files = 1
