@@ -1,3 +1,5 @@
+import logging
+
 import libcst as cst
 import mock
 import pytest
@@ -194,12 +196,8 @@ class TestRun:
 
 class TestCodemodIncludeExclude:
 
-    @mock.patch("codemodder.registry.logger.warning")
-    @mock.patch("codemodder.codemodder.logger.info")
     @mock.patch("codemodder.codetf.CodeTF.write_report")
-    def test_codemod_include_no_match(
-        self, write_report, info_logger, warning_logger, dir_structure
-    ):
+    def test_codemod_include_no_match(self, write_report, dir_structure, caplog):
         bad_codemod = "doesntexist"
         code_dir, codetf = dir_structure
         args = [
@@ -208,23 +206,20 @@ class TestCodemodIncludeExclude:
             str(codetf),
             f"--codemod-include={bad_codemod}",
         ]
+        caplog.set_level(logging.INFO)
+
         run(args)
         write_report.assert_called_once()
 
-        assert any("no codemods to run" in x[0][0] for x in info_logger.call_args_list)
-        assert any(x[0] == ("scanned: %s files", 0) for x in info_logger.call_args_list)
-
-        assert any(
-            f"Requested codemod to include '{bad_codemod}' does not exist." in x[0][0]
-            for x in warning_logger.call_args_list
+        assert "no codemods to run" in caplog.text
+        assert "scanned: 0 files" in caplog.text
+        assert (
+            f"Requested codemod to include '{bad_codemod}' does not exist."
+            in caplog.text
         )
 
-    @mock.patch("codemodder.registry.logger.warning")
-    @mock.patch("codemodder.codemodder.logger.info")
     @mock.patch("codemodder.codetf.CodeTF.write_report")
-    def test_codemod_include_some_match(
-        self, write_report, info_logger, warning_logger, dir_structure
-    ):
+    def test_codemod_include_some_match(self, write_report, dir_structure, caplog):
         bad_codemod = "doesntexist"
         good_codemod = "secure-random"
         code_dir, codetf = dir_structure
@@ -234,20 +229,17 @@ class TestCodemodIncludeExclude:
             str(codetf),
             f"--codemod-include={bad_codemod},{good_codemod}",
         ]
+        caplog.set_level(logging.INFO)
         run(args)
         write_report.assert_called_once()
-        assert any("running codemod %s" in x[0][0] for x in info_logger.call_args_list)
-        assert any(
-            f"Requested codemod to include '{bad_codemod}' does not exist." in x[0][0]
-            for x in warning_logger.call_args_list
+        assert f"running codemod {good_codemod}" in caplog.text
+        assert (
+            f"Requested codemod to include '{bad_codemod}' does not exist."
+            in caplog.text
         )
 
-    @mock.patch("codemodder.registry.logger.warning")
-    @mock.patch("codemodder.codemodder.logger.info")
     @mock.patch("codemodder.codetf.CodeTF.write_report")
-    def test_codemod_exclude_some_match(
-        self, write_report, info_logger, warning_logger, dir_structure
-    ):
+    def test_codemod_exclude_some_match(self, write_report, dir_structure, caplog):
         bad_codemod = "doesntexist"
         good_codemod = "secure-random"
         code_dir, codetf = dir_structure
@@ -257,24 +249,16 @@ class TestCodemodIncludeExclude:
             str(codetf),
             f"--codemod-exclude={bad_codemod},{good_codemod}",
         ]
+        caplog.set_level(logging.INFO)
         run(args)
         write_report.assert_called_once()
-        codemods_that_ran = [
-            x[0][1]
-            for x in info_logger.call_args_list
-            if x[0][0] == "running codemod %s"
-        ]
 
-        assert f"pixee:python/{good_codemod}" not in codemods_that_ran
-        assert any("running codemod %s" in x[0][0] for x in info_logger.call_args_list)
+        assert f"running codemod {good_codemod}" not in caplog.text
+        assert "running codemod " not in caplog.text
 
-    @mock.patch("codemodder.registry.logger.warning")
-    @mock.patch("codemodder.codemodder.logger.info")
     @mock.patch("codemodder.codetf.CodeTF.write_report")
     @mock.patch("codemodder.codemods.base_codemod.BaseCodemod.apply")
-    def test_codemod_exclude_no_match(
-        self, apply, write_report, info_logger, warning_logger, dir_structure
-    ):
+    def test_codemod_exclude_no_match(self, apply, write_report, dir_structure, caplog):
         bad_codemod = "doesntexist"
         code_dir, codetf = dir_structure
         args = [
@@ -283,10 +267,10 @@ class TestCodemodIncludeExclude:
             str(codetf),
             f"--codemod-exclude={bad_codemod}",
         ]
-
+        caplog.set_level(logging.INFO)
         run(args)
         write_report.assert_called_once()
-        assert any("running codemod %s" in x[0][0] for x in info_logger.call_args_list)
+        assert "running codemod " in caplog.text
 
     @mock.patch("codemodder.codemods.semgrep.semgrep_run")
     def test_exclude_all_registered_codemods(self, mock_semgrep_run, dir_structure):
