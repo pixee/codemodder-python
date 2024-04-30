@@ -88,6 +88,7 @@ defectdojo = "core_codemods:defectdojo_registry"
 
 [project.entry-points.sarif_detectors]
 "semgrep" = "codemodder.semgrep:SemgrepSarifToolDetector"
+"codeql" = "codemodder.codeql:CodeQLSarifToolDetector"
 
 [tool.setuptools]
 
