@@ -136,3 +136,9 @@ class TestMatchCodemods:
             for c in self.registry.codemods
             if not c.origin == "pixee" and c.id in self.all_ids
         ]
+
+    def test_non_pixee_name_no_match(self):
+        assert self.registry.match_codemods(["secure-random-S2245"], None) == []
+        assert self.registry.match_codemods(None, ["secure-random-S2245"]) == [
+            c for c in self.registry.codemods if c.id in self.all_ids
+        ]

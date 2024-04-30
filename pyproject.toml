@@ -19,7 +19,7 @@ dependencies = [
     "pylint>=3.0,<3.2",
     "python-json-logger~=2.0.0",
     "PyYAML~=6.0.0",
-    "semgrep>=1.50,<1.70",
+    "semgrep>=1.50,<1.71",
     "toml~=0.10.2",
     "tomlkit~=0.12.0",
     "wrapt~=1.16.0",
@@ -48,7 +48,7 @@ get-hashes = 'codemodder.scripts.get_hashes:main'
 
 [project.optional-dependencies]
 test = [
-    "coverage>=7.3,<7.5",
+    "coverage>=7.3,<7.6",
     "Flask<4",
     "Jinja2~=3.1.2",
     "jsonschema~=4.21.0",
@@ -56,7 +56,7 @@ test = [
     "mock==5.1.*",
     "pre-commit<4",
     "Pyjwt~=2.8.0",
-    "pytest>=7.4,<8.2",
+    "pytest>=8.2,<9",
     "pytest-cov>=4.1,<5.1",
     "pytest-mock>=3.12,<3.15",
     "pytest-randomly==3.*",
@@ -74,7 +74,7 @@ complexity = [
     "xenon==0.9.*",
 ]
 openai = [
-    "openai>=1.0,<1.24",
+    "openai>=1.0,<1.25",
 ]
 all = [
     "codemodder[test]",
@@ -88,6 +88,7 @@ defectdojo = "core_codemods:defectdojo_registry"
 
 [project.entry-points.sarif_detectors]
 "semgrep" = "codemodder.semgrep:SemgrepSarifToolDetector"
+"codeql" = "codemodder.codeql:CodeQLSarifToolDetector"
 
 [tool.setuptools]
 

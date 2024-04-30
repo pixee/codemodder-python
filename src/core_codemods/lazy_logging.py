@@ -54,21 +54,34 @@ class LazyLogging(SimpleCodemod, NameAndAncestorResolutionMixin):
                 ...
             {_log_funcs}
           - patterns:
-            - pattern: logging.$FUNC(..., $ANYTHING + ..., ...)
+            - pattern: logging.$FUNC($MSG + ..., ...)
             {_pattern_inside}
             {_log_funcs}
           - patterns:
-            - pattern: logging.getLogger(...).$FUNC(..., $ANYTHING + ..., ...)
+            - pattern: logging.getLogger(...).$FUNC($MSG + ..., ...)
             {_pattern_inside}
             {_log_funcs}
           - patterns:
-            - pattern: $VAR.$FUNC(..., $ANYTHING + ..., ...)
+            - pattern: $VAR.$FUNC($MSG + ..., ...)
             - pattern-inside: |
                 import logging
                 ...
                 $VAR = logging.getLogger(...)
                 ...
             {_log_funcs}
+          - patterns:
+            - pattern: logging.log($LEVEL, $MSG + ..., ...)
+            {_pattern_inside}
+          - patterns:
+            - pattern: logging.getLogger(...).log($LEVEL, $MSG + ..., ...)
+            {_pattern_inside}
+          - patterns:
+            - pattern: $VAR.log($LEVEL, $MSG + ..., ...)
+            - pattern-inside: |
+                import logging
+                ...
+                $VAR = logging.getLogger(...)
+                ...
         """
 
     def on_result_found(self, original_node, updated_node):

@@ -26,8 +26,7 @@ def _run_code(path, allowed_exceptions=None) -> Optional[ModuleType]:
     """
     allowed_exceptions = allowed_exceptions or ()
 
-    spec = importlib.util.spec_from_file_location("output_code", path)
-    if not spec:
+    if not (spec := importlib.util.spec_from_file_location("output_code", path)):
         return None
 
     module = importlib.util.module_from_spec(spec)

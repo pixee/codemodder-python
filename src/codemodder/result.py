@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Any
 import libcst as cst
 from libcst._position import CodeRange
 
+from codemodder.codetf import Finding
+
 from .utils.abc_dataclass import ABCDataclass
 
 if TYPE_CHECKING:
@@ -27,10 +29,11 @@ class Location(ABCDataclass):
     end: LineInfo
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Result(ABCDataclass):
     rule_id: str
     locations: list[Location]
+    finding: Finding | None = None
 
     def match_location(self, pos: CodeRange, node: cst.CSTNode) -> bool:
         del node
@@ -45,6 +48,11 @@ class Result(ABCDataclass):
             )
             for location in self.locations
         )
+
+
+@dataclass(kw_only=True)
+class SASTResult(Result):
+    finding_id: str
 
 
 def same_line(pos: CodeRange, location: Location) -> bool:

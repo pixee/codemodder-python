@@ -263,6 +263,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Medium",
         guidance_explained="This change makes your code more accurate but in some cases it may be necessary to adjust the `abs_tol` parameter value for your particular calculations.",
     ),
+    "break-or-continue-out-of-loop": DocMetadata(
+        importance="Low",
+        guidance_explained="While this change will make the code consistent, it is likely that the `break` or `continue` statement is a symptom of an error in program logic.",
+    ),
 }
 DEFECTDOJO_CODEMODS = {
     "django-secure-set-cookie": DocMetadata(
@@ -294,6 +298,9 @@ SONAR_CODEMOD_NAMES = [
     "url-sandbox-S5144",
     "fix-float-equality-S1244",
     "fix-math-isclose-S6727",
+    "sql-parameterization-S3649",
+    "django-model-without-dunder-str-S6554",
+    "break-or-continue-out-of-loop-S1716",
 ]
 SONAR_CODEMODS = {
     name: DocMetadata(
