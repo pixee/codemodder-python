@@ -228,11 +228,8 @@ def extract_boolean_operands(
     Recursively extract operands from a cst.BooleanOperation node from left to right as an iterator of nodes.
     """
     if isinstance(node.left, cst.BooleanOperation):
-        # Recursively yield operands from the boolean operation on the left
         yield from extract_boolean_operands(node.left, ensure_type)
     else:
-        # Yield left operand
         yield cst.ensure_type(node.left, ensure_type)
 
-    # Yield right operand
     yield cst.ensure_type(node.right, ensure_type)

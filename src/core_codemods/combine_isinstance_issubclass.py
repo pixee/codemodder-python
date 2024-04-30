@@ -18,34 +18,14 @@ class CombineIsinstanceIssubclass(SimpleCodemod, NameResolutionMixin):
     def leave_BooleanOperation(
         self, original_node: cst.BooleanOperation, updated_node: cst.BooleanOperation
     ) -> cst.CSTNode:
+        if not self.filter_by_path_includes_or_excludes(
+            self.node_position(original_node)
+        ):
+            return updated_node
+
         if self.matches_isinstance_issubclass_or_pattern(original_node):
-            if not self.filter_by_path_includes_or_excludes(
-                self.node_position(original_node)
-            ):
-                return updated_node
-
             self.report_change(original_node)
-
-            elements = []
-            seen_values = set()
-            for call in extract_boolean_operands(updated_node, ensure_type=cst.Call):
-                class_tuple_arg_value = call.args[1].value
-                if isinstance(class_tuple_arg_value, cst.Tuple):
-                    arg_elements = class_tuple_arg_value.elements
-                else:
-                    arg_elements = (cst.Element(value=class_tuple_arg_value),)
-
-                for element in arg_elements:
-                    if (value := getattr(element.value, "value", None)) in seen_values:
-                        # If an element has a non-None evaluated value that has already been seen, continue to avoid duplicates
-                        continue
-                    if value is not None:
-                        seen_values.add(value)
-                    elements.append(element)
-
-            instance_arg = updated_node.left.args[0]
-            new_class_tuple_arg = cst.Arg(value=cst.Tuple(elements=elements))
-            return cst.Call(func=call.func, args=[instance_arg, new_class_tuple_arg])
+            return self.make_new_call_from_boolean_operation(updated_node)
 
         return updated_node
 
@@ -95,5 +75,29 @@ class CombineIsinstanceIssubclass(SimpleCodemod, NameResolutionMixin):
                 for call in extract_boolean_operands(node, ensure_type=cst.Call)
             )
 
-        # No match
         return False
+
+    def make_new_call_from_boolean_operation(
+        self, updated_node: cst.BooleanOperation
+    ) -> cst.Call:
+        elements = []
+        seen_values = set()
+        for call in extract_boolean_operands(updated_node, ensure_type=cst.Call):
+            class_or_tuple_arg_value = call.args[1].value
+            arg_elements = (
+                class_or_tuple_arg_value.elements
+                if isinstance(class_or_tuple_arg_value, cst.Tuple)
+                else (cst.Element(value=class_or_tuple_arg_value),)
+            )
+
+            for element in arg_elements:
+                if (value := getattr(element.value, "value", None)) in seen_values:
+                    # If an element has a non-None evaluated value that has already been seen, continue to avoid duplicates
+                    continue
+                if value is not None:
+                    seen_values.add(value)
+                elements.append(element)
+
+        instance_arg = updated_node.left.args[0]
+        new_class_or_tuple_arg = cst.Arg(value=cst.Tuple(elements=elements))
+        return cst.Call(func=call.func, args=[instance_arg, new_class_or_tuple_arg])
