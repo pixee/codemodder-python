@@ -63,6 +63,19 @@ deserialized_data = yam.load(data, Loader=yam.SafeLoader)
 """
         self.run_and_assert(tmpdir, input_code, expected)
 
+    def test_import_alias_add(self, tmpdir):
+        input_code = """
+data = b'!!python/object/apply:subprocess.Popen \\n- ls'
+import yaml as yam
+deserialized_data = yam.load(data)
+"""
+        expected = """
+data = b'!!python/object/apply:subprocess.Popen \\n- ls'
+import yaml as yam
+deserialized_data = yam.load(data, Loader=yam.SafeLoader)
+"""
+        self.run_and_assert(tmpdir, input_code, expected)
+
     def test_preserve_custom_loader(self, tmpdir):
         expected = (
             input_code

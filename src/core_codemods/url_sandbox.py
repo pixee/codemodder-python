@@ -34,7 +34,7 @@ class UrlSandboxTransformer(LibcstResultTransformer):
         find_requests_visitor = FindRequestCallsAndImports(
             self.context,
             self.file_context,
-            self.file_context.findings,
+            self.file_context.results,
         )
         tree.visit(find_requests_visitor)
         if find_requests_visitor.nodes_to_change:

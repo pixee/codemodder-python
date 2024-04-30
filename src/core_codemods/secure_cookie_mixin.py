@@ -16,10 +16,7 @@ class SecureCookieMixin:
         )
 
         # samesite=Strict is OK because it's more restrictive than Lax.
-        strict_samesite_defined = any(
-            matchers.matches(arg, samesite) for arg in original_node.args
-        )
-        if not strict_samesite_defined:
+        if not any(matchers.matches(arg, samesite) for arg in original_node.args):
             new_args.append(
                 NewArg(name="samesite", value="'Lax'", add_if_missing=True),
             )

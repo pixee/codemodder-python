@@ -24,25 +24,29 @@ class CodemodProtocol(Protocol):
 
 class HardenPyyamlCallMixin:
     def update_call(
-        self: CodemodProtocol, original_node: cst.Call, updated_node: cst.Call
+        self: CodemodProtocol,
+        original_node: cst.Call,
+        updated_node: cst.Call,
+        maybe_aliased_name: str | None = None,
     ) -> cst.Call:
-        maybe_name = self.get_aliased_prefix_name(original_node, YAML_MODULE_NAME)
-        if (maybe_name := maybe_name or YAML_MODULE_NAME) == YAML_MODULE_NAME:
+        module_name = maybe_aliased_name or YAML_MODULE_NAME
+        if not maybe_aliased_name:
             self.add_needed_import(YAML_MODULE_NAME)
+
         updated_node = cast(cst.Call, updated_node)  # satisfy the type checker
         new_args = [
             *updated_node.args[:1],
             # This is the case where the arg is present but a bad value
             (
                 updated_node.args[1].with_changes(
-                    value=self.parse_expression(f"{maybe_name}.SafeLoader")
+                    value=self.parse_expression(f"{module_name}.SafeLoader")
                 )
                 if len(updated_node.args) > 1
                 # This is the case where the arg is not present
                 # Note that this case is deprecated in PyYAML 5.1 since the default is unsafe
                 else cst.Arg(
                     keyword=cst.Name("Loader"),
-                    value=self.parse_expression(f"{maybe_name}.SafeLoader"),
+                    value=self.parse_expression(f"{module_name}.SafeLoader"),
                     equal=cst.AssignEqual(
                         whitespace_before=cst.SimpleWhitespace(""),
                         whitespace_after=cst.SimpleWhitespace(""),
@@ -67,21 +71,27 @@ class HardenPyyamlTransformer(
         updated_node: Union[cst.Call, cst.ClassDef],
     ):
         # TODO: provide different change description for each case.
+        maybe_aliased_name = self.get_aliased_prefix_name(
+            original_node, YAML_MODULE_NAME
+        )
         match original_node, updated_node:
             case cst.Call(), cst.Call():
-                return self.update_call(original_node, updated_node)
+                return self.update_call(original_node, updated_node, maybe_aliased_name)
             case cst.ClassDef(), _:
                 return updated_node.with_changes(
-                    bases=self._update_bases(original_node)
+                    bases=self._update_bases(original_node, maybe_aliased_name)
                 )
         return updated_node
 
-    def _update_bases(self, original_node: cst.ClassDef) -> list[cst.Arg]:
+    def _update_bases(
+        self, original_node: cst.ClassDef, maybe_aliased_name: str | None = None
+    ) -> list[cst.Arg]:
         new = []
         base_names = [
             f"yaml.{klas}"
             for klas in ("UnsafeLoader", "Loader", "BaseLoader", "FullLoader")
         ]
+        module_name = maybe_aliased_name or YAML_MODULE_NAME
         for base_arg in original_node.bases:
             base_name = self.find_base_name(base_arg.value)
             if base_name not in base_names:
@@ -90,7 +100,8 @@ class HardenPyyamlTransformer(
 
             match base_arg.value:
                 case cst.Name():
-                    self.add_needed_import(YAML_MODULE_NAME, "SafeLoader")
+                    if not maybe_aliased_name:
+                        self.add_needed_import(module_name, "SafeLoader")
                     self.remove_unused_import(base_arg.value)
                     base_arg = base_arg.with_changes(
                         value=base_arg.value.with_changes(value="SafeLoader")

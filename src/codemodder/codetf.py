@@ -52,6 +52,13 @@ class Change(BaseModel):
     diffSide: DiffSide = DiffSide.RIGHT
     properties: Optional[dict] = None
     packageActions: Optional[list[PackageAction]] = None
+    finding: Optional[Finding] = None
+
+
+class AIMetadata(BaseModel):
+    provider: str
+    model: str
+    tokens: int
 
 
 class ChangeSet(BaseModel):
@@ -60,6 +67,7 @@ class ChangeSet(BaseModel):
     path: str
     diff: str
     changes: list[Change] = []
+    ai: Optional[AIMetadata] = None
 
 
 class Reference(BaseModel):
@@ -80,19 +88,32 @@ class Rule(BaseModel):
 
 class Finding(BaseModel):
     id: str
-    fixed: bool
-    reason: Optional[str] = None
+    rule: Rule
 
-    @model_validator(mode="after")
-    def validate_reason(self):
-        assert self.fixed or self.reason, "reason is required if fixed is False"
-        return self
+    def to_unfixed_finding(
+        self,
+        *,
+        path: str,
+        line_number: Optional[int] = None,
+        reason: str,
+    ) -> UnfixedFinding:
+        return UnfixedFinding(
+            id=self.id,
+            rule=self.rule,
+            path=path,
+            lineNumber=line_number,
+            reason=reason,
+        )
+
+
+class UnfixedFinding(Finding):
+    path: str
+    lineNumber: Optional[int] = None
+    reason: str
 
 
 class DetectionTool(BaseModel):
     name: str
-    rule: Rule
-    findings: list[Finding] = []
 
 
 class Result(BaseModel):
@@ -104,6 +125,7 @@ class Result(BaseModel):
     properties: Optional[dict] = None
     failedFiles: Optional[list[str]] = None
     changeset: list[ChangeSet]
+    unfixedFindings: Optional[list[UnfixedFinding]] = None
 
 
 class Sarif(BaseModel):

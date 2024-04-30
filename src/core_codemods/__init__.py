@@ -1,6 +1,7 @@
 from codemodder.registry import CodemodCollection
 
 from .add_requests_timeouts import AddRequestsTimeouts
+from .break_or_continue_out_of_loop import BreakOrContinueOutOfLoop
 from .combine_startswith_endswith import CombineStartswithEndswith
 from .defectdojo.semgrep.avoid_insecure_deserialization import (
     AvoidInsecureDeserialization,
@@ -51,7 +52,11 @@ from .requests_verify import RequestsVerify
 from .secure_flask_cookie import SecureFlaskCookie
 from .secure_flask_session_config import SecureFlaskSessionConfig
 from .secure_random import SecureRandom
+from .sonar.sonar_break_or_continue_out_of_loop import SonarBreakOrContinueOutOfLoop
 from .sonar.sonar_django_json_response_type import SonarDjangoJsonResponseType
+from .sonar.sonar_django_model_without_dunder_str import (
+    SonarDjangoModelWithoutDunderStr,
+)
 from .sonar.sonar_django_receiver_on_top import SonarDjangoReceiverOnTop
 from .sonar.sonar_enable_jinja2_autoescape import SonarEnableJinja2Autoescape
 from .sonar.sonar_exception_without_raise import SonarExceptionWithoutRaise
@@ -67,6 +72,7 @@ from .sonar.sonar_remove_assertion_in_pytest_raises import (
     SonarRemoveAssertionInPytestRaises,
 )
 from .sonar.sonar_secure_random import SonarSecureRandom
+from .sonar.sonar_sql_parameterization import SonarSQLParameterization
 from .sonar.sonar_tempfile_mktemp import SonarTempfileMktemp
 from .sonar.sonar_url_sandbox import SonarUrlSandbox
 from .sql_parameterization import SQLQueryParameterization
@@ -144,6 +150,7 @@ registry = CodemodCollection(
         FixDataclassDefaults,
         FixMissingSelfOrCls,
         FixMathIsClose,
+        BreakOrContinueOutOfLoop,
     ],
 )
 
@@ -166,6 +173,9 @@ sonar_registry = CodemodCollection(
         SonarUrlSandbox,
         SonarFixFloatEquality,
         SonarFixMathIsClose,
+        SonarSQLParameterization,
+        SonarDjangoModelWithoutDunderStr,
+        SonarBreakOrContinueOutOfLoop,
     ],
 )
 

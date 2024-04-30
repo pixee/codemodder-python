@@ -40,6 +40,7 @@ class ImportedCallModifier(
         self.change_description = change_description
         self.changes_in_file: list[Change] = []
         self.results = results
+        self.file_context = file_context
 
     def updated_args(self, original_args: Sequence[cst.Arg]):
         return original_args
@@ -74,8 +75,13 @@ class ImportedCallModifier(
                 and true_name
                 and true_name in self.matching_functions
             ):
+                findings = self.file_context.get_findings_for_location(line_number)
                 self.changes_in_file.append(
-                    Change(lineNumber=line_number, description=self.change_description)
+                    Change(
+                        lineNumber=line_number,
+                        description=self.change_description,
+                        finding=findings[0] if findings else None,
+                    )
                 )
 
                 new_args = self.updated_args(updated_node.args)
