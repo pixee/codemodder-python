@@ -1,5 +1,5 @@
 {
-  "total": 42,
+  "total": 43,
   "p": 1,
   "ps": 500,
   "paging": {
@@ -7,8 +7,8 @@
     "pageSize": 500,
     "total": 170
   },
-  "effortTotal": 1040,
-  "debtTotal": 1040,
+  "effortTotal": 1050,
+  "debtTotal": 1050,
   "issues": [
     {
       "key": "AY5_zeRwqkyzjj5fBCfH",
@@ -1897,6 +1897,40 @@
           "severity": "MEDIUM"
         }
       ]
+    },
+    {
+      "key": "AY8qLhIgGbYA0lXUoQ6D",
+      "rule": "python:S1716",
+      "severity": "CRITICAL",
+      "component": "break_or_continue_out_of_loop.py",
+      "project": "pixee_codemodder-python",
+      "line": 2,
+      "hash": "7aa28ed115707345d0274032757e8991",
+      "textRange": {
+        "startLine": 2,
+        "endLine": 2,
+        "startOffset": 4,
+        "endOffset": 12
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Remove this \"continue\" statement",
+      "effort": "10min",
+      "debt": "10min",
+      "tags": [],
+      "creationDate": "2024-04-29T15:45:53+0200",
+      "updateDate": "2024-04-29T15:48:13+0200",
+      "type": "BUG",
+      "organization": "pixee",
+      "pullRequest": "527",
+      "cleanCodeAttribute": "LOGICAL",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "RELIABILITY",
+          "severity": "HIGH"
+        }
+      ]
     }
   ],
   "components": [
@@ -2799,6 +2833,27 @@
       "name": "codemodder-python",
       "longName": "codemodder-python",
       "pullRequest": "495"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:src/codemodder/break_or_continue_out_of_loop.py",
+      "uuid": "AY8qLg_bGbYA0lXUoQ2e",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "break_or_continue_out_of_loop.py",
+      "longName": "src/codemodder/break_or_continue_out_of_loop.py",
+      "path": "src/codemodder/break_or_continue_out_of_loop.py",
+      "pullRequest": "527"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python",
+      "uuid": "AY8qHFqG75sAt1eYwm4n",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "codemodder-python",
+      "longName": "codemodder-python",
+      "pullRequest": "527"
     }
   ],
   "organizations": [

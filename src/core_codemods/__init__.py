@@ -1,6 +1,7 @@
 from codemodder.registry import CodemodCollection
 
 from .add_requests_timeouts import AddRequestsTimeouts
+from .break_or_continue_out_of_loop import BreakOrContinueOutOfLoop
 from .combine_startswith_endswith import CombineStartswithEndswith
 from .defectdojo.semgrep.avoid_insecure_deserialization import (
     AvoidInsecureDeserialization,
@@ -51,6 +52,7 @@ from .requests_verify import RequestsVerify
 from .secure_flask_cookie import SecureFlaskCookie
 from .secure_flask_session_config import SecureFlaskSessionConfig
 from .secure_random import SecureRandom
+from .sonar.sonar_break_or_continue_out_of_loop import SonarBreakOrContinueOutOfLoop
 from .sonar.sonar_django_json_response_type import SonarDjangoJsonResponseType
 from .sonar.sonar_django_model_without_dunder_str import (
     SonarDjangoModelWithoutDunderStr,
@@ -148,6 +150,7 @@ registry = CodemodCollection(
         FixDataclassDefaults,
         FixMissingSelfOrCls,
         FixMathIsClose,
+        BreakOrContinueOutOfLoop,
     ],
 )
 
@@ -172,6 +175,7 @@ sonar_registry = CodemodCollection(
         SonarFixMathIsClose,
         SonarSQLParameterization,
         SonarDjangoModelWithoutDunderStr,
+        SonarBreakOrContinueOutOfLoop,
     ],
 )
 
