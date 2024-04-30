@@ -14,15 +14,13 @@ class TestParseArgs:
     def setup_class(cls):
         cls.registry = load_registered_codemods()
 
-    @mock.patch("codemodder.cli.logger.error")
-    def test_no_args(self, error_logger, mocker):
+    def test_no_args(self, mocker, caplog):
         with pytest.raises(SystemExit) as err:
             parse_args([], mocker.MagicMock())
         assert err.value.args[0] == 3
-        error_logger.assert_called()
-        assert error_logger.call_args_list[0][0] == (
-            "CLI error: %s",
-            "the following arguments are required: directory",
+        assert (
+            "CLI error: the following arguments are required: directory"
+            in caplog.messages
         )
 
     @pytest.mark.parametrize(
@@ -107,8 +105,7 @@ class TestParseArgs:
             DEFAULT_EXCLUDED_CODEMODS
         )
 
-    @mock.patch("codemodder.cli.logger.error")
-    def test_bad_output_format(self, error_logger):
+    def test_bad_output_format(self, caplog):
         with pytest.raises(SystemExit) as err:
             parse_args(
                 [
@@ -121,14 +118,12 @@ class TestParseArgs:
                 self.registry,
             )
         assert err.value.args[0] == 3
-        error_logger.assert_called()
-        assert error_logger.call_args_list[0][0] == (
-            "CLI error: %s",
-            "argument --output-format: invalid choice: 'hello' (choose from 'codetf', 'diff')",
+        assert (
+            "CLI error: argument --output-format: invalid choice: 'hello' (choose from 'codetf', 'diff')"
+            in caplog.messages
         )
 
-    @mock.patch("codemodder.cli.logger.error")
-    def test_bad_option(self, error_logger):
+    def test_bad_option(self, caplog):
         with pytest.raises(SystemExit) as err:
             parse_args(
                 [
@@ -142,10 +137,9 @@ class TestParseArgs:
                 self.registry,
             )
         assert err.value.args[0] == 3
-        error_logger.assert_called()
-        assert error_logger.call_args_list[0][0] == (
-            "CLI error: %s",
-            "ambiguous option: --codemod=url-sandbox could match --codemod-exclude, --codemod-include",
+        assert (
+            "CLI error: ambiguous option: --codemod=url-sandbox could match --codemod-exclude, --codemod-include"
+            in caplog.messages
         )
 
     @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
