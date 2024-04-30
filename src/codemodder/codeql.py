@@ -45,7 +45,12 @@ class CodeQLResult(Result):
 
         locations: list[Location] = []
         for location in sarif_result["locations"]:
-            codeql_location = CodeQLLocation.from_sarif(location)
+            try:
+                codeql_location = CodeQLLocation.from_sarif(location)
+            except KeyError:
+                # TODO: handle this case more gracefully
+                continue
+
             locations.append(codeql_location)
         return cls(rule_id=rule_data["id"], locations=locations)
 
