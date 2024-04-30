@@ -35,6 +35,23 @@ class TestBreakOrContinueOutOfLoop(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected)
 
+    def test_results_in_empty_else(self, tmpdir):
+        input_code = """
+        def print_even_numbers():
+            if i % 2 == 0:
+                print(i)
+            else:
+                continue
+                continue
+                continue
+        """
+        expected = """
+        def print_even_numbers():
+            if i % 2 == 0:
+                print(i)
+        """
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=3)
+
     def test_single_statement_in_suite(self, tmpdir):
         input_code = """
         def f(): break
