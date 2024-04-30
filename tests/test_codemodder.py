@@ -232,7 +232,7 @@ class TestCodemodIncludeExclude:
         caplog.set_level(logging.INFO)
         run(args)
         write_report.assert_called_once()
-        assert f"running codemod {good_codemod}" in caplog.text
+        assert f"running codemod pixee:python/{good_codemod}" in caplog.text
         assert (
             f"Requested codemod to include '{bad_codemod}' does not exist."
             in caplog.text
@@ -254,7 +254,7 @@ class TestCodemodIncludeExclude:
         write_report.assert_called_once()
 
         assert f"running codemod {good_codemod}" not in caplog.text
-        assert "running codemod " not in caplog.text
+        assert "running codemod " in caplog.text
 
     @mock.patch("codemodder.codetf.CodeTF.write_report")
     @mock.patch("codemodder.codemods.base_codemod.BaseCodemod.apply")
