@@ -38,17 +38,19 @@ class TestBreakOrContinueOutOfLoop(BaseCodemodTest):
     def test_results_in_empty_else(self, tmpdir):
         input_code = """
         def print_even_numbers():
-            if i % 2 == 0:
-                print(i)
+            for i in  range(100):
+                if i % 2 == 0:
+                    print(i)
             else:
                 continue
-                continue
+                break
                 continue
         """
         expected = """
         def print_even_numbers():
-            if i % 2 == 0:
-                print(i)
+            for i in  range(100):
+                if i % 2 == 0:
+                    print(i)
         """
         self.run_and_assert(tmpdir, input_code, expected, num_changes=3)
 

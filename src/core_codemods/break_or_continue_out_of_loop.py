@@ -39,8 +39,14 @@ class BreakOrContinueOutOfLoopTransformer(
         ancestors = self.path_to_root(original_node)
 
         # is it inside a for or while ?
-        if any(filter(lambda n: isinstance(n, cst.For | cst.While), ancestors)):
-            return updated_node
+        maybe_loop_ancestor = next(
+            filter(lambda n: isinstance(n, cst.For | cst.While), ancestors), None
+        )
+        match maybe_loop_ancestor:
+            # ensure it is not insde the else block of a while/for
+            case cst.For() | cst.While() as loop:
+                if loop.orelse not in ancestors:
+                    return updated_node
 
         self.report_change(original_node)
 
@@ -67,16 +73,12 @@ class BreakOrContinueOutOfLoopTransformer(
     ]:
         return self._handle_break_or_continue(original_node, updated_node)
 
-    def leave_If(
-        self, original_node: cst.If, updated_node: cst.If
-    ) -> Union[
-        cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel
-    ]:
-        match original_node.orelse:
-            case cst.Else() if original_node.orelse in self.elses_to_check:
-                match updated_node.orelse.body.body:
+    def leave_Else(self, original_node, updated_node):
+        match original_node:
+            case cst.Else() if original_node in self.elses_to_check:
+                match updated_node.body.body:
                     case []:
-                        return updated_node.with_changes(orelse=None)
+                        return cst.RemovalSentinel.REMOVE
         return updated_node
 
     def leave_Continue(
