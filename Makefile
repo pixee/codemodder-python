@@ -1,12 +1,12 @@
 PYTEST = pytest -v
-COV_FLAGS = --cov-fail-under=93.5 --cov=codemodder --cov=core_codemods
+COV_FLAGS = --cov=codemodder --cov=core_codemods
 XDIST_FLAGS = --numprocesses auto
 
 test:
-	COVERAGE_CORE=sysmon ${PYTEST} ${COV_FLAGS} tests ${XDIST_FLAGS}
+	COVERAGE_CORE=sysmon ${PYTEST} ${COV_FLAGS} tests ${XDIST_FLAGS} && coverage json && coverage-threshold
 
 integration-test:
-	${PYTEST} integration_tests ${XDIST_FLAGS}
+	COVERAGE_CORE=sysmon ${PYTEST} integration_tests --cov=core_codemods ${XDIST_FLAGS}  && coverage json && coverage-threshold
 
 pygoat-test:
 	${PYTEST} -v ci_tests/test_pygoat_findings.py
