@@ -64,12 +64,14 @@ class CombineStartswithEndswith(SimpleCodemod, NameResolutionMixin):
             return True
 
         # Check for chained case: x.startswith("...") or x.startswith("...") or x.startswith("...") or ...
-        chained_or = m.BooleanOperation(
-            left=m.BooleanOperation(operator=m.Or()),
-            operator=m.Or(),
-            right=startswith | endswith,
-        )
-        if m.matches(node, chained_or):
+        if m.matches(
+            node,
+            m.BooleanOperation(
+                left=m.BooleanOperation(operator=m.Or()),
+                operator=m.Or(),
+                right=startswith | endswith,
+            ),
+        ):
             return all(
                 call.func.value.value == node.right.func.value.value  # Same function
                 for call in extract_boolean_operands(node, ensure_type=cst.Call)
