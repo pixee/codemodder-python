@@ -6,7 +6,7 @@ test:
 	COVERAGE_CORE=sysmon ${PYTEST} ${COV_FLAGS} tests ${XDIST_FLAGS} && coverage json && coverage-threshold
 
 integration-test:
-	COVERAGE_CORE=sysmon ${PYTEST} integration_tests --cov=core_codemods ${XDIST_FLAGS}  && coverage json && coverage-threshold
+	COVERAGE_CORE=sysmon ${PYTEST} integration_tests --cov=core_codemods ${XDIST_FLAGS}  && coverage json && coverage-threshold --line-coverage-min 80
 
 pygoat-test:
 	${PYTEST} -v ci_tests/test_pygoat_findings.py
