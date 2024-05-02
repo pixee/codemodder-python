@@ -73,7 +73,70 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                         ],
                     )
                     return self.update_arg_target(updated_node, new_args)
-
+            case name if name in (
+                "datetime.datetime.today",
+                "datetime.date.today",
+                "datetime.datetime.utcnow",
+            ):
+                self.report_change(original_node)
+                new_args = self.replace_args(
+                    original_node,
+                    [
+                        NewArg(
+                            name="tz",
+                            value="datetime.timezone.utc",
+                            add_if_missing=True,
+                        )
+                    ],
+                )
+                return self.update_call_target(
+                    updated_node, "datetime.datetime", "now", replacement_args=new_args
+                )
+            case "datetime.date.fromtimestamp":
+                self.report_change(original_node)
+                if len(original_node.args) != 2 and not self._has_timezone_arg(
+                    original_node, "tz"
+                ):
+                    new_args = self.replace_args(
+                        original_node,
+                        [
+                            NewArg(
+                                name="tz",
+                                value="datetime.timezone.utc",
+                                add_if_missing=True,
+                            )
+                        ],
+                    )
+                else:
+                    new_args = original_node.args
+                # Chains .date() to the end
+                res = self.update_call_target(
+                    updated_node, "datetime.datetime", replacement_args=new_args
+                )
+                return cst.parse_expression(self.code(res).strip("\n") + ".date()")
+            case "datetime.datetime.utcfromtimestamp":
+                self.report_change(original_node)
+                if len(original_node.args) != 2 and not self._has_timezone_arg(
+                    original_node, "tz"
+                ):
+                    new_args = self.replace_args(
+                        original_node,
+                        [
+                            NewArg(
+                                name="tz",
+                                value="datetime.timezone.utc",
+                                add_if_missing=True,
+                            )
+                        ],
+                    )
+                else:
+                    new_args = original_node.args
+                return self.update_call_target(
+                    updated_node,
+                    "datetime.datetime",
+                    "fromtimestamp",
+                    replacement_args=new_args,
+                )
         return updated_node
 
     def _has_timezone_arg(self, original_node: cst.Call, name: str) -> bool:
