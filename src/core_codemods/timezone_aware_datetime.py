@@ -36,7 +36,7 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                         self.add_needed_import("datetime", "timezone")
                         kwarg_val = "timezone.utc"
                     else:
-                        kwarg_val = "datetime.timezone.utc"
+                        kwarg_val = f"{maybe_name}.timezone.utc"
                     new_args = self.replace_args(
                         original_node,
                         [
@@ -62,7 +62,7 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                         self.add_needed_import("datetime", "timezone")
                         kwarg_val = "timezone.utc"
                     else:
-                        kwarg_val = "datetime.timezone.utc"
+                        kwarg_val = f"{maybe_name}.timezone.utc"
 
                     new_args = self.replace_args(
                         original_node,
@@ -89,7 +89,7 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                         self.add_needed_import("datetime", "timezone")
                         kwarg_val = "timezone.utc"
                     else:
-                        kwarg_val = "datetime.timezone.utc"
+                        kwarg_val = f"{maybe_name}.timezone.utc"
 
                     new_args = self.replace_args(
                         original_node,
@@ -104,21 +104,29 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                     return self.update_arg_target(updated_node, new_args)
             case name if name in (
                 "datetime.datetime.today",
-                "datetime.date.today",
                 "datetime.datetime.utcnow",
             ):
                 self.report_change(original_node)
                 maybe_name = self.get_aliased_prefix_name(
                     original_node, self._module_name
                 )
-                if not maybe_name:
+                if maybe_name:
+                    # it's a regular import OR alias import
+                    if maybe_name == self._module_name:
+                        module = "datetime.datetime"
+                    else:
+                        module = f"{maybe_name}.datetime"
+                    kwarg_val = f"{maybe_name}.timezone.utc"
+                else:
                     # it's from import so timezone should also be from import
                     self.add_needed_import("datetime", "timezone")
                     kwarg_val = "timezone.utc"
-                    module = "datetime"
-                else:
-                    kwarg_val = "datetime.timezone.utc"
-                    module = "datetime.datetime"
+                    module = (
+                        "datetime"
+                        if (curr_module := original_node.func.value.value)
+                        == self._module_name
+                        else curr_module
+                    )
                 new_args = self.replace_args(
                     original_node,
                     [
@@ -129,22 +137,71 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                         )
                     ],
                 )
+
                 return self.update_call_target(
                     updated_node, module, "now", replacement_args=new_args
                 )
+            case "datetime.date.today":
+                self.report_change(original_node)
+                maybe_name = self.get_aliased_prefix_name(
+                    original_node, self._module_name
+                )
+                if maybe_name:
+                    # it's a regular import OR alias import
+                    if maybe_name == self._module_name:
+                        module = "datetime.datetime"
+                    else:
+                        module = f"{maybe_name}.datetime"
+                    kwarg_val = f"{maybe_name}.timezone.utc"
+                else:
+                    # it's from import so timezone should also be from import
+                    self.add_needed_import("datetime", "timezone")
+                    kwarg_val = "timezone.utc"
+                    module = (
+                        "datetime"
+                        if (curr_module := original_node.func.value.value)
+                        in (self._module_name, "date")
+                        else curr_module
+                    )
+                new_args = self.replace_args(
+                    original_node,
+                    [
+                        NewArg(
+                            name="tz",
+                            value=kwarg_val,
+                            add_if_missing=True,
+                        )
+                    ],
+                )
+                # Chains .date() to the end
+                res = self.update_call_target(
+                    updated_node, module, "now", replacement_args=new_args
+                )
+                return cst.parse_expression(self.code(res).strip("\n") + ".date()")
+
             case "datetime.date.fromtimestamp":
                 self.report_change(original_node)
                 maybe_name = self.get_aliased_prefix_name(
                     original_node, self._module_name
                 )
-                if not maybe_name:
+
+                if maybe_name:
+                    # it's a regular import OR alias import
+                    if maybe_name == self._module_name:
+                        module = "datetime.datetime"
+                    else:
+                        module = f"{maybe_name}.datetime"
+                    kwarg_val = f"{maybe_name}.timezone.utc"
+                else:
                     # it's from import so timezone should also be from import
                     self.add_needed_import("datetime", "timezone")
                     kwarg_val = "timezone.utc"
-                    module = "datetime"
-                else:
-                    kwarg_val = "datetime.timezone.utc"
-                    module = "datetime.datetime"
+                    module = (
+                        "datetime"
+                        if (curr_module := original_node.func.value.value)
+                        in (self._module_name, "date")
+                        else curr_module
+                    )
 
                 if len(original_node.args) != 2 and not self._has_timezone_arg(
                     original_node, "tz"
@@ -171,14 +228,23 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                 maybe_name = self.get_aliased_prefix_name(
                     original_node, self._module_name
                 )
-                if not maybe_name:
+                if maybe_name:
+                    # it's a regular import OR alias import
+                    if maybe_name == self._module_name:
+                        module = "datetime.datetime"
+                    else:
+                        module = f"{maybe_name}.datetime"
+                    kwarg_val = f"{maybe_name}.timezone.utc"
+                else:
                     # it's from import so timezone should also be from import
                     self.add_needed_import("datetime", "timezone")
                     kwarg_val = "timezone.utc"
-                    module = "datetime"
-                else:
-                    kwarg_val = "datetime.timezone.utc"
-                    module = "datetime.datetime"
+                    module = (
+                        "datetime"
+                        if (curr_module := original_node.func.value.value)
+                        in (self._module_name, "date")
+                        else curr_module
+                    )
 
                 if len(original_node.args) != 2 and not self._has_timezone_arg(
                     original_node, "tz"
