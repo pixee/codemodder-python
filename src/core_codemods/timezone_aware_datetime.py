@@ -18,6 +18,7 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
         "datetime.datetime.now",
         "datetime.datetime.fromtimestamp",
     )
+    _module_name = "datetime"
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         if not self.node_is_selected(original_node):
@@ -25,15 +26,23 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
 
         match self.find_base_name(original_node):
             case "datetime.datetime":
-                # timezone must be kwarg
                 if not self._has_timezone_arg(original_node, "tzinfo"):
                     self.report_change(original_node)
+                    maybe_name = self.get_aliased_prefix_name(
+                        original_node, self._module_name
+                    )
+                    if not maybe_name:
+                        # it's from import so timezone should also be from import
+                        self.add_needed_import("datetime", "timezone")
+                        kwarg_val = "timezone.utc"
+                    else:
+                        kwarg_val = "datetime.timezone.utc"
                     new_args = self.replace_args(
                         original_node,
                         [
                             NewArg(
                                 name="tzinfo",
-                                value="datetime.timezone.utc",
+                                value=kwarg_val,
                                 add_if_missing=True,
                             )
                         ],
@@ -45,12 +54,22 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                     original_node, "tz"
                 ):
                     self.report_change(original_node)
+                    maybe_name = self.get_aliased_prefix_name(
+                        original_node, self._module_name
+                    )
+                    if not maybe_name:
+                        # it's from import so timezone should also be from import
+                        self.add_needed_import("datetime", "timezone")
+                        kwarg_val = "timezone.utc"
+                    else:
+                        kwarg_val = "datetime.timezone.utc"
+
                     new_args = self.replace_args(
                         original_node,
                         [
                             NewArg(
                                 name="tz",
-                                value="datetime.timezone.utc",
+                                value=kwarg_val,
                                 add_if_missing=True,
                             )
                         ],
@@ -62,12 +81,22 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                     original_node, "tz"
                 ):
                     self.report_change(original_node)
+                    maybe_name = self.get_aliased_prefix_name(
+                        original_node, self._module_name
+                    )
+                    if not maybe_name:
+                        # it's from import so timezone should also be from import
+                        self.add_needed_import("datetime", "timezone")
+                        kwarg_val = "timezone.utc"
+                    else:
+                        kwarg_val = "datetime.timezone.utc"
+
                     new_args = self.replace_args(
                         original_node,
                         [
                             NewArg(
                                 name="tz",
-                                value="datetime.timezone.utc",
+                                value=kwarg_val,
                                 add_if_missing=True,
                             )
                         ],
@@ -79,21 +108,44 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                 "datetime.datetime.utcnow",
             ):
                 self.report_change(original_node)
+                maybe_name = self.get_aliased_prefix_name(
+                    original_node, self._module_name
+                )
+                if not maybe_name:
+                    # it's from import so timezone should also be from import
+                    self.add_needed_import("datetime", "timezone")
+                    kwarg_val = "timezone.utc"
+                    module = "datetime"
+                else:
+                    kwarg_val = "datetime.timezone.utc"
+                    module = "datetime.datetime"
                 new_args = self.replace_args(
                     original_node,
                     [
                         NewArg(
                             name="tz",
-                            value="datetime.timezone.utc",
+                            value=kwarg_val,
                             add_if_missing=True,
                         )
                     ],
                 )
                 return self.update_call_target(
-                    updated_node, "datetime.datetime", "now", replacement_args=new_args
+                    updated_node, module, "now", replacement_args=new_args
                 )
             case "datetime.date.fromtimestamp":
                 self.report_change(original_node)
+                maybe_name = self.get_aliased_prefix_name(
+                    original_node, self._module_name
+                )
+                if not maybe_name:
+                    # it's from import so timezone should also be from import
+                    self.add_needed_import("datetime", "timezone")
+                    kwarg_val = "timezone.utc"
+                    module = "datetime"
+                else:
+                    kwarg_val = "datetime.timezone.utc"
+                    module = "datetime.datetime"
+
                 if len(original_node.args) != 2 and not self._has_timezone_arg(
                     original_node, "tz"
                 ):
@@ -102,7 +154,7 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                         [
                             NewArg(
                                 name="tz",
-                                value="datetime.timezone.utc",
+                                value=kwarg_val,
                                 add_if_missing=True,
                             )
                         ],
@@ -111,11 +163,23 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                     new_args = original_node.args
                 # Chains .date() to the end
                 res = self.update_call_target(
-                    updated_node, "datetime.datetime", replacement_args=new_args
+                    updated_node, module, replacement_args=new_args
                 )
                 return cst.parse_expression(self.code(res).strip("\n") + ".date()")
             case "datetime.datetime.utcfromtimestamp":
                 self.report_change(original_node)
+                maybe_name = self.get_aliased_prefix_name(
+                    original_node, self._module_name
+                )
+                if not maybe_name:
+                    # it's from import so timezone should also be from import
+                    self.add_needed_import("datetime", "timezone")
+                    kwarg_val = "timezone.utc"
+                    module = "datetime"
+                else:
+                    kwarg_val = "datetime.timezone.utc"
+                    module = "datetime.datetime"
+
                 if len(original_node.args) != 2 and not self._has_timezone_arg(
                     original_node, "tz"
                 ):
@@ -124,7 +188,7 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                         [
                             NewArg(
                                 name="tz",
-                                value="datetime.timezone.utc",
+                                value=kwarg_val,
                                 add_if_missing=True,
                             )
                         ],
@@ -133,7 +197,7 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                     new_args = original_node.args
                 return self.update_call_target(
                     updated_node,
-                    "datetime.datetime",
+                    module,
                     "fromtimestamp",
                     replacement_args=new_args,
                 )
