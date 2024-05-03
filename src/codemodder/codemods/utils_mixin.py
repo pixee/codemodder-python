@@ -591,6 +591,74 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
             return named_targets, other_targets
         return ([], [])
 
+    def _resolve_starred_element(self, element: cst.StarredElement):
+        resolved = self.resolve_expression(element.value)
+        match resolved:
+            case cst.List():
+                return self.resolve_list_literal(resolved)
+        return [element]
+
+    def _resolve_list_element(self, element: cst.BaseElement):
+        match element:
+            case cst.Element():
+                return [self.resolve_expression(element.value)]
+            case cst.StarredElement():
+                return self._resolve_starred_element(element)
+        return []
+
+    def resolve_list_literal(
+        self, list_literal: cst.List
+    ) -> itertools.chain[cst.BaseExpression]:
+        """
+        Returns an iterable of all the elements of that list resolved. It will recurse into starred elements whenever possible.
+        """
+        return itertools.chain.from_iterable(
+            map(self._resolve_list_element, list_literal.elements)
+        )
+
+    def _resolve_starred_dict_element(self, element: cst.StarredDictElement):
+        resolved = self.resolve_expression(element.value)
+        match resolved:
+            case cst.Dict():
+                return self.resolve_dict(resolved)
+        return dict()
+
+    def _resolve_dict_element(self, element: cst.BaseDictElement):
+        match element:
+            case cst.StarredDictElement():
+                return self._resolve_starred_dict_element(element)
+            case _:
+                resolved_key = self.resolve_expression(element.key)
+                resolved_key_value = resolved_key
+                match resolved_key:
+                    case cst.SimpleString():
+                        resolved_key_value = resolved_key.raw_value
+                resolved_value = self.resolve_expression(element.value)
+                return {resolved_key_value: resolved_value}
+
+    def resolve_dict(self, dictionary: cst.Dict):
+        compilation = dict()
+        for e in dictionary.elements:
+            compilation.update(self._resolve_dict_element(e))
+        return compilation
+
+    def resolve_keyword_args(self, call: cst.Call):
+        """
+        Returns a dict with all the keyword arguments resolved. It will recurse into starred elements whenever possible.
+        """
+        keyword_to_expr_dict: dict = dict()
+        for arg in call.args:
+            if arg.star == "**":
+                resolved = self.resolve_expression(arg.value)
+                match resolved:
+                    case cst.Dict():
+                        keyword_to_expr_dict |= self.resolve_dict(resolved)
+            if arg.keyword:
+                keyword_to_expr_dict |= {
+                    arg.keyword.value: self.resolve_expression(arg.value)
+                }
+        return keyword_to_expr_dict
+
 
 def iterate_left_expressions(node: cst.BaseExpression):
     yield node
