@@ -7,6 +7,7 @@ from .defectdojo.semgrep.avoid_insecure_deserialization import (
     AvoidInsecureDeserialization,
 )
 from .defectdojo.semgrep.django_secure_set_cookie import DjangoSecureSetCookie
+from .disable_graphql_introspection import DisableGraphQLIntrospection
 from .django_debug_flag_on import DjangoDebugFlagOn
 from .django_json_response_type import DjangoJsonResponseType
 from .django_model_without_dunder_str import DjangoModelWithoutDunderStr
@@ -151,6 +152,7 @@ registry = CodemodCollection(
         FixMissingSelfOrCls,
         FixMathIsClose,
         BreakOrContinueOutOfLoop,
+        DisableGraphQLIntrospection,
     ],
 )
 
