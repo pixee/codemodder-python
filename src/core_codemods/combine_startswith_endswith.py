@@ -1,12 +1,12 @@
 import libcst as cst
 from libcst import matchers as m
 
-from codemodder.codemods.utils import extract_boolean_operands
-from codemodder.codemods.utils_mixin import NameResolutionMixin
-from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
+from core_codemods.api import Metadata, ReviewGuidance
+
+from .combine_calls_base import CombineCallsBaseCodemod
 
 
-class CombineStartswithEndswith(SimpleCodemod, NameResolutionMixin):
+class CombineStartswithEndswith(CombineCallsBaseCodemod):
     metadata = Metadata(
         name="combine-startswith-endswith",
         summary="Simplify Boolean Expressions Using `startswith` and `endswith`",
@@ -15,92 +15,26 @@ class CombineStartswithEndswith(SimpleCodemod, NameResolutionMixin):
     )
     change_description = "Use tuple of matches instead of boolean expression"
 
-    def leave_BooleanOperation(
-        self, original_node: cst.BooleanOperation, updated_node: cst.BooleanOperation
-    ) -> cst.CSTNode:
-        if not self.filter_by_path_includes_or_excludes(
-            self.node_position(original_node)
-        ):
-            return updated_node
+    combinable_funcs = ["startswith", "endswith"]
+    dedupilcation_attr = "evaluated_value"
+    args_to_combine = [0]
+    args_to_keep_as_is = []
 
-        if self.matches_startswith_endswith_or_pattern(original_node):
-            self.report_change(original_node)
-            return self.make_new_call_from_boolean_operation(updated_node)
+    def make_call_matcher(self, func_name: str) -> m.Call:
+        return m.Call(
+            func=m.Attribute(value=m.Name(), attr=m.Name(func_name)),
+            args=[
+                m.Arg(
+                    value=m.Tuple()
+                    | m.SimpleString()
+                    | m.ConcatenatedString()
+                    | m.FormattedString()
+                    | m.Name()
+                )
+            ],
+        )
 
-        return updated_node
-
-    def matches_startswith_endswith_or_pattern(
-        self, node: cst.BooleanOperation
+    def check_calls_same_instance(
+        self, left_call: cst.Call, right_call: cst.Call
     ) -> bool:
-        # Match the pattern: x.startswith("...") or x.startswith("...") or x.startswith("...") or ...
-        # and the same but with endswith
-        args = [
-            m.Arg(
-                value=m.Tuple()
-                | m.SimpleString()
-                | m.ConcatenatedString()
-                | m.FormattedString()
-                | m.Name()
-            )
-        ]
-        startswith = m.Call(
-            func=m.Attribute(value=m.Name(), attr=m.Name("startswith")),
-            args=args,
-        )
-        endswith = m.Call(
-            func=m.Attribute(value=m.Name(), attr=m.Name("endswith")),
-            args=args,
-        )
-        startswith_or = m.BooleanOperation(
-            left=startswith, operator=m.Or(), right=startswith
-        )
-        endswith_or = m.BooleanOperation(left=endswith, operator=m.Or(), right=endswith)
-
-        # Check for simple case: x.startswith("...") or x.startswith("...")
-        if (
-            m.matches(node, startswith_or | endswith_or)
-            and node.left.func.value.value == node.right.func.value.value
-        ):
-            return True
-
-        # Check for chained case: x.startswith("...") or x.startswith("...") or x.startswith("...") or ...
-        if m.matches(
-            node,
-            m.BooleanOperation(
-                left=m.BooleanOperation(operator=m.Or()),
-                operator=m.Or(),
-                right=startswith | endswith,
-            ),
-        ):
-            return all(
-                call.func.value.value == node.right.func.value.value  # Same function
-                for call in extract_boolean_operands(node, ensure_type=cst.Call)
-            )
-
-        return False
-
-    def make_new_call_from_boolean_operation(
-        self, updated_node: cst.BooleanOperation
-    ) -> cst.Call:
-        elements = []
-        seen_evaluated_values = set()
-        for call in extract_boolean_operands(updated_node, ensure_type=cst.Call):
-            arg_value = call.args[0].value
-            arg_elements = (
-                arg_value.elements
-                if isinstance(arg_value, cst.Tuple)
-                else (cst.Element(value=arg_value),)
-            )
-
-            for element in arg_elements:
-                if (
-                    evaluated_value := getattr(element.value, "evaluated_value", None)
-                ) in seen_evaluated_values:
-                    # If an element has a non-None evaluated value that has already been seen, continue to avoid duplicates
-                    continue
-                if evaluated_value is not None:
-                    seen_evaluated_values.add(evaluated_value)
-                elements.append(element)
-
-        new_arg = cst.Arg(value=cst.Tuple(elements=elements))
-        return cst.Call(func=call.func, args=[new_arg])
+        return left_call.func.value.value == right_call.func.value.value

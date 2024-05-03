@@ -34,6 +34,9 @@ class TestCombineStartswithEndswith(BaseCodemodTest):
             "x.startswith('foo') or x.endswith('f')",
             "x.startswith('foo') or y.startswith('f')",
             "x.startswith('foo') or y.startswith('f') or x.startswith('f')",
+            "x.startswith('foo') or y.startswith('f') or x.startswith('f') or y.startswith('f')",
+            "x.startswith('foo') or x.endswith('foo') or x.startswith('bar') or x.endswith('bar') or x.startswith('foo')",
+            "x.startswith('foo') and x.startswith('f') or y.startswith('bar')",
         ],
     )
     def test_no_change(self, tmpdir, code):
@@ -220,3 +223,66 @@ class TestCombineStartswithEndswith(BaseCodemodTest):
         self._format_func_run_test(
             tmpdir, func, input_code, expected, num_changes=input_code.count(" or ")
         )
+
+    @each_func
+    @pytest.mark.parametrize(
+        "input_code, expected",
+        [
+            # same name and/or on left
+            (
+                "x and x.{func}('foo') or x.{func}('bar')",
+                "x and x.{func}(('foo', 'bar'))",
+            ),
+            (
+                "x or x.{func}('foo') or x.{func}('bar')",
+                "x or x.{func}(('foo', 'bar'))",
+            ),
+            # same name and/or on right
+            (
+                "x.{func}('foo') or x.{func}('bar') and x",
+                "x.{func}(('foo', 'bar')) and x",
+            ),
+            (
+                "x.{func}('foo') or x.{func}('bar') or x",
+                "x.{func}(('foo', 'bar')) or x",
+            ),
+            # other name and/or on left
+            (
+                "y and x.{func}('foo') or x.{func}('bar')",
+                "y and x.{func}(('foo', 'bar'))",
+            ),
+            (
+                "y or x.{func}('foo') or x.{func}('bar')",
+                "y or x.{func}(('foo', 'bar'))",
+            ),
+            # other name and/or on right
+            (
+                "x.{func}('foo') or x.{func}('bar') and y",
+                "x.{func}(('foo', 'bar')) and y",
+            ),
+            (
+                "x.{func}('foo') or x.{func}('bar') or y",
+                "x.{func}(('foo', 'bar')) or y",
+            ),
+            # same name and/or on left, other name and/or on right
+            (
+                "x or x.{func}('foo') or x.{func}('bar') or y",
+                "x or x.{func}(('foo', 'bar')) or y",
+            ),
+            (
+                "x and x.{func}('foo') or x.{func}('bar') or y",
+                "x and x.{func}(('foo', 'bar')) or y",
+            ),
+            # other name and/or on left, same name and/or on right
+            (
+                "y or x.{func}('foo') or x.{func}('bar') or x",
+                "y or x.{func}(('foo', 'bar')) or x",
+            ),
+            (
+                "y and x.{func}('foo') or x.{func}('bar') or x",
+                "y and x.{func}(('foo', 'bar')) or x",
+            ),
+        ],
+    )
+    def test_mixed_boolean_operation(self, tmpdir, func, input_code, expected):
+        self._format_func_run_test(tmpdir, func, input_code, expected)

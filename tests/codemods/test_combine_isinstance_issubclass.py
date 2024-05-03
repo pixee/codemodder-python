@@ -31,6 +31,10 @@ class TestCombineIsinstanceIssubclass(BaseCodemodTest):
             "isinstance(x, str) and isinstance(x, str) or True",
             "isinstance(x, str) or issubclass(x, str)",
             "isinstance(x, str) or isinstance(y, str)",
+            "isinstance(x, str) or isinstance(y, bytes) or isinstance(x, bytes)",
+            "isinstance(x, str) or isinstance(y, bytes) or isinstance(x, bytes) or isinstance(y, bytes)",
+            "isinstance(x, str) or issubclass(x, str) or isinstance(x, bytes) or issubclass(x, bytes) or isinstance(x, str)",
+            "isinstance(x, str) and isinstance(x, bytes) or isinstance(y, bytes)",
         ],
     )
     def test_no_change(self, tmpdir, code):
@@ -133,3 +137,66 @@ class TestCombineIsinstanceIssubclass(BaseCodemodTest):
         self._format_func_run_test(
             tmpdir, func, input_code, expected, input_code.count(" or ")
         )
+
+    @each_func
+    @pytest.mark.parametrize(
+        "input_code, expected",
+        [
+            # same name and/or on left
+            (
+                "x and {func}(x, str) or {func}(x, bytes)",
+                "x and {func}(x, (str, bytes))",
+            ),
+            (
+                "x or {func}(x, str) or {func}(x, bytes)",
+                "x or {func}(x, (str, bytes))",
+            ),
+            # same name and/or on right
+            (
+                "{func}(x, str) or {func}(x, bytes) and x",
+                "{func}(x, (str, bytes)) and x",
+            ),
+            (
+                "{func}(x, str) or {func}(x, bytes) or x",
+                "{func}(x, (str, bytes)) or x",
+            ),
+            # other name and/or on left
+            (
+                "y and {func}(x, str) or {func}(x, bytes)",
+                "y and {func}(x, (str, bytes))",
+            ),
+            (
+                "y or {func}(x, str) or {func}(x, bytes)",
+                "y or {func}(x, (str, bytes))",
+            ),
+            # other name and/or on right
+            (
+                "{func}(x, str) or {func}(x, bytes) and y",
+                "{func}(x, (str, bytes)) and y",
+            ),
+            (
+                "{func}(x, str) or {func}(x, bytes) or y",
+                "{func}(x, (str, bytes)) or y",
+            ),
+            # same name and/or on left, other name and/or on right
+            (
+                "x or {func}(x, str) or {func}(x, bytes) or y",
+                "x or {func}(x, (str, bytes)) or y",
+            ),
+            (
+                "x and {func}(x, str) or {func}(x, bytes) or y",
+                "x and {func}(x, (str, bytes)) or y",
+            ),
+            # other name and/or on left, same name and/or on right
+            (
+                "y or {func}(x, str) or {func}(x, bytes) or x",
+                "y or {func}(x, (str, bytes)) or x",
+            ),
+            (
+                "y and {func}(x, str) or {func}(x, bytes) or x",
+                "y and {func}(x, (str, bytes)) or x",
+            ),
+        ],
+    )
+    def test_mixed_boolean_operation(self, tmpdir, func, input_code, expected):
+        self._format_func_run_test(tmpdir, func, input_code, expected)

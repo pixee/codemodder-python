@@ -1,12 +1,12 @@
 import libcst as cst
 from libcst import matchers as m
 
-from codemodder.codemods.utils import extract_boolean_operands
-from codemodder.codemods.utils_mixin import NameResolutionMixin
-from core_codemods.api import Metadata, ReviewGuidance, SimpleCodemod
+from core_codemods.api import Metadata, ReviewGuidance
+
+from .combine_calls_base import CombineCallsBaseCodemod
 
 
-class CombineIsinstanceIssubclass(SimpleCodemod, NameResolutionMixin):
+class CombineIsinstanceIssubclass(CombineCallsBaseCodemod):
     metadata = Metadata(
         name="combine-isinstance-issubclass",
         summary="Simplify Boolean Expressions Using `isinstance` and `issubclass`",
@@ -15,89 +15,18 @@ class CombineIsinstanceIssubclass(SimpleCodemod, NameResolutionMixin):
     )
     change_description = "Use tuple of matches instead of boolean expression with `isinstance` or `issubclass`"
 
-    def leave_BooleanOperation(
-        self, original_node: cst.BooleanOperation, updated_node: cst.BooleanOperation
-    ) -> cst.CSTNode:
-        if not self.filter_by_path_includes_or_excludes(
-            self.node_position(original_node)
-        ):
-            return updated_node
+    combinable_funcs = ["isinstance", "issubclass"]
+    dedupilcation_attr = "value"
+    args_to_combine = [1]
+    args_to_keep_as_is = [0]
 
-        if self.matches_isinstance_issubclass_or_pattern(original_node):
-            self.report_change(original_node)
-            return self.make_new_call_from_boolean_operation(updated_node)
+    def make_call_matcher(self, func_name: str) -> m.Call:
+        return m.Call(
+            func=m.Name(func_name),
+            args=[m.Arg(value=m.Name()), m.Arg(value=m.Name() | m.Tuple())],
+        )
 
-        return updated_node
-
-    def matches_isinstance_issubclass_or_pattern(
-        self, node: cst.BooleanOperation
+    def check_calls_same_instance(
+        self, left_call: cst.Call, right_call: cst.Call
     ) -> bool:
-        # Match the pattern: isinstance(x, cls1) or isinstance(x, cls2) or isinstance(x, cls3) or ...
-        # and the same but with issubclass
-        args = [m.Arg(value=m.Name()), m.Arg(value=m.Name() | m.Tuple())]
-        isinstance_call = m.Call(
-            func=m.Name("isinstance"),
-            args=args,
-        )
-        issubclass_call = m.Call(
-            func=m.Name("issubclass"),
-            args=args,
-        )
-        isinstance_or = m.BooleanOperation(
-            left=isinstance_call, operator=m.Or(), right=isinstance_call
-        )
-        issubclass_or = m.BooleanOperation(
-            left=issubclass_call, operator=m.Or(), right=issubclass_call
-        )
-
-        # Check for simple case: isinstance(x, cls) or issubclass(x, cls)
-        if (
-            m.matches(node, isinstance_or | issubclass_or)
-            and node.left.func.value == node.right.func.value  # Same function
-            and node.left.args[0].value.value
-            == node.right.args[0].value.value  # Same first argument (instance)
-        ):
-            return True
-
-        # Check for chained case: isinstance(x, cls1) or isinstance(x, cls2) or isinstance(x, cls3) or ...
-        chained_or = m.BooleanOperation(
-            left=m.BooleanOperation(operator=m.Or()),
-            operator=m.Or(),
-            right=isinstance_call | issubclass_call,
-        )
-        if m.matches(node, chained_or):
-            return all(
-                (
-                    call.func.value == node.right.func.value  # Same function
-                    and call.args[0].value.value
-                    == node.right.args[0].value.value  # Same first argument (instance)
-                )
-                for call in extract_boolean_operands(node, ensure_type=cst.Call)
-            )
-
-        return False
-
-    def make_new_call_from_boolean_operation(
-        self, updated_node: cst.BooleanOperation
-    ) -> cst.Call:
-        elements = []
-        seen_values = set()
-        for call in extract_boolean_operands(updated_node, ensure_type=cst.Call):
-            class_or_tuple_arg_value = call.args[1].value
-            arg_elements = (
-                class_or_tuple_arg_value.elements
-                if isinstance(class_or_tuple_arg_value, cst.Tuple)
-                else (cst.Element(value=class_or_tuple_arg_value),)
-            )
-
-            for element in arg_elements:
-                if (value := getattr(element.value, "value", None)) in seen_values:
-                    # If an element has a non-None evaluated value that has already been seen, continue to avoid duplicates
-                    continue
-                if value is not None:
-                    seen_values.add(value)
-                elements.append(element)
-
-        instance_arg = updated_node.left.args[0]
-        new_class_or_tuple_arg = cst.Arg(value=cst.Tuple(elements=elements))
-        return cst.Call(func=call.func, args=[instance_arg, new_class_or_tuple_arg])
+        return left_call.args[0].value.value == right_call.args[0].value.value
