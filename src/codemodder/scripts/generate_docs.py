@@ -271,6 +271,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="While this change will make the code consistent, it is likely that the `break` or `continue` statement is a symptom of an error in program logic.",
     ),
+    "disable-graphql-introspection": DocMetadata(
+        importance="High",
+        guidance_explained="This change may disable a feature that was left on purpose. Moreover the rule added may be framework specific.",
+    ),
 }
 DEFECTDOJO_CODEMODS = {
     "django-secure-set-cookie": DocMetadata(

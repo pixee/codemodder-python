@@ -535,7 +535,7 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
                         return self._resolve_name_transitive(value)
                     case _:
                         return value
-        return None
+        return node
 
     def _find_direct_name_assignment_targets(
         self, name: cst.Name
