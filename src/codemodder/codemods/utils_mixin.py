@@ -630,9 +630,6 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
             case _:
                 resolved_key = self.resolve_expression(element.key)
                 resolved_key_value = resolved_key
-                match resolved_key:
-                    case cst.SimpleString():
-                        resolved_key_value = resolved_key.raw_value
                 resolved_value = self.resolve_expression(element.value)
                 return {resolved_key_value: resolved_value}
 
@@ -642,9 +639,15 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
             compilation.update(self._resolve_dict_element(e))
         return compilation
 
+    def _transform_string_elements(self, expr):
+        match expr:
+            case cst.SimpleString():
+                return expr.raw_value
+        return expr
+
     def resolve_keyword_args(self, call: cst.Call):
         """
-        Returns a dict with all the keyword arguments resolved. It will recurse into starred elements whenever possible.
+        Returns a dict with all the keyword arguments resolved. It will recurse into starred elements whenever possible and string keys from double starred dict arguments will be converted into their raw_value.
         """
         keyword_to_expr_dict: dict = dict()
         for arg in call.args:
@@ -652,7 +655,11 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
                 resolved = self.resolve_expression(arg.value)
                 match resolved:
                     case cst.Dict():
-                        keyword_to_expr_dict |= self.resolve_dict(resolved)
+                        resolved_starred_element = self.resolve_dict(resolved)
+                        keyword_to_expr_dict |= {
+                            self._transform_string_elements(k): v
+                            for k, v in resolved_starred_element
+                        }
             if arg.keyword:
                 keyword_to_expr_dict |= {
                     arg.keyword.value: self.resolve_expression(arg.value)
