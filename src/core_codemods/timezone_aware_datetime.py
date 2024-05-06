@@ -25,6 +25,35 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
             return updated_node
 
         match self.find_base_name(original_node):
+            case (
+                "datetime.datetime"
+                | "datetime.datetime.now"
+                | "datetime.datetime.fromtimestamp"
+                | "datetime.datetime.today"
+                | "datetime.datetime.utcnow"
+                | "datetime.datetime.utcfromtimestamp"
+                | "datetime.date.today"
+                | "datetime.date.fromtimestamp"
+            ):
+                return self.handle_datetime_calls(original_node, updated_node)
+        return updated_node
+
+    def handle_datetime_calls(
+        self, original_node: cst.Call, updated_node: cst.Call
+    ) -> cst.Call:
+        tz_info_required = self.needs_tzinfo(original_node)
+        if not tz_info_required:
+            return updated_node
+
+        self.report_change(original_node)
+        maybe_name = self.get_aliased_prefix_name(original_node, self._module_name)
+        tz_kwarg_val = f"{maybe_name}.timezone.utc" if maybe_name else "timezone.utc"
+        new_args = self.add_timezone_arg(original_node, tz_kwarg_val)
+        return self.update_arg_target(updated_node, new_args)
+
+        #########
+
+        match self.find_base_name(original_node):
             case "datetime.datetime":
                 if not self._has_timezone_arg(original_node, "tzinfo"):
                     self.report_change(original_node)
