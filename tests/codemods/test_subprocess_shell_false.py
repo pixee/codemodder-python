@@ -20,11 +20,11 @@ class TestSubprocessShellFalse(BaseCodemodTest):
         import subprocess
         subprocess.{func}(args, shell=True)
         """
-        expexted_output = f"""
+        expected = f"""
         import subprocess
         subprocess.{func}(args, shell=False)
         """
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected)
 
     @each_func
     def test_from_import(self, tmpdir, func):
@@ -32,11 +32,11 @@ class TestSubprocessShellFalse(BaseCodemodTest):
         from subprocess import {func}
         {func}(args, shell=True)
         """
-        expexted_output = f"""
+        expected = f"""
         from subprocess import {func}
         {func}(args, shell=False)
         """
-        self.run_and_assert(tmpdir, input_code, expexted_output)
+        self.run_and_assert(tmpdir, input_code, expected)
 
     @each_func
     def test_no_shell(self, tmpdir, func):
@@ -89,3 +89,19 @@ class TestSubprocessShellFalse(BaseCodemodTest):
         subprocess.run(args, shell=False) # noqa: S604
         """
         self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_no_change_if_first_arg_is_string(self, tmpdir):
+        input_code = """
+        import subprocess
+        subprocess.run("ls -l", shell=True)
+        subprocess.run("ls" "-l", shell=True)
+        ls_args = "-l -a"
+        subprocess.run(f"ls {ls_args}", shell=True)
+        
+        subprocess.run('ls -l', shell=True)
+        subprocess.run('ls' '-l', shell=True)
+        ls_args = '-l -a'
+        subprocess.run(f'ls {ls_args}', shell=True)
+        """
+
+        self.run_and_assert(tmpdir, input_code, input_code, num_changes=0)
