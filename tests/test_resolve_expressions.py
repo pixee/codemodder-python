@@ -127,8 +127,28 @@ class TestResolveExpression:
                     cst.Assign,
                 ).value
 
+                first_key = node.elements[0].key
+                second_key = node.elements[1].key
+                third_key = (
+                    cst.ensure_type(
+                        cst.ensure_type(
+                            cst.ensure_type(tree.body[2], cst.SimpleStatementLine).body[
+                                0
+                            ],
+                            cst.Assign,
+                        ).value,
+                        cst.Dict,
+                    )
+                    .elements[0]
+                    .key
+                )
+
                 resolved = self.resolve_dict(node)
-                assert resolved == {"1": first, "2": second, "3": third}
+                assert resolved == {
+                    first_key: first,
+                    second_key: second,
+                    third_key: third,
+                }
                 return tree
 
         input_code = dedent(
