@@ -658,7 +658,7 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
                         resolved_starred_element = self.resolve_dict(resolved)
                         keyword_to_expr_dict |= {
                             self._transform_string_elements(k): v
-                            for k, v in resolved_starred_element
+                            for k, v in resolved_starred_element.items()
                         }
             if arg.keyword:
                 keyword_to_expr_dict |= {
