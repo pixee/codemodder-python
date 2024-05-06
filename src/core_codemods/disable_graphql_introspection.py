@@ -16,6 +16,8 @@ class DisableGraphQLIntrospectionTransform(
     LibcstResultTransformer, NameAndAncestorResolutionMixin
 ):
 
+    change_description = "Added rule to disable introspection"
+
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
         visitor = FindGraphQLViewsWithIntrospection(self.context)
         tree.visit(visitor)
@@ -67,7 +69,6 @@ class FindGraphQLViewsWithIntrospection(
                 match resolved:
                     case cst.List():
                         # does it have any introspection rule
-                        print(list(self.resolve_list_literal(resolved)))
                         if not any(
                             filter(
                                 lambda e: self._is_introspection_rule_or_starred(e),
@@ -106,16 +107,15 @@ class FindGraphQLViewsWithIntrospection(
         # Does it have a starred element?
         if isinstance(node, cst.StarredElement):
             return True
-        print(node)
         if isinstance(node, cst.Name):
-            return self.find_base_name(node.value) in self.introspection_rules_objects
+            return self.find_base_name(node) in self.introspection_rules_objects
         return False
 
 
 DisableGraphQLIntrospection = CoreCodemod(
     metadata=Metadata(
         name="disable-graphql-introspection",
-        summary="",
+        summary="Adds rule to disable introspection",
         review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
         references=[
             Reference(
