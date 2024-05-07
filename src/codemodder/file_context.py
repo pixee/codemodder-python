@@ -58,3 +58,13 @@ class FileContext:
             )
             and result.finding is not None
         ]
+
+    def get_all_findings(self):
+        return [
+            result.finding
+            for result in (self.results or [])
+            if result.finding is not None
+        ]
+
+    def report_unfixed_for_file(self, reason: str):
+        self.add_unfixed_findings(self.get_all_findings(), reason, 0)

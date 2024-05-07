@@ -77,6 +77,7 @@ class CodemodExecutionContext:
         self.path_exclude = path_exclude
         self.max_workers = max_workers
         self.tool_result_files_map = tool_result_files_map or {}
+        self.fixing_tool_results = bool(self.tool_result_files_map)
         self.llm_client = self._setup_llm_client()
 
     def _setup_llm_client(self) -> Client | None:
