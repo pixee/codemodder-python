@@ -1,15 +1,51 @@
 {
-  "total": 43,
+  "total": 44,
   "p": 1,
   "ps": 500,
   "paging": {
     "pageIndex": 1,
     "pageSize": 500,
-    "total": 170
+    "total": 171
   },
-  "effortTotal": 1050,
-  "debtTotal": 1050,
+  "effortTotal": 1110,
+  "debtTotal": 1110,
   "issues": [
+    {
+      "key": "AY9OF405h-JU-nc_LHoK",
+      "rule": "python:S6786",
+      "severity": "MAJOR",
+      "component": "pixee_codemodder-python:disable_graphql_introspection.py",
+      "project": "pixee_codemodder-python",
+      "line": 18,
+      "hash": "9c3e253c0724553f5a6121109c75b44a",
+      "textRange": {
+        "startLine": 18,
+        "endLine": 18,
+        "startOffset": 14,
+        "endOffset": 33
+      },
+      "flows": [],
+      "status": "OPEN",
+      "message": "Disable introspection on this \"GraphQL\" server endpoint.",
+      "effort": "1h",
+      "debt": "1h",
+      "tags": [
+        "cwe"
+      ],
+      "creationDate": "2024-05-06T15:27:53+0200",
+      "updateDate": "2024-05-06T15:28:15+0200",
+      "type": "VULNERABILITY",
+      "organization": "pixee",
+      "pullRequest": "542",
+      "cleanCodeAttribute": "TRUSTWORTHY",
+      "cleanCodeAttributeCategory": "RESPONSIBLE",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "MEDIUM"
+        }
+      ]
+    },
     {
       "key": "AY5_zeRwqkyzjj5fBCfH",
       "rule": "python:S5719",
@@ -1934,6 +1970,27 @@
     }
   ],
   "components": [
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python",
+      "uuid": "AY9OFy2CQktd1_0m0s0M",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "codemodder-python",
+      "longName": "codemodder-python",
+      "pullRequest": "542"
+    },
+    {
+      "organization": "pixee",
+      "key": "pixee_codemodder-python:disable_graphql_introspection.py",
+      "uuid": "AY9OF4qsh-JU-nc_LHla",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "disable_graphql_introspection.py",
+      "longName": "disable_graphql_introspection.py",
+      "path": "disable_graphql_introspection.py",
+      "pullRequest": "542"
+    },
     {
       "organization": "pixee",
       "key": "pixee_codemodder-python:tests/project_analysis/file_parsers/test_pyproject_toml_file_parser.py",

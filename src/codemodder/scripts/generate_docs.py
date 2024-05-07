@@ -309,6 +309,7 @@ SONAR_CODEMOD_NAMES = [
     "sql-parameterization-S3649",
     "django-model-without-dunder-str-S6554",
     "break-or-continue-out-of-loop-S1716",
+    "disable-graphql-introspection-S6786",
 ]
 SONAR_CODEMODS = {
     name: DocMetadata(
