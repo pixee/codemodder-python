@@ -23,7 +23,7 @@ class DisableGraphQLIntrospectionTransform(
         tree.visit(visitor)
         all_changes: dict[cst.CSTNode, ReplacementNodeType] = {}
         for call, changes in visitor.calls_to_change.items():
-            if self.node_is_selected(call):
+            if self.node_is_selected(call.func) or self.node_is_selected(call):
                 all_changes |= changes
                 self.report_change(call)
         if all_changes:
