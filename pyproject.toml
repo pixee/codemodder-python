@@ -19,7 +19,7 @@ dependencies = [
     "pylint>=3.0,<3.2",
     "python-json-logger~=2.0.0",
     "PyYAML~=6.0.0",
-    "semgrep>=1.50,<1.71",
+    "semgrep>=1.50,<1.72",
     "toml~=0.10.2",
     "tomlkit~=0.12.0",
     "wrapt~=1.16.0",
@@ -49,6 +49,7 @@ get-hashes = 'codemodder.scripts.get_hashes:main'
 [project.optional-dependencies]
 test = [
     "coverage>=7.3,<7.6",
+    "coverage-threshold~=0.4",
     "Flask<4",
     "Jinja2~=3.1.2",
     "jsonschema~=4.22.0",
@@ -74,7 +75,7 @@ complexity = [
     "xenon==0.9.*",
 ]
 openai = [
-    "openai>=1.0,<1.26",
+    "openai>=1.0,<1.27",
 ]
 all = [
     "codemodder[test]",
@@ -110,3 +111,9 @@ extend-exclude = '''
   src/codemodder/_version.py
 )/
 '''
+
+[coverage-threshold]
+line_coverage_min = 93.5
+[coverage-threshold.modules."src/core_codemods/"]
+# Detect if a codemod is missing unit or integration tests
+file_line_coverage_min = 50
