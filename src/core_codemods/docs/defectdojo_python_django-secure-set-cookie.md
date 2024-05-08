@@ -1,5 +1,4 @@
-This codemod sets the most secure parameters when Django applications call `set_cookie` on a response object. Without these parameters, your Django
-application cookies may be vulnerable to being intercepted and used to gain access to sensitive data.
+This codemod sets the most secure parameters when Django applications call `set_cookie` on a response object. Without these parameters, your Django application cookies may be vulnerable to being intercepted and used to gain access to sensitive data.
 
 The changes from this codemod look like this:
 
