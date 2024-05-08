@@ -45,7 +45,6 @@ class CombineCallsBaseCodemod(SimpleCodemod, NameResolutionMixin):
     def matches_call_or_call(
         self, node: cst.BooleanOperation, call_matcher: m.Call
     ) -> bool:
-        # Check for simple case: x.startswith("...") or x.startswith("...")
         call_or_call = m.BooleanOperation(
             left=call_matcher, operator=m.Or(), right=call_matcher
         )
@@ -57,9 +56,6 @@ class CombineCallsBaseCodemod(SimpleCodemod, NameResolutionMixin):
     def matches_call_or_boolop(
         self, node: cst.BooleanOperation, call_matcher: m.Call
     ) -> bool:
-
-        # Check for case when call on left and call on left of right boolop can be combined like:
-        # x.startswith("...") or x.startswith("...") and/or <any>
         call_or_boolop = m.BooleanOperation(
             left=call_matcher,
             operator=m.Or(),
@@ -73,9 +69,6 @@ class CombineCallsBaseCodemod(SimpleCodemod, NameResolutionMixin):
     def matches_boolop_or_call(
         self, node: cst.BooleanOperation, call_matcher: m.Call
     ) -> bool:
-
-        # Check for case when call on right and call on right of left boolop can be combined like:
-        # <any> and/or x.startswith("...") or x.startswith("...")
         boolop_or_call = m.BooleanOperation(
             left=m.BooleanOperation(right=call_matcher),
             operator=m.Or(),
