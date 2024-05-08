@@ -33,7 +33,7 @@ CORE_CODEMODS = {
         guidance_explained="This codemod protects your applications against XSS attacks. However, it's possible you would like to set the `autoescape` parameter to a custom callable.",
     ),
     "fix-mutable-params": DocMetadata(
-        importance="Medium",
+        importance="Low",
         guidance_explained="We believe that this codemod fixes an unsafe practice and that the changes themselves are safe and reliable.",
     ),
     "harden-pyyaml": DocMetadata(
@@ -148,11 +148,11 @@ If you want to allow those protocols, change the incoming PR to look more like t
         guidance_explained="We believe this change is safe and will only close file resources that are not referenced outside of the with statement block.",
     ),
     "django-receiver-on-top": DocMetadata(
-        importance="Medium",
+        importance="Low",
         guidance_explained="We believe this change leads to the intended behavior the application and is thus safe.",
     ),
     "numpy-nan-equality": DocMetadata(
-        importance="Medium",
+        importance="Low",
         guidance_explained="We believe any use of `==` to compare with `numpy.nan` is unintended given that it is always `False`. Thus we consider this change safe.",
     ),
     "django-json-response-type": DocMetadata(
@@ -192,7 +192,7 @@ If you want to allow those protocols, change the incoming PR to look more like t
         guidance_explained="Since the `global` keyword is intended for use in non-module scopes, using it at the module scope is unnecessary.",
     ),
     "remove-debug-breakpoint": DocMetadata(
-        importance="Medium",
+        importance="Low",
         guidance_explained="Breakpoints are generally used only for debugging and can easily be forgotten before deploying code.",
     ),
     "combine-startswith-endswith": DocMetadata(
@@ -220,15 +220,15 @@ If you want to allow those protocols, change the incoming PR to look more like t
         guidance_explained="We believe this change is safe and will not cause any issues.",
     ),
     "fix-assert-tuple": DocMetadata(
-        importance="Medium",
+        importance="Low",
         guidance_explained="An `assert` statement on a non-empty tuple is likely unintended and should be rewritten. However, the new change may result in assertion failures that should be reviewed.",
     ),
     "lazy-logging": DocMetadata(
-        importance="Medium",
+        importance="Low",
         guidance_explained="We believe this change is safe and will not cause any issues.",
     ),
     "str-concat-in-sequence-literals": DocMetadata(
-        importance="Medium",
+        importance="Low",
         guidance_explained="While string concatenation inside a sequence iterable is likely a mistake, there are instances when you may choose to use them..",
     ),
     "fix-async-task-instantiation": DocMetadata(
@@ -248,19 +248,19 @@ If you want to allow those protocols, change the incoming PR to look more like t
         guidance_explained="This change may impact performance in some cases, but it is recommended when handling untrusted data.",
     ),
     "fix-dataclass-defaults": DocMetadata(
-        importance="Medium",
+        importance="Low",
         guidance_explained="This change is safe and will prevent runtime `ValueError`.",
     ),
     "fix-missing-self-or-cls": DocMetadata(
-        importance="Medium",
+        importance="Low",
         guidance_explained="This change is safe and will prevent errors when calling on these instance or class methods..",
     ),
     "fix-float-equality": DocMetadata(
-        importance="Medium",
+        importance="Low",
         guidance_explained="This change makes your code more accurate but in some cases it may be necessary to adjust the `abs_tol` and `rel_tol` parameter values for your particular calculations.",
     ),
     "fix-math-isclose": DocMetadata(
-        importance="Medium",
+        importance="Low",
         guidance_explained="This change makes your code more accurate but in some cases it may be necessary to adjust the `abs_tol` parameter value for your particular calculations.",
     ),
     "break-or-continue-out-of-loop": DocMetadata(
