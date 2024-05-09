@@ -2,6 +2,7 @@ from codemodder.registry import CodemodCollection
 
 from .add_requests_timeouts import AddRequestsTimeouts
 from .break_or_continue_out_of_loop import BreakOrContinueOutOfLoop
+from .combine_isinstance_issubclass import CombineIsinstanceIssubclass
 from .combine_startswith_endswith import CombineStartswithEndswith
 from .defectdojo.semgrep.avoid_insecure_deserialization import (
     AvoidInsecureDeserialization,
@@ -135,6 +136,7 @@ registry = CodemodCollection(
         RemoveModuleGlobal,
         RemoveDebugBreakpoint,
         CombineStartswithEndswith,
+        CombineIsinstanceIssubclass,
         FixDeprecatedLoggingWarn,
         FlaskEnableCSRFProtection,
         ReplaceFlaskSendFile,
