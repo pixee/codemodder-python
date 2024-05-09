@@ -18,17 +18,19 @@ class CodeQLLocation(Location):
     def from_sarif(cls, sarif_location) -> Self:
         artifact_location = sarif_location["physicalLocation"]["artifactLocation"]
         file = Path(artifact_location["uri"])
-        start = LineInfo(
-            line=sarif_location["physicalLocation"]["region"]["startLine"],
-            column=sarif_location["physicalLocation"]["region"].get("startColumn"),
-        )
+
+        try:
+            region = sarif_location["physicalLocation"]["region"]
+        except KeyError:
+            # A location without a region indicates a result for the entire file.
+            # Use sentinel values of 0 index for start/end
+            zero = LineInfo(0)
+            return cls(file=file, start=zero, end=zero)
+
+        start = LineInfo(line=region["startLine"], column=region.get("startColumn"))
         end = LineInfo(
-            line=sarif_location["physicalLocation"]["region"].get(
-                "endLine", start.line
-            ),
-            column=sarif_location["physicalLocation"]["region"].get(
-                "endColumn", start.column
-            ),
+            line=region.get("endLine", start.line),
+            column=region.get("endColumn", start.column),
         )
         return cls(file=file, start=start, end=end)
 
@@ -40,7 +42,6 @@ class CodeQLResult(Result):
     ) -> Self:
         extension_index = sarif_result["rule"]["toolComponent"]["index"]
         tool_index = sarif_result["rule"]["index"]
-
         rule_data = rule_extensions[extension_index]["rules"][tool_index]
 
         locations: list[Location] = []
@@ -48,7 +49,6 @@ class CodeQLResult(Result):
             try:
                 codeql_location = CodeQLLocation.from_sarif(location)
             except KeyError:
-                # TODO: handle this case more gracefully
                 continue
 
             locations.append(codeql_location)
