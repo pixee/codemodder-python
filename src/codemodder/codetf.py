@@ -56,9 +56,9 @@ class Change(BaseModel):
 
 
 class AIMetadata(BaseModel):
-    provider: str
-    model: str
-    tokens: int
+    provider: Optional[str] = None
+    model: Optional[str] = None
+    tokens: Optional[int] = None
 
 
 class ChangeSet(BaseModel):
