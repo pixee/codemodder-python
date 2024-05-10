@@ -17,3 +17,4 @@ jobs:
         with:
           tool: sonar
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+          sonar-component-key: ${{ secrets.SONAR_COMPONENT_KEY }}
