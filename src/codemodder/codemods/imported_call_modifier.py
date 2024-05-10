@@ -75,12 +75,13 @@ class ImportedCallModifier(
                 and true_name
                 and true_name in self.matching_functions
             ):
-                findings = self.file_context.get_findings_for_location(line_number)
                 self.changes_in_file.append(
                     Change(
                         lineNumber=line_number,
                         description=self.change_description,
-                        finding=findings[0] if findings else None,
+                        findings=self.file_context.get_findings_for_location(
+                            line_number
+                        ),
                     )
                 )
 

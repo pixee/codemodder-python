@@ -52,7 +52,7 @@ class Change(BaseModel):
     diffSide: DiffSide = DiffSide.RIGHT
     properties: Optional[dict] = None
     packageActions: Optional[list[PackageAction]] = None
-    finding: Optional[Finding] = None
+    findings: Optional[list[Finding]] = None
 
 
 class AIMetadata(BaseModel):
