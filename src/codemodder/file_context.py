@@ -31,8 +31,9 @@ class FileContext:
     def add_changeset(self, result: ChangeSet):
         self.changesets.append(result)
 
-    def add_failure(self, filename: Path):
+    def add_failure(self, filename: Path, reason: str):
         self.failures.append(filename)
+        self.add_unfixed_findings(self.get_all_findings(), reason, 0)
 
     def add_unfixed_findings(
         self, findings: list[Finding], reason: str, line_number: int | None = None
@@ -57,4 +58,11 @@ class FileContext:
                 for location in result.locations
             )
             and result.finding is not None
+        ]
+
+    def get_all_findings(self):
+        return [
+            result.finding
+            for result in (self.results or [])
+            if result.finding is not None
         ]
