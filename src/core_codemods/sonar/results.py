@@ -12,11 +12,11 @@ from codemodder.result import LineInfo, Location, Result, ResultSet
 
 class SonarLocation(Location):
     @classmethod
-    def from_result(cls, result) -> Self:
-        location = result.get("textRange")
+    def from_json_location(cls, json_location) -> Self:
+        location = json_location.get("textRange")
         start = LineInfo(location.get("startLine"), location.get("startOffset"), "")
         end = LineInfo(location.get("endLine"), location.get("endOffset"), "")
-        file = Path(result.get("component").split(":")[-1])
+        file = Path(json_location.get("component").split(":")[-1])
         return cls(file=file, start=start, end=end)
 
 
@@ -28,8 +28,15 @@ class SonarResult(Result):
         if not (rule_id := result.get("rule", None) or result.get("ruleKey", None)):
             raise ValueError("Could not extract rule id from sarif result.")
 
-        locations: list[Location] = [SonarLocation.from_result(result)]
-        return cls(rule_id=rule_id, locations=locations)
+        locations: list[Location] = [SonarLocation.from_json_location(result)]
+        all_flows: list[list[Location]] = [
+            [
+                SonarLocation.from_json_location(json_location)
+                for json_location in flow.get("locations", {})
+            ]
+            for flow in result.get("flows", [])
+        ]
+        return cls(rule_id=rule_id, locations=locations, codeflows=all_flows)
 
     def match_location(self, pos, node):
         match node:
