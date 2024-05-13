@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -29,10 +29,18 @@ class Location(ABCDataclass):
     end: LineInfo
 
 
+@dataclass
+class LocationWithMessage:
+    location: Location
+    message: str
+
+
 @dataclass(kw_only=True)
 class Result(ABCDataclass):
     rule_id: str
     locations: list[Location]
+    codeflows: list[list[Location]] = field(default_factory=list)
+    related_locations: list[LocationWithMessage] = field(default_factory=list)
     finding: Finding | None = None
 
     def match_location(self, pos: CodeRange, node: cst.CSTNode) -> bool:

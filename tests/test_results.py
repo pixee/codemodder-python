@@ -82,6 +82,50 @@ class TestResults:
         result = SonarResultSet.from_json(sonar_json1)
         assert len(result["rule"][Path("code.py")]) == 1
 
+    def test_sonar_flows(self, tmpdir):
+        issues = {
+            "issues": [
+                {
+                    "rule": "rule",
+                    "textRange": {
+                        "startLine": 1,
+                        "endLine": 1,
+                        "startOffset": 13,
+                        "endOffset": 14,
+                    },
+                    "component": "code.py",
+                    "flows": [
+                        {
+                            "locations": [
+                                {
+                                    "component": "code.py",
+                                    "textRange": {
+                                        "startLine": 1,
+                                        "endLine": 1,
+                                        "startOffset": 8,
+                                        "endOffset": 9,
+                                    },
+                                }
+                            ]
+                        }
+                    ],
+                    "status": "OPEN",
+                },
+            ],
+        }
+
+        sonar_json1 = Path(tmpdir) / "sonar1.json"
+        sonar_json1.write_text(json.dumps(issues))
+
+        resultset = SonarResultSet.from_json(sonar_json1)
+        result = resultset["rule"][Path("code.py")][0]
+        assert result.codeflows
+        assert result.codeflows[0]
+        assert result.codeflows[0][0].start.line == 1
+        assert result.codeflows[0][0].start.column == 8
+        assert result.codeflows[0][0].end.line == 1
+        assert result.codeflows[0][0].end.column == 9
+
     def test_sonar_robustness(self, tmpdir):
         sonar_json = Path(tmpdir) / "sonar1.json"
         # not a valid json
