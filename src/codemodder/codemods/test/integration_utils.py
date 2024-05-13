@@ -178,8 +178,6 @@ class BaseIntegrationTest(DependencyTestMixin):
     def check_code_after(self) -> ModuleType:
         with open(self.code_path, "r", encoding="utf-8") as f:  # type: ignore
             new_code = f.read()
-        # diff = difflib.ndiff(new_code.splitlines(keepends=True), self.expected_new_code.splitlines(keepends = True))
-        # print(''.join(diff))
         assert new_code == self.expected_new_code  # type: ignore
         return execute_code(
             path=self.code_path, allowed_exceptions=self.allowed_exceptions  # type: ignore

@@ -634,10 +634,11 @@ class NameAndAncestorResolutionMixin(NameResolutionMixin, AncestorPatternsMixin)
                 return {resolved_key_value: resolved_value}
 
     def resolve_dict(self, dictionary: cst.Dict):
-        compilation = dict()
-        for e in dictionary.elements:
-            compilation.update(self._resolve_dict_element(e))
-        return compilation
+        return {
+            k: v
+            for e in dictionary.elements
+            for k, v in self._resolve_dict_element(e).items()
+        }
 
     def _transform_string_elements(self, expr):
         match expr:
