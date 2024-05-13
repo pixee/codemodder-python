@@ -115,7 +115,7 @@ class FindGraphQLViewsWithIntrospection(
 DisableGraphQLIntrospection = CoreCodemod(
     metadata=Metadata(
         name="disable-graphql-introspection",
-        summary="Adds rule to disable introspection",
+        summary="Disable GraphQL Introspection to Prevent Sensitive Data Leakage",
         review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
         references=[
             Reference(

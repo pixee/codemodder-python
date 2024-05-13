@@ -1,6 +1,6 @@
 Introspection allows a client to query the schema of a GraphQL API. Allowing introspection in production code may allow a malicious user to gather information about data types and operations for a potential attack.
 
-Introspection is often enabled by default in GraphQL without authentication. This codemod disables introspection altogether at the view level by introducing a validation rule for that. The rules used may be dependent on the framework used. Please check your framework documentation for specific rules for disabling introspection.
+Introspection is often enabled by default in GraphQL without authentication. This codemod disables introspection altogether at the view level by introducing a validation rule. The required rules may be dependent on the framework that you are using. Please check your framework documentation for specific rules for disabling introspection.
 
 Our changes look something like this:
 ```diff
