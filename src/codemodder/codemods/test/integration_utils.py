@@ -256,13 +256,21 @@ class SonarIntegrationTest(BaseIntegrationTest):
     @classmethod
     def setup_class(cls):
         cls.codemod_registry = registry.load_registered_codemods()
-        cls.original_code, cls.expected_new_code = original_and_expected_from_code_path(
-            cls.code_path, cls.replacement_lines
-        )
-
-        cls.code_filename = os.path.relpath(cls.code_path, SAMPLES_DIR)
-        cls.code_dir = SAMPLES_DIR
         cls.output_path = tempfile.mkstemp()[1]
+        cls.code_dir = SAMPLES_DIR
+        cls.code_filename = os.path.relpath(cls.code_path, SAMPLES_DIR)
+
+        if hasattr(cls, "expected_new_code"):
+            # Some tests are easier to understand with the expected new code provided
+            # instead of calculated
+            cls.original_code = "".join(_lines_from_codepath(cls.code_path))
+            cls.expected_new_code = dedent(cls.expected_new_code)
+        else:
+            cls.original_code, cls.expected_new_code = (
+                original_and_expected_from_code_path(
+                    cls.code_path, cls.replacement_lines
+                )
+            )
 
         # TODO: support sonar integration tests that add a dependency to
         # `requirements_file_name`. These tests would not be able to run

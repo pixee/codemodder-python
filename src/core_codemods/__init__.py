@@ -8,6 +8,7 @@ from .defectdojo.semgrep.avoid_insecure_deserialization import (
     AvoidInsecureDeserialization,
 )
 from .defectdojo.semgrep.django_secure_set_cookie import DjangoSecureSetCookie
+from .disable_graphql_introspection import DisableGraphQLIntrospection
 from .django_debug_flag_on import DjangoDebugFlagOn
 from .django_json_response_type import DjangoJsonResponseType
 from .django_model_without_dunder_str import DjangoModelWithoutDunderStr
@@ -54,6 +55,7 @@ from .secure_flask_cookie import SecureFlaskCookie
 from .secure_flask_session_config import SecureFlaskSessionConfig
 from .secure_random import SecureRandom
 from .sonar.sonar_break_or_continue_out_of_loop import SonarBreakOrContinueOutOfLoop
+from .sonar.sonar_disable_graphql_introspection import SonarDisableGraphQLIntrospection
 from .sonar.sonar_django_json_response_type import SonarDjangoJsonResponseType
 from .sonar.sonar_django_model_without_dunder_str import (
     SonarDjangoModelWithoutDunderStr,
@@ -153,6 +155,7 @@ registry = CodemodCollection(
         FixMissingSelfOrCls,
         FixMathIsClose,
         BreakOrContinueOutOfLoop,
+        DisableGraphQLIntrospection,
     ],
 )
 
@@ -178,6 +181,7 @@ sonar_registry = CodemodCollection(
         SonarSQLParameterization,
         SonarDjangoModelWithoutDunderStr,
         SonarBreakOrContinueOutOfLoop,
+        SonarDisableGraphQLIntrospection,
     ],
 )
 
