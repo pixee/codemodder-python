@@ -36,7 +36,7 @@ def _apply_and_assert_with_tool(mocker, transformer, reason):
         "home",
         file_path,
         results=[
-            DefectDojoResult.from_finding(
+            DefectDojoResult.from_result(
                 {
                     "id": 1,
                     "title": "python.django.security.audit.secure-cookies.django-secure-set-cookie",
