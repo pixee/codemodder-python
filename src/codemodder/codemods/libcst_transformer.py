@@ -263,10 +263,8 @@ class LibcstTransformerPipeline(BaseTransformerPipeline):
                 with open(file_path, "r", encoding="utf-8") as f:
                     source_tree = cst.parse_module(f.read())
         except Exception:
-            file_context.add_failure(file_path)
-            if context.fixing_tool_results:
-                file_context.report_unfixed_for_file(reason="parsing file")
-            logger.exception("error parsing file %s", file_path)
+            file_context.add_failure(file_path, reason := "Failed to parse file")
+            logger.exception("%s %s", reason, file_path)
             return None
 
         tree = source_tree
@@ -275,10 +273,8 @@ class LibcstTransformerPipeline(BaseTransformerPipeline):
                 for transformer in self.transformers:
                     tree = transformer.transform(tree, results, file_context)
         except Exception:
-            file_context.add_failure(file_path)
-            if context.fixing_tool_results:
-                file_context.report_unfixed_for_file(reason="transforming file")
-            logger.exception("error transforming file %s", file_path)
+            file_context.add_failure(file_path, reason := "Failed to transform file")
+            logger.exception("%s %s", reason, file_path)
             return None
 
         if not file_context.codemod_changes:

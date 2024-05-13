@@ -74,14 +74,14 @@ def test_parse_error(mocker, caplog):
     )
     transformer = mocker.MagicMock(spec=LibcstResultTransformer)
     _apply_and_assert(mocker, transformer)
-    assert "error parsing file" in caplog.text
+    assert "Failed to parse file" in caplog.text
 
 
 def test_transformer_error(mocker, caplog):
     transformer = mocker.MagicMock(spec=LibcstResultTransformer)
     transformer.transform.side_effect = ParserSyntaxError
     _apply_and_assert(mocker, transformer)
-    assert "error transforming file" in caplog.text
+    assert "Failed to transform file" in caplog.text
 
 
 def test_parse_error_with_tool(mocker, caplog):
@@ -90,12 +90,12 @@ def test_parse_error_with_tool(mocker, caplog):
         side_effect=ParserSyntaxError,
     )
     transformer = mocker.MagicMock(spec=LibcstResultTransformer)
-    _apply_and_assert_with_tool(mocker, transformer, "parsing file")
-    assert "error parsing file" in caplog.text
+    _apply_and_assert_with_tool(mocker, transformer, "Failed to parse file")
+    assert "Failed to parse file" in caplog.text
 
 
 def test_transformer_error_with_tool(mocker, caplog):
     transformer = mocker.MagicMock(spec=LibcstResultTransformer)
     transformer.transform.side_effect = ParserSyntaxError
-    _apply_and_assert_with_tool(mocker, transformer, "transforming file")
-    assert "error transforming file" in caplog.text
+    _apply_and_assert_with_tool(mocker, transformer, "Failed to transform file")
+    assert "Failed to transform file" in caplog.text
