@@ -23,9 +23,7 @@ class RequirementsTxtWriter(DependencyWriter):
 
         requirement_lines = []
         for dep in dependencies:
-            requirement_lines.append(f"{dep.requirement} \\\n")
-            for hash_line in dep.build_hashes():
-                requirement_lines.append(f"{hash_line}\n")
+            requirement_lines.append(f"{dep.requirement}\n")
 
         updated_lines = original_lines + requirement_lines
 

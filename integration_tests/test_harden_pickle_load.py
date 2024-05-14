@@ -48,14 +48,10 @@ class TestHardenPickleLoad(BaseIntegrationTest):
         "pylint>1\n"
     )
     expected_requirements = (
-        (
-            "# file used to test dependency management\n"
-            "requests==2.31.0\n"
-            "black==23.7.*\n"
-            "mypy~=1.4\n"
-            "pylint>1\n"
-            f"{Fickling.requirement} \\\n"
-        )
-        + "\n".join(Fickling.build_hashes())
-        + "\n"
+        "# file used to test dependency management\n"
+        "requests==2.31.0\n"
+        "black==23.7.*\n"
+        "mypy~=1.4\n"
+        "pylint>1\n"
+        f"{Fickling.requirement}\n"
     )

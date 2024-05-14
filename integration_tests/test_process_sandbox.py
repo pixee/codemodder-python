@@ -44,14 +44,10 @@ class TestProcessSandbox(BaseIntegrationTest):
         "pylint>1\n"
     )
     expected_requirements = (
-        (
-            "# file used to test dependency management\n"
-            "requests==2.31.0\n"
-            "black==23.7.*\n"
-            "mypy~=1.4\n"
-            "pylint>1\n"
-            f"{Security.requirement} \\\n"
-        )
-        + "\n".join(Security.build_hashes())
-        + "\n"
+        "# file used to test dependency management\n"
+        "requests==2.31.0\n"
+        "black==23.7.*\n"
+        "mypy~=1.4\n"
+        "pylint>1\n"
+        f"{Security.requirement}\n"
     )
