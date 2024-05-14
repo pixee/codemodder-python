@@ -1,3 +1,6 @@
 codemods:
   prepend:
     - pixee:python/use-walrus-if
+  exclude:
+    - pixee:python/sandbox-process-creation
+    - pixee:python/url-sandbox
