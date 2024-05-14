@@ -1,3 +1,4 @@
+import mock
 from libcst._exceptions import ParserSyntaxError
 
 from codemodder.codemods.libcst_transformer import (
@@ -7,10 +8,54 @@ from codemodder.codemods.libcst_transformer import (
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 from core_codemods.defectdojo.results import DefectDojoResult
+from core_codemods.sonar.results import SonarResult
+
+FILE_PATH = mock.MagicMock()
+DEFECTDOJO_RESULTS = [
+    DefectDojoResult.from_result(
+        {
+            "id": 1,
+            "title": "python.django.security.audit.secure-cookies.django-secure-set-cookie",
+            "file_path": FILE_PATH,
+            "line": 2,
+        },
+    )
+]
+
+SONAR_RESULTS = [
+    SonarResult.from_result(
+        {
+            "rule": "python:S1716",
+            "textRange": {
+                "startLine": 1,
+                "endLine": 1,
+                "startOffset": 13,
+                "endOffset": 14,
+            },
+            "component": FILE_PATH,
+            "flows": [
+                {
+                    "locations": [
+                        {
+                            "component": FILE_PATH,
+                            "textRange": {
+                                "startLine": 1,
+                                "endLine": 1,
+                                "startOffset": 8,
+                                "endOffset": 9,
+                            },
+                        }
+                    ]
+                }
+            ],
+            "status": "OPEN",
+        }
+    )
+]
 
 
 def _apply_and_assert(mocker, transformer):
-    file_context = FileContext("home", mocker.MagicMock())
+    file_context = FileContext("home", FILE_PATH)
     execution_context = CodemodExecutionContext(
         directory=mocker.MagicMock(),
         dry_run=True,
@@ -30,21 +75,11 @@ def _apply_and_assert(mocker, transformer):
     assert file_context.unfixed_findings == []
 
 
-def _apply_and_assert_with_tool(mocker, transformer, reason):
-    file_path = mocker.MagicMock()
+def _apply_and_assert_with_tool(mocker, transformer, reason, results):
     file_context = FileContext(
         "home",
-        file_path,
-        results=[
-            DefectDojoResult.from_result(
-                {
-                    "id": 1,
-                    "title": "python.django.security.audit.secure-cookies.django-secure-set-cookie",
-                    "file_path": file_path,
-                    "line": 2,
-                },
-            )
-        ],
+        FILE_PATH,
+        results=results,
     )
     execution_context = CodemodExecutionContext(
         directory=mocker.MagicMock(),
@@ -54,7 +89,7 @@ def _apply_and_assert_with_tool(mocker, transformer, reason):
         repo_manager=mocker.MagicMock(),
         path_include=[],
         path_exclude=[],
-        tool_result_files_map={"sonar": ["results.json"]},
+        tool_result_files_map={"DOESNTMATTER": ["testing.json"]},
     )
     pipeline = LibcstTransformerPipeline(transformer)
     pipeline.apply(
@@ -84,18 +119,31 @@ def test_transformer_error(mocker, caplog):
     assert "Failed to transform file" in caplog.text
 
 
-def test_parse_error_with_tool(mocker, caplog):
+def test_parse_error_with_defectdojo(mocker, caplog):
     mocker.patch(
         "codemodder.codemods.libcst_transformer.cst.parse_module",
         side_effect=ParserSyntaxError,
     )
     transformer = mocker.MagicMock(spec=LibcstResultTransformer)
-    _apply_and_assert_with_tool(mocker, transformer, "Failed to parse file")
+    _apply_and_assert_with_tool(
+        mocker, transformer, "Failed to parse file", DEFECTDOJO_RESULTS
+    )
     assert "Failed to parse file" in caplog.text
 
 
-def test_transformer_error_with_tool(mocker, caplog):
+def test_transformer_error_with_defectdojo(mocker, caplog):
     transformer = mocker.MagicMock(spec=LibcstResultTransformer)
     transformer.transform.side_effect = ParserSyntaxError
-    _apply_and_assert_with_tool(mocker, transformer, "Failed to transform file")
+    _apply_and_assert_with_tool(
+        mocker, transformer, "Failed to transform file", DEFECTDOJO_RESULTS
+    )
+    assert "Failed to transform file" in caplog.text
+
+
+def test_transformer_error_with_sonar(mocker, caplog):
+    transformer = mocker.MagicMock(spec=LibcstResultTransformer)
+    transformer.transform.side_effect = ParserSyntaxError
+    _apply_and_assert_with_tool(
+        mocker, transformer, "Failed to transform file", SONAR_RESULTS
+    )
     assert "Failed to transform file" in caplog.text
