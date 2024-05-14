@@ -12,28 +12,28 @@ from codemodder.result import LineInfo, Location, ResultSet, SASTResult
 
 class DefectDojoLocation(Location):
     @classmethod
-    def from_finding(cls, finding: dict) -> Self:
+    def from_result(cls, result: dict) -> Self:
         return cls(
-            file=Path(finding["file_path"]),
+            file=Path(result["file_path"]),
             # TODO: parse snippet from "description" field?
-            start=LineInfo(finding["line"]),
-            end=LineInfo(finding["line"]),
+            start=LineInfo(result["line"]),
+            end=LineInfo(result["line"]),
         )
 
 
 class DefectDojoResult(SASTResult):
     @classmethod
-    def from_finding(cls, finding: dict) -> Self:
+    def from_result(cls, result: dict) -> Self:
         return cls(
-            finding_id=finding["id"],
-            rule_id=finding["title"],
-            locations=[DefectDojoLocation.from_finding(finding)],
+            finding_id=result["id"],
+            rule_id=result["title"],
+            locations=[DefectDojoLocation.from_result(result)],
             finding=Finding(
-                id=str(finding["id"]),
+                id=str(result["id"]),
                 rule=Rule(
                     # TODO: it's possible that these fields actually come from the codemod and not the result
-                    id=str(finding["title"]),
-                    name=str(finding["title"]),
+                    id=str(result["title"]),
+                    name=str(result["title"]),
                     url=None,
                 ),
             ),
@@ -62,7 +62,7 @@ class DefectDojoResultSet(ResultSet):
             data = json.load(file)
 
         result_set = cls()
-        for finding in data.get("results"):
-            result_set.add_result(DefectDojoResult.from_finding(finding))
+        for result in data.get("results"):
+            result_set.add_result(DefectDojoResult.from_result(result))
 
         return result_set

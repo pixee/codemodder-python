@@ -14,6 +14,7 @@ class TestDjangoJsonResponseType(BaseSASTCodemodTest):
         assert self.codemod.name == "django-json-response-type-S5131"
 
     def test_simple(self, tmpdir):
+        rule_id = "pythonsecurity:S5131"
         input_code = """
         from django.http import HttpResponse
         import json
@@ -33,7 +34,7 @@ class TestDjangoJsonResponseType(BaseSASTCodemodTest):
         issues = {
             "issues": [
                 {
-                    "rule": "pythonsecurity:S5131",
+                    "rule": rule_id,
                     "status": "OPEN",
                     "component": "code.py",
                     "textRange": {
@@ -45,4 +46,11 @@ class TestDjangoJsonResponseType(BaseSASTCodemodTest):
                 }
             ]
         }
-        self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(issues))
+        changes = self.run_and_assert(
+            tmpdir, input_code, expected, results=json.dumps(issues)
+        )
+        assert changes is not None
+        assert changes[0].changes[0].findings is not None
+        assert changes[0].changes[0].findings[0].id == rule_id
+        assert changes[0].changes[0].findings[0].rule.id == rule_id
+        assert changes[0].changes[0].findings[0].rule.name == rule_id

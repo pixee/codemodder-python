@@ -6,8 +6,9 @@ from pathlib import Path
 import libcst as cst
 from typing_extensions import Self
 
+from codemodder.codetf import Finding, Rule
 from codemodder.logging import logger
-from codemodder.result import LineInfo, Location, Result, ResultSet
+from codemodder.result import LineInfo, Location, ResultSet, SASTResult
 
 
 class SonarLocation(Location):
@@ -20,10 +21,10 @@ class SonarLocation(Location):
         return cls(file=file, start=start, end=end)
 
 
-class SonarResult(Result):
+class SonarResult(SASTResult):
 
     @classmethod
-    def from_result(cls, result) -> Self:
+    def from_result(cls, result: dict) -> Self:
         # Sonar issues have `rule` as key while hotspots call it `ruleKey`
         if not (rule_id := result.get("rule", None) or result.get("ruleKey", None)):
             raise ValueError("Could not extract rule id from sarif result.")
@@ -36,7 +37,21 @@ class SonarResult(Result):
             ]
             for flow in result.get("flows", [])
         ]
-        return cls(rule_id=rule_id, locations=locations, codeflows=all_flows)
+
+        return cls(
+            finding_id=rule_id,
+            rule_id=rule_id,
+            locations=locations,
+            codeflows=all_flows,
+            finding=Finding(
+                id=rule_id,
+                rule=Rule(
+                    id=rule_id,
+                    name=rule_id,
+                    url=None,
+                ),
+            ),
+        )
 
     def match_location(self, pos, node):
         match node:
