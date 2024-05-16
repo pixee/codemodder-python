@@ -19,7 +19,7 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
     def test_import(self, tmpdir):
         input_code = """
         import tempfile
-        
+
         name = tempfile.mktemp()
         var = "hello"
         """

@@ -1,3 +1,4 @@
+from textwrap import dedent
 from typing import Optional
 
 import libcst as cst
@@ -32,40 +33,48 @@ class TempfileMktempTransformer(
     ) -> cst.SimpleStatementLine | cst.FlattenSentinel:
         if maybe_tuple := self._is_assigned_to_mktemp(bsstmt):  # type: ignore
             assign_name, call = maybe_tuple
-
-            self.report_change(call)
-            new_line = cst.parse_statement(
-                f"""
-with tempfile.NamedTemporaryFile(delete=False) as tf:
-    {assign_name} = tf.name
-"""
-            )
-            return cst.FlattenSentinel(
-                [
-                    new_line,
-                ]
-            )
-
+            return self.report_and_change_assignment(call, assign_name)
         if maybe_tuple := self._mktemp_is_sink(bsstmt):
             wrapper_func_name, call = maybe_tuple
-            self.report_change(call)
-
-            new_line = cst.parse_statement(
-                f"""
-with tempfile.NamedTemporaryFile(delete=False) as tf:
-    {wrapper_func_name.value}(tf.name)
-"""
-            )
-            return cst.FlattenSentinel(
-                [
-                    new_line,
-                ]
-            )
+            return self.report_and_change_sink(call, wrapper_func_name)
         return original_node
+
+    def report_and_change_assignment(
+        self, node: cst.Call, assign_name: cst.Name
+    ) -> cst.FlattenSentinel:
+        self.report_change(node)
+        new_stmt = dedent(
+            f"""
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            {assign_name.value} = tf.name
+        """
+        ).rstrip()
+        return cst.FlattenSentinel(
+            [
+                cst.parse_statement(new_stmt),
+            ]
+        )
+
+    def report_and_change_sink(
+        self, node: cst.Call, sink_name: cst.Name
+    ) -> cst.FlattenSentinel:
+        self.report_change(node)
+
+        new_stmt = dedent(
+            f"""
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            {sink_name.value}(tf.name)
+        """
+        ).rstrip()
+        return cst.FlattenSentinel(
+            [
+                cst.parse_statement(new_stmt),
+            ]
+        )
 
     def _is_assigned_to_mktemp(
         self, bsstmt: cst.BaseSmallStatement
-    ) -> Optional[tuple[cst.AnnAssign | cst.Assign, cst.Call]]:
+    ) -> Optional[tuple[cst.Name, cst.Call]]:
         match bsstmt:
             case cst.Assign(value=value, targets=targets):
                 maybe_value = self._is_mktemp_call(value)  # type: ignore
@@ -78,7 +87,7 @@ with tempfile.NamedTemporaryFile(delete=False) as tf:
                     )
                 ):
                     # # Todo: handle multiple potential targets
-                    return (targets[0], maybe_value)
+                    return (targets[0].target, maybe_value)
             case cst.AnnAssign(target=target, value=value):
                 maybe_value = self._is_mktemp_call(value)  # type: ignore
                 if maybe_value and isinstance(target, cst.Name):  # type: ignore
@@ -93,7 +102,7 @@ with tempfile.NamedTemporaryFile(delete=False) as tf:
 
     def _mktemp_is_sink(
         self, bsstmt: cst.BaseSmallStatement
-    ) -> Optional[tuple[cst.AnnAssign | cst.Assign, cst.Call]]:
+    ) -> Optional[tuple[cst.Name, cst.Call]]:
         match bsstmt:
             case cst.Expr(value=cst.Call() as call):
                 if not (args := call.args):
