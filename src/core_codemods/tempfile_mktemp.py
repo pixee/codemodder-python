@@ -42,23 +42,17 @@ class TempfileMktempTransformer(
     def report_and_change_assignment(
         self, node: cst.Call, assign_name: cst.Name
     ) -> cst.FlattenSentinel:
-        self.report_change(node)
         new_stmt = dedent(
             f"""
         with tempfile.NamedTemporaryFile(delete=False) as tf:
             {assign_name.value} = tf.name
         """
         ).rstrip()
-        return cst.FlattenSentinel(
-            [
-                cst.parse_statement(new_stmt),
-            ]
-        )
+        return self._report_and_change(node, new_stmt)
 
     def report_and_change_sink(
         self, node: cst.Call, sink_name: cst.Name
     ) -> cst.FlattenSentinel:
-        self.report_change(node)
 
         new_stmt = dedent(
             f"""
@@ -66,6 +60,14 @@ class TempfileMktempTransformer(
             {sink_name.value}(tf.name)
         """
         ).rstrip()
+        return self._report_and_change(node, new_stmt)
+
+    def _report_and_change(self, node: cst.Call, new_stmt: str) -> cst.FlattenSentinel:
+        self.report_change(node)
+        maybe_name = self.get_aliased_prefix_name(node, self._module_name)
+        if maybe_name or self._module_name == self._module_name:
+            self.add_needed_import(self._module_name)
+        self.remove_unused_import(node)
         return cst.FlattenSentinel(
             [
                 cst.parse_statement(new_stmt),

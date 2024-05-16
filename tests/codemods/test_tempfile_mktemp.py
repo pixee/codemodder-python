@@ -1,3 +1,5 @@
+import pytest
+
 from codemodder.codemods.test import BaseSemgrepCodemodTest
 from core_codemods.tempfile_mktemp import TempfileMktemp
 
@@ -52,23 +54,6 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
 
-    # def test_as_str_concat(self, tmpdir):
-    #     input_code = """
-    #     import tempfile
-    #
-    #     var = "hello"
-    #     filename = tempfile.mktemp() + var
-    #     """
-    #     expected_output = """
-    #     import tempfile
-    #
-    #     var = "hello"
-    #
-    #     with tempfile.NamedTemporaryFile(delete=False) as tf:
-    #         filename = tf.name + var
-    #     """
-    #     self.run_and_assert(tmpdir, input_code, expected_output)
-    #
     # def test_import_with_arg(self, tmpdir):
     #     input_code = """
     #     import tempfile
@@ -97,22 +82,22 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
     #     """
     #     self.run_and_assert(tmpdir, input_code, expected_output)
     #
-    # def test_from_import(self, tmpdir):
-    #     input_code = """
-    #     from tempfile import mktemp
-    #
-    #     filename = mktemp()
-    #     print(filename)
-    #     """
-    #     expected_output = """
-    #     import tempfile
-    #
-    #     with tempfile.NamedTemporaryFile(delete=False) as tf:
-    #         filename = tf.name
-    #     print(filename)
-    #     """
-    #     self.run_and_assert(tmpdir, input_code, expected_output)
-    #
+    def test_from_import(self, tmpdir):
+        input_code = """
+        from tempfile import mktemp
+
+        filename = mktemp()
+        print(filename)
+        """
+        expected_output = """
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            filename = tf.name
+        print(filename)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
     # def test_import_alias(self, tmpdir):
     #     input_code = """
     #     import tempfile as _tempfile
@@ -164,76 +149,95 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
     #     """
     #     self.run_and_assert(tmpdir, input_code, expected_output)
 
+    @pytest.mark.xfail(reason="Not currently supported")
+    def test_as_str_concat(self, tmpdir):
+        input_code = """
+        import tempfile
 
-# class TestOpenTempfileMktemp(BaseSemgrepCodemodTest):
-#     codemod = TempfileMktemp
-#
-#     def test_open_and_write(self, tmpdir):
-#         input_code = """
-#         import tempfile
-#
-#         tmp_file = open(tempfile.mktemp(), "w+")
-#         tmp_file.write("text")
-#         """
-#         expected_output = """
-#         import tempfile
-#
-#         with tempfile.NamedTemporaryFile("w+", delete=False) as tf:
-#             tf.write("text")
-#         """
-#         self.run_and_assert(tmpdir, input_code, expected_output)
-#
-#     def test_open_write_close(self, tmpdir):
-#         input_code = """
-#         import tempfile
-#
-#         tmp_file = open(tempfile.mktemp(), "w+")
-#         tmp_file.write("text")
-#         print(tmp_file.name)
-#         tmp_file.close()
-#         """
-#         expected_output = """
-#         import tempfile
-#
-#         with tempfile.NamedTemporaryFile("w+") as tf:
-#             tf.write("text")
-#             print(tmp_file.name)
-#         """
-#         self.run_and_assert(tmpdir, input_code, expected_output)
-#
-#     def test_make_name_then_open(self, tmpdir):
-#         input_code = """
-#         import tempfile
-#
-#         filename = tempfile.mktemp()
-#         print(filename)
-#         tmp_file = open(filename, "w+")
-#         tmp_file.write("text")
-#         print("hello")
-#         """
-#         expected_output = """
-#         import tempfile
-#
-#         with tempfile.NamedTemporaryFile("w+", delete=False) as tf:
-#             filename = tf.name
-#             print(filename)
-#             tf.write("text")
-#         print("hello")
-#         """
-#         self.run_and_assert(tmpdir, input_code, expected_output)
-#
-#     def test_open_context_manager(self, tmpdir):
-#         input_code = """
-#         import tempfile
-#
-#         filename = tempfile.mktemp()
-#         with open(filename, "w+") as tmp:
-#             tmp.write("text")
-#         """
-#         expected_output = """
-#         import tempfile
-#
-#         with tempfile.NamedTemporaryFile("w+") as tf:
-#             tf.write("text")
-#         """
-#         self.run_and_assert(tmpdir, input_code, expected_output)
+        var = "hello"
+        filename = tempfile.mktemp() + var
+        """
+        expected_output = """
+        import tempfile
+
+        var = "hello"
+
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            filename = tf.name + var
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+
+@pytest.mark.xfail(reason="Not currently supported")
+class TestOpenTempfileMktemp(BaseSemgrepCodemodTest):
+    codemod = TempfileMktemp
+
+    def test_open_and_write(self, tmpdir):
+        input_code = """
+        import tempfile
+
+        tmp_file = open(tempfile.mktemp(), "w+")
+        tmp_file.write("text")
+        """
+        expected_output = """
+        import tempfile
+
+        with tempfile.NamedTemporaryFile("w+", delete=False) as tf:
+            tf.write("text")
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_open_write_close(self, tmpdir):
+        input_code = """
+        import tempfile
+
+        tmp_file = open(tempfile.mktemp(), "w+")
+        tmp_file.write("text")
+        print(tmp_file.name)
+        tmp_file.close()
+        """
+        expected_output = """
+        import tempfile
+
+        with tempfile.NamedTemporaryFile("w+") as tf:
+            tf.write("text")
+            print(tmp_file.name)
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_make_name_then_open(self, tmpdir):
+        input_code = """
+        import tempfile
+
+        filename = tempfile.mktemp()
+        print(filename)
+        tmp_file = open(filename, "w+")
+        tmp_file.write("text")
+        print("hello")
+        """
+        expected_output = """
+        import tempfile
+
+        with tempfile.NamedTemporaryFile("w+", delete=False) as tf:
+            filename = tf.name
+            print(filename)
+            tf.write("text")
+        print("hello")
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_open_context_manager(self, tmpdir):
+        input_code = """
+        import tempfile
+
+        filename = tempfile.mktemp()
+        with open(filename, "w+") as tmp:
+            tmp.write("text")
+        """
+        expected_output = """
+        import tempfile
+
+        with tempfile.NamedTemporaryFile("w+") as tf:
+            tf.write("text")
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
