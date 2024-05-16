@@ -7,16 +7,16 @@ from core_codemods.tempfile_mktemp import TempfileMktemp
 class TestTempfileMktemp(BaseSemgrepCodemodTest):
     codemod = TempfileMktemp
 
-    # def test_name(self):
-    #     assert self.codemod.name == "secure-tempfile"
-    #
-    # def test_no_change(self, tmpdir):
-    #     input_code = """
-    #     import tempfile
-    #     tempfile.mktemp()
-    #     var = "hello"
-    #     """
-    #     self.run_and_assert(tmpdir, input_code, input_code)
+    def test_name(self):
+        assert self.codemod.name == "secure-tempfile"
+
+    def test_no_change(self, tmpdir):
+        input_code = """
+        import tempfile
+        tempfile.mktemp()
+        var = "hello"
+        """
+        self.run_and_assert(tmpdir, input_code, input_code)
 
     def test_import(self, tmpdir):
         input_code = """
@@ -54,34 +54,34 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
 
-    # def test_import_with_arg(self, tmpdir):
-    #     input_code = """
-    #     import tempfile
-    #
-    #     filename = tempfile.mktemp('suffix')
-    #     filename = tempfile.mktemp('suffix', 'prefix')
-    #     filename = tempfile.mktemp('suffix', 'prefix', 'dir')
-    #     filename = tempfile.mktemp('suffix', prefix='prefix')
-    #     filename = tempfile.mktemp(suffix='suffix', prefix='prefix', dir='dir')
-    #     var = "hello"
-    #     """
-    #     expected_output = """
-    #     import tempfile
-    #
-    #     with tempfile.NamedTemporaryFile(suffix='suffix', delete=False) as tf:
-    #         filename = tf.name
-    #     with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', delete=False) as tf:
-    #         filename = tf.name
-    #     with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', dir='dir', delete=False) as tf:
-    #         filename = tf.name
-    #     with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', delete=False) as tf:
-    #         filename = tf.name
-    #     with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', dir='dir', delete=False) as tf:
-    #         filename = tf.name
-    #     var = "hello"
-    #     """
-    #     self.run_and_assert(tmpdir, input_code, expected_output)
-    #
+    def test_import_with_arg(self, tmpdir):
+        input_code = """
+        import tempfile
+
+        filename = tempfile.mktemp('suffix')
+        print(tempfile.mktemp('suffix', 'prefix'))
+        filename = tempfile.mktemp('suffix', 'prefix', 'dir')
+        filename = tempfile.mktemp('suffix', prefix='prefix')
+        filename = tempfile.mktemp(suffix='suffix', prefix='prefix', dir='dir')
+        var = "hello"
+        """
+        expected_output = """
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(suffix='suffix', delete=False) as tf:
+            filename = tf.name
+        with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', delete=False) as tf:
+            print(tf.name)
+        with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', dir='dir', delete=False) as tf:
+            filename = tf.name
+        with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', delete=False) as tf:
+            filename = tf.name
+        with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', dir='dir', delete=False) as tf:
+            filename = tf.name
+        var = "hello"
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output, 5)
+
     def test_from_import(self, tmpdir):
         input_code = """
         from tempfile import mktemp

@@ -33,41 +33,30 @@ class TempfileMktempTransformer(
     ) -> cst.SimpleStatementLine | cst.FlattenSentinel:
         if maybe_tuple := self._is_assigned_to_mktemp(bsstmt):  # type: ignore
             assign_name, call = maybe_tuple
-            return self.report_and_change_assignment(call, assign_name)
+            return self.report_and_change(call, assign_name)
         if maybe_tuple := self._mktemp_is_sink(bsstmt):
             wrapper_func_name, call = maybe_tuple
-            return self.report_and_change_sink(call, wrapper_func_name)
+            return self.report_and_change(call, wrapper_func_name, assignment=False)
         return original_node
 
-    def report_and_change_assignment(
-        self, node: cst.Call, assign_name: cst.Name
+    def report_and_change(
+        self, node: cst.Call, name: cst.Name, assignment=True
     ) -> cst.FlattenSentinel:
-        new_stmt = dedent(
-            f"""
-        with tempfile.NamedTemporaryFile(delete=False) as tf:
-            {assign_name.value} = tf.name
-        """
-        ).rstrip()
-        return self._report_and_change(node, new_stmt)
-
-    def report_and_change_sink(
-        self, node: cst.Call, sink_name: cst.Name
-    ) -> cst.FlattenSentinel:
-
-        new_stmt = dedent(
-            f"""
-        with tempfile.NamedTemporaryFile(delete=False) as tf:
-            {sink_name.value}(tf.name)
-        """
-        ).rstrip()
-        return self._report_and_change(node, new_stmt)
-
-    def _report_and_change(self, node: cst.Call, new_stmt: str) -> cst.FlattenSentinel:
         self.report_change(node)
         maybe_name = self.get_aliased_prefix_name(node, self._module_name)
         if maybe_name or self._module_name == self._module_name:
             self.add_needed_import(self._module_name)
         self.remove_unused_import(node)
+
+        with_block = (
+            f"{name.value} = tf.name" if assignment else f"{name.value}(tf.name)"
+        )
+        new_stmt = dedent(
+            f"""
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            {with_block}
+        """
+        ).rstrip()
         return cst.FlattenSentinel(
             [
                 cst.parse_statement(new_stmt),
