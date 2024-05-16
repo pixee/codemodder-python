@@ -9,6 +9,7 @@ from codemodder.codemods.libcst_transformer import (
     LibcstTransformerPipeline,
 )
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from codemodder.utils.utils import clean_simplestring
 from core_codemods.api import CoreCodemod, Metadata, Reference, ReviewGuidance
 
 
@@ -47,13 +48,12 @@ class TempfileMktempTransformer(
         if maybe_name or self._module_name == self._module_name:
             self.add_needed_import(self._module_name)
         self.remove_unused_import(node)
-
         with_block = (
             f"{name.value} = tf.name" if assignment else f"{name.value}(tf.name)"
         )
         new_stmt = dedent(
             f"""
-        with tempfile.NamedTemporaryFile(delete=False) as tf:
+        with tempfile.NamedTemporaryFile({self._make_args(node)}) as tf:
             {with_block}
         """
         ).rstrip()
@@ -62,6 +62,19 @@ class TempfileMktempTransformer(
                 cst.parse_statement(new_stmt),
             ]
         )
+
+    def _make_args(self, node: cst.Call) -> str:
+        """Convert args passed to tempfile.mktemp() to string for args to tempfile.NamedTemporaryFile"""
+
+        default = "delete=False"
+        if not node.args:
+            return default
+        new_args = ""
+        arg_keys = ("suffix", "prefix", "dir")
+        for idx, arg in enumerate(node.args):
+            cst.ensure_type(val := arg.value, cst.SimpleString)
+            new_args += f'{arg_keys[idx]}="{clean_simplestring(val)}", '
+        return f"{new_args}{default}"
 
     def _is_assigned_to_mktemp(
         self, bsstmt: cst.BaseSmallStatement

@@ -68,15 +68,19 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
         expected_output = """
         import tempfile
 
-        with tempfile.NamedTemporaryFile(suffix='suffix', delete=False) as tf:
+        with tempfile.NamedTemporaryFile(suffix="suffix", delete=False) as tf:
             filename = tf.name
-        with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', delete=False) as tf:
+        
+        with tempfile.NamedTemporaryFile(suffix="suffix", prefix="prefix", delete=False) as tf:
             print(tf.name)
-        with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', dir='dir', delete=False) as tf:
+        
+        with tempfile.NamedTemporaryFile(suffix="suffix", prefix="prefix", dir="dir", delete=False) as tf:
             filename = tf.name
-        with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', delete=False) as tf:
+        
+        with tempfile.NamedTemporaryFile(suffix="suffix", prefix="prefix", delete=False) as tf:
             filename = tf.name
-        with tempfile.NamedTemporaryFile(suffix='suffix', prefix='prefix', dir='dir', delete=False) as tf:
+        
+        with tempfile.NamedTemporaryFile(suffix="suffix", prefix="prefix", dir="dir", delete=False) as tf:
             filename = tf.name
         var = "hello"
         """
