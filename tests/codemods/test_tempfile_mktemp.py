@@ -98,56 +98,59 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
-    # def test_import_alias(self, tmpdir):
-    #     input_code = """
-    #     import tempfile as _tempfile
-    #
-    #     filename = _tempfile.mktemp()
-    #     var = "hello"
-    #     """
-    #     expected_output = """
-    #     import tempfile as _tempfile
-    #
-    #     with _tempfile.NamedTemporaryFile(delete=False) as tf:
-    #         filename = tf.name
-    #     var = "hello"
-    #     """
-    #     self.run_and_assert(tmpdir, input_code, expected_output)
-    #
-    # def test_import_method_alias(self, tmpdir):
-    #     input_code = """
-    #     from tempfile import mktemp as get_temp_file
-    #
-    #     filename = get_temp_file()
-    #     var = "hello"
-    #     """
-    #     expected_output = """
-    #     import tempfile
-    #
-    #     with tempfile.NamedTemporaryFile(delete=False) as tf:
-    #         filename = tf.name
-    #     var = "hello"
-    #     """
-    #     self.run_and_assert(tmpdir, input_code, expected_output)
-    #
-    # def test_random_multifunctions(self, tmpdir):
-    #     input_code = """
-    #     from tempfile import mktemp, TemporaryFile
-    #
-    #     filename = mktemp()
-    #     TemporaryFile()
-    #     var = "hello"
-    #     """
-    #     expected_output = """
-    #     from tempfile import TemporaryFile
-    #     import tempfile
-    #
-    #     with tempfile.NamedTemporaryFile(delete=False) as tf:
-    #         filename = tf.name
-    #     TemporaryFile()
-    #     var = "hello"
-    #     """
-    #     self.run_and_assert(tmpdir, input_code, expected_output)
+    def test_import_alias(self, tmpdir):
+        input_code = """
+        import tempfile as _tempfile
+
+        filename = _tempfile.mktemp()
+        var = "hello"
+        _tempfile.template
+        """
+        expected_output = """
+        import tempfile as _tempfile
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            filename = tf.name
+        var = "hello"
+        _tempfile.template
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_import_method_alias(self, tmpdir):
+        input_code = """
+        from tempfile import mktemp as get_temp_file
+
+        filename = get_temp_file()
+        var = "hello"
+        """
+        expected_output = """
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            filename = tf.name
+        var = "hello"
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_random_multifunctions(self, tmpdir):
+        input_code = """
+        from tempfile import mktemp, TemporaryFile
+
+        filename = mktemp()
+        TemporaryFile()
+        var = "hello"
+        """
+        expected_output = """
+        from tempfile import TemporaryFile
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            filename = tf.name
+        TemporaryFile()
+        var = "hello"
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.xfail(reason="Not currently supported")
     def test_as_str_concat(self, tmpdir):
