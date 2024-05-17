@@ -44,9 +44,7 @@ class TempfileMktempTransformer(
         self, node: cst.Call, name: cst.Name, assignment=True
     ) -> cst.FlattenSentinel:
         self.report_change(node)
-        maybe_name = self.get_aliased_prefix_name(node, self._module_name)
-        if (maybe_name or self._module_name) == self._module_name:
-            self.add_needed_import(self._module_name)
+        self.add_needed_import(self._module_name)
         self.remove_unused_import(node)
         with_block = (
             f"{name.value} = tf.name" if assignment else f"{name.value}(tf.name)"
