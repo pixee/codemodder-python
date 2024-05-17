@@ -45,7 +45,7 @@ class TempfileMktempTransformer(
     ) -> cst.FlattenSentinel:
         self.report_change(node)
         maybe_name = self.get_aliased_prefix_name(node, self._module_name)
-        if maybe_name or self._module_name == self._module_name:
+        if (maybe_name or self._module_name) == self._module_name:
             self.add_needed_import(self._module_name)
         self.remove_unused_import(node)
         with_block = (
@@ -125,7 +125,7 @@ TempfileMktemp = CoreCodemod(
     metadata=Metadata(
         name="secure-tempfile",
         summary="Upgrade and Secure Temp File Creation",
-        review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
+        review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
         references=[
             Reference(
                 url="https://docs.python.org/3/library/tempfile.html#tempfile.mktemp"

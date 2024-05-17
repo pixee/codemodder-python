@@ -94,7 +94,7 @@ CORE_CODEMODS = {
     ),
     "secure-tempfile": DocMetadata(
         importance="High",
-        guidance_explained="We believe this codemod is safe and will cause no unexpected errors.",
+        guidance_explained="We believe this codemod is safe. You should review this code before merging to make sure temporary files are created, used, and closed according to your expectations.",
     ),
     "upgrade-sslcontext-minimum-version": DocMetadata(
         importance="High",
