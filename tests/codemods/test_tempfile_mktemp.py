@@ -156,6 +156,16 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected_output)
 
+    def test_open_and_write_no_change(self, tmpdir):
+        input_code = """
+        import tempfile
+
+        tmp_file = open(tempfile.mktemp(), "w+")
+        tmp_file.write("text")
+        print(tmp_file.name)
+        """
+        self.run_and_assert(tmpdir, input_code, input_code)
+
     @pytest.mark.xfail(reason="Not currently supported")
     def test_as_str_concat(self, tmpdir):
         input_code = """
