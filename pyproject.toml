@@ -62,7 +62,7 @@ test = [
     "pytest-mock>=3.12,<3.15",
     "pytest-randomly==3.*",
     "pytest-xdist==3.*",
-    "requests~=2.31.0",
+    "requests>=2.31,<2.33",
     "security~=1.2.0",
     "types-mock==5.1.*",
     "django>=4,<6",
