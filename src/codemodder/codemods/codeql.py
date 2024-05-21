@@ -22,8 +22,8 @@ class CodeQLSarifFileDetector(BaseDetector):
 
 
 @cache
-def process_codeql_findings(semgrep_sarif_files: tuple[str]) -> ResultSet:
+def process_codeql_findings(codeql_sarif_files: tuple[str]) -> ResultSet:
     results = CodeQLResultSet()
-    for file in semgrep_sarif_files or ():
+    for file in codeql_sarif_files or ():
         results |= CodeQLResultSet.from_sarif(file)
     return results
