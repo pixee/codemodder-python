@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar, Type
 
 import libcst as cst
 from libcst._position import CodeRange
@@ -29,6 +29,11 @@ class Location(ABCDataclass):
     file: Path
     start: LineInfo
     end: LineInfo
+
+    @classmethod
+    @abstractmethod
+    def from_sarif(cls, sarif_location) -> Self:
+        pass
 
 
 @dataclass
@@ -62,6 +67,8 @@ class Result(ABCDataclass):
 
 @dataclass(kw_only=True)
 class SarifResult(Result, ABCDataclass):
+    location_type: ClassVar[Type[Location]]
+
     @classmethod
     def from_sarif(
         cls, sarif_result, sarif_run, truncate_rule_id: bool = False
@@ -74,19 +81,32 @@ class SarifResult(Result, ABCDataclass):
         )
 
     @classmethod
-    @abstractmethod
-    def extract_locations(cls, sarif_result):
-        pass
+    def extract_locations(cls, sarif_result) -> list[Location]:
+        return [
+            cls.location_type.from_sarif(location)
+            for location in sarif_result["locations"]
+        ]
 
     @classmethod
-    @abstractmethod
-    def extract_related_locations(cls, sarif_result):
-        pass
+    def extract_related_locations(cls, sarif_result) -> list[LocationWithMessage]:
+        return [
+            LocationWithMessage(
+                message=rel_location.get("message", {}).get("text", ""),
+                location=cls.location_type.from_sarif(rel_location),
+            )
+            for rel_location in sarif_result.get("relatedLocations", [])
+        ]
 
     @classmethod
-    @abstractmethod
-    def extract_code_flows(cls, sarif_result):
-        pass
+    def extract_code_flows(cls, sarif_result) -> list[list[Location]]:
+        return [
+            [
+                cls.location_type.from_sarif(locations.get("location"))
+                for locations in threadflow.get("locations", {})
+            ]
+            for codeflow in sarif_result.get("codeFlows", {})
+            for threadflow in codeflow.get("threadFlows", {})
+        ]
 
     @classmethod
     def extract_rule_id(cls, result, sarif_run, truncate_rule_id: bool = False) -> str:

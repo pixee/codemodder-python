@@ -9,14 +9,7 @@ from typing_extensions import Self, override
 
 from codemodder.context import CodemodExecutionContext
 from codemodder.logging import logger
-from codemodder.result import (
-    LineInfo,
-    Location,
-    LocationWithMessage,
-    Result,
-    ResultSet,
-    SarifResult,
-)
+from codemodder.result import LineInfo, Location, Result, ResultSet, SarifResult
 from codemodder.sarifs import AbstractSarifToolDetector
 
 
@@ -48,33 +41,7 @@ class SemgrepLocation(Location):
 
 
 class SemgrepResult(SarifResult):
-    @classmethod
-    def extract_locations(cls, sarif_result) -> list[Location]:
-        return [
-            SemgrepLocation.from_sarif(location)
-            for location in sarif_result["locations"]
-        ]
-
-    @classmethod
-    def extract_related_locations(cls, sarif_result) -> list[LocationWithMessage]:
-        return [
-            LocationWithMessage(
-                message=rel_location.get("message", {}).get("text", ""),
-                location=SemgrepLocation.from_sarif(rel_location),
-            )
-            for rel_location in sarif_result.get("relatedLocations", [])
-        ]
-
-    @classmethod
-    def extract_code_flows(cls, sarif_result) -> list[list[Location]]:
-        return [
-            [
-                SemgrepLocation.from_sarif(locations.get("location"))
-                for locations in threadflow.get("locations", {})
-            ]
-            for codeflow in sarif_result.get("codeFlows", {})
-            for threadflow in codeflow.get("threadFlows", {})
-        ]
+    location_type = SemgrepLocation
 
 
 class SemgrepResultSet(ResultSet):

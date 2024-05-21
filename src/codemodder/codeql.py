@@ -3,13 +3,7 @@ from pathlib import Path
 
 from typing_extensions import Self
 
-from codemodder.result import (
-    LineInfo,
-    Location,
-    LocationWithMessage,
-    ResultSet,
-    SarifResult,
-)
+from codemodder.result import LineInfo, Location, ResultSet, SarifResult
 from codemodder.sarifs import AbstractSarifToolDetector
 
 
@@ -42,38 +36,7 @@ class CodeQLLocation(Location):
 
 
 class CodeQLResult(SarifResult):
-    @classmethod
-    def extract_locations(cls, sarif_result) -> list[Location]:
-        locations: list[Location] = []
-        for location in sarif_result["locations"]:
-            try:
-                codeql_location = CodeQLLocation.from_sarif(location)
-            except KeyError:
-                continue
-
-            locations.append(codeql_location)
-        return locations
-
-    @classmethod
-    def extract_related_locations(cls, sarif_result) -> list[LocationWithMessage]:
-        return [
-            LocationWithMessage(
-                message=rel_location.get("message", {}).get("text", ""),
-                location=CodeQLLocation.from_sarif(rel_location),
-            )
-            for rel_location in sarif_result.get("relatedLocations", [])
-        ]
-
-    @classmethod
-    def extract_code_flows(cls, sarif_result) -> list[list[Location]]:
-        return [
-            [
-                CodeQLLocation.from_sarif(locations.get("location"))
-                for locations in threadflow.get("locations", {})
-            ]
-            for codeflow in sarif_result.get("codeFlows", {})
-            for threadflow in codeflow.get("threadFlows", {})
-        ]
+    location_type = CodeQLLocation
 
 
 class CodeQLResultSet(ResultSet):
