@@ -50,7 +50,7 @@ class XMLTransformer(XMLGenerator, LexicalHandler):
         self._write(f"<!--{content}-->\n")  # type: ignore
 
     def startCDATA(self):
-        self._write("<!CDATA[")  # type: ignore
+        self._write("<![CDATA[")  # type: ignore
 
     def endCDATA(self):
         self._write("]]>")  # type: ignore
@@ -99,7 +99,7 @@ class ElementAttributeXMLTransformer(XMLTransformer):
         self,
         out,
         name_attributes_map: dict[str, dict[str, str]],
-        encoding: str = "iso-8859-1",
+        encoding: str = "utf-8",
         short_empty_elements: bool = False,
         results: list[Result] | None = None,
     ) -> None:
@@ -108,10 +108,9 @@ class ElementAttributeXMLTransformer(XMLTransformer):
 
     def startElement(self, name, attrs):
         new_attrs = attrs
-        if self.event_match_result():
-            if name in self.name_attributes_map:
-                new_attrs = self.name_attributes_map[name]
-                self.add_change(self._my_locator.getLineNumber())
+        if self.event_match_result() and name in self.name_attributes_map:
+            new_attrs = self.name_attributes_map[name]
+            self.add_change(self._my_locator.getLineNumber())
         super().startElement(name, new_attrs)
 
 
