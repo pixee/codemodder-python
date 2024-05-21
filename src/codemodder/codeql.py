@@ -3,7 +3,13 @@ from pathlib import Path
 
 from typing_extensions import Self
 
-from codemodder.result import LineInfo, Location, LocationWithMessage, Result, ResultSet
+from codemodder.result import (
+    LineInfo,
+    Location,
+    LocationWithMessage,
+    ResultSet,
+    SarifResult,
+)
 from codemodder.sarifs import AbstractSarifToolDetector
 
 
@@ -35,15 +41,9 @@ class CodeQLLocation(Location):
         return cls(file=file, start=start, end=end)
 
 
-class CodeQLResult(Result):
+class CodeQLResult(SarifResult):
     @classmethod
-    def from_sarif(
-        cls, sarif_result, sarif_run, rule_extensions, truncate_rule_id: bool = False
-    ) -> Self:
-        extension_index = sarif_result["rule"]["toolComponent"]["index"]
-        tool_index = sarif_result["rule"]["index"]
-        rule_data = rule_extensions[extension_index]["rules"][tool_index]
-
+    def extract_locations(cls, sarif_result) -> list[Location]:
         locations: list[Location] = []
         for location in sarif_result["locations"]:
             try:
@@ -52,7 +52,21 @@ class CodeQLResult(Result):
                 continue
 
             locations.append(codeql_location)
-        all_flows: list[list[Location]] = [
+        return locations
+
+    @classmethod
+    def extract_related_locations(cls, sarif_result) -> list[LocationWithMessage]:
+        return [
+            LocationWithMessage(
+                message=rel_location.get("message", {}).get("text", ""),
+                location=CodeQLLocation.from_sarif(rel_location),
+            )
+            for rel_location in sarif_result.get("relatedLocations", [])
+        ]
+
+    @classmethod
+    def extract_code_flows(cls, sarif_result) -> list[list[Location]]:
+        return [
             [
                 CodeQLLocation.from_sarif(locations.get("location"))
                 for locations in threadflow.get("locations", {})
@@ -60,21 +74,6 @@ class CodeQLResult(Result):
             for codeflow in sarif_result.get("codeFlows", {})
             for threadflow in codeflow.get("threadFlows", {})
         ]
-        related_locations: list[LocationWithMessage] = []
-        if "relatedLocations" in sarif_result:
-            related_locations = [
-                LocationWithMessage(
-                    message=rel_location.get("message", {}).get("text", ""),
-                    location=CodeQLLocation.from_sarif(rel_location),
-                )
-                for rel_location in sarif_result.get("relatedLocations", [])
-            ]
-        return cls(
-            rule_id=rule_data["id"],
-            locations=locations,
-            codeflows=all_flows,
-            related_locations=related_locations,
-        )
 
 
 class CodeQLResultSet(ResultSet):
@@ -85,11 +84,10 @@ class CodeQLResultSet(ResultSet):
 
         result_set = cls()
         for sarif_run in data["runs"]:
-            rule_extensions = sarif_run["tool"]["extensions"]
             if CodeQLSarifToolDetector.detect(sarif_run):
                 for sarif_result in sarif_run["results"]:
                     codeql_result = CodeQLResult.from_sarif(
-                        sarif_result, sarif_run, rule_extensions, truncate_rule_id
+                        sarif_result, sarif_run, truncate_rule_id
                     )
                     result_set.add_result(codeql_result)
         return result_set
