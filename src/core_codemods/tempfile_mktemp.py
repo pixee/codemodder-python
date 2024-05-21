@@ -2,7 +2,7 @@ from textwrap import dedent
 from typing import Optional
 
 import libcst as cst
-from libcst import ensure_type, matchers
+from libcst import matchers
 
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
@@ -22,11 +22,7 @@ class TempfileMktempTransformer(
     def leave_SimpleStatementLine(self, original_node, updated_node):
         match original_node:
             case cst.SimpleStatementLine(body=[bsstmt]):
-                block = self.get_parent(original_node)
-                # SimpleStatementLine is always part of a IndentedBlock or Module body
-                block = ensure_type(block, cst.IndentedBlock | cst.Module)
-                if isinstance(block, cst.Module):
-                    return self.check_mktemp(original_node, bsstmt)
+                return self.check_mktemp(original_node, bsstmt)
         return updated_node
 
     def check_mktemp(
