@@ -39,6 +39,8 @@ class TestSonarTempfileMktemp(BaseSASTCodemodTest):
             ]
         }
         self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(issues))
+        unfixed = self.execution_context.get_unfixed_findings(self.codemod.id)
+        assert len(unfixed) == 0
 
     def test_unfixed(self, tmpdir):
         RULE_ID = "python:S5445"

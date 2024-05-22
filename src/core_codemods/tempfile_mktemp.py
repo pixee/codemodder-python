@@ -4,7 +4,6 @@ from typing import Optional
 import libcst as cst
 from libcst import matchers
 from libcst.codemod import CodemodContext
-from libcst.metadata import ScopeProvider
 
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
@@ -34,7 +33,8 @@ class TempfileMktempTransformer(
         super().__init__(context, results, file_context, _transformer)
 
     def visit_Call(self, node: cst.Call) -> None:
-        self.mktemp_calls.add(node) if self._is_mktemp_call(node) else None
+        if self._is_mktemp_call(node):
+            self.mktemp_calls.add(node)
 
     def leave_SimpleStatementLine(
         self,
@@ -157,21 +157,6 @@ class TempfileMktempTransformer(
                             wrapper_func = call.func
                             return (wrapper_func, maybe_value)
         return None
-
-
-class GatherMkTempCallsVisitor(cst.CSTVisitor, NameAndAncestorResolutionMixin):
-    METADATA_DEPENDENCIES = (ScopeProvider,)
-
-    def __init__(self):
-        super().__init__()
-        self.calls = []
-
-    def visit_Call(self, node: cst.Call) -> None:
-        (
-            self.calls.append(node)
-            if self.find_base_name(node.func) == "tempfile.mktemp"
-            else None
-        )
 
 
 TempfileMktemp = CoreCodemod(
