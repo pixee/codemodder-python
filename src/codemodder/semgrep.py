@@ -9,7 +9,7 @@ from typing_extensions import Self, override
 
 from codemodder.context import CodemodExecutionContext
 from codemodder.logging import logger
-from codemodder.result import LineInfo, Location, LocationWithMessage, Result, ResultSet
+from codemodder.result import LineInfo, Result, ResultSet, SarifLocation, SarifResult
 from codemodder.sarifs import AbstractSarifToolDetector
 
 
@@ -22,7 +22,7 @@ class SemgrepSarifToolDetector(AbstractSarifToolDetector):
         )
 
 
-class SemgrepLocation(Location):
+class SemgrepLocation(SarifLocation):
     @classmethod
     def from_sarif(cls, sarif_location) -> Self:
         artifact_location = sarif_location["physicalLocation"]["artifactLocation"]
@@ -40,60 +40,8 @@ class SemgrepLocation(Location):
         return cls(file=file, start=start, end=end)
 
 
-class SemgrepResult(Result):
-    @classmethod
-    def extract_rule_id(
-        cls, result, sarif_run, truncate_rule_id: bool = False
-    ) -> Optional[str]:
-        if rule_id := result.get("ruleId"):
-            return rule_id.split(".")[-1] if truncate_rule_id else rule_id
-
-        # it may be contained in the 'rule' field through the tool component in the sarif file
-        if "rule" in result:
-            tool_index = result["rule"]["toolComponent"]["index"]
-            rule_index = result["rule"]["index"]
-            return sarif_run["tool"]["extensions"][tool_index]["rules"][rule_index][
-                "id"
-            ]
-
-        return None
-
-    @classmethod
-    def from_sarif(
-        cls, sarif_result, sarif_run, truncate_rule_id: bool = False
-    ) -> Self:
-        if not (
-            rule_id := cls.extract_rule_id(sarif_result, sarif_run, truncate_rule_id)
-        ):
-            raise ValueError("Could not extract rule id from sarif result.")
-
-        locations: list[Location] = []
-        for location in sarif_result["locations"]:
-            artifact_location = SemgrepLocation.from_sarif(location)
-            locations.append(artifact_location)
-        all_flows: list[list[Location]] = [
-            [
-                SemgrepLocation.from_sarif(locations.get("location"))
-                for locations in threadflow.get("locations", {})
-            ]
-            for codeflow in sarif_result.get("codeFlows", {})
-            for threadflow in codeflow.get("threadFlows", {})
-        ]
-        related_locations: list[LocationWithMessage] = []
-        if "relatedLocations" in sarif_result:
-            related_locations = [
-                LocationWithMessage(
-                    message=rel_location.get("message", {}).get("text", ""),
-                    location=SemgrepLocation.from_sarif(rel_location),
-                )
-                for rel_location in sarif_result.get("relatedLocations", [])
-            ]
-        return cls(
-            rule_id=rule_id,
-            locations=locations,
-            codeflows=all_flows,
-            related_locations=related_locations,
-        )
+class SemgrepResult(SarifResult):
+    location_type = SemgrepLocation
 
 
 class SemgrepResultSet(ResultSet):

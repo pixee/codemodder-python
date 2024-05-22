@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from abc import abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar, Type
 
 import libcst as cst
 from libcst._position import CodeRange
+from typing_extensions import Self
 
 from codemodder.codetf import Finding
 
@@ -27,6 +29,13 @@ class Location(ABCDataclass):
     file: Path
     start: LineInfo
     end: LineInfo
+
+
+class SarifLocation(Location):
+    @classmethod
+    @abstractmethod
+    def from_sarif(cls, sarif_location) -> Self:
+        pass
 
 
 @dataclass
@@ -56,6 +65,65 @@ class Result(ABCDataclass):
             )
             for location in self.locations
         )
+
+
+@dataclass(kw_only=True)
+class SarifResult(Result, ABCDataclass):
+    location_type: ClassVar[Type[SarifLocation]]
+
+    @classmethod
+    def from_sarif(
+        cls, sarif_result, sarif_run, truncate_rule_id: bool = False
+    ) -> Self:
+        return cls(
+            rule_id=cls.extract_rule_id(sarif_result, sarif_run, truncate_rule_id),
+            locations=cls.extract_locations(sarif_result),
+            codeflows=cls.extract_code_flows(sarif_result),
+            related_locations=cls.extract_related_locations(sarif_result),
+        )
+
+    @classmethod
+    def extract_locations(cls, sarif_result) -> list[Location]:
+        return [
+            cls.location_type.from_sarif(location)
+            for location in sarif_result["locations"]
+        ]
+
+    @classmethod
+    def extract_related_locations(cls, sarif_result) -> list[LocationWithMessage]:
+        return [
+            LocationWithMessage(
+                message=rel_location.get("message", {}).get("text", ""),
+                location=cls.location_type.from_sarif(rel_location),
+            )
+            for rel_location in sarif_result.get("relatedLocations", [])
+        ]
+
+    @classmethod
+    def extract_code_flows(cls, sarif_result) -> list[list[Location]]:
+        return [
+            [
+                cls.location_type.from_sarif(locations.get("location"))
+                for locations in threadflow.get("locations", {})
+            ]
+            for codeflow in sarif_result.get("codeFlows", {})
+            for threadflow in codeflow.get("threadFlows", {})
+        ]
+
+    @classmethod
+    def extract_rule_id(cls, result, sarif_run, truncate_rule_id: bool = False) -> str:
+        if rule_id := result.get("ruleId"):
+            return rule_id.split(".")[-1] if truncate_rule_id else rule_id
+
+        # it may be contained in the 'rule' field through the tool component in the sarif file
+        if "rule" in result:
+            tool_index = result["rule"]["toolComponent"]["index"]
+            rule_index = result["rule"]["index"]
+            return sarif_run["tool"]["extensions"][tool_index]["rules"][rule_index][
+                "id"
+            ]
+
+        raise ValueError("Could not extract rule id from sarif result.")
 
 
 @dataclass(kw_only=True)
