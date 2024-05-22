@@ -30,6 +30,8 @@ class Location(ABCDataclass):
     start: LineInfo
     end: LineInfo
 
+
+class SarifLocation(Location):
     @classmethod
     @abstractmethod
     def from_sarif(cls, sarif_location) -> Self:
@@ -67,7 +69,7 @@ class Result(ABCDataclass):
 
 @dataclass(kw_only=True)
 class SarifResult(Result, ABCDataclass):
-    location_type: ClassVar[Type[Location]]
+    location_type: ClassVar[Type[SarifLocation]]
 
     @classmethod
     def from_sarif(

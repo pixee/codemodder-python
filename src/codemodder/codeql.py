@@ -3,7 +3,7 @@ from pathlib import Path
 
 from typing_extensions import Self
 
-from codemodder.result import LineInfo, Location, ResultSet, SarifResult
+from codemodder.result import LineInfo, ResultSet, SarifLocation, SarifResult
 from codemodder.sarifs import AbstractSarifToolDetector
 
 
@@ -13,7 +13,7 @@ class CodeQLSarifToolDetector(AbstractSarifToolDetector):
         return "tool" in run_data and "CodeQL" in run_data["tool"]["driver"]["name"]
 
 
-class CodeQLLocation(Location):
+class CodeQLLocation(SarifLocation):
     @classmethod
     def from_sarif(cls, sarif_location) -> Self:
         artifact_location = sarif_location["physicalLocation"]["artifactLocation"]
