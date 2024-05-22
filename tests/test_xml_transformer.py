@@ -75,12 +75,22 @@ class TestElementAttributeXMLTransformer:
         name_attr_map = {"element": {"attr": "true"}}
         self.run_and_assert(name_attr_map, input_code, expected_output)
 
-    def test_change_multiple_attr(self):
+    def test_add_new_attribute(self):
         input_code = """\
                 <?xml version="1.0" encoding="utf-8"?>
-                <element first="1" second="2"></element>"""
+                <element></element>"""
         expected_output = """\
                 <?xml version="1.0" encoding="utf-8"?>
-                <element first="one" second="two"></element>"""
+                <element attr="true"></element>"""
+        name_attr_map = {"element": {"attr": "true"}}
+        self.run_and_assert(name_attr_map, input_code, expected_output)
+
+    def test_change_multiple_attr_and_preserve_existing(self):
+        input_code = """\
+                <?xml version="1.0" encoding="utf-8"?>
+                <element first="1" second="2" three="three"></element>"""
+        expected_output = """\
+                <?xml version="1.0" encoding="utf-8"?>
+                <element first="one" second="two" three="three"></element>"""
         name_attr_map = {"element": {"first": "one", "second": "two"}}
         self.run_and_assert(name_attr_map, input_code, expected_output)

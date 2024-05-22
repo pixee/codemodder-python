@@ -3,7 +3,7 @@ from tempfile import TemporaryFile
 from xml.sax import SAXParseException, handler
 from xml.sax.handler import LexicalHandler
 from xml.sax.saxutils import XMLGenerator
-from xml.sax.xmlreader import Locator
+from xml.sax.xmlreader import AttributesImpl, Locator
 
 from defusedxml.sax import make_parser
 
@@ -107,9 +107,9 @@ class ElementAttributeXMLTransformer(XMLTransformer):
         super().__init__(out, encoding, short_empty_elements, results)
 
     def startElement(self, name, attrs):
-        new_attrs = attrs
+        new_attrs: AttributesImpl = attrs
         if self.event_match_result() and name in self.name_attributes_map:
-            new_attrs = self.name_attributes_map[name]
+            new_attrs = AttributesImpl(attrs._attrs | self.name_attributes_map[name])
             self.add_change(self._my_locator.getLineNumber())
         super().startElement(name, new_attrs)
 
@@ -150,19 +150,18 @@ class XMLTransformerPipeline(BaseTransformerPipeline):
                 return None
 
             diff = ""
-            with open(file_context.file_path, "r") as original:
-                # don't calculate diff if no changes were reported
-                # TODO there's a failure potential here for very large files
-                diff = (
-                    create_diff(
+            # don't calculate diff if no changes were reported
+            if changes:
+                with open(file_context.file_path, "r") as original:
+                    # TODO there's a failure potential here for very large files
+                    diff = create_diff(
                         original.readlines(),
                         output_file.readlines(),
                     )
-                    if changes
-                    else ""
-                )
 
-            if not context.dry_run:
+            # don't write anything if no changes were issued
+            # avoids simply formatting the file
+            if changes and not context.dry_run:
                 with open(file_context.file_path, "w+b") as original:
                     # mmap can't map empty files, write something first
                     original.write(b"a")
