@@ -166,6 +166,21 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, input_code)
 
+    def test_exclude_line(self, tmpdir):
+        input_code = (
+            expected
+        ) = """
+        import tempfile
+        name = tempfile.mktemp()
+        """
+        lines_to_exclude = [3]
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            lines_to_exclude=lines_to_exclude,
+        )
+
     @pytest.mark.xfail(reason="Not currently supported")
     def test_as_str_concat(self, tmpdir):
         input_code = """

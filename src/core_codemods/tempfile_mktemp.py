@@ -36,38 +36,32 @@ class TempfileMktempTransformer(
     def visit_Call(self, node: cst.Call) -> None:
         self.mktemp_calls.add(node) if self._is_mktemp_call(node) else None
 
-    def leave_SimpleStatementLine(self, original_node, updated_node):
-        # todo collapse this method into one below
+    def leave_SimpleStatementLine(
+        self,
+        original_node: cst.SimpleStatementLine,
+        updated_node: cst.SimpleStatementLine,
+    ) -> cst.SimpleStatementLine | cst.FlattenSentinel:
+        if not self.node_is_selected(original_node):
+            return updated_node
+
         match original_node:
             case cst.SimpleStatementLine(body=[bsstmt]):
-                return self.check_mktemp(original_node, bsstmt)
-        return updated_node
-
-    def check_mktemp(
-        self, original_node: cst.SimpleStatementLine, bsstmt: cst.BaseSmallStatement
-    ) -> cst.SimpleStatementLine | cst.FlattenSentinel:
-        # add include/exclude test
-
-        if not self.node_is_selected(original_node):
-            return original_node
-
-        if maybe_tuple := self._is_assigned_to_mktemp(bsstmt):  # type: ignore
-            assign_name, call = maybe_tuple
-            return self.report_and_change(call, assign_name)
-        if maybe_tuple := self._mktemp_is_sink(bsstmt):
-            wrapper_func_name, call = maybe_tuple
-            return self.report_and_change(call, wrapper_func_name, assignment=False)
+                if maybe_tuple := self._is_assigned_to_mktemp(bsstmt):
+                    assign_name, call = maybe_tuple
+                    return self.report_and_change(call, assign_name)
+                if maybe_tuple := self._mktemp_is_sink(bsstmt):
+                    wrapper_func_name, call = maybe_tuple
+                    return self.report_and_change(
+                        call, wrapper_func_name, assignment=False
+                    )
 
         # If we get here it's because there is a mktemp call but we haven't fixed it yet.
         for unfixed in self.mktemp_calls:
             self.report_unfixed(unfixed, reason="Pixee does not yet support this fix.")
         self.mktemp_calls.clear()
-        return original_node
+        return updated_node
 
     def filter_by_result(self, node) -> bool:
-        """
-        TODO
-        """
         match node:
             case cst.SimpleStatementLine():
                 pos_to_match = self.node_position(node)
