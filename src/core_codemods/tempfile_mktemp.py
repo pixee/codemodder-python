@@ -48,11 +48,16 @@ class TempfileMktempTransformer(
             case cst.SimpleStatementLine(body=[bsstmt]):
                 if maybe_tuple := self._is_assigned_to_mktemp(bsstmt):
                     assign_name, call = maybe_tuple
-                    return self.report_and_change(call, assign_name)
+                    return self.report_and_change(
+                        call, assign_name, original_node.leading_lines
+                    )
                 if maybe_tuple := self._mktemp_is_sink(bsstmt):
                     wrapper_func_name, call = maybe_tuple
                     return self.report_and_change(
-                        call, wrapper_func_name, assignment=False
+                        call,
+                        wrapper_func_name,
+                        original_node.leading_lines,
+                        assignment=False,
                     )
 
         # If we get here it's because there is a mktemp call but we haven't fixed it yet.
@@ -75,7 +80,7 @@ class TempfileMktempTransformer(
         return any(same_line(pos, location) for location in result.locations)
 
     def report_and_change(
-        self, node: cst.Call, name: cst.Name, assignment=True
+        self, node: cst.Call, name: cst.Name, leading_lines: tuple, assignment=True
     ) -> cst.FlattenSentinel:
         self.report_change(node)
         self.add_needed_import(self._module_name)
@@ -84,14 +89,15 @@ class TempfileMktempTransformer(
             f"{name.value} = tf.name" if assignment else f"{name.value}(tf.name)"
         )
         new_stmt = dedent(
-            f"""
+            f"""\
         with tempfile.NamedTemporaryFile({self._make_args(node)}) as tf:
             {with_block}
         """
         ).rstrip()
+
         return cst.FlattenSentinel(
             [
-                cst.parse_statement(new_stmt),
+                cst.parse_statement(new_stmt).with_changes(leading_lines=leading_lines),
             ]
         )
 
