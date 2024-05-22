@@ -15,12 +15,13 @@ class TestSonarTempfileMktemp(BaseSASTCodemodTest):
         input_code = """
         import tempfile
         
-        tempfile.mktemp()
+        filename = tempfile.mktemp()
         """
         expected = """
         import tempfile
         
-        tempfile.mkstemp()
+        with tempfile.NamedTemporaryFile(delete=False) as tf:
+            filename = tf.name
         """
         issues = {
             "issues": [

@@ -1,3 +1,3 @@
 import tempfile
 
-tempfile.mktemp()
+filename = tempfile.mktemp()
