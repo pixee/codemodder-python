@@ -23,15 +23,24 @@ from codemodder.registry import CodemodRegistry
 from codemodder.utils.timer import Timer
 
 try:
-    from openai import Client
+    from openai import AzureOpenAI, OpenAI
 except ImportError:
-    Client = None
+    OpenAI = None
+    AzureOpenAI = None
 
 
 if TYPE_CHECKING:
-    from openai import Client
+    from openai import OpenAI
 
     from codemodder.codemods.base_codemod import BaseCodemod
+
+
+class MisconfiguredAIClient(ValueError):
+    pass
+
+
+MODELS = ["gpt-4-turbo-2024-04-09", "gpt-4o-2024-05-13"]
+DEFAULT_AZURE_OPENAI_API_VERSION = "2024-02-01"
 
 
 class CodemodExecutionContext:
@@ -49,7 +58,7 @@ class CodemodExecutionContext:
     path_exclude: list[str]
     max_workers: int = 1
     tool_result_files_map: dict[str, list[str]]
-    llm_client: Client | None = None
+    llm_client: OpenAI | None = None
 
     def __init__(
         self,
@@ -80,16 +89,39 @@ class CodemodExecutionContext:
         self.tool_result_files_map = tool_result_files_map or {}
         self.llm_client = self._setup_llm_client()
 
-    def _setup_llm_client(self) -> Client | None:
-        if not Client:
-            logger.debug("OpenAI API client not available")
+    def _setup_llm_client(self) -> OpenAI | None:
+        if not AzureOpenAI:
+            logger.info("Azure OpenAI API client not available")
+            return None
+
+        azure_openapi_key = os.getenv("CODEMODDER_AZURE_OPENAI_API_KEY")
+        azure_openapi_endpoint = os.getenv("CODEMODDER_AZURE_OPENAI_ENDPOINT")
+        if bool(azure_openapi_key) ^ bool(azure_openapi_endpoint):
+            raise MisconfiguredAIClient(
+                "Azure OpenAI API key and endpoint must both be set or unset"
+            )
+
+        if azure_openapi_key and azure_openapi_endpoint:
+            logger.info("Using Azure OpenAI API client")
+            return AzureOpenAI(
+                api_key=azure_openapi_key,
+                api_version=os.getenv(
+                    "CODEMODDER_AZURE_OPENAI_API_VERSION",
+                    DEFAULT_AZURE_OPENAI_API_VERSION,
+                ),
+                azure_endpoint=azure_openapi_endpoint,
+            )
+
+        if not OpenAI:
+            logger.info("OpenAI API client not available")
             return None
 
         if not (api_key := os.getenv("CODEMODDER_OPENAI_API_KEY")):
-            logger.debug("OpenAI API key not found")
+            logger.info("OpenAI API key not found")
             return None
 
-        return Client(api_key=api_key)
+        logger.info("Using OpenAI API client")
+        return OpenAI(api_key=api_key)
 
     def add_changesets(self, codemod_name: str, change_sets: List[ChangeSet]):
         self._changesets_by_codemod.setdefault(codemod_name, []).extend(change_sets)
@@ -212,3 +244,8 @@ class CodemodExecutionContext:
             for change in changes:
                 logger.info("  - %s", change.path)
                 logger.debug("    diff:\n%s", indent(change.diff, " " * 6))
+
+    def __getattribute__(self, attr: str):
+        if (name := attr.replace("_", "-")) in MODELS:
+            return os.getenv(f"CODEMODDER_AZURE_OPENAI_{name.upper()}_DEPLOYMENT", name)
+        return super().__getattribute__(attr)

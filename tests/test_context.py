@@ -1,6 +1,11 @@
-import pytest
+import os
 
+import pytest
+from openai import AzureOpenAI, OpenAI
+
+from codemodder.context import DEFAULT_AZURE_OPENAI_API_VERSION
 from codemodder.context import CodemodExecutionContext as Context
+from codemodder.context import MisconfiguredAIClient
 from codemodder.dependency import Security
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.registry import load_registered_codemods
@@ -77,3 +82,120 @@ class TestContext:
 ```"""
             in description
         )
+
+    def test_setup_llm_client_no_env_vars(self, mocker):
+        mocker.patch.dict(os.environ, clear=True)
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+        assert context.llm_client is None
+
+    def test_setup_openai_llm_client(self, mocker):
+        mocker.patch.dict(os.environ, {"CODEMODDER_OPENAI_API_KEY": "test"})
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+        assert isinstance(context.llm_client, OpenAI)
+
+    def test_setup_azure_llm_client(self, mocker):
+        mocker.patch.dict(
+            os.environ,
+            {
+                "CODEMODDER_AZURE_OPENAI_API_KEY": "test",
+                "CODEMODDER_AZURE_OPENAI_ENDPOINT": "test",
+            },
+        )
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+        assert isinstance(context.llm_client, AzureOpenAI)
+        assert context.llm_client._api_version == DEFAULT_AZURE_OPENAI_API_VERSION
+
+    @pytest.mark.parametrize(
+        "env_var",
+        ["CODEMODDER_AZURE_OPENAI_API_KEY", "CODEMODDER_AZURE_OPENAI_ENDPOINT"],
+    )
+    def test_setup_azure_llm_client_missing_one(self, mocker, env_var):
+        mocker.patch.dict(os.environ, {env_var: "test"})
+        with pytest.raises(MisconfiguredAIClient):
+            Context(
+                mocker.Mock(),
+                True,
+                False,
+                load_registered_codemods(),
+                PythonRepoManager(mocker.Mock()),
+                [],
+                [],
+            )
+
+    def test_get_model_name(self, mocker):
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+        assert context.gpt_4_turbo_2024_04_09 == "gpt-4-turbo-2024-04-09"
+
+    @pytest.mark.parametrize("model", ["gpt-4-turbo-2024-04-09", "gpt-4o-2024-05-13"])
+    def test_model_get_name_from_env(self, mocker, model):
+        name = "my-awesome-deployment"
+        mocker.patch.dict(
+            os.environ,
+            {
+                f"CODEMODDER_AZURE_OPENAI_{model.upper()}_DEPLOYMENT": name,
+            },
+        )
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+        assert getattr(context, model.replace("-", "_")) == name
+
+    def test_get_api_version_from_env(self, mocker):
+        version = "fake-version"
+        mocker.patch.dict(
+            os.environ,
+            {
+                "CODEMODDER_AZURE_OPENAI_API_KEY": "test",
+                "CODEMODDER_AZURE_OPENAI_ENDPOINT": "test",
+                "CODEMODDER_AZURE_OPENAI_API_VERSION": version,
+            },
+        )
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+        assert isinstance(context.llm_client, AzureOpenAI)
+        assert context.llm_client._api_version == version
