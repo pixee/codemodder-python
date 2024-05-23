@@ -35,7 +35,6 @@ if TYPE_CHECKING:
 
 
 class CodemodExecutionContext:
-    _results_by_codemod: dict[str, list[ChangeSet]] = {}
     _failures_by_codemod: dict[str, list[Path]] = {}
     _dependency_update_by_codemod: dict[str, PackageStore | None] = {}
     _unfixed_findings_by_codemod: dict[str, list[UnfixedFinding]] = {}
@@ -69,6 +68,8 @@ class CodemodExecutionContext:
         self.verbose = verbose
         self._changesets_by_codemod: dict[str, list[ChangeSet]] = {}
         self._failures_by_codemod = {}
+        self._dependency_update_by_codemod = {}
+        self._unfixed_findings_by_codemod = {}
         self.dependencies = {}
         self.registry = registry
         self.repo_manager = repo_manager

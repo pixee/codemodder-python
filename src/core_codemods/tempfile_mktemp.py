@@ -3,12 +3,15 @@ from typing import Optional
 
 import libcst as cst
 from libcst import matchers
+from libcst.codemod import CodemodContext
 
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
 )
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
+from codemodder.file_context import FileContext
+from codemodder.result import Result, same_line
 from codemodder.utils.utils import clean_simplestring
 from core_codemods.api import CoreCodemod, Metadata, Reference, ReviewGuidance
 
@@ -19,26 +22,67 @@ class TempfileMktempTransformer(
     change_description = "Replaces `tempfile.mktemp` with `tempfile.mkstemp`."
     _module_name = "tempfile"
 
-    def leave_SimpleStatementLine(self, original_node, updated_node):
+    def __init__(
+        self,
+        context: CodemodContext,
+        results: list[Result] | None,
+        file_context: FileContext,
+        _transformer: bool = False,
+    ):
+        self.mktemp_calls: set[cst.Call] = set()
+        super().__init__(context, results, file_context, _transformer)
+
+    def visit_Call(self, node: cst.Call) -> None:
+        if self._is_mktemp_call(node):
+            self.mktemp_calls.add(node)
+
+    def leave_SimpleStatementLine(
+        self,
+        original_node: cst.SimpleStatementLine,
+        updated_node: cst.SimpleStatementLine,
+    ) -> cst.SimpleStatementLine | cst.FlattenSentinel:
+        if not self.node_is_selected(original_node):
+            return updated_node
+
         match original_node:
             case cst.SimpleStatementLine(body=[bsstmt]):
-                return self.check_mktemp(original_node, bsstmt)
+                if maybe_tuple := self._is_assigned_to_mktemp(bsstmt):
+                    assign_name, call = maybe_tuple
+                    return self.report_and_change(
+                        call, assign_name, original_node.leading_lines
+                    )
+                if maybe_tuple := self._mktemp_is_sink(bsstmt):
+                    wrapper_func_name, call = maybe_tuple
+                    return self.report_and_change(
+                        call,
+                        wrapper_func_name,
+                        original_node.leading_lines,
+                        assignment=False,
+                    )
+
+        # If we get here it's because there is a mktemp call but we haven't fixed it yet.
+        for unfixed in self.mktemp_calls:
+            self.report_unfixed(unfixed, reason="Pixee does not yet support this fix.")
+        self.mktemp_calls.clear()
         return updated_node
 
-    def check_mktemp(
-        self, original_node: cst.SimpleStatementLine, bsstmt: cst.BaseSmallStatement
-    ) -> cst.SimpleStatementLine | cst.FlattenSentinel:
-        if maybe_tuple := self._is_assigned_to_mktemp(bsstmt):  # type: ignore
-            assign_name, call = maybe_tuple
-            return self.report_and_change(call, assign_name)
-        if maybe_tuple := self._mktemp_is_sink(bsstmt):
-            wrapper_func_name, call = maybe_tuple
-            return self.report_and_change(call, wrapper_func_name, assignment=False)
-        return original_node
+    def filter_by_result(self, node) -> bool:
+        match node:
+            case cst.SimpleStatementLine():
+                pos_to_match = self.node_position(node)
+                return self.results is None or any(
+                    self.match_location(pos_to_match, result)
+                    for result in self.results or []
+                )
+        return False
+
+    def match_location(self, pos, result):
+        return any(same_line(pos, location) for location in result.locations)
 
     def report_and_change(
-        self, node: cst.Call, name: cst.Name, assignment=True
+        self, node: cst.Call, name: cst.Name, leading_lines: tuple, assignment=True
     ) -> cst.FlattenSentinel:
+        self.mktemp_calls.clear()
         self.report_change(node)
         self.add_needed_import(self._module_name)
         self.remove_unused_import(node)
@@ -46,14 +90,15 @@ class TempfileMktempTransformer(
             f"{name.value} = tf.name" if assignment else f"{name.value}(tf.name)"
         )
         new_stmt = dedent(
-            f"""
+            f"""\
         with tempfile.NamedTemporaryFile({self._make_args(node)}) as tf:
             {with_block}
         """
         ).rstrip()
+
         return cst.FlattenSentinel(
             [
-                cst.parse_statement(new_stmt),
+                cst.parse_statement(new_stmt).with_changes(leading_lines=leading_lines),
             ]
         )
 

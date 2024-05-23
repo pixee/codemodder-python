@@ -48,7 +48,6 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
         with tempfile.NamedTemporaryFile(delete=False) as tf:
             print(tf.name)
         var = "hello"
-
         with tempfile.NamedTemporaryFile(delete=False) as tf:
             bool(tf.name)
         """
@@ -70,16 +69,12 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
 
         with tempfile.NamedTemporaryFile(suffix="suffix", delete=False) as tf:
             filename = tf.name
-        
         with tempfile.NamedTemporaryFile(suffix="suffix", prefix="prefix", delete=False) as tf:
             print(tf.name)
-        
         with tempfile.NamedTemporaryFile(suffix="suffix", prefix="prefix", dir="dir", delete=False) as tf:
             filename = tf.name
-        
         with tempfile.NamedTemporaryFile(suffix="suffix", prefix="prefix", delete=False) as tf:
             filename = tf.name
-        
         with tempfile.NamedTemporaryFile(suffix="suffix", prefix="prefix", dir="dir", delete=False) as tf:
             filename = tf.name
         var = "hello"
@@ -165,6 +160,37 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
         print(tmp_file.name)
         """
         self.run_and_assert(tmpdir, input_code, input_code)
+
+    def test_exclude_line(self, tmpdir):
+        input_code = (
+            expected
+        ) = """
+        import tempfile
+        name = tempfile.mktemp()
+        """
+        lines_to_exclude = [3]
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            lines_to_exclude=lines_to_exclude,
+        )
+
+    def test_in_func_scope(self, tmpdir):
+        input_code = """
+        import tempfile
+
+        def make_file():
+            filename = tempfile.mktemp()
+        """
+        expected_output = """
+        import tempfile
+
+        def make_file():
+            with tempfile.NamedTemporaryFile(delete=False) as tf:
+                filename = tf.name
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
 
     @pytest.mark.xfail(reason="Not currently supported")
     def test_as_str_concat(self, tmpdir):

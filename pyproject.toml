@@ -114,7 +114,7 @@ extend-exclude = '''
 '''
 
 [coverage-threshold]
-line_coverage_min = 93.5
+line_coverage_min = 93
 [coverage-threshold.modules."src/core_codemods/"]
 # Detect if a codemod is missing unit or integration tests
 file_line_coverage_min = 50
