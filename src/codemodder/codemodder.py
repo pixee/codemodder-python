@@ -12,7 +12,7 @@ from codemodder.code_directory import match_files
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.semgrep import SemgrepRuleDetector
 from codemodder.codetf import CodeTF
-from codemodder.context import CodemodExecutionContext
+from codemodder.context import CodemodExecutionContext, MisconfiguredAIClient
 from codemodder.dependency import Dependency
 from codemodder.logging import configure_logger, log_list, log_section, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
@@ -166,17 +166,22 @@ def run(original_args) -> int:
     tool_result_files_map["defectdojo"] = argv.defectdojo_findings_json or []
 
     repo_manager = PythonRepoManager(Path(argv.directory))
-    context = CodemodExecutionContext(
-        Path(argv.directory),
-        argv.dry_run,
-        argv.verbose,
-        codemod_registry,
-        repo_manager,
-        argv.path_include,
-        argv.path_exclude,
-        tool_result_files_map,
-        argv.max_workers,
-    )
+
+    try:
+        context = CodemodExecutionContext(
+            Path(argv.directory),
+            argv.dry_run,
+            argv.verbose,
+            codemod_registry,
+            repo_manager,
+            argv.path_include,
+            argv.path_exclude,
+            tool_result_files_map,
+            argv.max_workers,
+        )
+    except MisconfiguredAIClient as e:
+        logger.error(e)
+        return 3  # Codemodder instructions conflicted (according to spec)
 
     repo_manager.parse_project()
 
