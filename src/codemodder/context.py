@@ -40,6 +40,7 @@ class MisconfiguredAIClient(ValueError):
 
 
 MODELS = ["gpt-4-turbo-2024-04-09", "gpt-4o-2024-05-13"]
+DEFAULT_AZURE_OPENAI_API_VERSION = "2024-02-01"
 
 
 class CodemodExecutionContext:
@@ -104,7 +105,10 @@ class CodemodExecutionContext:
             logger.info("Using Azure OpenAI API client")
             return AzureOpenAI(
                 api_key=azure_openapi_key,
-                api_version="2024-02-01",
+                api_version=os.getenv(
+                    "CODEMODDER_AZURE_OPENAI_API_VERSION",
+                    DEFAULT_AZURE_OPENAI_API_VERSION,
+                ),
                 azure_endpoint=azure_openapi_endpoint,
             )
 

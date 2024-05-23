@@ -3,6 +3,7 @@ import os
 import pytest
 from openai import AzureOpenAI, OpenAI
 
+from codemodder.context import DEFAULT_AZURE_OPENAI_API_VERSION
 from codemodder.context import CodemodExecutionContext as Context
 from codemodder.context import MisconfiguredAIClient
 from codemodder.dependency import Security
@@ -126,6 +127,7 @@ class TestContext:
             [],
         )
         assert isinstance(context.llm_client, AzureOpenAI)
+        assert context.llm_client._api_version == DEFAULT_AZURE_OPENAI_API_VERSION
 
     @pytest.mark.parametrize(
         "env_var",
@@ -175,3 +177,25 @@ class TestContext:
             [],
         )
         assert getattr(context, model.replace("-", "_")) == name
+
+    def test_get_api_version_from_env(self, mocker):
+        version = "fake-version"
+        mocker.patch.dict(
+            os.environ,
+            {
+                "CODEMODDER_AZURE_OPENAI_API_KEY": "test",
+                "CODEMODDER_AZURE_OPENAI_ENDPOINT": "test",
+                "CODEMODDER_AZURE_OPENAI_API_VERSION": version,
+            },
+        )
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+        assert isinstance(context.llm_client, AzureOpenAI)
+        assert context.llm_client._api_version == version
