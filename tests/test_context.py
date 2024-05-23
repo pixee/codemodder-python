@@ -143,3 +143,35 @@ class TestContext:
                 [],
                 [],
             )
+
+    def test_get_model_name(self, mocker):
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+        assert context.gpt_4_turbo_2024_04_09 == "gpt-4-turbo-2024-04-09"
+
+    @pytest.mark.parametrize("model", ["gpt-4-turbo-2024-04-09", "gpt-4o-2024-05-13"])
+    def test_model_get_name_from_env(self, mocker, model):
+        name = "my-awesome-deployment"
+        mocker.patch.dict(
+            os.environ,
+            {
+                f"CODEMODDER_AZURE_OPENAI_{model.upper()}_DEPLOYMENT": name,
+            },
+        )
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+        assert getattr(context, model.replace("-", "_")) == name

@@ -39,6 +39,9 @@ class MisconfiguredAIClient(ValueError):
     pass
 
 
+MODELS = ["gpt-4-turbo-2024-04-09", "gpt-4o-2024-05-13"]
+
+
 class CodemodExecutionContext:
     _failures_by_codemod: dict[str, list[Path]] = {}
     _dependency_update_by_codemod: dict[str, PackageStore | None] = {}
@@ -237,3 +240,8 @@ class CodemodExecutionContext:
             for change in changes:
                 logger.info("  - %s", change.path)
                 logger.debug("    diff:\n%s", indent(change.diff, " " * 6))
+
+    def __getattribute__(self, attr: str):
+        if (name := attr.replace("_", "-")) in MODELS:
+            return os.getenv(f"CODEMODDER_AZURE_OPENAI_{name.upper()}_DEPLOYMENT", name)
+        return super().__getattribute__(attr)
