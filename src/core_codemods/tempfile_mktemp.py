@@ -82,6 +82,7 @@ class TempfileMktempTransformer(
     def report_and_change(
         self, node: cst.Call, name: cst.Name, leading_lines: tuple, assignment=True
     ) -> cst.FlattenSentinel:
+        self.mktemp_calls.clear()
         self.report_change(node)
         self.add_needed_import(self._module_name)
         self.remove_unused_import(node)
