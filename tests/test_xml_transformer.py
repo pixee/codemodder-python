@@ -8,6 +8,8 @@ from defusedxml.sax import make_parser
 
 from codemodder.codemods.xml_transformer import (
     ElementAttributeXMLTransformer,
+    NewElement,
+    NewElementXMLTransformer,
     XMLTransformer,
 )
 
@@ -55,7 +57,6 @@ class TestElementAttributeXMLTransformer:
 
     def run_and_assert(self, name_attr_map, input_code, expected_output):
         with StringIO() as result, StringIO(dedent(input_code)) as input_stream:
-            result = StringIO()
             transformer = ElementAttributeXMLTransformer(
                 result, name_attributes_map=name_attr_map
             )
@@ -94,3 +95,91 @@ class TestElementAttributeXMLTransformer:
                 <element first="one" second="two" three="three"></element>"""
         name_attr_map = {"element": {"first": "one", "second": "two"}}
         self.run_and_assert(name_attr_map, input_code, expected_output)
+
+
+class TestNewElementXMLTransformer:
+
+    def run_and_assert(self, new_elements, input_code, expected_output):
+        with StringIO() as result, StringIO(dedent(input_code)) as input_stream:
+            transformer = NewElementXMLTransformer(result, new_elements=new_elements)
+            parser = make_parser()
+            parser.setContentHandler(transformer)
+            parser.setProperty(handler.property_lexical_handler, transformer)
+            parser.parse(input_stream)
+            assert result.getvalue() == dedent(expected_output)
+
+    def test_add_new_element(self):
+        input_code = """\
+                <root></root>
+        """
+        expected_output = """\
+                <?xml version="1.0" encoding="utf-8"?>
+                <root><child1></child1><child2 one="1">2</child2></root>"""
+        new_elements = [
+            NewElement(name="child1", parent_name="root"),
+            NewElement(
+                name="child2", parent_name="root", content="2", attributes={"one": "1"}
+            ),
+        ]
+        self.run_and_assert(new_elements, input_code, expected_output)
+
+    def test_add_new_sibling_same_name(self):
+        input_code = """\
+                <root>
+                    <child>child 1</child>
+                </root>
+        """
+        expected_output = """\
+                <?xml version="1.0" encoding="utf-8"?>
+                <root>
+                    <child>child 1</child>
+                <child>child 2</child></root>"""
+        new_elements = [
+            NewElement(name="child", parent_name="root", content="child 2"),
+        ]
+        self.run_and_assert(new_elements, input_code, expected_output)
+
+    def test_add_nested_elementsl(self):
+        input_code = """\
+        <?xml version="1.0" encoding="utf-8" ?>
+        <configuration>
+          <system.web>
+          </system.web>
+          <system.webServer>
+            <validation validateIntegratedModeConfiguration="false" />
+            <modules>
+              <remove name="ScriptModule" />
+              <add name="ScriptModule" preCondition="managedHandler" type="System.Web.Handlers.ScriptModule, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" />
+            </modules>
+          </system.webServer>
+        </configuration>
+        """
+        expected_output = """\
+        <?xml version="1.0" encoding="utf-8"?>
+        <configuration>
+          <system.web>
+          </system.web>
+          <system.webServer>
+            <validation validateIntegratedModeConfiguration="false"></validation>
+            <modules>
+              <remove name="ScriptModule"></remove>
+              <add name="ScriptModule" preCondition="managedHandler" type="System.Web.Handlers.ScriptModule, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"></add>
+            </modules>
+          <httpProtocol><customHeaders><add name="X-Frame-Options" value="DENY"></add></customHeaders></httpProtocol></system.webServer>
+        </configuration>"""
+        new_elements = [
+            NewElement(
+                name="httpProtocol",
+                parent_name="system.webServer",
+                content=NewElement(
+                    name="customHeaders",
+                    parent_name="httpProtocol",
+                    content=NewElement(
+                        name="add",
+                        parent_name="customHeaders",
+                        attributes={"name": "X-Frame-Options", "value": "DENY"},
+                    ),
+                ),
+            ),
+        ]
+        self.run_and_assert(new_elements, input_code, expected_output)
