@@ -1,4 +1,5 @@
 import mmap
+from dataclasses import dataclass, field
 from tempfile import TemporaryFile
 from xml.sax import SAXParseException, handler
 from xml.sax.handler import LexicalHandler
@@ -112,6 +113,48 @@ class ElementAttributeXMLTransformer(XMLTransformer):
             new_attrs = AttributesImpl(attrs._attrs | self.name_attributes_map[name])
             self.add_change(self._my_locator.getLineNumber())
         super().startElement(name, new_attrs)
+
+
+@dataclass
+class NewElement:
+    name: str
+    parent_name: str
+    content: str = ""
+    attributes: dict[str, str] = field(default_factory=dict)
+
+
+class NewElementXMLTransformer(XMLTransformer):
+    """
+    Adds new elements to the XML file at specified locations.
+    """
+
+    def __init__(
+        self,
+        out,
+        encoding: str = "utf-8",
+        short_empty_elements: bool = False,
+        results: list[Result] | None = None,
+        new_elements: list[NewElement] | None = None,
+    ) -> None:
+        super().__init__(out, encoding, short_empty_elements, results)
+        self.new_elements = new_elements or []
+
+    def startElement(self, name, attrs):
+        super().startElement(name, attrs)
+
+    def endElement(self, name):
+        for new_element in self.new_elements:
+            if new_element.parent_name == name:
+                self.add_new_element(new_element)
+                self.add_change(self._my_locator.getLineNumber())
+
+        super().endElement(name)
+
+    def add_new_element(self, new_element: NewElement):
+        attrs = AttributesImpl(new_element.attributes or {})
+        super().startElement(new_element.name, attrs)
+        super().characters(new_element.content)
+        super().endElement(new_element.name)
 
 
 class XMLTransformerPipeline(BaseTransformerPipeline):
