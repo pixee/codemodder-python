@@ -141,51 +141,47 @@ class TestNewElementXMLTransformer:
         ]
         self.run_and_assert(new_elements, input_code, expected_output)
 
-    # def add_new_sibling_same_name(self):
-    #     input_code = """\
-    #             <?xml version="1.0" encoding="UTF-8"?>
-    #             <library>
-    #                 <book>
-    #                     <title>The Great Gatsby</title>
-    #                     <author>F. Scott Fitzgerald</author>
-    #                 </book>
-    #             </library>
-    #     """
-    #     expected_output = """\
-    #             <?xml version="1.0" encoding="UTF-8"?>
-    #             <library>
-    #                 <book>
-    #                     <title>The Great Gatsby</title>
-    #                     <author>F. Scott Fitzgerald</author>
-    #                 </book>
-    #                 <book>
-    #                     <title>To Kill a Mockingbird</title>
-    #                     <author>Harper Lee</author>
-    #                 </book>
-    #             </library>
-    #     """
-    #     new_elements = [
-    #         NewElement(name="child2", parent_name="root"),
-    #         NewElement(name="child3", parent_name="root", content="3", attributes={"one": "1"})
-    #     ]
-    #     self.run_and_assert(new_elements, input_code, expected_output)
-
-    # def test_add_new_sibling_element(self):
-    #     input_code = """\
-    #             <root>
-    #                 <child1>Content 1</child1>
-    #             </root>
-    #     """
-    #     expected_output = """\
-    #             <?xml version="1.0" encoding="utf-8"?>
-    #             <root>
-    #                 <child1>Content 1</child1>
-    #                 <child2></child2>
-    #                 <child3 one="1">3</child3>
-    #             </root>
-    #     """
-    #     new_elements = [
-    #         NewElement(name="child2", parent_name="root"),
-    #         NewElement(name="child3", parent_name="root", content="3", attributes={"one": "1"})
-    #     ]
-    #     self.run_and_assert(new_elements, input_code, expected_output)
+    def test_final(self):
+        input_code = """\
+        <?xml version="1.0" encoding="utf-8" ?>
+        <configuration>
+          <system.web>
+          </system.web>
+          <system.webServer>
+            <validation validateIntegratedModeConfiguration="false" />
+            <modules>
+              <remove name="ScriptModule" />
+              <add name="ScriptModule" preCondition="managedHandler" type="System.Web.Handlers.ScriptModule, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" />
+            </modules>
+          </system.webServer>
+        </configuration>
+        """
+        expected_output = """\
+        <?xml version="1.0" encoding="utf-8"?>
+        <configuration>
+          <system.web>
+          </system.web>
+          <system.webServer>
+            <validation validateIntegratedModeConfiguration="false"></validation>
+            <modules>
+              <remove name="ScriptModule"></remove>
+              <add name="ScriptModule" preCondition="managedHandler" type="System.Web.Handlers.ScriptModule, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"></add>
+            </modules>
+          <httpProtocol><customHeaders><add name="X-Frame-Options" value="DENY"></add></customHeaders></httpProtocol></system.webServer>
+        </configuration>"""
+        new_elements = [
+            NewElement(
+                name="httpProtocol",
+                parent_name="system.webServer",
+                content=NewElement(
+                    name="customHeaders",
+                    parent_name="httpProtocol",
+                    content=NewElement(
+                        name="add",
+                        parent_name="customHeaders",
+                        attributes={"name": "X-Frame-Options", "value": "DENY"},
+                    ),
+                ),
+            ),
+        ]
+        self.run_and_assert(new_elements, input_code, expected_output)

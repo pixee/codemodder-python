@@ -140,20 +140,26 @@ class NewElementXMLTransformer(XMLTransformer):
         self.new_elements = new_elements or []
 
     def startElement(self, name, attrs):
+        # breakpoint()
         super().startElement(name, attrs)
 
     def endElement(self, name):
+        # breakpoint()
         for new_element in self.new_elements:
             if new_element.parent_name == name:
                 self.add_new_element(new_element)
                 self.add_change(self._my_locator.getLineNumber())
-
+        # breakpoint()
         super().endElement(name)
 
     def add_new_element(self, new_element: NewElement):
         attrs = AttributesImpl(new_element.attributes or {})
         super().startElement(new_element.name, attrs)
-        super().characters(new_element.content)
+        # breakpoint()
+        if isinstance(new_element.content, NewElement):
+            self.add_new_element(new_element.content)
+        else:
+            super().characters(new_element.content)
         super().endElement(new_element.name)
 
 
