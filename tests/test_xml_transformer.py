@@ -57,7 +57,6 @@ class TestElementAttributeXMLTransformer:
 
     def run_and_assert(self, name_attr_map, input_code, expected_output):
         with StringIO() as result, StringIO(dedent(input_code)) as input_stream:
-            result = StringIO()
             transformer = ElementAttributeXMLTransformer(
                 result, name_attributes_map=name_attr_map
             )
@@ -102,7 +101,6 @@ class TestNewElementXMLTransformer:
 
     def run_and_assert(self, new_elements, input_code, expected_output):
         with StringIO() as result, StringIO(dedent(input_code)) as input_stream:
-            result = StringIO()
             transformer = NewElementXMLTransformer(result, new_elements=new_elements)
             parser = make_parser()
             parser.setContentHandler(transformer)
@@ -141,7 +139,7 @@ class TestNewElementXMLTransformer:
         ]
         self.run_and_assert(new_elements, input_code, expected_output)
 
-    def test_final(self):
+    def test_add_nested_elementsl(self):
         input_code = """\
         <?xml version="1.0" encoding="utf-8" ?>
         <configuration>
