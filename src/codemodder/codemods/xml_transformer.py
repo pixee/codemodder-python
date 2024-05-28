@@ -171,12 +171,6 @@ class XMLTransformerPipeline(BaseTransformerPipeline):
         file_context: FileContext,
         results: list[Result] | None,
     ) -> ChangeSet | None:
-        if (file_path := file_context.file_path).suffix.lower() not in (
-            ".config",
-            ".xml",
-        ):
-            return None
-
         with TemporaryFile("w+") as output_file:
             # this will fail fast for files that are not XML
             try:
@@ -188,7 +182,7 @@ class XMLTransformerPipeline(BaseTransformerPipeline):
                 parser.setProperty(
                     handler.property_lexical_handler, transformer_instance
                 )
-                parser.parse(file_context.file_path)
+                parser.parse(file_path := file_context.file_path)
                 changes = transformer_instance.changes
                 output_file.seek(0)
             except Exception:
@@ -202,7 +196,7 @@ class XMLTransformerPipeline(BaseTransformerPipeline):
                 return None
 
             new_lines = output_file.readlines()
-            with open(file_context.file_path, "r") as original:
+            with open(file_path, "r") as original:
                 # TODO there's a failure potential here for very large files
                 diff = create_diff(
                     original.readlines(),
@@ -210,11 +204,11 @@ class XMLTransformerPipeline(BaseTransformerPipeline):
                 )
 
             if not context.dry_run:
-                with open(file_context.file_path, "w+") as original:
+                with open(file_path, "w+") as original:
                     original.writelines(new_lines)
 
             return ChangeSet(
-                path=str(file_context.file_path.relative_to(context.directory)),
+                path=str(file_path.relative_to(context.directory)),
                 diff=diff,
                 changes=changes,
             )
