@@ -1,7 +1,6 @@
-import mmap
 from dataclasses import dataclass, field
 from tempfile import TemporaryFile
-from xml.sax import SAXParseException, handler
+from xml.sax import handler
 from xml.sax.handler import LexicalHandler
 from xml.sax.saxutils import XMLGenerator
 from xml.sax.xmlreader import AttributesImpl, Locator
@@ -13,6 +12,7 @@ from codemodder.codetf import Change, ChangeSet
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff
 from codemodder.file_context import FileContext
+from codemodder.logging import logger
 from codemodder.result import Result
 
 
@@ -171,12 +171,7 @@ class XMLTransformerPipeline(BaseTransformerPipeline):
         file_context: FileContext,
         results: list[Result] | None,
     ) -> ChangeSet | None:
-        if file_context.file_path.suffix.lower() not in (".config", ".xml"):
-            return None
-
-        changes = []
         with TemporaryFile("w+") as output_file:
-
             # this will fail fast for files that are not XML
             try:
                 transformer_instance = self.xml_transformer(
@@ -187,42 +182,33 @@ class XMLTransformerPipeline(BaseTransformerPipeline):
                 parser.setProperty(
                     handler.property_lexical_handler, transformer_instance
                 )
-                parser.parse(file_context.file_path)
+                parser.parse(file_path := file_context.file_path)
                 changes = transformer_instance.changes
                 output_file.seek(0)
-
-            except SAXParseException:
+            except Exception:
+                file_context.add_failure(
+                    file_path, reason := "Failed to parse XML file"
+                )
+                logger.exception("%s %s", reason, file_path)
                 return None
 
-            diff = ""
-            # don't calculate diff if no changes were reported
-            if changes:
-                with open(file_context.file_path, "r") as original:
-                    # TODO there's a failure potential here for very large files
-                    diff = create_diff(
-                        original.readlines(),
-                        output_file.readlines(),
-                    )
+            if not changes:
+                return None
 
-            # don't write anything if no changes were issued
-            # avoids simply formatting the file
-            if changes and not context.dry_run:
-                with open(file_context.file_path, "w+b") as original:
-                    # mmap can't map empty files, write something first
-                    original.write(b"a")
-                    # copy contents of result into original file
-                    # the snippet below preserves the original file metadata and accounts for large files.
-                    output_file.seek(0)
-                    output_mmap = mmap.mmap(output_file.fileno(), 0)
+            new_lines = output_file.readlines()
+            with open(file_path, "r") as original:
+                # TODO there's a failure potential here for very large files
+                diff = create_diff(
+                    original.readlines(),
+                    new_lines,
+                )
 
-                    original.truncate()
-                    original_mmap = mmap.mmap(original.fileno(), 0)
-                    original_mmap.resize(len(output_mmap))
-                    original_mmap[:] = output_mmap
-                    original_mmap.flush()
+            if not context.dry_run:
+                with open(file_path, "w+") as original:
+                    original.writelines(new_lines)
 
             return ChangeSet(
-                path=str(file_context.file_path.relative_to(context.directory)),
+                path=str(file_path.relative_to(context.directory)),
                 diff=diff,
                 changes=changes,
             )
