@@ -6,5 +6,4 @@ SonarBreakOrContinueOutOfLoop = SonarCodemod.from_core_codemod(
     other=BreakOrContinueOutOfLoop,
     rule_id="python:S1716",
     rule_name='"break" and "continue" should not be used outside a loop',
-    rule_url="https://rules.sonarsource.com/python/RSPEC-1716/",
 )

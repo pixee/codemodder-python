@@ -6,5 +6,4 @@ SonarSQLParameterization = SonarCodemod.from_core_codemod(
     other=SQLQueryParameterization,
     rule_id="pythonsecurity:S3649",
     rule_name="Database queries should not be vulnerable to injection attacks",
-    rule_url="https://rules.sonarsource.com/python/RSPEC-3649/",
 )

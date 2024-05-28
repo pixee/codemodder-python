@@ -6,5 +6,4 @@ SonarDisableGraphQLIntrospection = SonarCodemod.from_core_codemod(
     other=DisableGraphQLIntrospection,
     rule_id="python:S6786",
     rule_name="GraphQL introspection should be disabled in production",
-    rule_url="https://rules.sonarsource.com/python/RSPEC-6786/",
 )

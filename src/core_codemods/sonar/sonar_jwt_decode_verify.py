@@ -34,6 +34,5 @@ SonarJwtDecodeVerify = SonarCodemod.from_core_codemod(
     other=JwtDecodeVerify,
     rule_id="python:S5659",
     rule_name="JWT should be signed and verified",
-    rule_url="https://rules.sonarsource.com/python/RSPEC-5659/",
     transformer=LibcstTransformerPipeline(JwtDecodeVerifySonarTransformer),
 )

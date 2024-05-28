@@ -6,5 +6,4 @@ SonarFixFloatEquality = SonarCodemod.from_core_codemod(
     other=FixFloatEquality,
     rule_id="python:S1244",
     rule_name="Floating point numbers should not be tested for equality",
-    rule_url="https://rules.sonarsource.com/python/type/Bug/RSPEC-1244/",
 )

@@ -6,5 +6,4 @@ SonarLiteralOrNewObjectIdentity = SonarCodemod.from_core_codemod(
     other=LiteralOrNewObjectIdentity,
     rule_id="python:S5796",
     rule_name="New objects should not be created only to check their identity",
-    rule_url="https://rules.sonarsource.com/python/type/Bug/RSPEC-5796/",
 )

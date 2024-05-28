@@ -6,5 +6,4 @@ SonarFixAssertTuple = SonarCodemod.from_core_codemod(
     other=FixAssertTuple,
     rule_id="python:S5905",
     rule_name="Assert should not be called on a tuple literal",
-    rule_url="https://rules.sonarsource.com/python/type/Bug/RSPEC-5905/",
 )

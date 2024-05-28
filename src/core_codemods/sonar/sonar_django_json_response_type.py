@@ -6,5 +6,4 @@ SonarDjangoJsonResponseType = SonarCodemod.from_core_codemod(
     other=DjangoJsonResponseType,
     rule_id="pythonsecurity:S5131",
     rule_name="Endpoints should not be vulnerable to reflected XSS attacks (Django)",
-    rule_url="https://rules.sonarsource.com/python/type/Bug/RSPEC-5131/",
 )

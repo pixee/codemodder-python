@@ -6,5 +6,4 @@ SonarFixMissingSelfOrCls = SonarCodemod.from_core_codemod(
     other=FixMissingSelfOrCls,
     rule_id="python:S5719",
     rule_name="Instance and class methods should have at least one positional parameter",
-    rule_url="https://rules.sonarsource.com/python/RSPEC-5719/",
 )
