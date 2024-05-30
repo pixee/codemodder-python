@@ -91,5 +91,5 @@ class SonarResultSet(ResultSet):
 
             return result_set
         except Exception:
-            logger.debug("Could not parse sonar json %s", json_file)
+            logger.exception("Could not parse sonar json %s", json_file)
         return cls()
