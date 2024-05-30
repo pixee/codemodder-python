@@ -28,7 +28,7 @@ class SonarCodemod(SASTCodemod):
         return SonarCodemod(
             metadata=Metadata(
                 name=name,
-                summary="Sonar: " + other.summary,
+                summary=other.summary,
                 review_guidance=other._metadata.review_guidance,
                 references=(
                     other.references + [Reference(url=rule_url, description=rule_name)]
