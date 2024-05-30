@@ -9,7 +9,7 @@ class TestResults:
         issues1 = {
             "issues": [
                 {
-                    "rule": "rule",
+                    "rule": "python:S5659",
                     "status": "OPEN",
                     "component": "code.py",
                     "textRange": {
@@ -24,7 +24,7 @@ class TestResults:
         issues2 = {
             "issues": [
                 {
-                    "rule": "rule",
+                    "rule": "python:S5659",
                     "status": "OPEN",
                     "component": "code.py",
                     "textRange": {
@@ -45,15 +45,21 @@ class TestResults:
         result2 = SonarResultSet.from_json(sonar_json2)
 
         combined = result1 | result2
-        assert len(combined["rule"][Path("code.py")]) == 2
-        assert result2["rule"][Path("code.py")][0] in combined["rule"][Path("code.py")]
-        assert result1["rule"][Path("code.py")][0] in combined["rule"][Path("code.py")]
+        assert len(combined["python:S5659"][Path("code.py")]) == 2
+        assert (
+            result2["python:S5659"][Path("code.py")][0]
+            in combined["python:S5659"][Path("code.py")]
+        )
+        assert (
+            result1["python:S5659"][Path("code.py")][0]
+            in combined["python:S5659"][Path("code.py")]
+        )
 
     def test_sonar_only_open_issues(self, tmpdir):
         issues = {
             "issues": [
                 {
-                    "rule": "rule",
+                    "rule": "python:S5659",
                     "status": "OPEN",
                     "component": "code.py",
                     "textRange": {
@@ -64,7 +70,7 @@ class TestResults:
                     },
                 },
                 {
-                    "rule": "rule",
+                    "rule": "python:S5659",
                     "status": "RESOLVED",
                     "component": "code.py",
                     "textRange": {
@@ -80,13 +86,13 @@ class TestResults:
         sonar_json1.write_text(json.dumps(issues))
 
         result = SonarResultSet.from_json(sonar_json1)
-        assert len(result["rule"][Path("code.py")]) == 1
+        assert len(result["python:S5659"][Path("code.py")]) == 1
 
     def test_sonar_flows(self, tmpdir):
         issues = {
             "issues": [
                 {
-                    "rule": "rule",
+                    "rule": "python:S5659",
                     "textRange": {
                         "startLine": 1,
                         "endLine": 1,
@@ -118,7 +124,7 @@ class TestResults:
         sonar_json1.write_text(json.dumps(issues))
 
         resultset = SonarResultSet.from_json(sonar_json1)
-        result = resultset["rule"][Path("code.py")][0]
+        result = resultset["python:S5659"][Path("code.py")][0]
         assert result.codeflows
         assert result.codeflows[0]
         assert result.codeflows[0][0].start.line == 1

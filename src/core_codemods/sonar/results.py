@@ -11,6 +11,17 @@ from codemodder.logging import logger
 from codemodder.result import LineInfo, Location, ResultSet, SASTResult
 
 
+def sonar_url_from_id(rule_id: str) -> str:
+    # convert "python:SXXX" or "pythonsecurity:SXXX" to XXX
+    try:
+        rule_id = rule_id.split(":")[1][1:]
+    except IndexError:
+        logger.debug("Invalid sonar rule id: %s", rule_id)
+        raise
+
+    return f"https://rules.sonarsource.com/python/RSPEC-{rule_id}/"
+
+
 class SonarLocation(Location):
     @classmethod
     def from_json_location(cls, json_location) -> Self:
@@ -48,7 +59,7 @@ class SonarResult(SASTResult):
                 rule=Rule(
                     id=rule_id,
                     name=rule_id,
-                    url=None,
+                    url=sonar_url_from_id(rule_id),
                 ),
             ),
         )

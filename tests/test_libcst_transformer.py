@@ -100,6 +100,7 @@ def _apply_and_assert_with_tool(mocker, transformer, reason, results):
     assert len(file_context.failures) == 1
     assert len(file_context.unfixed_findings) == 1
     assert file_context.unfixed_findings[0].reason == reason
+    return file_context
 
 
 def test_parse_error(mocker, caplog):
@@ -143,7 +144,11 @@ def test_transformer_error_with_defectdojo(mocker, caplog):
 def test_transformer_error_with_sonar(mocker, caplog):
     transformer = mocker.MagicMock(spec=LibcstResultTransformer)
     transformer.transform.side_effect = ParserSyntaxError
-    _apply_and_assert_with_tool(
+    file_context = _apply_and_assert_with_tool(
         mocker, transformer, "Failed to transform file", SONAR_RESULTS
     )
     assert "Failed to transform file" in caplog.text
+    assert (
+        file_context.unfixed_findings[0].rule.url
+        == "https://rules.sonarsource.com/python/RSPEC-1716/"
+    )

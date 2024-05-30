@@ -33,6 +33,5 @@ SonarFixMathIsClose = SonarCodemod.from_core_codemod(
     other=FixMathIsClose,
     rule_id="python:S6727",
     rule_name="The abs_tol parameter should be provided when using math.isclose to compare values to 0",
-    rule_url="https://rules.sonarsource.com/python/RSPEC-6727/",
     transformer=LibcstTransformerPipeline(FixMathIsCloseSonarTransformer),
 )

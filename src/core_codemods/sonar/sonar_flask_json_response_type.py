@@ -6,5 +6,4 @@ SonarFlaskJsonResponseType = SonarCodemod.from_core_codemod(
     other=FlaskJsonResponseType,
     rule_id="pythonsecurity:S5131",
     rule_name="Endpoints should not be vulnerable to reflected XSS attacks (Flask)",
-    rule_url="https://rules.sonarsource.com/python/type/Bug/RSPEC-5131/",
 )

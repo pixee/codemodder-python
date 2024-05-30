@@ -8,5 +8,4 @@ SonarRemoveAssertionInPytestRaises = SonarCodemod.from_core_codemod(
     other=RemoveAssertionInPytestRaises,
     rule_id="python:S5915",
     rule_name="Assertions should not be made at the end of blocks expecting an exception",
-    rule_url="https://rules.sonarsource.com/python/type/Bug/RSPEC-5915/",
 )

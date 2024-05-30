@@ -6,5 +6,4 @@ SonarUrlSandbox = SonarCodemod.from_core_codemod(
     other=UrlSandbox,
     rule_id="pythonsecurity:S5144",
     rule_name="Server-side requests should not be vulnerable to forging attacks",
-    rule_url="https://rules.sonarsource.com/python/type/Vulnerability/RSPEC-5144/",
 )

@@ -7,7 +7,7 @@ from codemodder.codemods.base_transformer import BaseTransformerPipeline
 from codemodder.context import CodemodExecutionContext
 from codemodder.result import ResultSet
 from core_codemods.api.core_codemod import CoreCodemod, SASTCodemod
-from core_codemods.sonar.results import SonarResultSet
+from core_codemods.sonar.results import SonarResultSet, sonar_url_from_id
 
 
 class SonarCodemod(SASTCodemod):
@@ -22,9 +22,9 @@ class SonarCodemod(SASTCodemod):
         other: CoreCodemod,
         rule_id: str,
         rule_name: str,
-        rule_url: str,
         transformer: BaseTransformerPipeline | None = None,
     ):
+        rule_url = sonar_url_from_id(rule_id)
         return SonarCodemod(
             metadata=Metadata(
                 name=name,

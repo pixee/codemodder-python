@@ -6,5 +6,4 @@ SonarEnableJinja2Autoescape = SonarCodemod.from_core_codemod(
     other=EnableJinja2Autoescape,
     rule_id="python:S5247",
     rule_name="Disabling auto-escaping in template engines is security-sensitive",
-    rule_url="https://rules.sonarsource.com/python/RSPEC-5247/",
 )

@@ -6,5 +6,4 @@ SonarTempfileMktemp = SonarCodemod.from_core_codemod(
     other=TempfileMktemp,
     rule_id="python:S5445",
     rule_name="Insecure temporary file creation methods should not be used",
-    rule_url="https://rules.sonarsource.com/python/type/Vulnerability/RSPEC-5445/",
 )
