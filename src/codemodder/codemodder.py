@@ -199,11 +199,15 @@ def run(original_args) -> int:
     log_list(logging.INFO, "including paths", included_paths)
     log_list(logging.INFO, "excluding paths", argv.path_exclude)
 
-    files_to_analyze: list[Path] = match_files(
-        context.directory,
-        argv.path_exclude,
-        included_paths,
-    )
+    files_to_analyze: list[Path] = [
+        path
+        for path in match_files(
+            context.directory,
+            argv.path_exclude,
+            included_paths,
+        )
+        if path.is_file() and not path.is_symlink()
+    ]
 
     full_names = [str(path) for path in files_to_analyze]
     log_list(logging.DEBUG, "matched files", full_names)
