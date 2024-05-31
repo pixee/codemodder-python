@@ -110,6 +110,11 @@ def run(
         if call.returncode != 0:
             if not execution_context.verbose:
                 logger.error("captured semgrep stderr: %s", call.stderr)
+            try:
+                logger.error("semgrep sarif output: %s", temp_sarif_file.read())
+            except Exception as e:
+                logger.error("failed to read semgrep sarif output: %s", e)
+
             raise subprocess.CalledProcessError(call.returncode, command)
         # semgrep prepends the folders into the rule-id, we want the base name only
         results = InternalSemgrepResultSet.from_sarif(
