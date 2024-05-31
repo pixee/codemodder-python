@@ -8,6 +8,7 @@ from codemodder.codemodder import find_semgrep_results, run
 from codemodder.diff import create_diff_from_tree
 from codemodder.registry import load_registered_codemods
 from codemodder.result import ResultSet
+from codemodder.semgrep import run as semgrep_run
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -73,6 +74,20 @@ class TestRun:
 
         mock_parse.assert_not_called()
         assert codetf.exists()
+
+    def test_skip_symlinks(self, mocker, dir_structure):
+        # Override fixture for this specific test case
+        mocker.patch("codemodder.codemods.semgrep.semgrep_run", semgrep_run)
+        code_dir, codetf = dir_structure
+        (code_dir / "symlink.py").symlink_to(code_dir / "test_request.py")
+        args = [
+            str(code_dir),
+            "--output",
+            str(codetf),
+            "--codemod-include=url-sandbox",
+        ]
+        res = run(args)
+        assert res == 0
 
     @mock.patch("libcst.parse_module", side_effect=Exception)
     @mock.patch("codemodder.codetf.CodeTF.build")
