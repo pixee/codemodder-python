@@ -22,10 +22,16 @@ async def check_accessible_urls(urls):
         tasks = [visit_url(client, url) for url in urls]
         results = await asyncio.gather(*tasks)
 
-    if failures := [url for url, status in results if status not in (200, 301)]:
-        pytest.fail(
-            f"Update the following URLs because they are not accessible:\n{'\n'.join(failures)}"
-        )
+    if failures := [
+        (url, status) for url, status in results if status not in (200, 301, 302)
+    ]:
+        if failures:
+            failure_messages = [f"{url}: status={status}" for url, status in failures]
+            pytest.fail(
+                "Update the following URLs because they are not accessible:\n{}".format(
+                    "\n".join(failure_messages)
+                )
+            )
 
 
 @pytest.mark.asyncio
