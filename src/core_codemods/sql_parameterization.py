@@ -177,7 +177,7 @@ class SQLQueryParameterizationTransformer(
         for call, linearized_query in find_queries.calls.items():
             # filter node
             if not self.node_is_selected(call):
-                return tree
+                continue
 
             # Step (2)
             ep = ExtractParameters(self.context, linearized_query)

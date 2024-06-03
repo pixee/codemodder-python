@@ -1,8 +1,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from codemodder.codemods.test import BaseSASTCodemodTest
 from core_codemods.sonar.sonar_sql_parameterization import SonarSQLParameterization
 
@@ -66,51 +64,58 @@ class TestSonarSQLParameterization(BaseSASTCodemodTest):
         }
         self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(issues))
 
-    @pytest.mark.xfail(reason="TODO: See issue #607")
     def test_more_complicated_example(self, tmpdir):
         input_code = """
-        from django.shortcuts import redirect
-        from django.http import HttpResponse
+        from django.core.signals import request_finished
+        from django.dispatch import receiver
+        from django.views.decorators.csrf import csrf_exempt
+        from django.shortcuts import redirect, render
 
         import sqlite3
-        import json
 
+        connection = sqlite3.connect(":memory:")
+        connection.cursor().execute("CREATE TABLE Users (name, phone)")
+        connection.cursor().execute("INSERT INTO Users VALUES ('Jenny','867-5309')")
 
-        def do_useful_things(request):
-            if request.method == "POST":
-                user = request.POST.get("user")
+        @csrf_exempt
+        @receiver(request_finished)
+        def bad_query(request):
+            if request.method == 'POST':
+                name = request.POST.get('name')
+                phone = request.POST.get('phone')
 
-                sql = "SELECT user FROM users WHERE user = '%s'"
-                conn = sqlite3.connect("example")
-                result = conn.cursor().execute(sql % user)
-
-                json_response = json.dumps({"user": result.fetchone()[0]})
-                return HttpResponse(json_response.encode("utf-8"))
+                query = "SELECT * FROM Users WHERE name ='" + name + "' AND phone = '" + phone + "'"
+                result = connection.cursor().execute(query)
+                return render(request, 'result.html', {'result': result})
             else:
-                return redirect("/")
+                return redirect('/')
         """.lstrip(
             "\n"
         )
         expected = """
-        from django.shortcuts import redirect
-        from django.http import HttpResponse
+        from django.core.signals import request_finished
+        from django.dispatch import receiver
+        from django.views.decorators.csrf import csrf_exempt
+        from django.shortcuts import redirect, render
 
         import sqlite3
-        import json
 
+        connection = sqlite3.connect(":memory:")
+        connection.cursor().execute("CREATE TABLE Users (name, phone)")
+        connection.cursor().execute("INSERT INTO Users VALUES ('Jenny','867-5309')")
 
-        def do_useful_things(request):
-            if request.method == "POST":
-                user = request.POST.get("user")
+        @csrf_exempt
+        @receiver(request_finished)
+        def bad_query(request):
+            if request.method == 'POST':
+                name = request.POST.get('name')
+                phone = request.POST.get('phone')
 
-                sql = "SELECT user FROM users WHERE user = ?"
-                conn = sqlite3.connect("example")
-                result = conn.cursor().execute(sql, (user, ))
-
-                json_response = json.dumps({"user": result.fetchone()[0]})
-                return HttpResponse(json_response.encode("utf-8"))
+                query = "SELECT * FROM Users WHERE name =?" + " AND phone = ?"
+                result = connection.cursor().execute(query, (name, phone, ))
+                return render(request, 'result.html', {'result': result})
             else:
-                return redirect("/")
+                return redirect('/')
         """.lstrip(
             "\n"
         )
