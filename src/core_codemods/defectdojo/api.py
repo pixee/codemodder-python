@@ -53,13 +53,12 @@ class DefectDojoCodemod(SASTCodemod):
         return DefectDojoCodemod(
             metadata=Metadata(
                 name=name,
-                summary="DefectDojo: " + other.summary,
+                summary=other.summary,
                 review_guidance=other._metadata.review_guidance,
                 references=(
                     other.references + [Reference(url=rule_url, description=rule_name)]
                 ),
-                description=f"This codemod acts upon the following DefectDojo rules: {rule_id}.\n\n"
-                + other.description,
+                description=other.description,
                 tool=ToolMetadata(
                     name="DefectDojo",
                     rules=[

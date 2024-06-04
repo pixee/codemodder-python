@@ -33,8 +33,7 @@ class SonarCodemod(SASTCodemod):
                 references=(
                     other.references + [Reference(url=rule_url, description=rule_name)]
                 ),
-                description=f"This codemod acts upon the following Sonar rules: {rule_id}.\n\n"
-                + other.description,
+                description=other.description,
                 tool=ToolMetadata(
                     name="Sonar",
                     rules=[
