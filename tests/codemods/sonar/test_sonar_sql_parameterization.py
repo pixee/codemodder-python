@@ -4,12 +4,10 @@ from pathlib import Path
 from codemodder.codemods.test import BaseSASTCodemodTest
 from core_codemods.sonar.sonar_sql_parameterization import SonarSQLParameterization
 
-SAMPLE_FILE_PATH = (
-    Path(__file__).parents[2] / "samples" / "sonar" / "sql_parameterization.json"
-)
-SAMPLE_FILE_PATH_2 = (
-    Path(__file__).parents[2] / "samples" / "sonar" / "sql_parameterization2.json"
-)
+SAMPLE_FILE_PATH = [
+    (Path(__file__).parents[2] / "samples" / "sonar" / "sql_parameterization.json"),
+    (Path(__file__).parents[2] / "samples" / "sonar" / "sql_parameterization2.json"),
+]
 
 
 class TestSonarSQLParameterization(BaseSASTCodemodTest):
@@ -123,7 +121,7 @@ class TestSonarSQLParameterization(BaseSASTCodemodTest):
             "\n"
         )
 
-        issues = json.loads(SAMPLE_FILE_PATH.read_text())
+        issues = json.loads(SAMPLE_FILE_PATH[0].read_text())
 
         filename = Path(tmpdir) / "introduction" / "new_view.py"
         filename.parent.mkdir(parents=True)
@@ -184,7 +182,7 @@ class TestSonarSQLParameterization(BaseSASTCodemodTest):
             "\n"
         )
 
-        issues = json.loads(SAMPLE_FILE_PATH_2.read_text())
+        issues = json.loads(SAMPLE_FILE_PATH[1].read_text())
 
         filename = Path(tmpdir) / "introduction" / "new_view.py"
         filename.parent.mkdir(parents=True)
