@@ -1,14 +1,13 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from codemodder.codemods.test import BaseSASTCodemodTest
 from core_codemods.sonar.sonar_sql_parameterization import SonarSQLParameterization
 
-SAMPLE_FILE_PATH = (
-    Path(__file__).parents[2] / "samples" / "sonar" / "sql_parameterization.json"
-)
+SAMPLE_FILE_PATH = [
+    (Path(__file__).parents[2] / "samples" / "sonar" / "sql_parameterization.json"),
+    (Path(__file__).parents[2] / "samples" / "sonar" / "sql_parameterization2.json"),
+]
 
 
 class TestSonarSQLParameterization(BaseSASTCodemodTest):
@@ -66,8 +65,76 @@ class TestSonarSQLParameterization(BaseSASTCodemodTest):
         }
         self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(issues))
 
-    @pytest.mark.xfail(reason="TODO: See issue #607")
     def test_more_complicated_example(self, tmpdir):
+        input_code = """
+        from django.core.signals import request_finished
+        from django.dispatch import receiver
+        from django.views.decorators.csrf import csrf_exempt
+        from django.shortcuts import redirect, render
+
+        import sqlite3
+
+        connection = sqlite3.connect(":memory:")
+        connection.cursor().execute("CREATE TABLE Users (name, phone)")
+        connection.cursor().execute("INSERT INTO Users VALUES ('Jenny','867-5309')")
+
+        @csrf_exempt
+        @receiver(request_finished)
+        def bad_query(request):
+            if request.method == 'POST':
+                name = request.POST.get('name')
+                phone = request.POST.get('phone')
+
+                query = "SELECT * FROM Users WHERE name ='" + name + "' AND phone = '" + phone + "'"
+                result = connection.cursor().execute(query)
+                return render(request, 'result.html', {'result': result})
+            else:
+                return redirect('/')
+        """.lstrip(
+            "\n"
+        )
+        expected = """
+        from django.core.signals import request_finished
+        from django.dispatch import receiver
+        from django.views.decorators.csrf import csrf_exempt
+        from django.shortcuts import redirect, render
+
+        import sqlite3
+
+        connection = sqlite3.connect(":memory:")
+        connection.cursor().execute("CREATE TABLE Users (name, phone)")
+        connection.cursor().execute("INSERT INTO Users VALUES ('Jenny','867-5309')")
+
+        @csrf_exempt
+        @receiver(request_finished)
+        def bad_query(request):
+            if request.method == 'POST':
+                name = request.POST.get('name')
+                phone = request.POST.get('phone')
+
+                query = "SELECT * FROM Users WHERE name =?" + " AND phone = ?"
+                result = connection.cursor().execute(query, (name, phone, ))
+                return render(request, 'result.html', {'result': result})
+            else:
+                return redirect('/')
+        """.lstrip(
+            "\n"
+        )
+
+        issues = json.loads(SAMPLE_FILE_PATH[0].read_text())
+
+        filename = Path(tmpdir) / "introduction" / "new_view.py"
+        filename.parent.mkdir(parents=True)
+
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            files=[filename],
+            results=json.dumps(issues),
+        )
+
+    def test_regression(self, tmpdir):
         input_code = """
         from django.shortcuts import redirect
         from django.http import HttpResponse
@@ -115,7 +182,7 @@ class TestSonarSQLParameterization(BaseSASTCodemodTest):
             "\n"
         )
 
-        issues = json.loads(SAMPLE_FILE_PATH.read_text())
+        issues = json.loads(SAMPLE_FILE_PATH[1].read_text())
 
         filename = Path(tmpdir) / "introduction" / "new_view.py"
         filename.parent.mkdir(parents=True)
