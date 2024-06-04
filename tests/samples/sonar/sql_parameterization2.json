@@ -1,0 +1,136 @@
+{
+  "total": 1,
+  "p": 1,
+  "ps": 100,
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 100,
+    "total": 1
+  },
+  "effortTotal": 30,
+  "debtTotal": 30,
+  "issues": [
+    {
+      "key": "AY_ehQPX_7kI1fIE7rny",
+      "rule": "pythonsecurity:S3649",
+      "severity": "BLOCKER",
+      "component": "drdavella_pygoat-sonar2:introduction/new_view.py",
+      "project": "drdavella_pygoat-sonar2",
+      "line": 14,
+      "hash": "7626fa03ea6a82e887d1b56e02b671ff",
+      "textRange": {
+        "startLine": 14,
+        "endLine": 14,
+        "startOffset": 17,
+        "endOffset": 50
+      },
+      "flows": [
+        {
+          "locations": [
+            {
+              "component": "drdavella_pygoat-sonar2:introduction/new_view.py",
+              "textRange": {
+                "startLine": 14,
+                "endLine": 14,
+                "startOffset": 17,
+                "endOffset": 50
+              },
+              "msg": "Sink: this invocation is not safe; a malicious value can be used as argument"
+            },
+            {
+              "component": "drdavella_pygoat-sonar2:introduction/new_view.py",
+              "textRange": {
+                "startLine": 14,
+                "endLine": 14,
+                "startOffset": 39,
+                "endOffset": 49
+              },
+              "msg": "This concatenation can propagate malicious content to the newly created string"
+            },
+            {
+              "component": "drdavella_pygoat-sonar2:introduction/new_view.py",
+              "textRange": {
+                "startLine": 14,
+                "endLine": 14,
+                "startOffset": 45,
+                "endOffset": 49
+              },
+              "msg": "The malicious content is concatenated into the string"
+            },
+            {
+              "component": "drdavella_pygoat-sonar2:introduction/new_view.py",
+              "textRange": {
+                "startLine": 10,
+                "endLine": 10,
+                "startOffset": 8,
+                "endOffset": 39
+              },
+              "msg": "A malicious value can be assigned to variable ‘user’"
+            },
+            {
+              "component": "drdavella_pygoat-sonar2:introduction/new_view.py",
+              "textRange": {
+                "startLine": 10,
+                "endLine": 10,
+                "startOffset": 15,
+                "endOffset": 39
+              },
+              "msg": "Source: a user can craft an HTTP request with malicious content"
+            }
+          ]
+        }
+      ],
+      "status": "OPEN",
+      "message": "Change this code to not construct SQL queries directly from user-controlled data.",
+      "effort": "30min",
+      "debt": "30min",
+      "tags": [
+        "cwe",
+        "sql"
+      ],
+      "creationDate": "2024-06-03T16:31:26+0200",
+      "updateDate": "2024-06-03T16:33:14+0200",
+      "type": "VULNERABILITY",
+      "organization": "drdavella",
+      "pullRequest": "8",
+      "cleanCodeAttribute": "COMPLETE",
+      "cleanCodeAttributeCategory": "INTENTIONAL",
+      "impacts": [
+        {
+          "softwareQuality": "SECURITY",
+          "severity": "HIGH"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "organization": "drdavella",
+      "key": "drdavella_pygoat-sonar2:introduction/new_view.py",
+      "uuid": "AY_ehQEt_7kI1fIE7rnL",
+      "enabled": true,
+      "qualifier": "FIL",
+      "name": "new_view.py",
+      "longName": "introduction/new_view.py",
+      "path": "introduction/new_view.py",
+      "pullRequest": "8"
+    },
+    {
+      "organization": "drdavella",
+      "key": "drdavella_pygoat-sonar2",
+      "uuid": "AY_ehL76AhxmzzWReady",
+      "enabled": true,
+      "qualifier": "TRK",
+      "name": "pygoat-sonar",
+      "longName": "pygoat-sonar",
+      "pullRequest": "8"
+    }
+  ],
+  "organizations": [
+    {
+      "key": "drdavella",
+      "name": "Dan D'Avella"
+    }
+  ],
+  "facets": []
+}

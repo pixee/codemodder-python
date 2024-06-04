@@ -7,6 +7,9 @@ from core_codemods.sonar.sonar_sql_parameterization import SonarSQLParameterizat
 SAMPLE_FILE_PATH = (
     Path(__file__).parents[2] / "samples" / "sonar" / "sql_parameterization.json"
 )
+SAMPLE_FILE_PATH_2 = (
+    Path(__file__).parents[2] / "samples" / "sonar" / "sql_parameterization2.json"
+)
 
 
 class TestSonarSQLParameterization(BaseSASTCodemodTest):
@@ -121,6 +124,67 @@ class TestSonarSQLParameterization(BaseSASTCodemodTest):
         )
 
         issues = json.loads(SAMPLE_FILE_PATH.read_text())
+
+        filename = Path(tmpdir) / "introduction" / "new_view.py"
+        filename.parent.mkdir(parents=True)
+
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected,
+            files=[filename],
+            results=json.dumps(issues),
+        )
+
+    def test_regression(self, tmpdir):
+        input_code = """
+        from django.shortcuts import redirect
+        from django.http import HttpResponse
+
+        import sqlite3
+        import json
+
+
+        def do_useful_things(request):
+            if request.method == "POST":
+                user = request.POST.get("user")
+
+                sql = "SELECT user FROM users WHERE user = '%s'"
+                conn = sqlite3.connect("example")
+                result = conn.cursor().execute(sql % user)
+
+                json_response = json.dumps({"user": result.fetchone()[0]})
+                return HttpResponse(json_response.encode("utf-8"))
+            else:
+                return redirect("/")
+        """.lstrip(
+            "\n"
+        )
+        expected = """
+        from django.shortcuts import redirect
+        from django.http import HttpResponse
+
+        import sqlite3
+        import json
+
+
+        def do_useful_things(request):
+            if request.method == "POST":
+                user = request.POST.get("user")
+
+                sql = "SELECT user FROM users WHERE user = ?"
+                conn = sqlite3.connect("example")
+                result = conn.cursor().execute(sql, (user, ))
+
+                json_response = json.dumps({"user": result.fetchone()[0]})
+                return HttpResponse(json_response.encode("utf-8"))
+            else:
+                return redirect("/")
+        """.lstrip(
+            "\n"
+        )
+
+        issues = json.loads(SAMPLE_FILE_PATH_2.read_text())
 
         filename = Path(tmpdir) / "introduction" / "new_view.py"
         filename.parent.mkdir(parents=True)
