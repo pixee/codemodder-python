@@ -12,8 +12,9 @@ from codemodder.code_directory import match_files
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.semgrep import SemgrepRuleDetector
 from codemodder.codetf import CodeTF
-from codemodder.context import CodemodExecutionContext, MisconfiguredAIClient
+from codemodder.context import CodemodExecutionContext
 from codemodder.dependency import Dependency
+from codemodder.llm import MisconfiguredAIClient
 from codemodder.logging import configure_logger, log_list, log_section, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager

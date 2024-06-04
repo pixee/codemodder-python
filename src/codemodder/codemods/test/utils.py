@@ -11,6 +11,19 @@ from codemodder.registry import CodemodCollection, CodemodRegistry
 from codemodder.semgrep import run as semgrep_run
 
 
+class DiffError(Exception):
+    """Custom exception to raise when output code != expected output code."""
+
+    def __init__(self, expected, actual):
+        self.expected = expected
+        self.actual = actual
+
+    def __str__(self):
+        return (
+            f"\nExpected:\n\n{self.expected}\n does NOT match actual:\n\n{self.actual}"
+        )
+
+
 class BaseCodemodTest:
     codemod: ClassVar = NotImplemented
 
@@ -74,20 +87,25 @@ class BaseCodemodTest:
         )
 
     def assert_changes(self, root, file_path, input_code, expected, changes):
+        assert os.path.relpath(file_path, root) == changes.path
+        assert all(change.description for change in changes.changes)
+
         expected_diff = create_diff(
             dedent(input_code).splitlines(keepends=True),
             dedent(expected).splitlines(keepends=True),
         )
-
-        assert expected_diff == changes.diff
-        assert os.path.relpath(file_path, root) == changes.path
+        try:
+            assert expected_diff == changes.diff
+        except AssertionError:
+            raise DiffError(expected_diff, changes.diff)
 
         with open(file_path, "r", encoding="utf-8") as tmp_file:
             output_code = tmp_file.read()
 
-        assert output_code == dedent(expected)
-        # All changes must have non-empty descriptions
-        assert all(change.description for change in changes.changes)
+        try:
+            assert output_code == (format_expected := dedent(expected))
+        except AssertionError:
+            raise DiffError(format_expected, output_code)
 
     def run_and_assert_filepath(
         self,

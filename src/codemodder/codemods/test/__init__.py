@@ -5,4 +5,5 @@ from .utils import (
     BaseDjangoCodemodTest,
     BaseSASTCodemodTest,
     BaseSemgrepCodemodTest,
+    DiffError,
 )
