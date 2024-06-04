@@ -13,6 +13,12 @@ if TYPE_CHECKING:
 
 from codemodder.logging import logger
 
+__all__ = [
+    "MODELS",
+    "setup_llm_client",
+    "MisconfiguredAIClient",
+]
+
 models = ["gpt-4-turbo-2024-04-09", "gpt-4o-2024-05-13"]
 DEFAULT_AZURE_OPENAI_API_VERSION = "2024-02-01"
 
