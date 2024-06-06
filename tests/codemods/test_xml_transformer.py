@@ -14,7 +14,7 @@ def test_transformer_failure(mocker, caplog):
         side_effect=Exception,
     )
     file_context = FileContext(
-        "home",
+        Path("home"),
         Path("test.xml"),
     )
     execution_context = CodemodExecutionContext(
@@ -22,6 +22,7 @@ def test_transformer_failure(mocker, caplog):
         dry_run=True,
         verbose=False,
         registry=mocker.MagicMock(),
+        providers=None,
         repo_manager=mocker.MagicMock(),
         path_include=[],
         path_exclude=[],
@@ -53,6 +54,7 @@ def test_transformer(mocker):
         dry_run=True,
         verbose=False,
         registry=mocker.MagicMock(),
+        providers=None,
         repo_manager=mocker.MagicMock(),
         path_include=[],
         path_exclude=[],

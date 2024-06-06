@@ -7,6 +7,7 @@ import mock
 
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff
+from codemodder.providers import load_providers
 from codemodder.registry import CodemodCollection, CodemodRegistry
 from codemodder.semgrep import run as semgrep_run
 
@@ -61,6 +62,7 @@ class BaseCodemodTest:
             dry_run=False,
             verbose=False,
             registry=mock.MagicMock(),
+            providers=load_providers(),
             repo_manager=mock.MagicMock(),
             path_include=[f.name for f in files_to_check],
             path_exclude=path_exclude,
@@ -184,6 +186,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
             verbose=False,
             tool_result_files_map={self.tool: [str(tmp_results_file_path)]},
             registry=mock.MagicMock(),
+            providers=load_providers(),
             repo_manager=mock.MagicMock(),
             path_include=[f.name for f in files_to_check],
             path_exclude=path_exclude,

@@ -19,6 +19,7 @@ from codemodder.llm import setup_llm_client
 from codemodder.logging import log_list, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
+from codemodder.providers import ProviderRegistry
 from codemodder.registry import CodemodRegistry
 from codemodder.utils.timer import Timer
 
@@ -37,6 +38,7 @@ class CodemodExecutionContext:
     dry_run: bool = False
     verbose: bool = False
     registry: CodemodRegistry
+    providers: ProviderRegistry
     repo_manager: PythonRepoManager
     timer: Timer
     path_include: list[str]
@@ -51,6 +53,7 @@ class CodemodExecutionContext:
         dry_run: bool,
         verbose: bool,
         registry: CodemodRegistry,
+        providers: ProviderRegistry,
         repo_manager: PythonRepoManager,
         path_include: list[str],
         path_exclude: list[str],
@@ -66,6 +69,7 @@ class CodemodExecutionContext:
         self._unfixed_findings_by_codemod = {}
         self.dependencies = {}
         self.registry = registry
+        self.providers = providers
         self.repo_manager = repo_manager
         self.timer = Timer()
         self.path_include = path_include

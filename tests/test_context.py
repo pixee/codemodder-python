@@ -28,7 +28,9 @@ class TestContext:
         repo_manager = PythonRepoManager(mocker.Mock())
         codemod = registry.match_codemods(codemod_include=["url-sandbox"])[0]
 
-        context = Context(mocker.Mock(), True, False, registry, repo_manager, [], [])
+        context = Context(
+            mocker.Mock(), True, False, registry, None, repo_manager, [], []
+        )
         context.add_dependencies(codemod.id, {Security})
 
         pkg_store_name = "pyproject.toml"
@@ -57,7 +59,9 @@ class TestContext:
         repo_manager = PythonRepoManager(mocker.Mock())
         codemod = registry.match_codemods(codemod_include=["url-sandbox"])[0]
 
-        context = Context(mocker.Mock(), True, False, registry, repo_manager, [], [])
+        context = Context(
+            mocker.Mock(), True, False, registry, None, repo_manager, [], []
+        )
         context.add_dependencies(codemod.id, {Security})
 
         mocker.patch(
@@ -89,6 +93,7 @@ class TestContext:
             True,
             False,
             load_registered_codemods(),
+            None,
             PythonRepoManager(mocker.Mock()),
             [],
             [],
@@ -102,6 +107,7 @@ class TestContext:
             True,
             False,
             load_registered_codemods(),
+            None,
             PythonRepoManager(mocker.Mock()),
             [],
             [],
@@ -121,6 +127,7 @@ class TestContext:
             True,
             False,
             load_registered_codemods(),
+            None,
             PythonRepoManager(mocker.Mock()),
             [],
             [],
@@ -140,6 +147,7 @@ class TestContext:
                 True,
                 False,
                 load_registered_codemods(),
+                None,
                 PythonRepoManager(mocker.Mock()),
                 [],
                 [],
@@ -160,6 +168,7 @@ class TestContext:
             True,
             False,
             load_registered_codemods(),
+            None,
             PythonRepoManager(mocker.Mock()),
             [],
             [],
