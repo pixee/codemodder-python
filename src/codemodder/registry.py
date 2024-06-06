@@ -4,9 +4,9 @@ import os
 import re
 from dataclasses import dataclass
 from functools import cached_property
-from importlib.metadata import entry_points
+from importlib.metadata import EntryPoint, entry_points
 from itertools import chain
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 
 from codemodder.logging import logger
 
@@ -140,10 +140,18 @@ class CodemodRegistry:
         return [codemod.describe() for codemod in codemods]
 
 
-def load_registered_codemods() -> CodemodRegistry:
+def load_registered_codemods(ep_filter: Optional[Callable[[EntryPoint], bool]] = None):
     registry = CodemodRegistry()
     logger.debug("loading registered codemod collections")
     for entry_point in entry_points().select(group="codemods"):
+        if ep_filter and not ep_filter(entry_point):
+            logger.debug(
+                '- skipping codemod collection "%s" from "%s as requested"',
+                entry_point.name,
+                entry_point.module,
+            )
+            continue
+
         logger.debug(
             '- loading codemod collection "%s" from "%s"',
             entry_point.name,
