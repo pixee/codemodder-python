@@ -80,7 +80,7 @@ complexity = [
     "xenon==0.9.*",
 ]
 openai = [
-    "openai>=1.0,<1.31",
+    "openai>=1.0,<1.33",
 ]
 all = [
     "codemodder[test]",
