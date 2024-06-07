@@ -8,7 +8,8 @@ from codemodder.scripts.generate_docs import ALL_CODEMODS_METADATA
 def pytest_generate_tests(metafunc):
     registry = load_registered_codemods()
     if "codemod" in metafunc.fixturenames:
-        metafunc.parametrize("codemod", registry.codemods)
+        ids = [codemod.id for codemod in registry.codemods]
+        metafunc.parametrize("codemod", registry.codemods, ids=ids)
 
 
 def test_load_codemod_docs_info(codemod: BaseCodemod):
