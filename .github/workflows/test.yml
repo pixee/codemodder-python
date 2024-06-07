@@ -38,6 +38,24 @@ jobs:
         run: python -m build .
       - name: Twine Check
         run: twine check dist/*
+  test-minimal:
+    # Test that a codemodder run doesn't require any optional dependencies.
+    name: Run codemodder list
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install Codemodder Package
+        # Only install what most users would, not optional dependencies
+        run: pip install .
+      - name: Run codemodder
+        run: codemodder --list
   test:
     name: Run pytest
     runs-on: ubuntu-22.04
