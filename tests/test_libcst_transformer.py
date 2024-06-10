@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import mock
 from libcst._exceptions import ParserSyntaxError
 
@@ -55,12 +57,13 @@ SONAR_RESULTS = [
 
 
 def _apply_and_assert(mocker, transformer):
-    file_context = FileContext("home", FILE_PATH)
+    file_context = FileContext(Path("home"), FILE_PATH)
     execution_context = CodemodExecutionContext(
         directory=mocker.MagicMock(),
         dry_run=True,
         verbose=False,
         registry=mocker.MagicMock(),
+        providers=None,
         repo_manager=mocker.MagicMock(),
         path_include=[],
         path_exclude=[],
@@ -77,7 +80,7 @@ def _apply_and_assert(mocker, transformer):
 
 def _apply_and_assert_with_tool(mocker, transformer, reason, results):
     file_context = FileContext(
-        "home",
+        Path("home"),
         FILE_PATH,
         results=results,
     )
@@ -86,6 +89,7 @@ def _apply_and_assert_with_tool(mocker, transformer, reason, results):
         dry_run=True,
         verbose=False,
         registry=mocker.MagicMock(),
+        providers=None,
         repo_manager=mocker.MagicMock(),
         path_include=[],
         path_exclude=[],

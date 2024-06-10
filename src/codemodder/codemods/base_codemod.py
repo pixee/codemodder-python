@@ -78,6 +78,7 @@ class BaseCodemod(metaclass=ABCMeta):
     detector: BaseDetector | None
     transformer: BaseTransformerPipeline
     default_extensions: list[str] | None
+    provider: str | None
 
     def __init__(
         self,
@@ -86,12 +87,14 @@ class BaseCodemod(metaclass=ABCMeta):
         detector: BaseDetector | None = None,
         transformer: BaseTransformerPipeline,
         default_extensions: list[str] | None = None,
+        provider: str | None = None,
     ):
         # Metadata should only be accessed via properties
         self._metadata = metadata
         self.detector = detector
         self.transformer = transformer
         self.default_extensions = default_extensions or [".py"]
+        self.provider = provider
 
     @property
     @abstractmethod
@@ -159,6 +162,15 @@ class BaseCodemod(metaclass=ABCMeta):
         files_to_analyze: list[Path],
         rules: list[str],
     ) -> None:
+        if self.provider and (
+            not (provider := context.providers.get_provider(self.provider))
+            or not provider.is_available
+        ):
+            logger.warning(
+                "provider %s is not available, skipping codemod", self.provider
+            )
+            return
+
         results = (
             # It seems like semgrep doesn't like our fully-specified id format
             self.detector.apply(self.name, context, files_to_analyze)

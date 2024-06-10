@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import DefaultDict, Sequence
 
-from codemodder import __version__, registry
+from codemodder import __version__, providers, registry
 from codemodder.cli import parse_args
 from codemodder.code_directory import match_files
 from codemodder.codemods.api import BaseCodemod
@@ -142,6 +142,7 @@ def run(original_args) -> int:
     start = datetime.datetime.now()
 
     codemod_registry = registry.load_registered_codemods()
+    provider_registry = providers.load_providers()
 
     # A little awkward, but we need the codemod registry in order to validate potential arguments
     argv = parse_args(original_args, codemod_registry)
@@ -174,6 +175,7 @@ def run(original_args) -> int:
             argv.dry_run,
             argv.verbose,
             codemod_registry,
+            provider_registry,
             repo_manager,
             argv.path_include,
             argv.path_exclude,
