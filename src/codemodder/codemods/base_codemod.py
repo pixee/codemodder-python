@@ -162,7 +162,7 @@ class BaseCodemod(metaclass=ABCMeta):
         files_to_analyze: list[Path],
         rules: list[str],
     ) -> None:
-        if self.provider is not None and (
+        if self.provider and (
             not (provider := context.providers.get_provider(self.provider))
             or not provider.is_available
         ):
