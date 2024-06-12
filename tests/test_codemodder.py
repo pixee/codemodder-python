@@ -394,3 +394,27 @@ SESSION_COOKIE_SECURE = True"""
 +CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000","http://0.0.0.0:8000","http://172.16.189.10"]
 +SESSION_COOKIE_SECURE = True"""
         )
+
+    @pytest.mark.parametrize(
+        "flag",
+        [
+            "sarif",
+            "sonar-issues-json",
+            "sonar-hotspots-json",
+            "defectdojo-findings-json",
+        ],
+    )
+    @mock.patch("codemodder.codetf.CodeTF.write_report")
+    def test_bad_sarif_path(self, mock_report, caplog, flag):
+        args = [
+            "tests/samples",
+            "--output",
+            "here.txt",
+            "--codemod-include=url-sandbox",
+            f"--{flag}=bad.json",
+        ]
+
+        exit_code = run(args)
+        assert exit_code == 1
+        assert "No such file or directory: 'bad.json'" in caplog.text
+        mock_report.assert_not_called()
