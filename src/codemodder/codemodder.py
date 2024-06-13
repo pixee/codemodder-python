@@ -159,13 +159,25 @@ def run(original_args) -> int:
     logger.info("codemodder: python/%s", __version__)
     logger.info("command: %s %s", Path(sys.argv[0]).name, " ".join(original_args))
 
-    # TODO: this should be dict[str, list[Path]]
-    tool_result_files_map: DefaultDict[str, list[str]] = detect_sarif_tools(
-        [Path(name) for name in argv.sarif or []]
-    )
+    try:
+        # TODO: this should be dict[str, list[Path]]
+        tool_result_files_map: DefaultDict[str, list[str]] = detect_sarif_tools(
+            [Path(name) for name in argv.sarif or []]
+        )
+    except FileNotFoundError as err:
+        logger.error(err)
+        return 1
+
     tool_result_files_map["sonar"].extend(argv.sonar_issues_json or [])
     tool_result_files_map["sonar"].extend(argv.sonar_hotspots_json or [])
     tool_result_files_map["defectdojo"] = argv.defectdojo_findings_json or []
+
+    for file_name in itertools.chain(*tool_result_files_map.values()):
+        if not os.path.exists(file_name):
+            logger.error(
+                f"FileNotFoundError: [Errno 2] No such file or directory: '{file_name}'"
+            )
+            return 1
 
     repo_manager = PythonRepoManager(Path(argv.directory))
 
