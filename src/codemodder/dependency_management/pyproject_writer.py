@@ -21,6 +21,9 @@ class PyprojectWriter(DependencyWriter):
         pyproject = self._parse_file()
         original = deepcopy(pyproject)
 
+        # It's unlikely and bad practice to declare dependencies under [project].dependencies
+        # and [tool.poetry.dependencies] but if it happens, prioritize poetry
+
         try:
             pyproject["project"]["dependencies"].extend(
                 [f"{dep.requirement}" for dep in dependencies]
