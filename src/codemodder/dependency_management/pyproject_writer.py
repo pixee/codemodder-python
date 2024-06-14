@@ -21,16 +21,26 @@ class PyprojectWriter(DependencyWriter):
         pyproject = self._parse_file()
         original = deepcopy(pyproject)
 
-        # It's unlikely and bad practice to declare dependencies under [project].dependencies
-        # and [tool.poetry.dependencies] but if it happens, prioritize poetry
+        if pyproject.get("tool", {}).get("poetry", {}).get("dependencies"):
+            # It's unlikely and bad practice to declare dependencies under [project].dependencies
+            # and [tool.poetry.dependencies] but if it happens, we will give priority to poetry
+            # and add dependencies under its system.
+            for dep in dependencies:
+                try:
+                    pyproject["tool"]["poetry"]["dependencies"].append(
+                        dep.requirement.name, str(dep.requirement.specifier)
+                    )
+                except tomlkit.exceptions.KeyAlreadyPresent:
+                    pass
 
-        try:
-            pyproject["project"]["dependencies"].extend(
-                [f"{dep.requirement}" for dep in dependencies]
-            )
-        except tomlkit.exceptions.NonExistentKey:
-            logger.debug("Unable to add dependencies to pyproject.toml file.")
-            return None
+        else:
+            try:
+                pyproject["project"]["dependencies"].extend(
+                    [f"{dep.requirement}" for dep in dependencies]
+                )
+            except tomlkit.exceptions.NonExistentKey:
+                logger.debug("Unable to add dependencies to pyproject.toml file.")
+                return None
 
         diff, added_line_nums = create_diff_and_linenums(
             tomlkit.dumps(original).split("\n"), tomlkit.dumps(pyproject).split("\n")
