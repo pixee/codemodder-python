@@ -36,7 +36,7 @@ def test_update_pyproject_dependencies(tmpdir, dry_run):
     pyproject_toml.write(dedent(orig_pyproject))
 
     store = PackageStore(
-        type=FileType.REQ_TXT,
+        type=FileType.TOML,
         file=pyproject_toml,
         dependencies=set(),
         py_versions=[">=3.10.0"],
@@ -127,7 +127,7 @@ def test_add_same_dependency_only_once(tmpdir):
     pyproject_toml.write(dedent(orig_pyproject))
 
     store = PackageStore(
-        type=FileType.REQ_TXT,
+        type=FileType.TOML,
         file=pyproject_toml,
         dependencies=set(),
         py_versions=[">=3.10.0"],
@@ -181,7 +181,7 @@ def test_dont_add_existing_dependency(tmpdir):
     pyproject_toml.write(dedent(orig_pyproject))
 
     store = PackageStore(
-        type=FileType.REQ_TXT,
+        type=FileType.TOML,
         file=pyproject_toml,
         dependencies=set([Security.requirement]),
         py_versions=[">=3.10.0"],
@@ -207,7 +207,7 @@ def test_pyproject_no_dependencies(tmpdir):
     pyproject_toml.write(dedent(orig_pyproject))
 
     store = PackageStore(
-        type=FileType.REQ_TXT,
+        type=FileType.TOML,
         file=pyproject_toml,
         dependencies=set(),
         py_versions=[">=3.10.0"],
@@ -219,3 +219,192 @@ def test_pyproject_no_dependencies(tmpdir):
     writer.write(dependencies)
 
     assert pyproject_toml.read() == dedent(orig_pyproject)
+
+
+def test_pyproject_poetry(tmpdir):
+    orig_pyproject = """\
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+        
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+        
+        [tool.poetry.dependencies]
+        python = "~=3.11.0"
+        requests = ">=2.25.1,<3.0.0"
+        pandas = "^1.2.3"
+        libcst = ">1.0"
+    """
+
+    pyproject_toml = tmpdir.join("pyproject.toml")
+    pyproject_toml.write(dedent(orig_pyproject))
+
+    store = PackageStore(
+        type=FileType.TOML,
+        file=pyproject_toml,
+        dependencies=set(),
+        py_versions=["~=3.11.0"],
+    )
+
+    writer = PyprojectWriter(store, tmpdir)
+    dependencies = [Security, DefusedXML]
+    writer.write(dependencies)
+
+    updated_pyproject = f"""\
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+        
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+        
+        [tool.poetry.dependencies]
+        python = "~=3.11.0"
+        requests = ">=2.25.1,<3.0.0"
+        pandas = "^1.2.3"
+        libcst = ">1.0"
+        {Security.requirement.name} = "{ str(Security.requirement.specifier)}"
+        {DefusedXML.requirement.name} = "{ str(DefusedXML.requirement.specifier)}"
+    """
+
+    assert pyproject_toml.read() == dedent(updated_pyproject)
+
+
+def test_pyproject_poetry_existing_dependency(tmpdir):
+    orig_pyproject = """\
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+
+        [tool.poetry.dependencies]
+        python = "~=3.11.0"
+        requests = ">=2.25.1,<3.0.0"
+        pandas = "^1.2.3"
+        libcst = ">1.0"
+        defusedxml = "^0.7"
+    """
+
+    pyproject_toml = tmpdir.join("pyproject.toml")
+    pyproject_toml.write(dedent(orig_pyproject))
+
+    store = PackageStore(
+        type=FileType.TOML,
+        file=pyproject_toml,
+        dependencies=set([DefusedXML.requirement]),
+        py_versions=["~=3.11.0"],
+    )
+
+    writer = PyprojectWriter(store, tmpdir)
+    dependencies = [DefusedXML]
+    writer.write(dependencies)
+
+    assert pyproject_toml.read() == dedent(orig_pyproject)
+
+
+def test_pyproject_poetry_no_deps_section(tmpdir):
+    orig_pyproject = """\
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+    """
+
+    pyproject_toml = tmpdir.join("pyproject.toml")
+    pyproject_toml.write(dedent(orig_pyproject))
+
+    store = PackageStore(
+        type=FileType.TOML,
+        file=pyproject_toml,
+        dependencies=set(),
+        py_versions=[],
+    )
+
+    writer = PyprojectWriter(store, tmpdir)
+    dependencies = [Security, DefusedXML]
+    writer.write(dependencies)
+
+    updated_pyproject = f"""\
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+
+        [tool.poetry.dependencies]
+        {Security.requirement.name} = "{str(Security.requirement.specifier)}"
+        {DefusedXML.requirement.name} = "{str(DefusedXML.requirement.specifier)}"
+
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+    """
+
+    assert pyproject_toml.read() == dedent(updated_pyproject)
+
+
+def test_pyproject_poetry_no_declared_deps(tmpdir):
+    orig_pyproject = """\
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+
+        [tool.poetry.dependencies]
+        python = "^3.11"
+    """
+
+    pyproject_toml = tmpdir.join("pyproject.toml")
+    pyproject_toml.write(dedent(orig_pyproject))
+
+    store = PackageStore(
+        type=FileType.TOML,
+        file=pyproject_toml,
+        dependencies=set(),
+        py_versions=["~=3.11.0"],
+    )
+
+    writer = PyprojectWriter(store, tmpdir)
+    dependencies = [Security, DefusedXML]
+    writer.write(dependencies)
+
+    updated_pyproject = f"""\
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+
+        [tool.poetry.dependencies]
+        python = "^3.11"
+        {Security.requirement.name} = "{str(Security.requirement.specifier)}"
+        {DefusedXML.requirement.name} = "{str(DefusedXML.requirement.specifier)}"
+    """
+
+    assert pyproject_toml.read() == dedent(updated_pyproject)

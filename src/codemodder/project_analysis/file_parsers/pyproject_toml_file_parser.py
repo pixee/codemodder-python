@@ -16,17 +16,35 @@ class PyprojectTomlParser(BaseParser):
         return FileType.TOML
 
     def _parse_file(self, file: Path) -> PackageStore | None:
+        """
+        Parse a pyproject.toml file which may or may not use poetry.
+        """
         data = toml.load(file)
+        project_data = data.get("project")
+        poetry_data = data.get("tool", {}).get("poetry")
 
-        if not (project := data.get("project")):
+        if not project_data and not poetry_data:
             return None
 
-        dependencies = project.get("dependencies", [])
-        version = project.get("requires-python", None)
+        version = None
+        project_dependencies, poetry_dependencies = [], []
+        if project_data:
+            project_dependencies = project_data.get("dependencies", [])
+            version = project_data.get("requires-python", None)
+
+        if poetry_data:
+            poetry_dependencies = [
+                f"{name}{version}"
+                for name, version in poetry_data.get("dependencies", {}).items()
+                if name != "python"
+            ]
+
+            # In poetry python version is declared within `[tool.poetry.dependencies]`
+            version = poetry_data.get("dependencies", {}).get("python", None)
 
         return PackageStore(
             type=self.file_type,
             file=file,
-            dependencies=set(dependencies),
+            dependencies=set(project_dependencies + poetry_dependencies),
             py_versions=[version] if version else [],
         )
