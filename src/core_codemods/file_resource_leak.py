@@ -229,12 +229,16 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
                 )
 
                 # grab the index of the last statement with reference to the resource
-                last_index = (
-                    self._find_last_index_with_access(
-                        named_targets, original_block, index
-                    )
-                    or index
+                last_index = self._find_last_index_with_access(
+                    named_targets, original_block, index
                 )
+
+                # No accesses, remove the statement
+                if last_index is None:
+                    new_stmts[index] = cst.Pass()
+                    new_index_of_original_stmt[index] = -1
+                    continue
+
                 # check if the statement in the last_index is now included in some earlier with statement
                 new_last_index = new_index_of_original_stmt[last_index]
 

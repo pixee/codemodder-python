@@ -19,6 +19,26 @@ class TestFileResourceLeak(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected)
 
+    def test_unused(self, tmpdir):
+        input_code = """
+        file = open('test.txt', 'r')
+        """
+        expected = """
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_unused_inside_block(self, tmpdir):
+        input_code = """
+        file = open('test.txt', 'r')
+        file2 = open('test2.txt','r')
+        file.read()
+        """
+        expected = """
+        with open('test.txt', 'r') as file:
+            file.read()
+        """
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=2)
+
     def test_simple_annotated(self, tmpdir):
         input_code = """
         file: int = open('test.txt', 'r')
@@ -58,17 +78,6 @@ class TestFileResourceLeak(BaseCodemodTest):
             print('stop')
         """
         self.run_and_assert(tmpdir, input_code, expected, num_changes=4)
-
-    def test_just_open(self, tmpdir):
-        # strange as this change may be, it still leaks if left untouched
-        input_code = """
-        file = open('test.txt', 'r')
-        """
-        expected = """
-        with open('test.txt', 'r') as file:
-            pass
-        """
-        self.run_and_assert(tmpdir, input_code, expected)
 
     def test_multiple_assignments(self, tmpdir):
         input_code = """
