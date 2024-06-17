@@ -21,10 +21,13 @@ class PyprojectWriter(DependencyWriter):
         pyproject = self._parse_file()
         original = deepcopy(pyproject)
 
-        if pyproject.get("tool", {}).get("poetry", {}).get("dependencies"):
+        if poetry_data := pyproject.get("tool", {}).get("poetry", {}):
             # It's unlikely and bad practice to declare dependencies under [project].dependencies
             # and [tool.poetry.dependencies] but if it happens, we will give priority to poetry
             # and add dependencies under its system.
+            if poetry_data.get("dependencies") is None:
+                pyproject["tool"]["poetry"].append("dependencies", {})
+
             for dep in dependencies:
                 try:
                     pyproject["tool"]["poetry"]["dependencies"].append(
