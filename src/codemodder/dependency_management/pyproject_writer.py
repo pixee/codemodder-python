@@ -22,11 +22,13 @@ class PyprojectWriter(DependencyWriter):
         original = deepcopy(pyproject)
 
         if poetry_data := pyproject.get("tool", {}).get("poetry", {}):
+            add_newline = False
             # It's unlikely and bad practice to declare dependencies under [project].dependencies
             # and [tool.poetry.dependencies] but if it happens, we will give priority to poetry
             # and add dependencies under its system.
             if poetry_data.get("dependencies") is None:
                 pyproject["tool"]["poetry"].append("dependencies", {})
+                add_newline = True
 
             for dep in dependencies:
                 try:
@@ -35,6 +37,9 @@ class PyprojectWriter(DependencyWriter):
                     )
                 except tomlkit.exceptions.KeyAlreadyPresent:
                     pass
+
+            if add_newline:
+                pyproject["tool"]["poetry"]["dependencies"].add(tomlkit.nl())
 
         else:
             try:

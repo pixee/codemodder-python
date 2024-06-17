@@ -351,6 +351,7 @@ def test_pyproject_poetry_no_deps_section(tmpdir):
         [tool.poetry.dependencies]
         {Security.requirement.name} = "{str(Security.requirement.specifier)}"
         {DefusedXML.requirement.name} = "{str(DefusedXML.requirement.specifier)}"
+
         [build-system]
         requires = ["poetry-core>=1.0.0"]
         build-backend = "poetry.core.masonry.api"
