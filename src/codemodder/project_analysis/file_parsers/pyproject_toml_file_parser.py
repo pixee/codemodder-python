@@ -38,7 +38,7 @@ class PyprojectTomlParser(BaseParser):
                 for name, version in poetry_data.get("dependencies", {}).items()
                 if name != "python"
             ]
-            # TODO: pandas^1.2.3 or similar needs to be changed to pip valid
+
             # In poetry python version is declared within `[tool.poetry.dependencies]`
             version = poetry_data.get("dependencies", {}).get("python", None)
 

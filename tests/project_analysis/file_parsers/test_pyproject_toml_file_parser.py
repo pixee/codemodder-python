@@ -75,6 +75,25 @@ def pkg_with_poetry_pyproject(tmp_path_factory):
 
 
 @pytest.fixture(scope="module")
+def pkg_with_poetry_no_deps(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp("foo")
+    toml_file = base_dir / "pyproject.toml"
+    toml = """\
+    [tool.poetry]
+    name = "example-project"
+    version = "0.1.0"
+    description = "An example project to demonstrate Poetry configuration."
+    authors = ["Your Name <your.email@example.com>"]
+
+    [build-system]
+    requires = ["poetry-core>=1.0.0"]
+    build-backend = "poetry.core.masonry.api"
+    """
+    toml_file.write_text(toml)
+    return base_dir
+
+
+@pytest.fixture(scope="module")
 def pkg_with_poetry_multiple_dep_locations(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("foo")
     toml_file = base_dir / "pyproject.toml"
@@ -93,9 +112,9 @@ def pkg_with_poetry_multiple_dep_locations(tmp_path_factory):
     build-backend = "poetry.core.masonry.api"
 
     [tool.poetry.dependencies]
-    python = "~=3.11.0"
-    requests = ">=2.25.1,<3.0.0"
-    pandas = "1.2.3"
+    python = "^3.11"
+    requests = "^2.25.1"
+    pandas = "^1.2.3"
     libcst = ">1.0"
     """
     toml_file.write_text(toml)
@@ -147,6 +166,16 @@ class TestPyprojectTomlParser:
         assert store.py_versions == ["~=3.11.0"]
         assert len(store.dependencies) == 3
 
+    def test_parse_poetry_no_deps(self, pkg_with_poetry_no_deps):
+        parser = PyprojectTomlParser(pkg_with_poetry_no_deps)
+        found = parser.parse()
+        assert len(found) == 1
+        store = found[0]
+        assert store.type.value == "pyproject.toml"
+        assert store.file == pkg_with_poetry_no_deps / parser.file_type.value
+        assert store.py_versions == []
+        assert len(store.dependencies) == 0
+
     def test_parse_poetry_and_project_dependencies(
         self, pkg_with_poetry_multiple_dep_locations
     ):
@@ -159,5 +188,5 @@ class TestPyprojectTomlParser:
             store.file
             == pkg_with_poetry_multiple_dep_locations / parser.file_type.value
         )
-        assert store.py_versions == ["~=3.11.0"]
+        assert store.py_versions == ["^3.11"]
         assert len(store.dependencies) == 4
