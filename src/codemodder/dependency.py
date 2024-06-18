@@ -17,6 +17,8 @@ class Dependency:
     oss_link: str
     package_link: str
     hashes: list[str] = field(default_factory=list)
+    # Forward reference
+    type_stubs: list["Dependency"] = field(default_factory=list)
 
     @property
     def name(self) -> str:
@@ -56,6 +58,24 @@ FlaskWTF = Dependency(
     ),
     oss_link="https://github.com/wtforms/flask-wtf/",
     package_link="https://pypi.org/project/Flask-WTF/",
+    type_stubs=[
+        Dependency(
+            Requirement("types-WTForms==3.1.0.20240425"),
+            hashes=[
+                "449b6e3756b2bc70657e98d989bdbf572a25466428774be96facf9debcbf6c4e",
+                "49ffc1fe5576ea0735b763fff77e7060dd39ecc661276cbd0b47099921b3a6f2",
+            ],
+            description="""\
+                    This is a type stub package for the WTForms package.
+        """,
+            _license=License(
+                "Apache-2.0",
+                "https://opensource.org/license/apache-2-0",
+            ),
+            oss_link="https://github.com/python/typeshed",
+            package_link="https://pypi.org/project/types-WTForms/",
+        ),
+    ],
 )
 
 DefusedXML = Dependency(
@@ -74,6 +94,24 @@ to protect against XML vulnerabilities.\
     ),
     oss_link="https://github.com/tiran/defusedxml",
     package_link="https://pypi.org/project/defusedxml/",
+    type_stubs=[
+        Dependency(
+            Requirement("types-defusedxml==0.7.0.20240218"),
+            hashes=[
+                "2b7f3c5ca14fdbe728fab0b846f5f7eb98c4bd4fd2b83d25f79e923caa790ced",
+                "05688a7724dc66ea74c4af5ca0efc554a150c329cb28c13a64902cab878d06ed",
+            ],
+            description="""\
+                This is a type stub package for the defusedxml package.
+    """,
+            _license=License(
+                "Apache-2.0",
+                "https://opensource.org/license/apache-2-0",
+            ),
+            oss_link="https://github.com/python/typeshed",
+            package_link="https://pypi.org/project/types-defusedxml/",
+        ),
+    ],
 )
 
 Security = Dependency(
