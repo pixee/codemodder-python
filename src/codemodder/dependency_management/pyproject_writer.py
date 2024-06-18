@@ -9,6 +9,8 @@ from codemodder.dependency_management.base_dependency_writer import DependencyWr
 from codemodder.diff import create_diff_and_linenums
 from codemodder.logging import logger
 
+TYPE_CHECKER_LIBRARIES = ["mypy", "pyright"]
+
 
 def added_line_nums_strategy(lines, i):
     return lines[i]
@@ -21,26 +23,11 @@ class PyprojectWriter(DependencyWriter):
         pyproject = self._parse_file()
         original = deepcopy(pyproject)
 
-        if poetry_data := pyproject.get("tool", {}).get("poetry", {}):
-            add_newline = False
+        if pyproject.get("tool", {}).get("poetry", {}):
             # It's unlikely and bad practice to declare dependencies under [project].dependencies
             # and [tool.poetry.dependencies] but if it happens, we will give priority to poetry
             # and add dependencies under its system.
-            if poetry_data.get("dependencies") is None:
-                pyproject["tool"]["poetry"].append("dependencies", {})
-                add_newline = True
-
-            for dep in dependencies:
-                try:
-                    pyproject["tool"]["poetry"]["dependencies"].append(
-                        dep.requirement.name, str(dep.requirement.specifier)
-                    )
-                except tomlkit.exceptions.KeyAlreadyPresent:
-                    pass
-
-            if add_newline:
-                pyproject["tool"]["poetry"]["dependencies"].add(tomlkit.nl())
-
+            self._update_poetry(pyproject, dependencies)
         else:
             try:
                 pyproject["project"]["dependencies"].extend(
@@ -70,3 +57,67 @@ class PyprojectWriter(DependencyWriter):
     def _parse_file(self):
         with open(self.path, encoding="utf-8") as f:
             return tomlkit.load(f)
+
+    def _update_poetry(
+        self,
+        pyproject: tomlkit.toml_document.TOMLDocument,
+        dependencies: list[Dependency],
+    ):
+        add_newline = False
+
+        if pyproject.get("tool", {}).get("poetry", {}).get("dependencies") is None:
+            pyproject["tool"]["poetry"].update({"dependencies": {}})
+            add_newline = True
+
+        typing_location = find_typing_location(pyproject)
+
+        for dep in dependencies:
+            try:
+                pyproject["tool"]["poetry"]["dependencies"].append(
+                    dep.requirement.name, str(dep.requirement.specifier)
+                )
+            except tomlkit.exceptions.KeyAlreadyPresent:
+                pass
+
+            for type_stub_dependency in dep.type_stubs:
+                if typing_location:
+                    try:
+                        keys = typing_location.split(".")
+                        section = pyproject["tool"]["poetry"]
+                        for key in keys:
+                            section = section[key]
+                        section.append(
+                            type_stub_dependency.requirement.name,
+                            str(type_stub_dependency.requirement.specifier),
+                        )
+                    except tomlkit.exceptions.KeyAlreadyPresent:
+                        pass
+
+        if add_newline:
+            pyproject["tool"]["poetry"]["dependencies"].add(tomlkit.nl())
+
+
+def find_typing_location(pyproject):
+    """
+    Look for a typing tool declared as a dependency in project.toml
+    """
+    locations = [
+        "dependencies",
+        "test.dependencies",
+        "dev-dependencies",
+        "dev.dependencies",
+        "group.test.dependencies",
+    ]
+    poetry_section = pyproject.get("tool", {}).get("poetry", {})
+
+    for location in locations:
+        keys = location.split(".")
+        section = poetry_section
+        try:
+            for key in keys:
+                section = section[key]
+            if any(checker in section for checker in TYPE_CHECKER_LIBRARIES):
+                return location
+        except KeyError:
+            continue
+    return None
