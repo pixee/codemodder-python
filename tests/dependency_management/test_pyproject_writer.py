@@ -494,12 +494,6 @@ def test_pyproject_poetry_with_type_checker_tool_without_poetry_deps_section(
         [build-system]
         requires = ["poetry-core>=1.0.0"]
         build-backend = "poetry.core.masonry.api"
-
-        [tool.poetry.dependencies]
-        python = "~=3.11.0"
-        requests = ">=2.25.1,<3.0.0"
-        pandas = "^1.2.3"
-        libcst = ">1.0"
         
         {dependency_section}
         {type_checker} = "==1.0"
@@ -527,17 +521,13 @@ def test_pyproject_poetry_with_type_checker_tool_without_poetry_deps_section(
         description = "An example project to demonstrate Poetry configuration."
         authors = ["Your Name <your.email@example.com>"]
 
+        [tool.poetry.dependencies]
+        {Security.requirement.name} = "{str(Security.requirement.specifier)}"
+        {DefusedXML.requirement.name} = "{str(DefusedXML.requirement.specifier)}"
+
         [build-system]
         requires = ["poetry-core>=1.0.0"]
         build-backend = "poetry.core.masonry.api"
-
-        [tool.poetry.dependencies]
-        python = "~=3.11.0"
-        requests = ">=2.25.1,<3.0.0"
-        pandas = "^1.2.3"
-        libcst = ">1.0"
-        {Security.requirement.name} = "{str(Security.requirement.specifier)}"
-        {DefusedXML.requirement.name} = "{str(DefusedXML.requirement.specifier)}"
         
         {dependency_section}
         {type_checker} = "==1.0"
