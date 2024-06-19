@@ -4,7 +4,10 @@ import pytest
 
 from codemodder.codetf import DiffSide
 from codemodder.dependency import DefusedXML, Security
-from codemodder.dependency_management.pyproject_writer import PyprojectWriter
+from codemodder.dependency_management.pyproject_writer import (
+    TYPE_CHECKER_LIBRARIES,
+    PyprojectWriter,
+)
 from codemodder.project_analysis.file_parsers.package_store import (
     FileType,
     PackageStore,
@@ -405,6 +408,198 @@ def test_pyproject_poetry_no_declared_deps(tmpdir):
         python = "^3.11"
         {Security.requirement.name} = "{str(Security.requirement.specifier)}"
         {DefusedXML.requirement.name} = "{str(DefusedXML.requirement.specifier)}"
+    """
+
+    assert pyproject_toml.read() == dedent(updated_pyproject)
+
+
+@pytest.mark.parametrize("type_checker", TYPE_CHECKER_LIBRARIES)
+def test_pyproject_poetry_with_type_checker_tool(tmpdir, type_checker):
+    orig_pyproject = f"""\
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+
+        [tool.poetry.dependencies]
+        python = "~=3.11.0"
+        requests = ">=2.25.1,<3.0.0"
+        pandas = "^1.2.3"
+        libcst = ">1.0"
+        {type_checker} = "==1.0"
+    """
+
+    pyproject_toml = tmpdir.join("pyproject.toml")
+    pyproject_toml.write(dedent(orig_pyproject))
+
+    store = PackageStore(
+        type=FileType.TOML,
+        file=pyproject_toml,
+        dependencies=set(),
+        py_versions=["~=3.11.0"],
+    )
+
+    writer = PyprojectWriter(store, tmpdir)
+    dependencies = [Security, DefusedXML]
+    writer.write(dependencies)
+
+    defusedxml_type_stub = DefusedXML.type_stubs[0]
+    updated_pyproject = f"""\
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+
+        [tool.poetry.dependencies]
+        python = "~=3.11.0"
+        requests = ">=2.25.1,<3.0.0"
+        pandas = "^1.2.3"
+        libcst = ">1.0"
+        {type_checker} = "==1.0"
+        {Security.requirement.name} = "{str(Security.requirement.specifier)}"
+        {DefusedXML.requirement.name} = "{str(DefusedXML.requirement.specifier)}"
+        {defusedxml_type_stub.requirement.name} = "{str(defusedxml_type_stub.requirement.specifier)}"
+    """
+
+    assert pyproject_toml.read() == dedent(updated_pyproject)
+
+
+@pytest.mark.parametrize(
+    "dependency_section",
+    [
+        "[tool.poetry.test.dependencies]",
+        "[tool.poetry.dev-dependencies]",
+        "[tool.poetry.dev.dependencies]",
+        "[tool.poetry.group.test.dependencies]",
+    ],
+)
+@pytest.mark.parametrize("type_checker", TYPE_CHECKER_LIBRARIES)
+def test_pyproject_poetry_with_type_checker_tool_without_poetry_deps_section(
+    tmpdir, type_checker, dependency_section
+):
+    orig_pyproject = f"""\
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+        
+        {dependency_section}
+        {type_checker} = "==1.0"
+    """
+
+    pyproject_toml = tmpdir.join("pyproject.toml")
+    pyproject_toml.write(dedent(orig_pyproject))
+
+    store = PackageStore(
+        type=FileType.TOML,
+        file=pyproject_toml,
+        dependencies=set(),
+        py_versions=["~=3.11.0"],
+    )
+
+    writer = PyprojectWriter(store, tmpdir)
+    dependencies = [Security, DefusedXML]
+    writer.write(dependencies)
+
+    defusedxml_type_stub = DefusedXML.type_stubs[0]
+    updated_pyproject = f"""\
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+
+        [tool.poetry.dependencies]
+        {Security.requirement.name} = "{str(Security.requirement.specifier)}"
+        {DefusedXML.requirement.name} = "{str(DefusedXML.requirement.specifier)}"
+
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+        
+        {dependency_section}
+        {type_checker} = "==1.0"
+        {defusedxml_type_stub.requirement.name} = "{str(defusedxml_type_stub.requirement.specifier)}"
+    """
+
+    assert pyproject_toml.read() == dedent(updated_pyproject)
+
+
+@pytest.mark.parametrize("type_checker", TYPE_CHECKER_LIBRARIES)
+def test_pyproject_poetry_with_type_checker_tool_multiple(tmpdir, type_checker):
+    orig_pyproject = f"""\
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+        
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+
+        [tool.poetry.dependencies]
+        python = "~=3.11.0"
+        requests = ">=2.25.1,<3.0.0"
+        pandas = "^1.2.3"
+        libcst = ">1.0"
+        
+        [tool.poetry.group.test.dependencies]
+        {type_checker} = "==1.0"
+    """
+
+    pyproject_toml = tmpdir.join("pyproject.toml")
+    pyproject_toml.write(dedent(orig_pyproject))
+
+    store = PackageStore(
+        type=FileType.TOML,
+        file=pyproject_toml,
+        dependencies=set(),
+        py_versions=["~=3.11.0"],
+    )
+
+    writer = PyprojectWriter(store, tmpdir)
+    dependencies = [Security, DefusedXML]
+    writer.write(dependencies)
+
+    defusedxml_type_stub = DefusedXML.type_stubs[0]
+    updated_pyproject = f"""\
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+        
+        [tool.poetry]
+        name = "example-project"
+        version = "0.1.0"
+        description = "An example project to demonstrate Poetry configuration."
+        authors = ["Your Name <your.email@example.com>"]
+
+        [tool.poetry.dependencies]
+        python = "~=3.11.0"
+        requests = ">=2.25.1,<3.0.0"
+        pandas = "^1.2.3"
+        libcst = ">1.0"
+        {Security.requirement.name} = "{str(Security.requirement.specifier)}"
+        {DefusedXML.requirement.name} = "{str(DefusedXML.requirement.specifier)}"
+
+        [tool.poetry.group.test.dependencies]
+        {type_checker} = "==1.0"
+        {defusedxml_type_stub.requirement.name} = "{str(defusedxml_type_stub.requirement.specifier)}"
     """
 
     assert pyproject_toml.read() == dedent(updated_pyproject)
