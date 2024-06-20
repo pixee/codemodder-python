@@ -1,10 +1,10 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.tempfile_mktemp import TempfileMktemp
 
 
-class TestTempfileMktemp(BaseSemgrepCodemodTest):
+class TestTempfileMktemp(BaseCodemodTest):
     codemod = TempfileMktemp
 
     def test_name(self):
@@ -212,7 +212,7 @@ class TestTempfileMktemp(BaseSemgrepCodemodTest):
 
 
 @pytest.mark.xfail(reason="Not currently supported")
-class TestOpenTempfileMktemp(BaseSemgrepCodemodTest):
+class TestOpenTempfileMktemp(BaseCodemodTest):
     codemod = TempfileMktemp
 
     def test_open_and_write(self, tmpdir):

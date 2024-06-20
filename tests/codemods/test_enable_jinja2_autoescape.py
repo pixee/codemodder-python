@@ -1,10 +1,10 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.enable_jinja2_autoescape import EnableJinja2Autoescape
 
 
-class TestEnableJinja2Autoescape(BaseSemgrepCodemodTest):
+class TestEnableJinja2Autoescape(BaseCodemodTest):
     codemod = EnableJinja2Autoescape
 
     def test_name(self):

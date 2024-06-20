@@ -1,8 +1,8 @@
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.fix_hasattr_call import TransformFixHasattrCall
 
 
-class TestTransformFixHasattrCall(BaseSemgrepCodemodTest):
+class TestTransformFixHasattrCall(BaseCodemodTest):
     codemod = TransformFixHasattrCall
 
     def test_name(self):

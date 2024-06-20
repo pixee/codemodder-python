@@ -1,13 +1,13 @@
 import mock
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from codemodder.dependency import Security
 from core_codemods.process_creation_sandbox import ProcessSandbox
 
 
 @mock.patch("codemodder.codemods.api.FileContext.add_dependency")
-class TestProcessCreationSandbox(BaseSemgrepCodemodTest):
+class TestProcessCreationSandbox(BaseCodemodTest):
     codemod = ProcessSandbox
 
     def test_name(self, _):

@@ -1,13 +1,13 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.requests_verify import RequestsVerify
 
 each_func = pytest.mark.parametrize("func", ["get", "post", "request"])
 each_library = pytest.mark.parametrize("library", ["requests", "httpx"])
 
 
-class TestRequestsVerify(BaseSemgrepCodemodTest):
+class TestRequestsVerify(BaseCodemodTest):
     codemod = RequestsVerify
 
     def test_name(self):
@@ -112,7 +112,7 @@ class TestRequestsVerify(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected)
 
 
-class TestHttpxSpecific(BaseSemgrepCodemodTest):
+class TestHttpxSpecific(BaseCodemodTest):
     codemod = RequestsVerify
 
     def test_stream(self, tmpdir):

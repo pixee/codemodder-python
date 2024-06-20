@@ -8,8 +8,6 @@ import mock
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff
 from codemodder.providers import load_providers
-from codemodder.registry import CodemodCollection, CodemodRegistry
-from codemodder.semgrep import run as semgrep_run
 
 
 class DiffError(Exception):
@@ -124,25 +122,6 @@ class BaseCodemodTest:
             num_changes=num_changes,
             files=[file_path],
         )
-
-
-class BaseSemgrepCodemodTest(BaseCodemodTest):
-    @classmethod
-    def setup_class(cls):
-        collection = CodemodCollection(
-            origin="pixee",
-            codemods=[cls.codemod],
-        )
-        cls.registry = CodemodRegistry()
-        cls.registry.add_codemod_collection(collection)
-
-    def results_by_id_filepath(self, input_code, file_path):
-        with open(file_path, "w", encoding="utf-8") as tmp_file:
-            tmp_file.write(dedent(input_code))
-
-        name = self.codemod.name
-        results = self.registry.match_codemods(codemod_include=[name])
-        return semgrep_run(self.execution_context, results[0].yaml_files)
 
 
 class BaseDjangoCodemodTest(BaseCodemodTest):

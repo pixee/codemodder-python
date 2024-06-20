@@ -1,6 +1,6 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.add_requests_timeouts import (
     AddRequestsTimeouts,
     TransformAddRequestsTimeouts,
@@ -10,7 +10,7 @@ METHODS = ["get", "post", "put", "delete", "head", "options", "patch"]
 TIMEOUT = TransformAddRequestsTimeouts.DEFAULT_TIMEOUT
 
 
-class TestAddRequestsTimeouts(BaseSemgrepCodemodTest):
+class TestAddRequestsTimeouts(BaseCodemodTest):
     codemod = AddRequestsTimeouts
 
     @pytest.mark.parametrize("method", METHODS)

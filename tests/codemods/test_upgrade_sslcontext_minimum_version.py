@@ -1,6 +1,6 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.upgrade_sslcontext_minimum_version import (
     UpgradeSSLContextMinimumVersion,
 )
@@ -14,7 +14,7 @@ INSECURE_VERSIONS = [
 ]
 
 
-class TestUpgradeSSLContextMinimumVersion(BaseSemgrepCodemodTest):
+class TestUpgradeSSLContextMinimumVersion(BaseCodemodTest):
     codemod = UpgradeSSLContextMinimumVersion
 
     @pytest.mark.parametrize("version", INSECURE_VERSIONS)

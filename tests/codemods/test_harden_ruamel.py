@@ -1,10 +1,10 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.harden_ruamel import HardenRuamel
 
 
-class TestHardenRuamel(BaseSemgrepCodemodTest):
+class TestHardenRuamel(BaseCodemodTest):
     codemod = HardenRuamel
 
     def test_name(self):

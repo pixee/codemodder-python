@@ -1,12 +1,12 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.secure_flask_cookie import SecureFlaskCookie
 
 each_func = pytest.mark.parametrize("func", ["make_response", "Response"])
 
 
-class TestSecureFlaskCookie(BaseSemgrepCodemodTest):
+class TestSecureFlaskCookie(BaseCodemodTest):
     codemod = SecureFlaskCookie
 
     def test_name(self):
