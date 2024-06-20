@@ -42,9 +42,14 @@ class BaseCodemodTest:
     def file_extension(self) -> str:
         return "py"
 
+    @classmethod
+    def setup_class(cls):
+        codemod_id = (
+            cls.codemod().id if isinstance(cls.codemod, type) else cls.codemod.id
+        )
+        cls.codemod = validate_codemod_registration(codemod_id)
+
     def setup_method(self):
-        if isinstance(self.codemod, type):
-            self.codemod = self.codemod()
         self.changeset = []
 
     def run_and_assert(
