@@ -10,9 +10,10 @@ from types import ModuleType
 
 import jsonschema
 
-from codemodder import __version__, registry
+from codemodder import __version__
 from core_codemods.sonar.api import process_sonar_findings
 
+from .utils import validate_codemod_registration
 from .validations import execute_code
 
 
@@ -47,7 +48,11 @@ class BaseIntegrationTest(DependencyTestMixin):
 
     @classmethod
     def setup_class(cls):
-        cls.codemod_registry = registry.load_registered_codemods()
+        codemod_id = (
+            cls.codemod().id if isinstance(cls.codemod, type) else cls.codemod.id
+        )
+        cls.codemod_instance = validate_codemod_registration(codemod_id)
+
         cls.output_path = tempfile.mkstemp()[1]
         cls.code_dir = tempfile.mkdtemp()
 
@@ -85,20 +90,6 @@ class BaseIntegrationTest(DependencyTestMixin):
 
         if cls.requirements_file_name:
             pathlib.Path(cls.dependency_path).unlink(missing_ok=True)
-
-    def setup_method(self):
-        try:
-            codemod_id = (
-                self.codemod().id if isinstance(self.codemod, type) else self.codemod.id
-            )
-            # This is how we ensure that the codemod is actually in the registry
-            self.codemod_instance = self.codemod_registry.match_codemods(
-                codemod_include=[codemod_id]
-            )[0]
-        except IndexError as exc:
-            raise IndexError(
-                "You must register the codemod to a CodemodCollection."
-            ) from exc
 
     def _assert_run_fields(self, run, output_path):
         assert run["vendor"] == "pixee"
@@ -255,7 +246,11 @@ class SonarIntegrationTest(BaseIntegrationTest):
 
     @classmethod
     def setup_class(cls):
-        cls.codemod_registry = registry.load_registered_codemods()
+        codemod_id = (
+            cls.codemod().id if isinstance(cls.codemod, type) else cls.codemod.id
+        )
+        cls.codemod_instance = validate_codemod_registration(codemod_id)
+
         cls.output_path = tempfile.mkstemp()[1]
         cls.code_dir = SAMPLES_DIR
         cls.code_filename = os.path.relpath(cls.code_path, SAMPLES_DIR)

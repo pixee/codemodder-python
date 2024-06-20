@@ -5,9 +5,21 @@ from typing import ClassVar
 
 import mock
 
+from codemodder import registry
+from codemodder.codemods.api import BaseCodemod
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff
 from codemodder.providers import load_providers
+
+
+def validate_codemod_registration(codemod_id: str) -> BaseCodemod:
+    codemod_registry = registry.load_registered_codemods()
+    try:
+        return codemod_registry.match_codemods(codemod_include=[codemod_id])[0]
+    except IndexError as exc:
+        raise IndexError(
+            "You must register the codemod to a CodemodCollection."
+        ) from exc
 
 
 class DiffError(Exception):
