@@ -36,7 +36,7 @@ class ModelRegistry(dict):
     def __getattr__(self, name):
         if name in self:
             return os.getenv(
-                f"CODEMODDER_AZURE_OPENAI_{self[name].upper()}_DEPLOYMENT", self[name]
+                f"CODEMODDER_AZURE_OPENAI_{name.upper()}_DEPLOYMENT", self[name]
             )
         raise AttributeError(
             f"'{self.__class__.__name__}' object has no attribute '{name}'"
