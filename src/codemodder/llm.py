@@ -21,7 +21,7 @@ __all__ = [
     "MisconfiguredAIClient",
 ]
 
-models = ["gpt-4-turbo-2024-04-09", "gpt-4o-2024-05-13"]
+models = ["gpt-4-turbo-2024-04-09", "gpt-4o-2024-05-13", "gpt-35-turbo-0125"]
 DEFAULT_AZURE_OPENAI_API_VERSION = "2024-02-01"
 
 
@@ -36,7 +36,7 @@ class ModelRegistry(dict):
     def __getattr__(self, name):
         if name in self:
             return os.getenv(
-                f"CODEMODDER_AZURE_OPENAI_{self[name].upper()}_DEPLOYMENT", self[name]
+                f"CODEMODDER_AZURE_OPENAI_{name.upper()}_DEPLOYMENT", self[name]
             )
         raise AttributeError(
             f"'{self.__class__.__name__}' object has no attribute '{name}'"
