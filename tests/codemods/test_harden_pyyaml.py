@@ -1,7 +1,7 @@
 import pytest
 import yaml
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.harden_pyyaml import HardenPyyaml
 
 UNSAFE_LOADERS = yaml.loader.__all__.copy()  # type: ignore
@@ -9,7 +9,7 @@ UNSAFE_LOADERS.remove("SafeLoader")
 loaders = pytest.mark.parametrize("loader", UNSAFE_LOADERS)
 
 
-class TestHardenPyyaml(BaseSemgrepCodemodTest):
+class TestHardenPyyaml(BaseCodemodTest):
     codemod = HardenPyyaml
 
     def test_name(self):
@@ -114,7 +114,7 @@ deserialized_data = yam.load(data, Loader=yam.SafeLoader)
         self.run_and_assert(tmpdir, input_code, expected)
 
 
-class TestHardenPyyamlClassInherit(BaseSemgrepCodemodTest):
+class TestHardenPyyamlClassInherit(BaseCodemodTest):
     codemod = HardenPyyaml
 
     def test_safe_loader(self, tmpdir):

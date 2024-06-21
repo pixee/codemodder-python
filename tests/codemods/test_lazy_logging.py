@@ -1,13 +1,13 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.lazy_logging import LazyLogging
 
 logging_funcs = {"debug", "info", "warning", "warn", "error", "critical"}
 each_func = pytest.mark.parametrize("func", sorted(logging_funcs))
 
 
-class TestLazyLoggingModulo(BaseSemgrepCodemodTest):
+class TestLazyLoggingModulo(BaseCodemodTest):
     codemod = LazyLogging
 
     def test_name(self):
@@ -348,7 +348,7 @@ class TestLazyLoggingModulo(BaseSemgrepCodemodTest):
         self.run_and_assert(tmpdir, code, code)
 
 
-class TestLazyLoggingPlus(BaseSemgrepCodemodTest):
+class TestLazyLoggingPlus(BaseCodemodTest):
     codemod = LazyLogging
 
     @each_func

@@ -1,12 +1,12 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.lxml_safe_parsing import LxmlSafeParsing
 
 each_func = pytest.mark.parametrize("func", ["parse", "fromstring"])
 
 
-class TestLxmlSafeParsing(BaseSemgrepCodemodTest):
+class TestLxmlSafeParsing(BaseCodemodTest):
     codemod = LxmlSafeParsing
 
     def test_name(self):

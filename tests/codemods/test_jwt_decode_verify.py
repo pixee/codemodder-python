@@ -1,10 +1,10 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.jwt_decode_verify import JwtDecodeVerify
 
 
-class TestJwtDecodeVerify(BaseSemgrepCodemodTest):
+class TestJwtDecodeVerify(BaseCodemodTest):
     codemod = JwtDecodeVerify
 
     def test_name(self):

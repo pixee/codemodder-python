@@ -1,10 +1,10 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.secure_random import SecureRandom
 
 
-class TestSecureRandom(BaseSemgrepCodemodTest):
+class TestSecureRandom(BaseCodemodTest):
     codemod = SecureRandom
 
     def test_name(self):

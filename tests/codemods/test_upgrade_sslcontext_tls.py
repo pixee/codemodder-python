@@ -1,6 +1,6 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.upgrade_sslcontext_tls import UpgradeSSLContextTLS
 
 INSECURE_PROTOCOLS = [
@@ -12,7 +12,7 @@ INSECURE_PROTOCOLS = [
 ]
 
 
-class TestUpgradeWeakTLS(BaseSemgrepCodemodTest):
+class TestUpgradeWeakTLS(BaseCodemodTest):
     codemod = UpgradeSSLContextTLS
 
     @pytest.mark.parametrize("protocol", INSECURE_PROTOCOLS)

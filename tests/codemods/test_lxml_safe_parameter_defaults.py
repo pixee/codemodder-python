@@ -1,6 +1,6 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.lxml_safe_parser_defaults import LxmlSafeParserDefaults
 
 each_class = pytest.mark.parametrize(
@@ -8,7 +8,7 @@ each_class = pytest.mark.parametrize(
 )
 
 
-class TestLxmlSafeParserDefaults(BaseSemgrepCodemodTest):
+class TestLxmlSafeParserDefaults(BaseCodemodTest):
     codemod = LxmlSafeParserDefaults
 
     def test_name(self):

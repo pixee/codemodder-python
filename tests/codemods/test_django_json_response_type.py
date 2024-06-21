@@ -1,8 +1,8 @@
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.django_json_response_type import DjangoJsonResponseType
 
 
-class TestDjangoJsonResponseType(BaseSemgrepCodemodTest):
+class TestDjangoJsonResponseType(BaseCodemodTest):
     codemod = DjangoJsonResponseType
 
     def test_name(self):

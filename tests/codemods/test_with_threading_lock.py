@@ -1,6 +1,6 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.with_threading_lock import WithThreadingLock
 
 each_class = pytest.mark.parametrize(
@@ -15,7 +15,7 @@ each_class = pytest.mark.parametrize(
 )
 
 
-class TestWithThreadingLock(BaseSemgrepCodemodTest):
+class TestWithThreadingLock(BaseCodemodTest):
     codemod = WithThreadingLock
 
     def test_rule_ids(self):
@@ -89,7 +89,7 @@ with threading.{klass}(), foo():
         self.run_and_assert(tmpdir, input_code, input_code)
 
 
-class TestThreadingNameResolution(BaseSemgrepCodemodTest):
+class TestThreadingNameResolution(BaseCodemodTest):
     codemod = WithThreadingLock
 
     @pytest.mark.parametrize(

@@ -1,10 +1,10 @@
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.fix_deprecated_logging_warn import FixDeprecatedLoggingWarn
 
 
-class TestFixDeprecatedLoggingWarn(BaseSemgrepCodemodTest):
+class TestFixDeprecatedLoggingWarn(BaseCodemodTest):
     codemod = FixDeprecatedLoggingWarn
 
     @pytest.mark.parametrize(

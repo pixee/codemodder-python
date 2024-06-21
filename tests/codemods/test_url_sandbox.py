@@ -1,13 +1,13 @@
 import mock
 import pytest
 
-from codemodder.codemods.test import BaseSemgrepCodemodTest
+from codemodder.codemods.test import BaseCodemodTest
 from codemodder.dependency import Security
 from core_codemods.url_sandbox import UrlSandbox
 
 
 @mock.patch("codemodder.codemods.api.FileContext.add_dependency")
-class TestUrlSandbox(BaseSemgrepCodemodTest):
+class TestUrlSandbox(BaseCodemodTest):
     codemod = UrlSandbox
 
     def test_name(self, _):

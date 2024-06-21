@@ -5,11 +5,21 @@ from typing import ClassVar
 
 import mock
 
+from codemodder import registry
+from codemodder.codemods.api import BaseCodemod
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff
 from codemodder.providers import load_providers
-from codemodder.registry import CodemodCollection, CodemodRegistry
-from codemodder.semgrep import run as semgrep_run
+
+
+def validate_codemod_registration(codemod_id: str) -> BaseCodemod:
+    codemod_registry = registry.load_registered_codemods()
+    try:
+        return codemod_registry.match_codemods(codemod_include=[codemod_id])[0]
+    except IndexError as exc:
+        raise IndexError(
+            "You must register the codemod to a CodemodCollection."
+        ) from exc
 
 
 class DiffError(Exception):
@@ -32,9 +42,14 @@ class BaseCodemodTest:
     def file_extension(self) -> str:
         return "py"
 
+    @classmethod
+    def setup_class(cls):
+        codemod_id = (
+            cls.codemod().id if isinstance(cls.codemod, type) else cls.codemod.id
+        )
+        cls.codemod = validate_codemod_registration(codemod_id)
+
     def setup_method(self):
-        if isinstance(self.codemod, type):
-            self.codemod = self.codemod()
         self.changeset = []
 
     def run_and_assert(
@@ -124,25 +139,6 @@ class BaseCodemodTest:
             num_changes=num_changes,
             files=[file_path],
         )
-
-
-class BaseSemgrepCodemodTest(BaseCodemodTest):
-    @classmethod
-    def setup_class(cls):
-        collection = CodemodCollection(
-            origin="pixee",
-            codemods=[cls.codemod],
-        )
-        cls.registry = CodemodRegistry()
-        cls.registry.add_codemod_collection(collection)
-
-    def results_by_id_filepath(self, input_code, file_path):
-        with open(file_path, "w", encoding="utf-8") as tmp_file:
-            tmp_file.write(dedent(input_code))
-
-        name = self.codemod.name
-        results = self.registry.match_codemods(codemod_include=[name])
-        return semgrep_run(self.execution_context, results[0].yaml_files)
 
 
 class BaseDjangoCodemodTest(BaseCodemodTest):
