@@ -1,20 +1,21 @@
 from abc import ABCMeta, abstractmethod
 from collections import UserDict
 from importlib.metadata import entry_points
+from typing import Any
 
 from codemodder.logging import logger
 
 
 class BaseProvider(metaclass=ABCMeta):
     name: str
-    _resource: str | None
+    _resource: Any | None
 
     def __init__(self, name):
         self.name = name
         self._resource = self.load()
 
     @abstractmethod
-    def load(self) -> str | None:
+    def load(self) -> Any | None:
         pass
 
     @property
@@ -22,7 +23,7 @@ class BaseProvider(metaclass=ABCMeta):
         return self.resource is not None
 
     @property
-    def resource(self) -> str:
+    def resource(self) -> Any:
         if self._resource is None:
             raise ValueError(f"Resource for provider {self.name} is not available")
         return self._resource
