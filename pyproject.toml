@@ -53,7 +53,7 @@ test = [
     "coverage-threshold~=0.4",
     "defusedxml==0.7.1",
     "types-defusedxml==0.7.0.20240218",
-    "flask-wtf==1.2.0",
+    "flask-wtf==1.2.1",
     "types-WTForms==3.1.0.20240425",
     "Flask<4",
     "httpx~=0.27",
