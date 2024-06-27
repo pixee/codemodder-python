@@ -93,7 +93,11 @@ class BaseCodemodTest:
             return
 
         assert len(changes) == 1
-        assert len(changes[0].changes) == num_changes
+        assert (
+            actual_num := len(changes[0].changes)
+        ) == num_changes, (
+            f"Expected {num_changes} changes but {actual_num} were created."
+        )
 
         self.assert_changes(
             tmpdir,
@@ -196,7 +200,11 @@ class BaseSASTCodemodTest(BaseCodemodTest):
             return
 
         assert len(changes) == 1
-        assert len(changes[0].changes) == num_changes
+        assert (
+            actual_num := len(changes[0].changes)
+        ) == num_changes, (
+            f"Expected {num_changes} changes but {actual_num} were created."
+        )
 
         self.assert_changes(
             tmpdir,
