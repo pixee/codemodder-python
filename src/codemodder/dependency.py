@@ -44,10 +44,10 @@ License: [{self._license.name}]({self._license.url}) ✅ \
 
 
 FlaskWTF = Dependency(
-    Requirement("flask-wtf==1.2.0"),
+    Requirement("flask-wtf==1.2.1"),
     hashes=[
-        "96e6f091c641c9944ba7dba2957c84797b630006aa926c99507fbd790069772b",
-        "e5dcf9f3cb80ee6ca8bb68de9ea467e7d613a708ebc5e130b9b02996e06c0d54",
+        "fa6793f2fb7e812e0fe9743b282118e581fb1b6c45d414b8af05e659bd653287",
+        "8bb269eb9bb46b87e7c8233d7e7debdf1f8b74bf90cc1789988c29b37a97b695",
     ],
     description="""\
             This package integrates WTForms into Flask. WTForms provides data validation and and CSRF protection which helps harden applications.
