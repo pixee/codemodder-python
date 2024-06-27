@@ -1,4 +1,5 @@
 import difflib
+from collections import deque
 
 import libcst as cst
 
@@ -20,38 +21,49 @@ def create_diff_from_tree(original_tree: cst.Module, new_tree: cst.Module) -> st
 
 def create_diff_and_linenums(
     original_lines: list[str], new_lines: list[str]
-) -> tuple[str, list[int]]:
+) -> tuple[str, deque[int]]:
     diff_lines = list(difflib.unified_diff(original_lines, new_lines))
-    return difflines_to_str(diff_lines), calc_new_line_nums(diff_lines)
+    return difflines_to_str(diff_lines), calc_line_num_changes(diff_lines)
 
 
-def calc_new_line_nums(diff_lines: list[str]) -> list[int]:
+def calc_line_num_changes(diff_lines: list[str]) -> deque[int]:
+    """
+    Calculates the line numbers changed from a list of diff lines
+    Returns a set-like object from which items can be accessed by index like a list.
+    """
     if not diff_lines:
-        return []
+        return deque()
 
-    added_line_nums = []
+    changed_line_nums: deque[int] = deque()
     current_line_number = 0
+    original_line_number = 0
 
     for line in diff_lines:
         if line.startswith("@@"):
             # Extract the starting line number for the updated file from the diff metadata.
             # The format is @@ -x,y +a,b @@, where a is the starting line number in the updated file.
-            start_line = line.split(" ")[2]
-            current_line_number = (
-                int(start_line.split(",")[0][1:]) - 1
-            )  # Subtract 1 because line numbers are 1-indexed
+            start_line_original, start_line_updated = line.split(" ")[1:3]
+            original_line_number = int(start_line_original.split(",")[0][1:]) - 1
+            current_line_number = int(start_line_updated.split(",")[0][1:]) - 1
 
         elif line.startswith("+"):
             # Increment line number for each line in the updated file
             current_line_number += 1
-            if not line.startswith("++"):  # Ignore the diff metadata lines
-                added_line_nums.append(current_line_number)
+            if not line.startswith("+++"):  # Ignore the diff metadata lines
+                changed_line_nums.append(current_line_number)
 
-        elif not line.startswith("-"):
-            # Increment line number for unchanged/context lines
+        elif line.startswith("-"):
+            # Increment line number for each line in the original file
+            original_line_number += 1
+            if not line.startswith("---"):  # Ignore the diff metadata lines
+                changed_line_nums.append(original_line_number)
+
+        else:
+            # Increment line numbers for unchanged/context lines
+            original_line_number += 1
             current_line_number += 1
 
-    return added_line_nums
+    return changed_line_nums
 
 
 def difflines_to_str(diff_lines: list[str]) -> str:
