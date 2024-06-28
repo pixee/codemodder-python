@@ -1,5 +1,4 @@
 import difflib
-from collections import deque
 
 import libcst as cst
 
@@ -21,20 +20,20 @@ def create_diff_from_tree(original_tree: cst.Module, new_tree: cst.Module) -> st
 
 def create_diff_and_linenums(
     original_lines: list[str], new_lines: list[str]
-) -> tuple[str, deque[int]]:
+) -> tuple[str, list[int]]:
     diff_lines = list(difflib.unified_diff(original_lines, new_lines))
     return difflines_to_str(diff_lines), calc_line_num_changes(diff_lines)
 
 
-def calc_line_num_changes(diff_lines: list[str]) -> deque[int]:
+def calc_line_num_changes(diff_lines: list[str]) -> list[int]:
     """
     Calculates the line numbers changed from a list of diff lines
-    Returns a set-like object from which items can be accessed by index like a list.
+    Returns a list with unique elements.
     """
     if not diff_lines:
-        return deque()
+        return []
 
-    changed_line_nums: deque[int] = deque()
+    changed_line_nums: list[int] = []
     current_line_number = 0
     original_line_number = 0
 
@@ -63,7 +62,7 @@ def calc_line_num_changes(diff_lines: list[str]) -> deque[int]:
             original_line_number += 1
             current_line_number += 1
 
-    return changed_line_nums
+    return list(set(changed_line_nums))
 
 
 def difflines_to_str(diff_lines: list[str]) -> str:

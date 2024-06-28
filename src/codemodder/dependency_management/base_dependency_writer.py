@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from collections import deque
 from pathlib import Path
 from typing import Callable, List, Optional, Union
 
@@ -46,7 +45,7 @@ class DependencyWriter(metaclass=ABCMeta):
         self,
         dependencies: list[Dependency],
         line_number_strategy: Callable,
-        strategy_arg: Union[int, List[str], List[int], deque[int]],
+        strategy_arg: Union[int, List[str], List[int]],
     ) -> list[Change]:
         return [
             Change(
