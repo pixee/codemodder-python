@@ -22,4 +22,6 @@ def test_load_codemod_docs_info(codemod: BaseCodemod):
         "Merge After Cursory Review",
         "Merge Without Review",
     )
-    assert codemod.name in ALL_CODEMODS_METADATA
+    assert (
+        codemod.name in ALL_CODEMODS_METADATA
+    ), f"{codemod.name} has not been added to generate_docs.py"

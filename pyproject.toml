@@ -95,6 +95,7 @@ all = [
 core = "core_codemods:registry"
 sonar = "core_codemods:sonar_registry"
 defectdojo = "core_codemods:defectdojo_registry"
+semgrep = "core_codemods:semgrep_registry"
 
 [project.entry-points.sarif_detectors]
 "semgrep" = "codemodder.semgrep:SemgrepSarifToolDetector"

@@ -322,7 +322,22 @@ SONAR_CODEMODS = {
     for name in SONAR_CODEMOD_NAMES
 }
 
-ALL_CODEMODS_METADATA = CORE_CODEMODS | DEFECTDOJO_CODEMODS | SONAR_CODEMODS
+SEMGREP_CODEMOD_NAMES = [
+    "enable-jinja2-autoescape-semgrep",
+]
+SEMGREP_CODEMODS = {
+    name: DocMetadata(
+        importance=CORE_CODEMODS[
+            core_codemod_name := "-".join(name.split("-")[:-1])
+        ].importance,
+        guidance_explained=CORE_CODEMODS[core_codemod_name].guidance_explained,
+        need_sarif="Yes (Semgrep)",
+    )
+    for name in SEMGREP_CODEMOD_NAMES
+}
+ALL_CODEMODS_METADATA = (
+    CORE_CODEMODS | DEFECTDOJO_CODEMODS | SONAR_CODEMODS | SEMGREP_CODEMODS
+)
 
 
 def generate_docs(codemod):
