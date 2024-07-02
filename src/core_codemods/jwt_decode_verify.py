@@ -7,6 +7,7 @@ from codemodder.codemods.libcst_transformer import (
     NewArg,
 )
 from codemodder.codemods.semgrep import SemgrepRuleDetector
+from codemodder.result import fuzzy_column_match, same_line
 from core_codemods.api import Metadata, Reference, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 
@@ -56,6 +57,29 @@ class JwtDecodeVerifyTransformer(LibcstResultTransformer):
             original_node, [NewArg(name="verify", value="True", add_if_missing=False)]
         )
         return self.update_arg_target(updated_node, new_args)
+
+
+class JwtDecodeVerifySASTTransformer(JwtDecodeVerifyTransformer):
+    def filter_by_result(self, node) -> bool:
+        """
+        Special case result-matching for this rule because the SAST
+        results returned have a start/end column for the verify keyword
+        within the `decode` call, not for the entire `decode` call.
+        """
+        match node:
+            case cst.Call():
+                pos_to_match = self.node_position(node)
+                return any(
+                    self.match_location(pos_to_match, result)
+                    for result in self.results or []
+                )
+        return False
+
+    def match_location(self, pos, result):
+        return any(
+            same_line(pos, location) and fuzzy_column_match(pos, location)
+            for location in result.locations
+        )
 
 
 def is_verify_keyword(element: cst.DictElement) -> bool:
