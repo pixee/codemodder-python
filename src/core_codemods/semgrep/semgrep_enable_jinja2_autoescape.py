@@ -6,5 +6,4 @@ SemgrepEnableJinja2Autoescape = SemgrepCodemod.from_core_codemod(
     other=EnableJinja2Autoescape,
     rule_id="python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2",
     rule_name="direct-use-of-jinja2",
-    rule_url="https://sg.run/RoKe",
 )

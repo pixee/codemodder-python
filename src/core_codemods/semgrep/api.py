@@ -22,10 +22,9 @@ class SemgrepCodemod(SASTCodemod):
         other: CoreCodemod,
         rule_id: str,
         rule_name: str,
-        rule_url: str,
         transformer: BaseTransformerPipeline | None = None,
     ):
-
+        rule_url = f"https://semgrep.dev/r?q={rule_id}"
         return SemgrepCodemod(
             metadata=Metadata(
                 name=name,
