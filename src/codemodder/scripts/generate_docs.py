@@ -324,6 +324,7 @@ SONAR_CODEMODS = {
 
 SEMGREP_CODEMOD_NAMES = [
     "enable-jinja2-autoescape-semgrep",
+    "jwt-decode-verify-semgrep",
 ]
 SEMGREP_CODEMODS = {
     name: DocMetadata(
