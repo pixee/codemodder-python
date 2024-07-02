@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
+from codemodder.codemods.semgrep import SemgrepSarifFileDetector
 from codemodder.context import CodemodExecutionContext
 from codemodder.semgrep import SemgrepResultSet, SemgrepSarifToolDetector
-from core_codemods.semgrep.api import SemgrepSarifFileDetector
 
 SAMPLE_DATA_PATH = Path(__file__).parent / "samples"
 
