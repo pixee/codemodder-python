@@ -11,7 +11,7 @@ class TestEnableJinja2Autoescape(BaseSASTCodemodTest):
     tool = "semgrep"
 
     def test_name(self):
-        assert self.codemod.name == "enable-jinja2-autoescape"
+        assert self.codemod.name == "enable-jinja2-autoescape-semgrep"
 
     def test_import(self, tmpdir):
         input_code = """
