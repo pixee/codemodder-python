@@ -43,7 +43,7 @@ class SASTCodemod(CoreCodemod):
             transformer=transformer,
             default_extensions=default_extensions,
         )
-        self.requested_rules = [self.name]
+        self.requested_rules = []
         if requested_rules:
             self.requested_rules.extend(requested_rules)
 

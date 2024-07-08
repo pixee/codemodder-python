@@ -106,6 +106,7 @@ class BaseCodemod(metaclass=ABCMeta):
 
     @property
     def name(self) -> str:
+        """Non-unique property for codemods. Multiple codemods can have the same name."""
         return self._metadata.name
 
     @property
@@ -172,7 +173,7 @@ class BaseCodemod(metaclass=ABCMeta):
             return
 
         results = (
-            # It seems like semgrep doesn't like our fully-specified id format
+            # It seems like semgrep doesn't like our fully-specified id format so pass in short name instead.
             self.detector.apply(self.name, context, files_to_analyze)
             if self.detector
             else None
