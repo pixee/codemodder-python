@@ -67,7 +67,7 @@ class TestDependencyManager:
             tmp_repo,
             "--output",
             self.output_path,
-            "--codemod-include=url-sandbox",
+            "--codemod-include=pixee:python/url-sandbox",
             "--verbose",
         ]
         completed_process = subprocess.run(
@@ -90,7 +90,7 @@ class TestDependencyManager:
             tmp_repo,
             "--output",
             self.output_path,
-            "--codemod-include=url-sandbox",
+            "--codemod-include=pixee:python/url-sandbox",
             "--verbose",
         ]
         completed_process = subprocess.run(
@@ -115,7 +115,7 @@ class TestDependencyManager:
             tmp_repo,
             "--output",
             self.output_path,
-            "--codemod-include=url-sandbox",
+            "--codemod-include=pixee:python/url-sandbox",
             "--verbose",
         ]
         completed_process = subprocess.run(
@@ -140,7 +140,7 @@ class TestDependencyManager:
             tmp_repo,
             "--output",
             self.output_path,
-            "--codemod-include=url-sandbox",
+            "--codemod-include=pixee:python/url-sandbox",
             "--verbose",
         ]
         completed_process = subprocess.run(

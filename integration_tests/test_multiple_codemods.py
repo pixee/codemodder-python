@@ -12,7 +12,10 @@ class TestMultipleCodemods:
     @pytest.mark.parametrize(
         "codemods",
         # In this particular case the order should not affect the result
-        ["secure-random,fix-mutable-params", "fix-mutable-params,secure-random"],
+        [
+            "pixee:python/secure-random,pixee:python/fix-mutable-params",
+            "pixee:python/fix-mutable-params,pixee:python/secure-random",
+        ],
     )
     def test_two_codemods(self, codemods, tmpdir):
         source_file_name = "multiple_codemods.py"
@@ -59,5 +62,5 @@ def func(foo=None):
         ids = codemods.split(",")
         assert len(results["results"]) == 2
         # Order matters
-        assert results["results"][0]["codemod"] == f"pixee:python/{ids[0]}"
-        assert results["results"][1]["codemod"] == f"pixee:python/{ids[1]}"
+        assert results["results"][0]["codemod"] == f"{ids[0]}"
+        assert results["results"][1]["codemod"] == f"{ids[1]}"
