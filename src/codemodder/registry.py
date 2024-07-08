@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import re
 from dataclasses import dataclass
-from functools import cached_property
 from importlib.metadata import EntryPoint, entry_points
 from itertools import chain
 from typing import TYPE_CHECKING, Callable, Optional
@@ -32,18 +31,12 @@ class CodemodCollection:
 
 
 class CodemodRegistry:
-    _codemods_by_name: dict[str, BaseCodemod]
     _codemods_by_id: dict[str, BaseCodemod]
     _default_include_paths: set[str]
 
     def __init__(self):
-        self._codemods_by_name = {}
         self._codemods_by_id = {}
         self._default_include_paths = set()
-
-    @property
-    def names(self):
-        return list(self._codemods_by_name.keys())
 
     @property
     def ids(self):
@@ -51,24 +44,15 @@ class CodemodRegistry:
 
     @property
     def codemods(self):
-        return list(self._codemods_by_name.values())
+        return list(self._codemods_by_id.values())
 
     @property
     def default_include_paths(self) -> list[str]:
         return list(self._default_include_paths)
 
-    @cached_property
-    def pixee_codemods_by_name(self) -> dict:
-        return {
-            name: codemod
-            for name, codemod in self._codemods_by_name.items()
-            if codemod.origin == "pixee"
-        }
-
     def add_codemod_collection(self, collection: CodemodCollection):
         for codemod in collection.codemods:
             wrapper = codemod() if isinstance(codemod, type) else codemod
-            self._codemods_by_name[wrapper.name] = wrapper
             self._codemods_by_id[wrapper.id] = wrapper
             self._default_include_paths.update(
                 chain(
@@ -98,10 +82,8 @@ class CodemodRegistry:
             names = set(name for name in codemod_exclude if "*" not in name)
 
             for codemod in self.codemods:
-                if (
-                    codemod.id in names
-                    or (codemod.origin == "pixee" and codemod.name in names)
-                    or any(pat.match(codemod.id) for pat in patterns)
+                if codemod.id in names or any(
+                    pat.match(codemod.id) for pat in patterns
                 ):
                     continue
 
@@ -124,9 +106,7 @@ class CodemodRegistry:
                 continue
 
             try:
-                matched_codemods.append(
-                    self.pixee_codemods_by_name.get(name) or self._codemods_by_id[name]
-                )
+                matched_codemods.append(self._codemods_by_id[name])
             except KeyError:
                 logger.warning(f"Requested codemod to include '{name}' does not exist.")
         return matched_codemods

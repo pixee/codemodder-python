@@ -8,7 +8,7 @@ class TestMatchCodemods:
     @classmethod
     def setup_class(cls):
         cls.registry = load_registered_codemods()
-        cls.codemod_map = cls.registry._codemods_by_name
+        cls.codemod_map = cls.registry._codemods_by_id
         cls.all_ids = [
             c().id if isinstance(c, type) else c.id for c in registry.codemods
         ]
@@ -31,34 +31,42 @@ class TestMatchCodemods:
 
     def test_include_non_sast_in_sast(self):
         assert set(
-            self.registry.match_codemods(["secure-random"], None, sast_only=True)
-        ) == {self.codemod_map["secure-random"]}
+            self.registry.match_codemods(
+                ["pixee:python/secure-random"], None, sast_only=True
+            )
+        ) == {self.codemod_map["pixee:python/secure-random"]}
 
     @pytest.mark.parametrize(
         "input_str",
-        ["secure-random", "pixee:python/secure-random", "secure-random,url-sandbox"],
+        [
+            "pixee:python/secure-random",
+            "pixee:python/secure-random,pixee:python/url-sandbox",
+        ],
     )
     def test_include(self, input_str):
         includes = input_str.split(",")
         assert self.registry.match_codemods(includes, None) == [
-            self.codemod_map[name.replace("pixee:python/", "")] for name in includes
+            self.codemod_map[name] for name in includes
         ]
 
     @pytest.mark.parametrize(
-        "input_str", ["url-sandbox,secure-random", "secure-random,url-sandbox"]
+        "input_str",
+        [
+            "pixee:python/url-sandbox,pixee:python/secure-random",
+            "pixee:python/secure-random,pixee:python/url-sandbox",
+        ],
     )
     def test_include_preserve_order(self, input_str):
         includes = input_str.split(",")
         assert [
-            codemod.name for codemod in self.registry.match_codemods(includes, None)
+            codemod.id for codemod in self.registry.match_codemods(includes, None)
         ] == includes
 
     @pytest.mark.parametrize(
         "input_str",
         [
-            "secure-random",
             "pixee:python/secure-random",
-            "secure-random,url-sandbox",
+            "pixee:python/secure-random,pixee:python/url-sandbox",
         ],
     )
     def test_exclude(self, input_str):
@@ -66,7 +74,7 @@ class TestMatchCodemods:
         res = [
             c
             for c in self.registry.codemods
-            if c.id in self.all_ids and c.name not in excludes and c.id not in excludes
+            if c.id in self.all_ids and c.id not in excludes
         ]
         assert self.registry.match_codemods(None, excludes) == res
 
@@ -74,9 +82,9 @@ class TestMatchCodemods:
         assert self.registry.match_codemods(["doesntexist"], None) == []
 
     def test_codemod_include_some_match(self):
-        assert self.registry.match_codemods(["doesntexist", "secure-random"], None) == [
-            self.codemod_map["secure-random"]
-        ]
+        assert self.registry.match_codemods(
+            ["doesntexist", "pixee:python/secure-random"], None
+        ) == [self.codemod_map["pixee:python/secure-random"]]
 
     def test_bad_codemod_exclude_all_match(self):
         assert self.registry.match_codemods(None, ["doesntexist"]) == [
@@ -84,10 +92,12 @@ class TestMatchCodemods:
         ]
 
     def test_exclude_some_match(self):
-        assert self.registry.match_codemods(None, ["doesntexist", "secure-random"]) == [
+        assert self.registry.match_codemods(
+            None, ["doesntexist", "pixee:python/secure-random"]
+        ) == [
             c
             for c in self.registry.codemods
-            if c.name not in "secure-random" and c.id in self.all_ids
+            if c.id not in "pixee:python/secure-random" and c.id in self.all_ids
         ]
 
     def test_include_with_pattern(self):
@@ -96,9 +106,11 @@ class TestMatchCodemods:
         ]
 
     def test_include_with_pattern_and_another(self):
-        assert self.registry.match_codemods(["*django*", "use-defusedxml"], None) == [
-            c for c in self.registry.codemods if "django" in c.id
-        ] + [self.codemod_map["use-defusedxml"]]
+        assert self.registry.match_codemods(
+            ["*django*", "pixee:python/use-defusedxml"], None
+        ) == [c for c in self.registry.codemods if "django" in c.id] + [
+            self.codemod_map["pixee:python/use-defusedxml"]
+        ]
 
     def test_include_sast_with_prefix(self):
         assert self.registry.match_codemods(["sonar*"], None, sast_only=False) == [
@@ -121,13 +133,13 @@ class TestMatchCodemods:
 
     def test_exclude_with_pattern_and_another(self):
         assert self.registry.match_codemods(
-            None, ["*django*", "use-defusedxml"], sast_only=False
+            None, ["*django*", "pixee:python/use-defusedxml"], sast_only=False
         ) == [
             c
             for c in self.registry.codemods
             if "django" not in c.id
             and c.id in self.all_ids
-            and c.name != "use-defusedxml"
+            and c.id != "pixee:python/use-defusedxml"
         ]
 
     def test_exclude_pixee_with_prefix(self):
