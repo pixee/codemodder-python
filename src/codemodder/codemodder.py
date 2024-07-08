@@ -41,7 +41,7 @@ def find_semgrep_results(
         yaml_files := list(
             itertools.chain.from_iterable(
                 [
-                    codemod.detector.get_yaml_files(codemod.name)
+                    codemod.detector.get_yaml_files(codemod._internal_name)
                     for codemod in codemods
                     if codemod.detector
                     and isinstance(codemod.detector, SemgrepRuleDetector)
@@ -101,16 +101,14 @@ def apply_codemods(
         logger.info("running codemod %s", codemod.id)
 
         if isinstance(codemod.detector, SemgrepRuleDetector):
-            # Unfortunately the IDs from semgrep are not fully specified
-            # TODO: eventually we need to be able to use fully specified IDs here
-            if codemod.name not in semgrep_finding_ids:
+            if codemod._internal_name not in semgrep_finding_ids:
                 logger.debug(
                     "no results from semgrep for %s, skipping analysis",
                     codemod.id,
                 )
                 continue
 
-            files_to_analyze = semgrep_results.files_for_rule(codemod.name)
+            files_to_analyze = semgrep_results.files_for_rule(codemod._internal_name)
 
         # Non-semgrep codemods ignore the semgrep results
         codemod.apply(context, files_to_analyze)
