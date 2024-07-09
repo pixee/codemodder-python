@@ -76,7 +76,7 @@ class SemgrepCodemod(SASTCodemod):
                         )
                     ]
                 ),
-                description=metadata.description,
+                description=other.change_description,
                 tool=ToolMetadata(
                     name="Semgrep",
                     rules=[
