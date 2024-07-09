@@ -26,7 +26,9 @@ class TestContext:
     def test_successful_dependency_description(self, mocker):
         registry = load_registered_codemods()
         repo_manager = PythonRepoManager(mocker.Mock())
-        codemod = registry.match_codemods(codemod_include=["url-sandbox"])[0]
+        codemod = registry.match_codemods(codemod_include=["pixee:python/url-sandbox"])[
+            0
+        ]
 
         context = Context(
             mocker.Mock(), True, False, registry, None, repo_manager, [], []
@@ -57,7 +59,9 @@ class TestContext:
     def test_failed_dependency_description(self, mocker):
         registry = load_registered_codemods()
         repo_manager = PythonRepoManager(mocker.Mock())
-        codemod = registry.match_codemods(codemod_include=["url-sandbox"])[0]
+        codemod = registry.match_codemods(codemod_include=["pixee:python/url-sandbox"])[
+            0
+        ]
 
         context = Context(
             mocker.Mock(), True, False, registry, None, repo_manager, [], []

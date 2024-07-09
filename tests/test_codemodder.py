@@ -65,7 +65,7 @@ class TestRun:
             str(code_dir),
             "--output",
             str(codetf),
-            "--codemod-include=url-sandbox",
+            "--codemod-include=pixee:python/url-sandbox",
             "--path-exclude",
             "*py",
         ]
@@ -84,7 +84,7 @@ class TestRun:
             str(code_dir),
             "--output",
             str(codetf),
-            "--codemod-include=url-sandbox",
+            "--codemod-include=pixee:python/url-sandbox",
         ]
         res = run(args)
         assert res == 0
@@ -98,7 +98,7 @@ class TestRun:
             "--output",
             str(codetf),
             "--codemod-include",
-            "fix-assert-tuple",
+            "pixee:python/fix-assert-tuple",
             "--path-include",
             "*request.py",
         ]
@@ -140,7 +140,7 @@ class TestRun:
             str(codetf),
             "--dry-run",
             # Make this test faster by restricting the number of codemods
-            "--codemod-include=use-defusedxml",
+            "--codemod-include=pixee:python/use-defusedxml",
         ]
 
         assert not codetf.exists()
@@ -160,7 +160,7 @@ class TestRun:
             "--output",
             str(codetf),
             # Make this test faster by restricting the number of codemods
-            "--codemod-include=use-generator,use-defusedxml,use-walrus-if",
+            "--codemod-include=pixee:python/use-generator,pixee:python/use-defusedxml,pixee:python/use-walrus-if",
         ]
         if dry_run:
             args += ["--dry-run"]
@@ -176,37 +176,6 @@ class TestRun:
         assert len(results_by_codemod) == 3
 
         mock_reporting.return_value.write_report.assert_called_once()
-
-    @pytest.mark.parametrize(
-        "codemod", ["use-defusedxml", "pixee:python/use-defusedxml"]
-    )
-    @mock.patch(
-        "codemodder.codemods.libcst_transformer.LibcstTransformerPipeline.apply",
-        new_callable=mock.PropertyMock,
-    )
-    @mock.patch("codemodder.context.CodemodExecutionContext.compile_results")
-    @mock.patch("codemodder.codetf.CodeTF.write_report")
-    def test_run_codemod_name_or_id(
-        self,
-        write_report,
-        mock_compile_results,
-        transform_apply,
-        codemod,
-        dir_structure,
-    ):
-        del write_report
-        code_dir, codetf = dir_structure
-        args = [
-            str(code_dir),
-            "--output",
-            str(codetf),
-            f"--codemod-include={codemod}",
-        ]
-
-        exit_code = run(args)
-        assert exit_code == 0
-        mock_compile_results.assert_called()
-        transform_apply.assert_called()
 
 
 class TestCodemodIncludeExclude:
@@ -236,7 +205,7 @@ class TestCodemodIncludeExclude:
     @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_codemod_include_some_match(self, write_report, dir_structure, caplog):
         bad_codemod = "doesntexist"
-        good_codemod = "secure-random"
+        good_codemod = "pixee:python/secure-random"
         code_dir, codetf = dir_structure
         args = [
             str(code_dir),
@@ -247,7 +216,7 @@ class TestCodemodIncludeExclude:
         caplog.set_level(logging.INFO)
         run(args)
         write_report.assert_called_once()
-        assert f"running codemod pixee:python/{good_codemod}" in caplog.text
+        assert f"running codemod {good_codemod}" in caplog.text
         assert (
             f"Requested codemod to include '{bad_codemod}' does not exist."
             in caplog.text
@@ -293,7 +262,7 @@ class TestCodemodIncludeExclude:
         assert not codetf.exists()
 
         registry = load_registered_codemods()
-        names = ",".join(registry.names)
+        names = ",".join(registry.ids)
         args = [
             str(code_dir),
             "--output",
@@ -316,7 +285,7 @@ class TestExitCode:
             str(code_dir),
             "--output",
             "here.txt",
-            "--codemod-include=url-sandbox",
+            "--codemod-include=pixee:python/url-sandbox",
             "--path-exclude",
             "*request.py",
         ]
@@ -331,7 +300,7 @@ class TestExitCode:
             "bad/path/",
             "--output",
             "here.txt",
-            "--codemod-include=url-sandbox",
+            "--codemod-include=pixee:python/url-sandbox",
         ]
 
         exit_code = run(args)
@@ -410,7 +379,7 @@ SESSION_COOKIE_SECURE = True"""
             "tests/samples",
             "--output",
             "here.txt",
-            "--codemod-include=url-sandbox",
+            "--codemod-include=pixee:python/url-sandbox",
             f"--{flag}=bad.json",
         ]
 

@@ -106,6 +106,7 @@ class BaseCodemod(metaclass=ABCMeta):
 
     @property
     def name(self) -> str:
+        """Non-unique property for codemods. Multiple codemods can have the same name."""
         return self._metadata.name
 
     @property
@@ -156,6 +157,13 @@ class BaseCodemod(metaclass=ABCMeta):
             "references": [ref.model_dump() for ref in self.references],
         }
 
+    @property
+    def _internal_name(self) -> str:
+        """Used only for internal semgrep runs."""
+        # Unfortunately the IDs from semgrep are not fully specified
+        # TODO: eventually we need to be able to use fully specified IDs here
+        return self.name
+
     def _apply(
         self,
         context: CodemodExecutionContext,
@@ -172,8 +180,8 @@ class BaseCodemod(metaclass=ABCMeta):
             return
 
         results = (
-            # It seems like semgrep doesn't like our fully-specified id format
-            self.detector.apply(self.name, context, files_to_analyze)
+            # It seems like semgrep doesn't like our fully-specified id format so pass in short name instead.
+            self.detector.apply(self._internal_name, context, files_to_analyze)
             if self.detector
             else None
         )
@@ -224,7 +232,7 @@ class BaseCodemod(metaclass=ABCMeta):
         :param context: The codemod execution context
         :param files_to_analyze: The list of files to analyze
         """
-        self._apply(context, files_to_analyze, [self.name])
+        self._apply(context, files_to_analyze, [self._internal_name])
 
     def _process_file(
         self,
