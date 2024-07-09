@@ -11,7 +11,7 @@ class TestSonarSQLParameterization(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "break-or-continue-out-of-loop-S1716"
+        assert self.codemod.name == "break-or-continue-out-of-loop"
 
     def test_simple(self, tmpdir):
         input_code = """

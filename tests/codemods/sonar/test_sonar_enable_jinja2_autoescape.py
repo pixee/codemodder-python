@@ -11,7 +11,7 @@ class TestEnableJinja2Autoescape(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "enable-jinja2-autoescape-S5247"
+        assert self.codemod.name == "enable-jinja2-autoescape"
 
     def test_simple(self, tmpdir):
         input_code = """

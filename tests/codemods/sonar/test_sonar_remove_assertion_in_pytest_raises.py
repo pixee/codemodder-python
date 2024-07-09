@@ -11,7 +11,7 @@ class TestRemoveAssertionInPytestRaises(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "remove-assertion-in-pytest-raises-S5915"
+        assert self.codemod.name == "remove-assertion-in-pytest-raises"
 
     def test_simple(self, tmpdir):
         input_code = """

@@ -9,7 +9,7 @@ class TestSonarFixMathIsClose(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "fix-math-isclose-S6727"
+        assert self.codemod.name == "fix-math-isclose"
 
     def test_simple(self, tmpdir):
         input_code = """

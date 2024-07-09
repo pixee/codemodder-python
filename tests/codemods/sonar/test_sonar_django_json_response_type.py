@@ -11,7 +11,7 @@ class TestDjangoJsonResponseType(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "django-json-response-type-S5131"
+        assert self.codemod.name == "django-json-response-type"
 
     def test_simple(self, tmpdir):
         rule_id = "pythonsecurity:S5131"

@@ -30,7 +30,7 @@ class JwtDecodeVerifySonarTransformer(JwtDecodeVerifyTransformer):
 
 
 SonarJwtDecodeVerify = SonarCodemod.from_core_codemod(
-    name="jwt-decode-verify-S5659",
+    name="jwt-decode-verify",
     other=JwtDecodeVerify,
     rule_id="python:S5659",
     rule_name="JWT should be signed and verified",

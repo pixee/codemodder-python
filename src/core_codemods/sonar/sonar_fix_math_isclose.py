@@ -29,7 +29,7 @@ class FixMathIsCloseSonarTransformer(FixMathIsCloseTransformer):
 
 
 SonarFixMathIsClose = SonarCodemod.from_core_codemod(
-    name="fix-math-isclose-S6727",
+    name="fix-math-isclose",
     other=FixMathIsClose,
     rule_id="python:S6727",
     rule_name="The abs_tol parameter should be provided when using math.isclose to compare values to 0",

@@ -290,33 +290,31 @@ DEFECTDOJO_CODEMODS = {
 }
 
 SONAR_CODEMOD_NAMES = [
-    "numpy-nan-equality-S6725",
-    "literal-or-new-object-identity-S5796",
-    "django-receiver-on-top-S6552",
-    "exception-without-raise-S3984",
-    "fix-assert-tuple-S5905",
-    "remove-assertion-in-pytest-raises-S5915",
-    "flask-json-response-type-S5131",
-    "django-json-response-type-S5131",
-    "jwt-decode-verify-S5659",
-    "fix-missing-self-or-cls-S5719",
-    "secure-tempfile-S5445",
-    "secure-random-S2245",
-    "enable-jinja2-autoescape-S5247",
-    "url-sandbox-S5144",
-    "fix-float-equality-S1244",
-    "fix-math-isclose-S6727",
-    "sql-parameterization-S3649",
-    "django-model-without-dunder-str-S6554",
-    "break-or-continue-out-of-loop-S1716",
-    "disable-graphql-introspection-S6786",
+    "numpy-nan-equality",
+    "literal-or-new-object-identity",
+    "django-receiver-on-top",
+    "exception-without-raise",
+    "fix-assert-tuple",
+    "remove-assertion-in-pytest-raises",
+    "flask-json-response-type",
+    "django-json-response-type",
+    "jwt-decode-verify",
+    "fix-missing-self-or-cls",
+    "secure-tempfile",
+    "secure-random",
+    "enable-jinja2-autoescape",
+    "url-sandbox",
+    "fix-float-equality",
+    "fix-math-isclose",
+    "sql-parameterization",
+    "django-model-without-dunder-str",
+    "break-or-continue-out-of-loop",
+    "disable-graphql-introspection",
 ]
 SONAR_CODEMODS = {
     name: DocMetadata(
-        importance=CORE_CODEMODS[
-            core_codemod_name := "-".join(name.split("-")[:-1])
-        ].importance,
-        guidance_explained=CORE_CODEMODS[core_codemod_name].guidance_explained,
+        importance=CORE_CODEMODS[name].importance,
+        guidance_explained=CORE_CODEMODS[name].guidance_explained,
         need_sarif="Yes (Sonar)",
     )
     for name in SONAR_CODEMOD_NAMES

@@ -9,7 +9,7 @@ class TestSonarNumpyNanEquality(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "numpy-nan-equality-S6725"
+        assert self.codemod.name == "numpy-nan-equality"
 
     def test_simple(self, tmpdir):
         input_code = """

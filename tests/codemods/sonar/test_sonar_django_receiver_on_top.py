@@ -9,7 +9,7 @@ class TestSonarDjangoReceiverOnTop(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "django-receiver-on-top-S6552"
+        assert self.codemod.name == "django-receiver-on-top"
 
     def test_simple(self, tmpdir):
         input_code = """

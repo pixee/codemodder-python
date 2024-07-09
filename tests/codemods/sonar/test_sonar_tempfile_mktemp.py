@@ -9,7 +9,7 @@ class TestSonarTempfileMktemp(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "secure-tempfile-S5445"
+        assert self.codemod.name == "secure-tempfile"
 
     def test_simple(self, tmpdir):
         input_code = """

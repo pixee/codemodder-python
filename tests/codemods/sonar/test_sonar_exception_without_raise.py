@@ -9,7 +9,7 @@ class TestSonarExceptionWithoutRaise(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "exception-without-raise-S3984"
+        assert self.codemod.name == "exception-without-raise"
 
     def test_simple(self, tmpdir):
         input_code = """

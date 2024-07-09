@@ -11,8 +11,8 @@ class TestSonarDjangoModelWithoutDunderStr(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "django-model-without-dunder-str-S6554"
-        assert self.codemod.id == "sonar:python/django-model-without-dunder-str-S6554"
+        assert self.codemod.name == "django-model-without-dunder-str"
+        assert self.codemod.id == "sonar:python/django-model-without-dunder-str"
 
     def test_simple(self, tmpdir):
         input_code = """

@@ -11,7 +11,7 @@ class TestSonarFlaskJsonResponseType(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "flask-json-response-type-S5131"
+        assert self.codemod.name == "flask-json-response-type"
 
     def test_simple(self, tmpdir):
         input_code = """
