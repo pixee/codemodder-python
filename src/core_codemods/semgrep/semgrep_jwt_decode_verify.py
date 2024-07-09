@@ -3,12 +3,12 @@ from core_codemods.jwt_decode_verify import (
     JwtDecodeVerify,
     JwtDecodeVerifySASTTransformer,
 )
-from core_codemods.sonar.api import SonarCodemod
+from core_codemods.semgrep.api import SemgrepCodemod
 
-SonarJwtDecodeVerify = SonarCodemod.from_core_codemod(
-    name="jwt-decode-verify-S5659",
+SemgrepJwtDecodeVerify = SemgrepCodemod.from_core_codemod(
+    name="jwt-decode-verify",
     other=JwtDecodeVerify,
-    rule_id="python:S5659",
-    rule_name="JWT should be signed and verified",
+    rule_id="python.jwt.security.unverified-jwt-decode.unverified-jwt-decode",
+    rule_name="unverified-jwt-decode",
     transformer=LibcstTransformerPipeline(JwtDecodeVerifySASTTransformer),
 )

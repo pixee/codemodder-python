@@ -1,28 +1,26 @@
 import json
 
 from codemodder.codemods.test import BaseSASTCodemodTest
-from core_codemods.semgrep.semgrep_enable_jinja2_autoescape import (
-    SemgrepEnableJinja2Autoescape,
-)
+from core_codemods.semgrep.semgrep_jwt_decode_verify import SemgrepJwtDecodeVerify
 
 
-class TestEnableJinja2Autoescape(BaseSASTCodemodTest):
-    codemod = SemgrepEnableJinja2Autoescape
+class TestSemgrepJwtDecodeVerify(BaseSASTCodemodTest):
+    codemod = SemgrepJwtDecodeVerify
     tool = "semgrep"
 
     def test_name(self):
-        assert self.codemod.name == "enable-jinja2-autoescape"
+        assert self.codemod.name == "jwt-decode-verify"
 
     def test_import(self, tmpdir):
         input_code = """
-        import jinja2
-        env = jinja2.Environment()
-        var = "hello"
+        import jwt
+
+        jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'],  options={"verify_signature": False})
         """
-        expexted_output = """
-        import jinja2
-        env = jinja2.Environment(autoescape=True)
-        var = "hello"
+        expected_output = """
+        import jwt
+
+        jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'],  options={"verify_signature": True})
         """
         results = {
             "runs": [
@@ -38,22 +36,21 @@ class TestEnableJinja2Autoescape(BaseSASTCodemodTest):
                                             "uriBaseId": "%SRCROOT%",
                                         },
                                         "region": {
-                                            "endColumn": 27,
-                                            "endLine": 3,
+                                            "endColumn": 93,
+                                            "endLine": 4,
                                             "snippet": {
-                                                "text": "env = jinja2.Environment()"
+                                                "text": "jwt.decode(encoded_jwt, SECRET_KEY, algorithms=['HS256'], options={\"verify_signature\": False})"
                                             },
-                                            "startColumn": 7,
-                                            "startLine": 3,
+                                            "startColumn": 88,
+                                            "startLine": 4,
                                         },
                                     }
                                 }
                             ],
                             "message": {
-                                "text": "Detected direct use of jinja2. If not done properly, this may bypass HTML escaping which opens up the application to cross-site scripting (XSS) vulnerabilities. Prefer using the Flask method 'render_template()' and templates with a '.html' extension in order to prevent XSS."
+                                "text": "Detected JWT token decoded with 'verify=False'. This bypasses any integrity checks for the token which means the token could be tampered with by malicious actors. Ensure that the JWT token is verified."
                             },
-                            "properties": {},
-                            "ruleId": "python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2",
+                            "ruleId": "python.jwt.security.unverified-jwt-decode.unverified-jwt-decode",
                         }
                     ]
                 }
@@ -62,6 +59,6 @@ class TestEnableJinja2Autoescape(BaseSASTCodemodTest):
         self.run_and_assert(
             tmpdir,
             input_code,
-            expexted_output,
+            expected_output,
             results=json.dumps(results),
         )

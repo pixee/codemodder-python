@@ -55,6 +55,7 @@ from .secure_flask_cookie import SecureFlaskCookie
 from .secure_flask_session_config import SecureFlaskSessionConfig
 from .secure_random import SecureRandom
 from .semgrep.semgrep_enable_jinja2_autoescape import SemgrepEnableJinja2Autoescape
+from .semgrep.semgrep_jwt_decode_verify import SemgrepJwtDecodeVerify
 from .sonar.sonar_break_or_continue_out_of_loop import SonarBreakOrContinueOutOfLoop
 from .sonar.sonar_disable_graphql_introspection import SonarDisableGraphQLIntrospection
 from .sonar.sonar_django_json_response_type import SonarDjangoJsonResponseType
@@ -198,5 +199,6 @@ semgrep_registry = CodemodCollection(
     origin="semgrep",
     codemods=[
         SemgrepEnableJinja2Autoescape,
+        SemgrepJwtDecodeVerify,
     ],
 )
