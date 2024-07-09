@@ -6,7 +6,7 @@ from core_codemods.jwt_decode_verify import (
 from core_codemods.semgrep.api import SemgrepCodemod
 
 SemgrepJwtDecodeVerify = SemgrepCodemod.from_core_codemod(
-    name="jwt-decode-verify-semgrep",
+    name="jwt-decode-verify",
     other=JwtDecodeVerify,
     rule_id="python.jwt.security.unverified-jwt-decode.unverified-jwt-decode",
     rule_name="unverified-jwt-decode",

@@ -323,15 +323,13 @@ SONAR_CODEMODS = {
 }
 
 SEMGREP_CODEMOD_NAMES = [
-    "enable-jinja2-autoescape-semgrep",
-    "jwt-decode-verify-semgrep",
+    "enable-jinja2-autoescape",
+    "jwt-decode-verify",
 ]
 SEMGREP_CODEMODS = {
     name: DocMetadata(
-        importance=CORE_CODEMODS[
-            core_codemod_name := "-".join(name.split("-")[:-1])
-        ].importance,
-        guidance_explained=CORE_CODEMODS[core_codemod_name].guidance_explained,
+        importance=CORE_CODEMODS[name].importance,
+        guidance_explained=CORE_CODEMODS[name].guidance_explained,
         need_sarif="Yes (Semgrep)",
     )
     for name in SEMGREP_CODEMOD_NAMES

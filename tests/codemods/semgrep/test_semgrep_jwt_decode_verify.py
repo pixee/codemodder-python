@@ -9,7 +9,7 @@ class TestSemgrepJwtDecodeVerify(BaseSASTCodemodTest):
     tool = "semgrep"
 
     def test_name(self):
-        assert self.codemod.name == "jwt-decode-verify-semgrep"
+        assert self.codemod.name == "jwt-decode-verify"
 
     def test_import(self, tmpdir):
         input_code = """
