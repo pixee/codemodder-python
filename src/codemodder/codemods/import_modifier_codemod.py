@@ -52,9 +52,6 @@ class ImportModifierCodemod(SimpleCodemod, metaclass=ABCMeta):
         pass
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        if not self.node_is_selected(tree):
-            return tree
-
         visitor = MappingImportedCallModifier(
             self.context,
             self.file_context,
