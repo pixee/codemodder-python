@@ -325,7 +325,6 @@ SEMGREP_CODEMOD_NAMES = [
     "jwt-decode-verify",
     "use-defusedxml",
     "subprocess-shell-false",
-    "django-secure-set-cookie",
 ]
 SEMGREP_CODEMODS = {
     name: DocMetadata(
@@ -334,6 +333,12 @@ SEMGREP_CODEMODS = {
         need_sarif="Yes (Semgrep)",
     )
     for name in SEMGREP_CODEMOD_NAMES
+} | {
+    "django-secure-set-cookie": DocMetadata(
+        importance="Medium",
+        guidance_explained="Our change provides the most secure way to create cookies in Django. However, it's possible you have configured your Django application configurations to use secure cookies. In these cases, using the default parameters for `set_cookie` is safe.",
+        need_sarif="Yes (Semgrep)",
+    )
 }
 ALL_CODEMODS_METADATA = (
     CORE_CODEMODS | DEFECTDOJO_CODEMODS | SONAR_CODEMODS | SEMGREP_CODEMODS
