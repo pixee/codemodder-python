@@ -324,6 +324,7 @@ SEMGREP_CODEMOD_NAMES = [
     "enable-jinja2-autoescape",
     "jwt-decode-verify",
     "use-defusedxml",
+    "subprocess-shell-false",
 ]
 SEMGREP_CODEMODS = {
     name: DocMetadata(

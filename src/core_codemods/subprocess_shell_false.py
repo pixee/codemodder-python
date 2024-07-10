@@ -3,26 +3,22 @@ from libcst import matchers as m
 from libcst.metadata import ParentNodeProvider
 
 from codemodder.codemods.check_annotations import is_disabled_by_annotations
-from codemodder.codemods.libcst_transformer import NewArg
+from codemodder.codemods.libcst_transformer import (
+    LibcstResultTransformer,
+    LibcstTransformerPipeline,
+    NewArg,
+)
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
+from core_codemods.api import (
+    CoreCodemod,
+    Metadata,
+    Reference,
+    ReviewGuidance,
+    SimpleCodemod,
+)
 
 
-class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
-    metadata = Metadata(
-        name="subprocess-shell-false",
-        summary="Use `shell=False` in `subprocess` Function Calls",
-        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
-        references=[
-            Reference(
-                url="https://docs.python.org/3/library/subprocess.html#security-considerations"
-            ),
-            Reference(
-                url="https://en.wikipedia.org/wiki/Code_injection#Shell_injection"
-            ),
-            Reference(url="https://stackoverflow.com/a/3172488"),
-        ],
-    )
+class SubprocessShellFalseTransformer(LibcstResultTransformer, NameResolutionMixin):
     change_description = "Set `shell` keyword argument to `False`"
     SUBPROCESS_FUNCS = [
         f"subprocess.{func}"
@@ -68,3 +64,22 @@ class SubprocessShellFalse(SimpleCodemod, NameResolutionMixin):
                 value=m.SimpleString() | m.ConcatenatedString() | m.FormattedString()
             ),
         )
+
+
+SubprocessShellFalse = CoreCodemod(
+    metadata=Metadata(
+        name="subprocess-shell-false",
+        summary="Use `shell=False` in `subprocess` Function Calls",
+        review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/library/subprocess.html#security-considerations"
+            ),
+            Reference(
+                url="https://en.wikipedia.org/wiki/Code_injection#Shell_injection"
+            ),
+            Reference(url="https://stackoverflow.com/a/3172488"),
+        ],
+    ),
+    transformer=LibcstTransformerPipeline(SubprocessShellFalseTransformer),
+)
