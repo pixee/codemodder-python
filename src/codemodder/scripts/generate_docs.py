@@ -325,6 +325,7 @@ SEMGREP_CODEMOD_NAMES = [
     "jwt-decode-verify",
     "use-defusedxml",
     "subprocess-shell-false",
+    "django-secure-set-cookie",
 ]
 SEMGREP_CODEMODS = {
     name: DocMetadata(
