@@ -15,7 +15,7 @@ class TestSonarSQLParameterization(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "sql-parameterization-S3649"
+        assert self.codemod.name == "sql-parameterization"
 
     def test_simple(self, tmpdir):
         input_code = """

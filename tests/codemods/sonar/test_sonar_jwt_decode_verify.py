@@ -9,7 +9,7 @@ class TestSonarJwtDecodeVerify(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "jwt-decode-verify-S5659"
+        assert self.codemod.name == "jwt-decode-verify"
 
     def test_simple(self, tmpdir):
         input_code = """

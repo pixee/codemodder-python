@@ -11,7 +11,7 @@ class TestSonarLiteralOrNewObjectIdentity(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "literal-or-new-object-identity-S5796"
+        assert self.codemod.name == "literal-or-new-object-identity"
 
     def test_list(self, tmpdir):
         input_code = """

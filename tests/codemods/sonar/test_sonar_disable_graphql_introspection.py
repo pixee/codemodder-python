@@ -11,7 +11,7 @@ class TestSonarDisableGraphQLIntrospection(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "disable-graphql-introspection-S6786"
+        assert self.codemod.name == "disable-graphql-introspection"
 
     def test_simple(self, tmpdir):
         input_code = """

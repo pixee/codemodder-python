@@ -9,7 +9,7 @@ class TestSonarFixFloatEquality(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "fix-float-equality-S1244"
+        assert self.codemod.name == "fix-float-equality"
 
     def test_simple(self, tmpdir):
         input_code = """

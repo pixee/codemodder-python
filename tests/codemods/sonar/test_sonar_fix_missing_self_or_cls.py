@@ -9,7 +9,7 @@ class TestSonarFixMissingSelfOrCls(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "fix-missing-self-or-cls-S5719"
+        assert self.codemod.name == "fix-missing-self-or-cls"
 
     def test_simple(self, tmpdir):
         input_code = """

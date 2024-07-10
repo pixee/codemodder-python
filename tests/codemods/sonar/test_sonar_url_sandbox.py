@@ -9,7 +9,7 @@ class TestSonarUrlSandbox(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "url-sandbox-S5144"
+        assert self.codemod.name == "url-sandbox"
 
     def test_simple(self, tmpdir):
         input_code = """

@@ -9,7 +9,7 @@ class TestSonarSecureRandom(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "secure-random-S2245"
+        assert self.codemod.name == "secure-random"
 
     def test_simple(self, tmpdir):
         input_code = """

@@ -9,7 +9,7 @@ class TestSonarFixAssertTuple(BaseSASTCodemodTest):
     tool = "sonar"
 
     def test_name(self):
-        assert self.codemod.name == "fix-assert-tuple-S5905"
+        assert self.codemod.name == "fix-assert-tuple"
 
     def test_simple(self, tmpdir):
         input_code = """
