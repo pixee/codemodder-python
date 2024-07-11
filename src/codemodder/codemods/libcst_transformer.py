@@ -278,9 +278,11 @@ class LibcstTransformerPipeline(BaseTransformerPipeline):
             return None
 
         if not file_context.codemod_changes:
+            logger.debug("No changes produced for %s", file_path)
             return None
 
         if not (diff := create_diff_from_tree(source_tree, tree)):
+            logger.debug("No code diff produced for %s", file_path)
             return None
 
         change_set = ChangeSet(

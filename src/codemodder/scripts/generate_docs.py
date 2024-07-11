@@ -339,7 +339,12 @@ SEMGREP_CODEMODS = {
         importance="Medium",
         guidance_explained="Our change provides the most secure way to create cookies in Django. However, it's possible you have configured your Django application configurations to use secure cookies. In these cases, using the default parameters for `set_cookie` is safe.",
         need_sarif="Yes (Semgrep)",
-    )
+    ),
+    "rsa-key-size": DocMetadata(
+        importance="Medium",
+        guidance_explained="This codemod updates the key size for RSA to the `2048` recommended minimum. Since this is an important security fix that follows modern cryptographic standards, we believe this change can be safely merged without review.",
+        need_sarif="Yes (Semgrep)",
+    ),
 }
 ALL_CODEMODS_METADATA = (
     CORE_CODEMODS | DEFECTDOJO_CODEMODS | SONAR_CODEMODS | SEMGREP_CODEMODS
