@@ -60,6 +60,7 @@ SemgrepRsaKeySize = SemgrepCodemod(
     metadata=Metadata(
         name="rsa-key-size",
         summary=RsaKeySizeTransformer.change_description.title(),
+        description=RsaKeySizeTransformer.change_description.title(),
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         tool=ToolMetadata(
             name="Semgrep",
