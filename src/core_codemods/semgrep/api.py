@@ -20,8 +20,7 @@ class SemgrepCodemod(SASTCodemod):
         cls,
         name: str,
         other: CoreCodemod,
-        rule_id: str,
-        rule_name: str,
+        rules: list[ToolRule],
         transformer: BaseTransformerPipeline | None = None,
     ):
         return SemgrepCodemod(
@@ -33,25 +32,20 @@ class SemgrepCodemod(SASTCodemod):
                     other.references
                     + [
                         Reference(
-                            url=semgrep_url_from_id(rule_id), description=rule_name
+                            url=semgrep_url_from_id(rule.id), description=rule.name
                         )
+                        for rule in rules
                     ]
                 ),
                 description=other.description,
                 tool=ToolMetadata(
                     name="Semgrep",
-                    rules=[
-                        ToolRule(
-                            id=rule_id,
-                            name=rule_name,
-                            url=semgrep_url_from_id(rule_id),
-                        )
-                    ],
+                    rules=rules,
                 ),
             ),
             transformer=transformer if transformer else other.transformer,
             detector=SemgrepSarifFileDetector(),
-            requested_rules=[rule_id],
+            requested_rules=[rule.id for rule in rules],
         )
 
     @classmethod
