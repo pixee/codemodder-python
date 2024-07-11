@@ -23,7 +23,7 @@ def detect_sarif_tools(filenames: list[Path]) -> DefaultDict[str, list[str]]:
         ent.name: ent.load() for ent in entry_points().select(group="sarif_detectors")
     }
     for fname in filenames:
-        data = json.loads(fname.read_text())
+        data = json.loads(fname.read_text(encoding="utf-8-sig"))
         for name, det in detectors.items():
             # TODO: handle malformed sarif?
             for run in data["runs"]:
