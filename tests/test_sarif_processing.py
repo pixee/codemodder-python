@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from codemodder.sarifs import detect_sarif_tools
 from codemodder.semgrep import SemgrepResult, SemgrepResultSet
 
 
@@ -33,6 +34,17 @@ class TestSarifProcessing:
             result, sarif_run, truncate_rule_id=True
         )
         assert rule_id == "secure-random"
+
+    def test_detect_sarif_with_bom_encoding(self, tmpdir):
+        sarif_file = Path("tests") / "samples" / "semgrep.sarif"
+        sarif_file_bom = tmpdir / "semgrep_bom.sarif"
+
+        with open(sarif_file_bom, "w") as f:
+            f.write("\ufeff")
+            f.write(sarif_file.read_text(encoding="utf-8"))
+
+        results = detect_sarif_tools([sarif_file_bom])
+        assert len(results) == 1
 
     @pytest.mark.parametrize("truncate", [True, False])
     def test_results_by_rule_id(self, truncate):
