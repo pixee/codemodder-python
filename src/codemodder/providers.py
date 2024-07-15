@@ -25,7 +25,7 @@ class BaseProvider(metaclass=ABCMeta):
     @property
     def resource(self) -> Any:
         if self._resource is None:
-            raise ValueError(f"Resource for provider {self.name} is not available")
+            logger.debug("Resource for provider %s is not available", self.name)
         return self._resource
 
 
