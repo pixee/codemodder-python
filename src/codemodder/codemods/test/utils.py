@@ -7,6 +7,7 @@ import mock
 
 from codemodder import registry
 from codemodder.codemods.api import BaseCodemod
+from codemodder.codetf import Change
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff
 from codemodder.providers import load_providers
@@ -210,6 +211,8 @@ class BaseSASTCodemodTest(BaseCodemodTest):
 
         self.assert_num_changes(changes, num_changes, min_num_changes)
 
+        self.assert_findings(all_changes)
+
         self.assert_changes(
             tmpdir,
             tmp_file_path,
@@ -219,3 +222,6 @@ class BaseSASTCodemodTest(BaseCodemodTest):
         )
 
         return changes
+
+    def assert_findings(self, changes: list[Change]):
+        assert all(x.findings is not None for x in changes), changes
