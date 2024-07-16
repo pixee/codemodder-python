@@ -62,10 +62,8 @@ class BaseCodemodTest:
         files: list[Path] | None = None,
         lines_to_exclude: list[int] | None = None,
     ):
-        root = root or tmpdir
-        tmp_file_path = (
-            files[0] if files else Path(tmpdir) / f"code.{self.file_extension}"
-        )
+        root = root or Path(tmpdir)
+        tmp_file_path = files[0] if files else root / f"code.{self.file_extension}"
         tmp_file_path.write_text(dedent(input_code))
 
         files_to_check = files or [tmp_file_path]
@@ -167,13 +165,11 @@ class BaseSASTCodemodTest(BaseCodemodTest):
         lines_to_exclude: list[int] | None = None,
         results: str = "",
     ):
-        root = root or tmpdir
-        tmp_file_path = (
-            files[0] if files else Path(tmpdir) / f"code.{self.file_extension}"
-        )
+        root = root or Path(tmpdir)
+        tmp_file_path = files[0] if files else root / f"code.{self.file_extension}"
         tmp_file_path.write_text(dedent(input_code))
 
-        tmp_results_file_path = Path(tmpdir) / "sast_results"
+        tmp_results_file_path = root / "sast_results"
         tmp_results_file_path.write_text(results)
 
         files_to_check = files or [tmp_file_path]
