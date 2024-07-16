@@ -58,6 +58,7 @@ class BaseCodemodTest:
         input_code,
         expected,
         num_changes: int = 1,
+        min_num_changes: int | None = None,
         root: Path | None = None,
         files: list[Path] | None = None,
         lines_to_exclude: list[int] | None = None,
@@ -90,12 +91,7 @@ class BaseCodemodTest:
             assert not changes
             return
 
-        assert len(changes) == 1
-        assert (
-            actual_num := len(changes[0].changes)
-        ) == num_changes, (
-            f"Expected {num_changes} changes but {actual_num} were created."
-        )
+        self.assert_num_changes(changes, num_changes, min_num_changes)
 
         self.assert_changes(
             tmpdir,
@@ -104,6 +100,20 @@ class BaseCodemodTest:
             expected,
             changes[0],
         )
+
+    def assert_num_changes(self, changes, expected_num_changes, min_num_changes):
+        assert len(changes) == 1
+
+        actual_num = len(changes[0].changes)
+
+        if min_num_changes is not None:
+            assert (
+                actual_num >= min_num_changes
+            ), f"Expected at least {min_num_changes} changes but {actual_num} were created."
+        else:
+            assert (
+                actual_num == expected_num_changes
+            ), f"Expected {expected_num_changes} changes but {actual_num} were created."
 
     def assert_changes(self, root, file_path, input_code, expected, changes):
         assert os.path.relpath(file_path, root) == changes.path
@@ -133,12 +143,14 @@ class BaseCodemodTest:
         input_code: str,
         expected: str,
         num_changes: int = 1,
+        min_num_changes: int | None = None,
     ):
         self.run_and_assert(
             tmpdir=root,
             input_code=input_code,
             expected=expected,
             num_changes=num_changes,
+            min_num_changes=min_num_changes,
             files=[file_path],
         )
 
@@ -160,6 +172,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
         input_code,
         expected,
         num_changes: int = 1,
+        min_num_changes: int | None = None,
         root: Path | None = None,
         files: list[Path] | None = None,
         lines_to_exclude: list[int] | None = None,
@@ -195,12 +208,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
             assert not changes
             return
 
-        assert len(changes) == 1
-        assert (
-            actual_num := len(changes[0].changes)
-        ) == num_changes, (
-            f"Expected {num_changes} changes but {actual_num} were created."
-        )
+        self.assert_num_changes(changes, num_changes, min_num_changes)
 
         self.assert_changes(
             tmpdir,
