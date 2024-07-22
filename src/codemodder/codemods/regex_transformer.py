@@ -11,6 +11,9 @@ from codemodder.result import Result
 
 
 class RegexTransformerPipeline(BaseTransformerPipeline):
+    pattern: Pattern
+    replacement: str
+    change_description: str
 
     def __init__(self, pattern: Pattern, replacement: str, change_description: str):
         super().__init__()
