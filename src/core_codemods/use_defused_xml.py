@@ -1,7 +1,9 @@
 from functools import cached_property
 
+from codemodder.codemods.import_modifier_codemod import ImportModifierCodemod
+from codemodder.codemods.libcst_transformer import LibcstTransformerPipeline
 from codemodder.dependency import DefusedXML, Dependency
-from core_codemods.api import ImportModifierCodemod, Metadata, Reference, ReviewGuidance
+from core_codemods.api import CoreCodemod, Metadata, Reference, ReviewGuidance
 
 ETREE_METHODS = ["parse", "fromstring", "iterparse", "XMLParser"]
 SAX_METHODS = ["parse", "make_parser", "parseString"]
@@ -9,25 +11,7 @@ DOM_METHODS = ["parse", "parseString"]
 # TODO: add expat methods?
 
 
-class UseDefusedXml(ImportModifierCodemod):
-    metadata = Metadata(
-        name="use-defusedxml",
-        summary="Use `defusedxml` for Parsing XML",
-        review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
-        references=[
-            Reference(
-                url="https://docs.python.org/3/library/xml.html#xml-vulnerabilities"
-            ),
-            Reference(
-                url="https://docs.python.org/3/library/xml.html#the-defusedxml-package"
-            ),
-            Reference(url="https://pypi.org/project/defusedxml/"),
-            Reference(
-                url="https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
-            ),
-        ],
-    )
-
+class UseDefusedXmlTransformer(ImportModifierCodemod):
     change_description = "Replace builtin XML method with safe `defusedxml` method"
 
     @cached_property
@@ -49,3 +33,25 @@ class UseDefusedXml(ImportModifierCodemod):
     @property
     def dependency(self) -> Dependency:
         return DefusedXML
+
+
+UseDefusedXml = CoreCodemod(
+    metadata=Metadata(
+        name="use-defusedxml",
+        summary="Use `defusedxml` for Parsing XML",
+        review_guidance=ReviewGuidance.MERGE_AFTER_REVIEW,
+        references=[
+            Reference(
+                url="https://docs.python.org/3/library/xml.html#xml-vulnerabilities"
+            ),
+            Reference(
+                url="https://docs.python.org/3/library/xml.html#the-defusedxml-package"
+            ),
+            Reference(url="https://pypi.org/project/defusedxml/"),
+            Reference(
+                url="https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
+            ),
+        ],
+    ),
+    transformer=LibcstTransformerPipeline(UseDefusedXmlTransformer),
+)

@@ -1,6 +1,6 @@
 from codemodder.codemods.test import BaseIntegrationTest
 from codemodder.dependency import DefusedXML
-from core_codemods.use_defused_xml import UseDefusedXml
+from core_codemods.use_defused_xml import UseDefusedXml, UseDefusedXmlTransformer
 
 
 class TestUseDefusedXml(BaseIntegrationTest):
@@ -36,7 +36,7 @@ class TestUseDefusedXml(BaseIntegrationTest):
 +et = defusedxml.ElementTree.parse(xml)"""
 
     expected_line_change = "5"
-    change_description = UseDefusedXml.change_description
+    change_description = UseDefusedXmlTransformer.change_description
     requirements_file_name = "requirements.txt"
     original_requirements = (
         "# file used to test dependency management\n"
