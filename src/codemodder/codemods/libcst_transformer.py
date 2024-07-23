@@ -109,6 +109,7 @@ class LibcstResultTransformer(BaseTransformer):
             Change(
                 lineNumber=lineno,
                 description=description,
+                findings=self.file_context.get_findings_for_location(lineno),
             )
         )
 

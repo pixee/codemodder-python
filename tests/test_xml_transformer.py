@@ -2,6 +2,7 @@ from io import StringIO
 from textwrap import dedent
 from xml.sax import handler
 
+import mock
 import pytest
 from defusedxml import ExternalReferenceForbidden
 from defusedxml.sax import make_parser
@@ -19,7 +20,7 @@ class TestXMLTransformer:
     def run_and_assert(self, input_code, expected_output):
         with StringIO() as result, StringIO(dedent(input_code)) as input_stream:
             result = StringIO()
-            transformer = XMLTransformer(result)
+            transformer = XMLTransformer(result, mock.MagicMock())
             parser = make_parser()
             parser.setContentHandler(transformer)
             parser.setProperty(handler.property_lexical_handler, transformer)
@@ -58,7 +59,7 @@ class TestElementAttributeXMLTransformer:
     def run_and_assert(self, name_attr_map, input_code, expected_output):
         with StringIO() as result, StringIO(dedent(input_code)) as input_stream:
             transformer = ElementAttributeXMLTransformer(
-                result, name_attributes_map=name_attr_map
+                result, mock.MagicMock(), name_attributes_map=name_attr_map
             )
             parser = make_parser()
             parser.setContentHandler(transformer)
@@ -101,7 +102,9 @@ class TestNewElementXMLTransformer:
 
     def run_and_assert(self, new_elements, input_code, expected_output):
         with StringIO() as result, StringIO(dedent(input_code)) as input_stream:
-            transformer = NewElementXMLTransformer(result, new_elements=new_elements)
+            transformer = NewElementXMLTransformer(
+                result, mock.MagicMock(), new_elements=new_elements
+            )
             parser = make_parser()
             parser.setContentHandler(transformer)
             parser.setProperty(handler.property_lexical_handler, transformer)

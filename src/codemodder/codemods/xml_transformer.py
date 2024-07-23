@@ -26,10 +26,12 @@ class XMLTransformer(XMLGenerator, LexicalHandler):
     def __init__(
         self,
         out,
+        file_context: FileContext,
         encoding: str = "utf-8",
         short_empty_elements: bool = False,
         results: list[Result] | None = None,
     ) -> None:
+        self.file_context = file_context
         self.results = results
         self.changes: list[Change] = []
         self._my_locator = Locator()
@@ -87,7 +89,11 @@ class XMLTransformer(XMLGenerator, LexicalHandler):
 
     def add_change(self, line):
         self.changes.append(
-            Change(lineNumber=line, description=self.change_description)
+            Change(
+                lineNumber=line,
+                description=self.change_description,
+                findings=self.file_context.get_findings_for_location(line),
+            )
         )
 
 
@@ -99,13 +105,14 @@ class ElementAttributeXMLTransformer(XMLTransformer):
     def __init__(
         self,
         out,
+        file_context: FileContext,
         name_attributes_map: dict[str, dict[str, str]],
         encoding: str = "utf-8",
         short_empty_elements: bool = False,
         results: list[Result] | None = None,
     ) -> None:
         self.name_attributes_map = name_attributes_map
-        super().__init__(out, encoding, short_empty_elements, results)
+        super().__init__(out, file_context, encoding, short_empty_elements, results)
 
     def startElement(self, name, attrs):
         new_attrs: AttributesImpl = attrs
@@ -131,12 +138,13 @@ class NewElementXMLTransformer(XMLTransformer):
     def __init__(
         self,
         out,
+        file_context: FileContext,
         encoding: str = "utf-8",
         short_empty_elements: bool = False,
         results: list[Result] | None = None,
         new_elements: list[NewElement] | None = None,
     ) -> None:
-        super().__init__(out, encoding, short_empty_elements, results)
+        super().__init__(out, file_context, encoding, short_empty_elements, results)
         self.new_elements = new_elements or []
 
     def startElement(self, name, attrs):
@@ -175,7 +183,9 @@ class XMLTransformerPipeline(BaseTransformerPipeline):
             # this will fail fast for files that are not XML
             try:
                 transformer_instance = self.xml_transformer(
-                    out=output_file, results=results
+                    out=output_file,
+                    file_context=file_context,
+                    results=results,
                 )
                 parser = make_parser()
                 parser.setContentHandler(transformer_instance)

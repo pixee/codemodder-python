@@ -59,7 +59,9 @@ class FileResourceLeakTransformer(LibcstResultTransformer):
 
         for k, v in fr.assigned_resources.items():
             fr.assigned_resources[k] = [t for t in v if line_filter(t)]
-        fixer = ResourceLeakFixer(self.context, fr.assigned_resources)
+        fixer = ResourceLeakFixer(
+            self.context, self.file_context, fr.assigned_resources
+        )
         result = tree.visit(fixer)
         self.file_context.codemod_changes.extend(fixer.changes)
         return result
@@ -168,6 +170,7 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
     def __init__(
         self,
         context: CodemodContext,
+        file_context: FileContext,
         leaked_assigned_resources: dict[
             cst.IndentedBlock | cst.Module,
             list[
@@ -182,6 +185,7 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
         super().__init__(context)
         self.leaked_assigned_resources = leaked_assigned_resources
         self.changes: list[Change] = []
+        self.file_context = file_context
 
     def _is_fixable(self, block, index, named_targets, other_targets) -> bool:
         # assigned to something that is not a Name?
@@ -225,6 +229,9 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
                     Change(
                         lineNumber=line_number,
                         description=FileResourceLeakTransformer.change_description,
+                        findings=self.file_context.get_findings_for_location(
+                            line_number
+                        ),
                     )
                 )
 
