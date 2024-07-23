@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Callable, Mapping
+from typing import Mapping
 
 import libcst as cst
 from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
@@ -42,7 +42,7 @@ class MappingImportedCallModifier(ImportedCallModifier[Mapping[str, str]]):
 
 
 class ImportModifierCodemod(LibcstResultTransformer, metaclass=ABCMeta):
-    result_filter: Callable[[cst.CSTNode], bool] | None = None
+    call_modifier: type[MappingImportedCallModifier] = MappingImportedCallModifier
 
     @property
     def dependency(self) -> Dependency | None:
@@ -54,13 +54,12 @@ class ImportModifierCodemod(LibcstResultTransformer, metaclass=ABCMeta):
         pass
 
     def transform_module_impl(self, tree: cst.Module) -> cst.Module:
-        visitor = MappingImportedCallModifier(
+        visitor = self.call_modifier(
             self.context,
             self.file_context,
             self.mapping,
             self.change_description,
             self.results,
-            self.result_filter,
         )
         result_tree = visitor.transform_module(tree)
         self.file_context.codemod_changes.extend(visitor.changes_in_file)

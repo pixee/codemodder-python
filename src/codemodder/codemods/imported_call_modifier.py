@@ -1,11 +1,10 @@
 import abc
-from typing import Callable, Generic, Mapping, Sequence, Set, TypeVar, Union
+from typing import Generic, Mapping, Sequence, Set, TypeVar, Union
 
 import libcst as cst
 from libcst import matchers
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
-from libcst.metadata import PositionProvider
-from typing_extensions import override
+from libcst.metadata import ParentNodeProvider, PositionProvider
 
 from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.utils_mixin import NameResolutionMixin
@@ -24,7 +23,7 @@ class ImportedCallModifier(
     UtilsMixin,
     metaclass=abc.ABCMeta,
 ):
-    METADATA_DEPENDENCIES = (PositionProvider,)
+    METADATA_DEPENDENCIES = (ParentNodeProvider, PositionProvider)
 
     def __init__(
         self,
@@ -33,7 +32,6 @@ class ImportedCallModifier(
         matching_functions: FunctionMatchType,
         change_description: str,
         results: list[Result] | None = None,
-        result_filter: Callable[[cst.CSTNode], bool] | None = None,
     ):
         VisitorBasedCodemodCommand.__init__(self, codemod_context)
         self.line_exclude = file_context.line_exclude
@@ -43,15 +41,6 @@ class ImportedCallModifier(
         self.changes_in_file: list[Change] = []
         self.results = results
         self.file_context = file_context
-        self.result_filter = result_filter
-
-    @override
-    def filter_by_result(self, node: cst.CSTNode) -> bool:
-        return (
-            self.result_filter(node)
-            if self.result_filter
-            else super().filter_by_result(node)
-        )
 
     def updated_args(self, original_args: Sequence[cst.Arg]):
         return original_args
@@ -82,7 +71,7 @@ class ImportedCallModifier(
         if self.filter_by_path_includes_or_excludes(pos_to_match):
             true_name = self.find_base_name(original_node.func)
             if (
-                self._is_direct_call_from_imported_module(original_node)
+                self.is_direct_call_from_imported_module(original_node)
                 and true_name
                 and true_name in self.matching_functions
             ):
