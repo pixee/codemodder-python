@@ -1,10 +1,11 @@
 from typing import Mapping
 
+from codemodder.codemods.import_modifier_codemod import ImportModifierCodemod
 from codemodder.dependency import Dependency, Fickling
-from core_codemods.api import ImportModifierCodemod, Metadata, Reference, ReviewGuidance
+from core_codemods.api import Metadata, Reference, ReviewGuidance, SimpleCodemod
 
 
-class HardenPickleLoad(ImportModifierCodemod):
+class HardenPickleLoad(SimpleCodemod, ImportModifierCodemod):
     metadata = Metadata(
         name="harden-pickle-load",
         summary="Harden `pickle.load()` against deserialization attacks",

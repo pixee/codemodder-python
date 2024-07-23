@@ -1,10 +1,11 @@
 import abc
-from typing import Generic, Mapping, Sequence, Set, TypeVar, Union
+from typing import Callable, Generic, Mapping, Sequence, Set, TypeVar, Union
 
 import libcst as cst
 from libcst import matchers
 from libcst.codemod import CodemodContext, VisitorBasedCodemodCommand
 from libcst.metadata import PositionProvider
+from typing_extensions import override
 
 from codemodder.codemods.base_visitor import UtilsMixin
 from codemodder.codemods.utils_mixin import NameResolutionMixin
@@ -32,6 +33,7 @@ class ImportedCallModifier(
         matching_functions: FunctionMatchType,
         change_description: str,
         results: list[Result] | None = None,
+        result_filter: Callable[[cst.CSTNode], bool] | None = None,
     ):
         VisitorBasedCodemodCommand.__init__(self, codemod_context)
         self.line_exclude = file_context.line_exclude
@@ -41,6 +43,15 @@ class ImportedCallModifier(
         self.changes_in_file: list[Change] = []
         self.results = results
         self.file_context = file_context
+        self.result_filter = result_filter
+
+    @override
+    def filter_by_result(self, node: cst.CSTNode) -> bool:
+        return (
+            self.result_filter(node)
+            if self.result_filter
+            else super().filter_by_result(node)
+        )
 
     def updated_args(self, original_args: Sequence[cst.Arg]):
         return original_args

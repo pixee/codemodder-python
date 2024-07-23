@@ -1,7 +1,5 @@
-from codemodder.codemods.api import SimpleCodemod
 from codemodder.codemods.base_codemod import Metadata, Reference, ToolMetadata, ToolRule
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
-from codemodder.codemods.libcst_transformer import LibcstTransformerPipeline
 from codemodder.codemods.semgrep import SemgrepSarifFileDetector
 from core_codemods.api.core_codemod import CoreCodemod, SASTCodemod
 
@@ -46,43 +44,4 @@ class SemgrepCodemod(SASTCodemod):
             transformer=transformer if transformer else other.transformer,
             detector=SemgrepSarifFileDetector(),
             requested_rules=[rule.id for rule in rules],
-        )
-
-    @classmethod
-    def from_import_modifier_codemod(
-        cls,
-        name: str,
-        other: type[SimpleCodemod],
-        rule_id: str,
-        rule_name: str,
-    ):
-        metadata = other.metadata
-        return SemgrepCodemod(
-            metadata=Metadata(
-                name=name,
-                summary=metadata.summary,
-                review_guidance=metadata.review_guidance,
-                references=(
-                    metadata.references
-                    + [
-                        Reference(
-                            url=semgrep_url_from_id(rule_id), description=rule_name
-                        )
-                    ]
-                ),
-                description=other.change_description,
-                tool=ToolMetadata(
-                    name="Semgrep",
-                    rules=[
-                        ToolRule(
-                            id=rule_id,
-                            name=rule_name,
-                            url=semgrep_url_from_id(rule_id),
-                        )
-                    ],
-                ),
-            ),
-            transformer=LibcstTransformerPipeline(other),
-            detector=SemgrepSarifFileDetector(),
-            requested_rules=[rule_id],
         )
