@@ -253,6 +253,9 @@ class SQLQueryParameterizationTransformer(
                     Change(
                         lineNumber=line_number,
                         description=SQLQueryParameterizationTransformer.change_description,
+                        findings=self.file_context.get_findings_for_location(
+                            line_number
+                        ),
                     )
                 )
                 # Normalization and cleanup

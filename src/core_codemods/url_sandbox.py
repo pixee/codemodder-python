@@ -71,6 +71,7 @@ class FindRequestCallsAndImports(ContextAwareVisitor, UtilsMixin):
             cst.CSTNode, Union[cst.CSTNode, cst.FlattenSentinel, cst.RemovalSentinel]
         ] = {}
         self.changes_in_file: List[Change] = []
+        self.file_context = file_context
         ContextAwareVisitor.__init__(self, codemod_context)
         UtilsMixin.__init__(
             self,
@@ -109,6 +110,9 @@ class FindRequestCallsAndImports(ContextAwareVisitor, UtilsMixin):
                             Change(
                                 lineNumber=line_number,
                                 description=UrlSandboxTransformer.change_description,
+                                findings=self.file_context.get_findings_for_location(
+                                    line_number
+                                ),
                             )
                         )
 
@@ -126,6 +130,9 @@ class FindRequestCallsAndImports(ContextAwareVisitor, UtilsMixin):
                     Change(
                         lineNumber=line_number,
                         description=UrlSandboxTransformer.change_description,
+                        findings=self.file_context.get_findings_for_location(
+                            line_number
+                        ),
                     )
                 )
 

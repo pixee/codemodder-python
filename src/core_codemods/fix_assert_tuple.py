@@ -49,8 +49,9 @@ class FixAssertTupleTransform(LibcstResultTransformer, NameResolutionMixin):
         for idx in range(newlines_count):
             self.file_context.codemod_changes.append(
                 Change(
-                    lineNumber=start_line + idx,
+                    lineNumber=(line_number := start_line + idx),
                     description=self.change_description,
+                    findings=self.file_context.get_findings_for_location(line_number),
                 )
             )
 
