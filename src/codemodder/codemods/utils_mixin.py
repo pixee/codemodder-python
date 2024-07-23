@@ -100,7 +100,7 @@ class NameResolutionMixin(MetadataDependent):
         # it is a from import
         return _get_name(import_node) + "." + get_full_name_for_node(import_alias.name)
 
-    def _is_direct_call_from_imported_module(
+    def is_direct_call_from_imported_module(
         self, call: cst.Call
     ) -> Optional[tuple[Union[cst.Import, cst.ImportFrom], cst.ImportAlias]]:
         for nodo in iterate_left_expressions(call):
