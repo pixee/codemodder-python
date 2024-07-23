@@ -30,11 +30,13 @@ class XMLTransformer(XMLGenerator, LexicalHandler):
         encoding: str = "utf-8",
         short_empty_elements: bool = False,
         results: list[Result] | None = None,
+        line_only_matching=False,
     ) -> None:
         self.file_context = file_context
         self.results = results
         self.changes: list[Change] = []
         self._my_locator = Locator()
+        self.line_only_matching = line_only_matching
         super().__init__(out, encoding, short_empty_elements)
 
     def startElement(self, name, attrs):
@@ -81,10 +83,15 @@ class XMLTransformer(XMLGenerator, LexicalHandler):
             return True
         for result in self.results or []:
             for location in result.locations:
-                # No two elements can have the same start but different ends.
-                # It suffices to only match the start.
-                if location.start.line == line and location.start.column - 1 == column:
-                    return True
+                if self.line_only_matching:
+                    return location.start.line == line
+                else:
+                    # No two elements can have the same start but different ends.
+                    # It suffices to only match the start.
+                    return (
+                        location.start.line == line
+                        and location.start.column - 1 == column
+                    )
         return False
 
     def add_change(self, line):
@@ -110,9 +117,17 @@ class ElementAttributeXMLTransformer(XMLTransformer):
         encoding: str = "utf-8",
         short_empty_elements: bool = False,
         results: list[Result] | None = None,
+        line_only_matching=False,
     ) -> None:
         self.name_attributes_map = name_attributes_map
-        super().__init__(out, file_context, encoding, short_empty_elements, results)
+        super().__init__(
+            out,
+            file_context,
+            encoding,
+            short_empty_elements,
+            results,
+            line_only_matching,
+        )
 
     def startElement(self, name, attrs):
         new_attrs: AttributesImpl = attrs

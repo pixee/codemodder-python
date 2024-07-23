@@ -13,6 +13,7 @@ from codemodder.codemods.xml_transformer import (
     NewElementXMLTransformer,
     XMLTransformer,
 )
+from codemodder.semgrep import SemgrepResult
 
 
 class TestXMLTransformer:
@@ -56,10 +57,21 @@ class TestXMLTransformer:
 
 class TestElementAttributeXMLTransformer:
 
-    def run_and_assert(self, name_attr_map, input_code, expected_output):
+    def run_and_assert(
+        self,
+        name_attr_map,
+        input_code,
+        expected_output,
+        results=None,
+        line_only_match=False,
+    ):
         with StringIO() as result, StringIO(dedent(input_code)) as input_stream:
             transformer = ElementAttributeXMLTransformer(
-                result, mock.MagicMock(), name_attributes_map=name_attr_map
+                result,
+                mock.MagicMock(),
+                name_attributes_map=name_attr_map,
+                results=results,
+                line_only_matching=line_only_match,
             )
             parser = make_parser()
             parser.setContentHandler(transformer)
@@ -96,6 +108,59 @@ class TestElementAttributeXMLTransformer:
                 <element first="one" second="two" three="three"></element>"""
         name_attr_map = {"element": {"first": "one", "second": "two"}}
         self.run_and_assert(name_attr_map, input_code, expected_output)
+
+    def test_change_only_line_matching_result(self):
+        input_code = """\
+        <?xml version="1.0" encoding="utf-8"?>
+        <configuration>
+          <element first="1">
+          </element>
+          <element first="1">
+          </element>
+        </configuration>"""
+        expected_output = """\
+        <?xml version="1.0" encoding="utf-8"?>
+        <configuration>
+          <element first="1">
+          </element>
+          <element first="one">
+          </element>
+        </configuration>"""
+        name_attr_map = {"element": {"first": "one"}}
+        data = {
+            "runs": [
+                {
+                    "results": [
+                        {
+                            "fingerprints": {"matchBasedId/v1": "123"},
+                            "locations": [
+                                {
+                                    "ruleId": "rule",
+                                    "physicalLocation": {
+                                        "artifactLocation": {
+                                            "uri": "code.py",
+                                            "uriBaseId": "%SRCROOT%",
+                                        },
+                                        "region": {
+                                            "snippet": {"text": "snip"},
+                                            "endColumn": 1,
+                                            "endLine": 5,
+                                            "startColumn": 1,
+                                            "startLine": 5,
+                                        },
+                                    },
+                                }
+                            ],
+                            "ruleId": "rule",
+                        }
+                    ]
+                }
+            ]
+        }
+        sarif_run = data["runs"]
+        sarif_results = sarif_run[0]["results"]
+        results = [SemgrepResult.from_sarif(sarif_results[0], sarif_run)]
+        self.run_and_assert(name_attr_map, input_code, expected_output, results, True)
 
 
 class TestNewElementXMLTransformer:
