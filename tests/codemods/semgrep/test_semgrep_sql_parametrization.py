@@ -187,9 +187,10 @@ class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
                 }
             ]
         }
-        self.run_and_assert(
+        changes = self.run_and_assert(
             tmpdir,
             input_code,
             expexted_output,
             results=json.dumps(results),
         )
+        assert len(changes[0].changes[0].findings) == len(results["runs"][0]["results"])
