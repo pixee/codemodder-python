@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from codemodder.sarifs import detect_sarif_tools
+from codemodder.sarifs import DuplicateToolError, detect_sarif_tools
 from codemodder.semgrep import SemgrepResult, SemgrepResultSet
 
 
@@ -74,9 +74,52 @@ class TestSarifProcessing:
                 "--output",
                 tmpdir / "doesntmatter.txt",
                 "--codemod-include",
-                "secure-random",
+                "pixee:python/secure-random",
                 "--dry-run",
             ],
             check=False,
         )
         assert completed_process.returncode == 0
+
+    def test_codeql_sarif_input_two_sarifs_same_tool(self, tmpdir):
+        tmpfile = Path(tmpdir) / "doesntmatter.sarif"
+        codeql_sarif = Path("tests/samples/webgoat_v8.2.0_codeql.sarif")
+        tmpfile.write_text(codeql_sarif.read_text())
+
+        completed_process = subprocess.run(
+            [
+                "codemodder",
+                "tests/samples/",
+                "--sarif",
+                f"{codeql_sarif},{tmpfile}",
+                "--output",
+                tmpdir / "doesntmatter.txt",
+                "--codemod-include",
+                "pixee:python/secure-random",
+                "--dry-run",
+            ],
+            check=False,
+            capture_output=True,
+        )
+        assert completed_process.returncode == 1
+        assert (
+            "duplicate tool sarif detected: codeql" in completed_process.stderr.decode()
+        )
+
+    def test_two_sarifs_same_tool(self):
+        with pytest.raises(DuplicateToolError) as exc:
+            detect_sarif_tools([Path("tests/samples/webgoat_v8.2.0_codeql.sarif")] * 2)
+        assert "duplicate tool sarif detected: codeql" in str(exc.value)
+
+    def test_two_sarifs_different_tools(self):
+        results = detect_sarif_tools(
+            [
+                Path("tests/samples/webgoat_v8.2.0_codeql.sarif"),
+                Path("tests/samples/semgrep.sarif"),
+            ]
+        )
+        assert len(results) == 2
+        assert "codeql" in results
+        assert "semgrep" in results
+        assert len(results["codeql"]) == 1
+        assert len(results["semgrep"]) == 1
