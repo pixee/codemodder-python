@@ -83,15 +83,12 @@ class XMLTransformer(XMLGenerator, LexicalHandler):
             return True
         for result in self.results or []:
             for location in result.locations:
-                if self.line_only_matching:
-                    return location.start.line == line
-                else:
-                    # No two elements can have the same start but different ends.
-                    # It suffices to only match the start.
-                    return (
-                        location.start.line == line
-                        and location.start.column - 1 == column
-                    )
+                # No two elements can have the same start but different ends.
+                # It suffices to only match the start.
+                if (self.line_only_matching and location.start.line == line) or (
+                    location.start.line == line and location.start.column - 1 == column
+                ):
+                    return True
         return False
 
     def add_change(self, line):
