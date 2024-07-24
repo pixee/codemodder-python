@@ -26,6 +26,7 @@ class TestDjangoReceiverOnTop(SonarIntegrationTest):
     )
     # fmt: on
 
-    expected_line_change = "7"
+    expected_line_change = "6"
     change_description = DjangoReceiverOnTopTransformer.change_description
     num_changed_files = 1
+    num_changes = 2
