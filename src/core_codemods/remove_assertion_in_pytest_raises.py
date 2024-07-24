@@ -137,6 +137,7 @@ class RemoveAssertionInPytestRaisesTransformer(
                         body=[cst.SimpleStatementLine(body=[cst.Pass()])]
                     )
                 )
+            # TODO: need to report change for each line changed
             self.report_change(original_node)
             return cst.FlattenSentinel([new_with, *assert_stmts])
 

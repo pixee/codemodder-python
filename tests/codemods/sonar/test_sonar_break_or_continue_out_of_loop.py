@@ -14,11 +14,11 @@ class TestSonarSQLParameterization(BaseSASTCodemodTest):
         assert self.codemod.name == "break-or-continue-out-of-loop"
 
     def test_simple(self, tmpdir):
-        input_code = """
+        input_code = """\
         def f():
             continue
         """
-        expected = """
+        expected = """\
         def f():
             pass
         """

@@ -15,14 +15,14 @@ class TestSonarDjangoModelWithoutDunderStr(BaseSASTCodemodTest):
         assert self.codemod.id == "sonar:python/django-model-without-dunder-str"
 
     def test_simple(self, tmpdir):
-        input_code = """
+        input_code = """\
         from django.db import models
                 
         class User(models.Model):
             name = models.CharField(max_length=100)
             phone = models.IntegerField(blank=True)
         """
-        expected = """
+        expected = """\
         from django.db import models
                 
         class User(models.Model):

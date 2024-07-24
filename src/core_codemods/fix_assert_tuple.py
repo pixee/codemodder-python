@@ -51,6 +51,7 @@ class FixAssertTupleTransform(LibcstResultTransformer, NameResolutionMixin):
                 Change(
                     lineNumber=(line_number := start_line + idx),
                     description=self.change_description,
+                    # For now we can only link the finding to the first line changed
                     findings=self.file_context.get_findings_for_location(line_number),
                 )
             )
