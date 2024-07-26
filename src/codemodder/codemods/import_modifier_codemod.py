@@ -6,7 +6,7 @@ from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 
 from codemodder.codemods.api import LibcstResultTransformer
 from codemodder.codemods.imported_call_modifier import ImportedCallModifier
-from codemodder.dependency import Dependency
+from codemodder.dependency import Dependency, Security
 
 
 class MappingImportedCallModifier(ImportedCallModifier[Mapping[str, str]]):
@@ -15,7 +15,7 @@ class MappingImportedCallModifier(ImportedCallModifier[Mapping[str, str]]):
             return updated_node
 
         import_name = self.matching_functions[true_name]
-        AddImportsVisitor.add_needed_import(self.context, import_name)
+        self.add_import(import_name)
         RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
         return updated_node.with_changes(
             args=new_args,
@@ -30,7 +30,7 @@ class MappingImportedCallModifier(ImportedCallModifier[Mapping[str, str]]):
             return updated_node
 
         import_name = self.matching_functions[true_name]
-        AddImportsVisitor.add_needed_import(self.context, import_name)
+        self.add_import(import_name)
         RemoveImportsVisitor.remove_unused_import_by_node(self.context, original_node)
         return updated_node.with_changes(
             args=new_args,
@@ -39,6 +39,9 @@ class MappingImportedCallModifier(ImportedCallModifier[Mapping[str, str]]):
                 attr=cst.Name(value=true_name.split(".")[-1]),
             ),
         )
+
+    def add_import(self, import_name):
+        AddImportsVisitor.add_needed_import(self.context, import_name)
 
 
 class ImportModifierCodemod(LibcstResultTransformer, metaclass=ABCMeta):
@@ -67,3 +70,14 @@ class ImportModifierCodemod(LibcstResultTransformer, metaclass=ABCMeta):
             self.add_dependency(dependency)
 
         return result_tree
+
+
+class SecurityCallModifier(MappingImportedCallModifier):
+    def add_import(self, import_name: str) -> None:
+        AddImportsVisitor.add_needed_import(
+            self.context, module=Security.requirement.name, obj=import_name
+        )
+
+
+class SecurityImportModifierCodemod(ImportModifierCodemod, metaclass=ABCMeta):
+    call_modifier: type[SecurityCallModifier] = SecurityCallModifier
