@@ -326,6 +326,7 @@ SEMGREP_CODEMOD_NAMES = [
     "use-defusedxml",
     "subprocess-shell-false",
     "harden-pyyaml",
+    "sql-parameterization",
 ]
 SEMGREP_CODEMODS = {
     name: DocMetadata(
