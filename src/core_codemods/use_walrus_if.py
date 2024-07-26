@@ -49,8 +49,6 @@ class UseWalrusIf(SimpleCodemod, NameResolutionMixin):
         self.assigns = {}
 
     def _build_named_expr(self, target, value, parens=True):
-        if isinstance(value, cst.Comparison):
-            value = value.with_changes(lpar=[cst.LeftParen()], rpar=[cst.RightParen()])
         return cst.NamedExpr(
             target=target,
             value=value,
@@ -124,6 +122,9 @@ class UseWalrusIf(SimpleCodemod, NameResolutionMixin):
                 case cst.UnaryOperation(
                     operator=cst.Not(), expression=cst.Name() as name
                 ):
+                    value = value.with_changes(
+                        lpar=[cst.LeftParen()], rpar=[cst.RightParen()]
+                    )
                     if name.value == target.value:
                         named_expr = self._build_named_expr(target, value, parens=True)
                         self.assigns[assign] = named_expr
