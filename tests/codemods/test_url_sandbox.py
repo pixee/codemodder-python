@@ -261,3 +261,31 @@ class TestUrlSandbox(BaseCodemodTest):
         """
 
         self.run_and_assert(tmpdir, input_code, expected)
+
+    @pytest.mark.xfail(
+        reason="Does not properly handle 'from' imports with multiple names"
+    )
+    def test_multiple_imports(self, add_dependency, tmpdir):
+        input_code = """
+        from requests import Response, Timeout, get
+        import csv
+
+        del Response, Timeout # just to make sure these names are used
+
+        url = input()
+        get(url)
+        csv.excel
+        """
+        expected = """
+        from requests import Response, Timeout
+        import csv
+        from security import safe_requests
+
+        del Response, Timeout # just to make sure these names are used
+
+        url = input()
+        safe_requests.get(url)
+        csv.excel
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
+        add_dependency.assert_called_once_with(Security)
