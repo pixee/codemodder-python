@@ -68,7 +68,9 @@ class ImportedCallModifier(
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         pos_to_match = self.node_position(original_node)
         line_number = pos_to_match.start.line
-        if self.filter_by_path_includes_or_excludes(pos_to_match):
+        if self.node_is_selected(
+            original_node
+        ) and self.filter_by_path_includes_or_excludes(pos_to_match):
             true_name = self.find_base_name(original_node.func)
             if (
                 self.is_direct_call_from_imported_module(original_node)

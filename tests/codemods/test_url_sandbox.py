@@ -40,10 +40,10 @@ class TestUrlSandbox(BaseCodemodTest):
         var = "hello"
         """
         expected = """
-        from security.safe_requests import get
+        from security import safe_requests
 
         url = input()
-        get(url)
+        safe_requests.get(url)
         var = "hello"
         """
         self.run_and_assert(tmpdir, input_code, expected)
@@ -160,10 +160,10 @@ class TestUrlSandbox(BaseCodemodTest):
         var = "hello"
         """
         expected = """
-        from security.safe_requests import get as got
+        from security import safe_requests
 
         url = input()
-        got(url)
+        safe_requests.get(url)
         var = "hello"
         """
         self.run_and_assert(tmpdir, input_code, expected)
@@ -196,6 +196,24 @@ class TestUrlSandbox(BaseCodemodTest):
         requests.get("www.google.com")
         """
 
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    def test_ignore_hardcoded_but_not_all(self, _, tmpdir):
+        input_code = """
+        import requests
+
+        requests.get("www.google.com")
+        url = input()
+        requests.get(url)
+        """
+        expected = """
+        import requests
+        from security import safe_requests
+
+        requests.get("www.google.com")
+        url = input()
+        safe_requests.get(url)
+        """
         self.run_and_assert(tmpdir, input_code, expected)
 
     def test_ignore_hardcoded_from_global_variable(self, _, tmpdir):
@@ -262,9 +280,6 @@ class TestUrlSandbox(BaseCodemodTest):
 
         self.run_and_assert(tmpdir, input_code, expected)
 
-    @pytest.mark.xfail(
-        reason="Does not properly handle 'from' imports with multiple names"
-    )
     def test_multiple_imports(self, add_dependency, tmpdir):
         input_code = """
         from requests import Response, Timeout, get
