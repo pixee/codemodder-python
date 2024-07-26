@@ -269,3 +269,19 @@ if val is not None:
             print("hi")
         """
         self.run_and_assert(tmpdir, input_code, expected_output)
+
+    def test_walrus_bools_list(self, tmpdir):
+        input_code = """
+        successes = [False, True]
+        all_success = False not in successes
+
+        if not all_success:
+            return
+        """
+        expected_output = """
+        successes = [False, True]
+
+        if not (False not in successes):
+            return
+        """
+        self.run_and_assert(tmpdir, input_code, expected_output)
