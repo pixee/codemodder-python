@@ -33,7 +33,8 @@ class DjangoReceiverOnTopTransformer(LibcstResultTransformer, NameResolutionMixi
                 new_decorators.extend(
                     d for d in original_node.decorators if d != receiver
                 )
-                self.report_change(original_node)
+                for decorator in new_decorators:
+                    self.report_change(decorator)
                 return updated_node.with_changes(decorators=new_decorators)
         return updated_node
 

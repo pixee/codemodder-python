@@ -225,5 +225,5 @@ class BaseSASTCodemodTest(BaseCodemodTest):
 
     def assert_findings(self, changes: list[Change]):
         assert all(
-            x.findings is not None for x in changes
+            x.findings for x in changes
         ), f"Expected all changes to have findings: {changes}"

@@ -25,7 +25,7 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
         def foo():
             pass
         """
-        self.run_and_assert(tmpdir, input_code, expected)
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=2)
 
     def test_simple_alias(self, tmpdir):
         input_code = """
@@ -44,7 +44,7 @@ class TestDjangoReceiverOnTop(BaseCodemodTest):
         def foo():
             pass
         """
-        self.run_and_assert(tmpdir, input_code, expected)
+        self.run_and_assert(tmpdir, input_code, expected, num_changes=2)
 
     def test_no_receiver(self, tmpdir):
         input_code = """

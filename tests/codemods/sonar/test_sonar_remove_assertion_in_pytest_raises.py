@@ -13,6 +13,9 @@ class TestRemoveAssertionInPytestRaises(BaseSASTCodemodTest):
     def test_name(self):
         assert self.codemod.name == "remove-assertion-in-pytest-raises"
 
+    def assert_findings(self, changes):
+        assert not all(x.findings for x in changes)
+
     def test_simple(self, tmpdir):
         input_code = """
         import pytest

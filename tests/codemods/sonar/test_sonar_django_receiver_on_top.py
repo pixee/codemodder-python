@@ -11,6 +11,11 @@ class TestSonarDjangoReceiverOnTop(BaseSASTCodemodTest):
     def test_name(self):
         assert self.codemod.name == "django-receiver-on-top"
 
+    def assert_findings(self, changes):
+        # For now we can only link the finding to the line with the receiver decorator
+        assert changes[0].findings
+        assert not changes[1].findings
+
     def test_simple(self, tmpdir):
         input_code = """
         from django.dispatch import receiver
@@ -43,4 +48,6 @@ class TestSonarDjangoReceiverOnTop(BaseSASTCodemodTest):
                 }
             ]
         }
-        self.run_and_assert(tmpdir, input_code, expected, results=json.dumps(issues))
+        self.run_and_assert(
+            tmpdir, input_code, expected, results=json.dumps(issues), num_changes=2
+        )

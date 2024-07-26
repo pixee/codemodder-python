@@ -68,19 +68,19 @@ class Result(ABCDataclass):
 
 
 @dataclass(kw_only=True)
-class SarifResult(Result, ABCDataclass):
+class SASTResult(Result):
+    finding_id: str
+
+
+@dataclass(kw_only=True)
+class SarifResult(SASTResult, ABCDataclass):
     location_type: ClassVar[Type[SarifLocation]]
 
     @classmethod
     def from_sarif(
         cls, sarif_result, sarif_run, truncate_rule_id: bool = False
     ) -> Self:
-        return cls(
-            rule_id=cls.extract_rule_id(sarif_result, sarif_run, truncate_rule_id),
-            locations=cls.extract_locations(sarif_result),
-            codeflows=cls.extract_code_flows(sarif_result),
-            related_locations=cls.extract_related_locations(sarif_result),
-        )
+        raise NotImplementedError
 
     @classmethod
     def extract_locations(cls, sarif_result) -> list[Location]:
@@ -124,11 +124,6 @@ class SarifResult(Result, ABCDataclass):
             ]
 
         raise ValueError("Could not extract rule id from sarif result.")
-
-
-@dataclass(kw_only=True)
-class SASTResult(Result):
-    finding_id: str
 
 
 def same_line(pos: CodeRange, location: Location) -> bool:

@@ -7,6 +7,7 @@ from typing import Iterable, Optional
 
 from typing_extensions import Self, override
 
+from codemodder.codetf import Finding, Rule
 from codemodder.context import CodemodExecutionContext
 from codemodder.logging import logger
 from codemodder.result import LineInfo, Result, ResultSet, SarifLocation, SarifResult
@@ -42,6 +43,33 @@ class SemgrepLocation(SarifLocation):
 
 class SemgrepResult(SarifResult):
     location_type = SemgrepLocation
+
+    @classmethod
+    def from_sarif(
+        cls, sarif_result, sarif_run, truncate_rule_id: bool = False
+    ) -> Self:
+        # avoid circular import
+        from core_codemods.semgrep.api import semgrep_url_from_id
+
+        return cls(
+            rule_id=(
+                rule_id := cls.extract_rule_id(
+                    sarif_result, sarif_run, truncate_rule_id
+                )
+            ),
+            locations=cls.extract_locations(sarif_result),
+            codeflows=cls.extract_code_flows(sarif_result),
+            related_locations=cls.extract_related_locations(sarif_result),
+            finding_id=rule_id,
+            finding=Finding(
+                id=rule_id,
+                rule=Rule(
+                    id=rule_id,
+                    name=rule_id,
+                    url=semgrep_url_from_id(rule_id),
+                ),
+            ),
+        )
 
 
 class SemgrepResultSet(ResultSet):
