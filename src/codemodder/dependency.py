@@ -115,10 +115,10 @@ to protect against XML vulnerabilities.\
 )
 
 Security = Dependency(
-    Requirement("security==1.3.0"),
+    Requirement("security==1.3.1"),
     hashes=[
-        "7a7a1dcd93f08a43c1e3020b05f3d04e1223bda503120434db9abe25eed23e2a",
-        "9380b12f8d82767d4a4c31d252654cab935b42b0c6529ba11a9e7e52d38de79f",
+        "9df6e75393f494ca3fd06dac3ed02f3c4fed60842b13fd00757b026cedff426b",
+        "7ec0853c74c7dd22a9967bda087db5d4a7df58253574e60ec475c660f839da6d",
     ],
     description="""This library holds security tools for protecting Python API calls.""",
     _license=License(
