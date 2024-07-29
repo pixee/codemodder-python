@@ -58,6 +58,7 @@ from .semgrep.semgrep_django_secure_set_cookie import SemgrepDjangoSecureSetCook
 from .semgrep.semgrep_enable_jinja2_autoescape import SemgrepEnableJinja2Autoescape
 from .semgrep.semgrep_harden_pyyaml import SemgrepHardenPyyaml
 from .semgrep.semgrep_jwt_decode_verify import SemgrepJwtDecodeVerify
+from .semgrep.semgrep_no_csrf_exempt import SemgrepNoCsrfExempt
 from .semgrep.semgrep_rsa_key_size import SemgrepRsaKeySize
 from .semgrep.semgrep_sql_parametrization import SemgrepSQLParameterization
 from .semgrep.semgrep_subprocess_shell_false import SemgrepSubprocessShellFalse
@@ -205,6 +206,7 @@ semgrep_registry = CodemodCollection(
     origin="semgrep",
     codemods=[
         SemgrepEnableJinja2Autoescape,
+        SemgrepNoCsrfExempt,
         SemgrepJwtDecodeVerify,
         SemgrepUseDefusedXml,
         SemgrepSubprocessShellFalse,
