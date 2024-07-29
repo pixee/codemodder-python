@@ -321,6 +321,7 @@ SONAR_CODEMODS = {
 }
 
 SEMGREP_CODEMOD_NAMES = [
+    "url-sandbox",
     "enable-jinja2-autoescape",
     "jwt-decode-verify",
     "use-defusedxml",
