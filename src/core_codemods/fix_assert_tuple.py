@@ -7,7 +7,6 @@ from codemodder.codemods.libcst_transformer import (
     LibcstTransformerPipeline,
 )
 from codemodder.codemods.utils_mixin import NameResolutionMixin
-from codemodder.codetf import Change
 from core_codemods.api import Metadata, ReviewGuidance
 from core_codemods.api.core_codemod import CoreCodemod
 
@@ -47,14 +46,7 @@ class FixAssertTupleTransform(LibcstResultTransformer, NameResolutionMixin):
     ):
         start_line = self.node_position(original_node).start.line
         for idx in range(newlines_count):
-            self.file_context.codemod_changes.append(
-                Change(
-                    lineNumber=(line_number := start_line + idx),
-                    description=self.change_description,
-                    # For now we can only link the finding to the first line changed
-                    findings=self.file_context.get_findings_for_location(line_number),
-                )
-            )
+            self.report_change_for_line(start_line + idx)
 
 
 FixAssertTuple = CoreCodemod(
