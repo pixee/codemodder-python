@@ -58,6 +58,11 @@ def test_change_diffside(side):
     assert change.model_dump()["diffSide"] == side
 
 
+def test_change_invalid_line_number():
+    with pytest.raises(ValueError):
+        Change(lineNumber=0, description="Change 1 to 2")
+
+
 def test_write_codetf(tmpdir, mocker, codetf_schema):
     path = tmpdir / "test.codetf.json"
 

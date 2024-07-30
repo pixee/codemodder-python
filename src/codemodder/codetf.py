@@ -54,6 +54,12 @@ class Change(BaseModel):
     packageActions: Optional[list[PackageAction]] = None
     findings: Optional[list[Finding]] = None
 
+    @model_validator(mode="after")
+    def validate_lineNumber(self):
+        if self.lineNumber < 1:
+            raise ValueError("lineNumber must be greater than 0")
+        return self
+
 
 class AIMetadata(BaseModel):
     provider: Optional[str] = None
