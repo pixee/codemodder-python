@@ -59,9 +59,16 @@ class NanInjectionTransformer(LibcstResultTransformer):
             {self.code(original_node).strip()}
         """
         )
-        self.report_change(original_node)
+        self._report_new_lines(original_node)
         new_statement = cst.parse_statement(code)
         return new_statement.with_changes(leading_lines=updated_node.leading_lines)
+
+    def _report_new_lines(self, original_node: cst.SimpleStatementLine):
+        self.report_change(original_node)
+        line_number = self.lineno_for_node(original_node)
+        findings = self.file_context.get_findings_for_location(line_number)
+        for lineno in range(line_number + 1, line_number + 4):
+            self.report_change_for_line(lineno, findings=findings)
 
 
 class MatchNodesInLineVisitor(ContextAwareVisitor, UtilsMixin):

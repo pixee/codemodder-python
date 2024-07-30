@@ -67,5 +67,5 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             input_code,
             expected_output,
             results=json.dumps(results),
-            # num_changes=4,
+            num_changes=4,
         )
