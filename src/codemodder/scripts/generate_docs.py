@@ -347,6 +347,11 @@ SEMGREP_CODEMODS = {
         guidance_explained="This codemod updates the key size for RSA to the `2048` recommended minimum. Since this is an important security fix that follows modern cryptographic standards, we believe this change can be safely merged without review.",
         need_sarif="Yes (Semgrep)",
     ),
+    "no-csrf-exempt": DocMetadata(
+        importance="Medium",
+        guidance_explained="This codemod removes the `@csrf_exempt` decorator from a Django view to ensure it's protected against CSRF attacks. However, there are valid cases for using this decorator so make sure to review your application to determine if this is the case.",
+        need_sarif="Yes (Semgrep)",
+    ),
 }
 ALL_CODEMODS_METADATA = (
     CORE_CODEMODS | DEFECTDOJO_CODEMODS | SONAR_CODEMODS | SEMGREP_CODEMODS
