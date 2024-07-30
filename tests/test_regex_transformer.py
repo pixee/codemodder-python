@@ -20,7 +20,7 @@ def test_transformer_no_change(mocker, caplog, tmp_path_factory):
         dry_run=True,
         verbose=False,
         registry=mocker.MagicMock(),
-        providers=None,
+        providers=mocker.MagicMock(),
         repo_manager=mocker.MagicMock(),
         path_include=[],
         path_exclude=[],
@@ -53,7 +53,7 @@ def test_transformer(mocker, tmp_path_factory):
         dry_run=False,
         verbose=False,
         registry=mocker.MagicMock(),
-        providers=None,
+        providers=mocker.MagicMock(),
         repo_manager=mocker.MagicMock(),
         path_include=[],
         path_exclude=[],
@@ -69,3 +69,4 @@ def test_transformer(mocker, tmp_path_factory):
     )
     assert changeset is not None
     assert code.read_text() == text.replace("hello", "bye")
+    assert changeset.changes[0].lineNumber == 1

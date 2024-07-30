@@ -11,11 +11,13 @@ from codemodder.result import Result
 
 
 class RegexTransformerPipeline(BaseTransformerPipeline):
-    pattern: Pattern
+    pattern: Pattern | str
     replacement: str
     change_description: str
 
-    def __init__(self, pattern: Pattern, replacement: str, change_description: str):
+    def __init__(
+        self, pattern: Pattern | str, replacement: str, change_description: str
+    ):
         super().__init__()
         self.pattern = pattern
         self.replacement = replacement
@@ -27,6 +29,7 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
         file_context: FileContext,
         results: list[Result] | None,
     ) -> ChangeSet | None:
+        del results
 
         changes = []
         updated_lines = []
@@ -35,12 +38,13 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
             original_lines = f.readlines()
 
         for lineno, line in enumerate(original_lines):
+            # TODO: use results to filter out which lines to change
             changed_line = re.sub(self.pattern, self.replacement, line)
             updated_lines.append(changed_line)
             if line != changed_line:
                 changes.append(
                     Change(
-                        lineNumber=lineno,
+                        lineNumber=lineno + 1,
                         description=self.change_description,
                         findings=file_context.get_findings_for_location(lineno),
                     )
