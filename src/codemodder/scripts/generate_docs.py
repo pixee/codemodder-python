@@ -352,6 +352,11 @@ SEMGREP_CODEMODS = {
         guidance_explained="This codemod removes the `@csrf_exempt` decorator from a Django view to ensure it's protected against CSRF attacks. However, there are valid cases for using this decorator so make sure to review your application to determine if this is the case.",
         need_sarif="Yes (Semgrep)",
     ),
+    "nan-injection": DocMetadata(
+        importance="Medium",
+        guidance_explained="We believe that this codemod fixes an unsafe typecast call and that the changes are safe and reliable.",
+        need_sarif="Yes (Semgrep)",
+    ),
 }
 ALL_CODEMODS_METADATA = (
     CORE_CODEMODS | DEFECTDOJO_CODEMODS | SONAR_CODEMODS | SEMGREP_CODEMODS
