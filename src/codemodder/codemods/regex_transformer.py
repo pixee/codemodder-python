@@ -34,8 +34,11 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
         changes = []
         updated_lines = []
 
-        with open(file_context.file_path, "r", encoding="utf-8") as f:
-            original_lines = f.readlines()
+        original_lines = (
+            file_context.file_path.read_bytes()
+            .decode("utf-8")
+            .splitlines(keepends=True)
+        )
 
         for lineno, line in enumerate(original_lines):
             # TODO: use results to filter out which lines to change
