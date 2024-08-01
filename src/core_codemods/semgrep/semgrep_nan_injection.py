@@ -44,8 +44,7 @@ class NanInjectionTransformer(LibcstResultTransformer):
         original_node: cst.SimpleStatementLine,
         updated_node: cst.SimpleStatementLine,
     ):
-        var_name = self._get_var_in_call(node)
-        if not var_name:
+        if not (var_name := self._get_var_in_call(node)):
             return original_node
 
         code = dedent(
