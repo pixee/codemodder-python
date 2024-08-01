@@ -16,7 +16,7 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
         assert self.codemod.name == "nan-injection"
 
     @each_func
-    def test_wrap_if_statement(self, tmpdir, func):
+    def test_assignment(self, tmpdir, func):
         input_code = f"""\
         def home(request):
             uuid = request.POST.get("uuid")
@@ -49,6 +49,223 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
                                             "uriBaseId": "%SRCROOT%",
                                         },
                                         "region": region_data_for_func(func),
+                                    }
+                                }
+                            ],
+                            "message": {
+                                "text": "Found user input going directly into typecast for bool(), float(), or complex(). This allows an attacker to inject Python's not-a-number (NaN) into the typecast. This results in undefind behavior, particularly when doing comparisons. Either cast to a different type, or add a guard checking for all capitalizations of the string 'nan'."
+                            },
+                            "ruleId": "python.django.security.nan-injection.nan-injection",
+                        }
+                    ],
+                }
+            ]
+        }
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected_output,
+            results=json.dumps(results),
+            num_changes=4,
+        )
+
+    def test_multiple(self, tmpdir):
+        input_code = """\
+        def view(request):
+            tid = request.POST.get("tid")
+            some_list = [1, 2, 3, float('nan')]
+
+            float(tid) in some_list
+
+            z = [1, 2, complex(tid), 3]
+
+            x = [float(tid), 1.0, 2.0]
+
+            return [1, 2, float(tid), 3]
+        """
+        expected_output = """\
+        def view(request):
+            tid = request.POST.get("tid")
+            some_list = [1, 2, 3, float('nan')]
+
+            if tid.lower() == "nan":
+                raise ValueError
+            else:
+                float(tid) in some_list
+
+            if tid.lower() == "nan":
+                raise ValueError
+            else:
+                z = [1, 2, complex(tid), 3]
+
+            if tid.lower() == "nan":
+                raise ValueError
+            else:
+                x = [float(tid), 1.0, 2.0]
+
+            if tid.lower() == "nan":
+                raise ValueError
+            else:
+                return [1, 2, float(tid), 3]
+        """
+
+        results = {
+            "runs": [
+                {
+                    "results": [
+                        {
+                            "fingerprints": {"matchBasedId/v1": "1fdbd5a"},
+                            "locations": [
+                                {
+                                    "physicalLocation": {
+                                        "artifactLocation": {
+                                            "uri": "code.py",
+                                            "uriBaseId": "%SRCROOT%",
+                                        },
+                                        "region": {
+                                            "endColumn": 15,
+                                            "endLine": 5,
+                                            "snippet": {
+                                                "text": "    float(tid) in some_list"
+                                            },
+                                            "startColumn": 5,
+                                            "startLine": 5,
+                                        },
+                                    }
+                                }
+                            ],
+                            "message": {
+                                "text": "Found user input going directly into typecast for bool(), float(), or complex(). This allows an attacker to inject Python's not-a-number (NaN) into the typecast. This results in undefind behavior, particularly when doing comparisons. Either cast to a different type, or add a guard checking for all capitalizations of the string 'nan'."
+                            },
+                            "ruleId": "python.django.security.nan-injection.nan-injection",
+                        },
+                        {
+                            "fingerprints": {"matchBasedId/v1": "1fdbd5a"},
+                            "locations": [
+                                {
+                                    "physicalLocation": {
+                                        "artifactLocation": {
+                                            "uri": "code.py",
+                                            "uriBaseId": "%SRCROOT%",
+                                        },
+                                        "region": {
+                                            "endColumn": 28,
+                                            "endLine": 7,
+                                            "snippet": {
+                                                "text": "    z = [1, 2, complex(tid), 3]"
+                                            },
+                                            "startColumn": 16,
+                                            "startLine": 7,
+                                        },
+                                    }
+                                }
+                            ],
+                            "message": {
+                                "text": "Found user input going directly into typecast for bool(), float(), or complex(). This allows an attacker to inject Python's not-a-number (NaN) into the typecast. This results in undefind behavior, particularly when doing comparisons. Either cast to a different type, or add a guard checking for all capitalizations of the string 'nan'."
+                            },
+                            "ruleId": "python.django.security.nan-injection.nan-injection",
+                        },
+                        {
+                            "fingerprints": {"matchBasedId/v1": "1fdbd5a"},
+                            "locations": [
+                                {
+                                    "physicalLocation": {
+                                        "artifactLocation": {
+                                            "uri": "code.py",
+                                            "uriBaseId": "%SRCROOT%",
+                                        },
+                                        "region": {
+                                            "endColumn": 20,
+                                            "endLine": 9,
+                                            "snippet": {
+                                                "text": "    x = [float(tid), 1.0, 2.0]"
+                                            },
+                                            "startColumn": 10,
+                                            "startLine": 9,
+                                        },
+                                    }
+                                }
+                            ],
+                            "message": {
+                                "text": "Found user input going directly into typecast for bool(), float(), or complex(). This allows an attacker to inject Python's not-a-number (NaN) into the typecast. This results in undefind behavior, particularly when doing comparisons. Either cast to a different type, or add a guard checking for all capitalizations of the string 'nan'."
+                            },
+                            "ruleId": "python.django.security.nan-injection.nan-injection",
+                        },
+                        {
+                            "fingerprints": {"matchBasedId/v1": "1fdbd5a"},
+                            "locations": [
+                                {
+                                    "physicalLocation": {
+                                        "artifactLocation": {
+                                            "uri": "code.py",
+                                            "uriBaseId": "%SRCROOT%",
+                                        },
+                                        "region": {
+                                            "endColumn": 29,
+                                            "endLine": 11,
+                                            "snippet": {
+                                                "text": "    return [1, 2, float(tid), 3]"
+                                            },
+                                            "startColumn": 19,
+                                            "startLine": 11,
+                                        },
+                                    }
+                                }
+                            ],
+                            "message": {
+                                "text": "Found user input going directly into typecast for bool(), float(), or complex(). This allows an attacker to inject Python's not-a-number (NaN) into the typecast. This results in undefind behavior, particularly when doing comparisons. Either cast to a different type, or add a guard checking for all capitalizations of the string 'nan'."
+                            },
+                            "ruleId": "python.django.security.nan-injection.nan-injection",
+                        },
+                    ],
+                }
+            ]
+        }
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected_output,
+            results=json.dumps(results),
+            num_changes=16,
+        )
+
+    def test_nested(self, tmpdir):
+        input_code = """\
+        def view(request):
+            tid = request.POST.get("tid")
+            assert bool(float(tid) + 10.0)
+        """
+        expected_output = """\
+        def view(request):
+            tid = request.POST.get("tid")
+            if tid.lower() == "nan":
+                raise ValueError
+            else:
+                assert bool(float(tid) + 10.0)
+        """
+
+        results = {
+            "runs": [
+                {
+                    "results": [
+                        {
+                            "fingerprints": {"matchBasedId/v1": "1235"},
+                            "locations": [
+                                {
+                                    "physicalLocation": {
+                                        "artifactLocation": {
+                                            "uri": "code.py",
+                                            "uriBaseId": "%SRCROOT%",
+                                        },
+                                        "region": {
+                                            "endColumn": 35,
+                                            "endLine": 3,
+                                            "snippet": {
+                                                "text": "    assert bool(float(tid) + 10.0)"
+                                            },
+                                            "startColumn": 12,
+                                            "startLine": 3,
+                                        },
                                     }
                                 }
                             ],

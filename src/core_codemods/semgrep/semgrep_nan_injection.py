@@ -44,16 +44,13 @@ class NanInjectionTransformer(LibcstResultTransformer):
         original_node: cst.SimpleStatementLine,
         updated_node: cst.SimpleStatementLine,
     ):
-        # We assume the call node's argument is a variable, otherwise semgrep
-        # wouldn't have created a finding.
-        try:
-            var = node.args[0].value.value
-        except Exception:
-            return updated_node
+        var_name = self._get_var_in_call(node)
+        if not var_name:
+            return original_node
 
         code = dedent(
             f"""\
-        if {var}.lower() == "nan":
+        if {var_name}.lower() == "nan":
             raise ValueError
         else:
             {self.code(original_node).strip()}
@@ -62,6 +59,15 @@ class NanInjectionTransformer(LibcstResultTransformer):
         self._report_new_lines(original_node)
         new_statement = cst.parse_statement(code)
         return new_statement.with_changes(leading_lines=updated_node.leading_lines)
+
+    def _get_var_in_call(self, node: cst):
+        match node.args[0].value:
+            case cst.Name():
+                # float(var)
+                return node.args[0].value.value
+            case cst.BinaryOperation():
+                # bool(float(var)), complex(float(var)), etc
+                return node.args[0].value.left.args[0].value.value
 
     def _report_new_lines(self, original_node: cst.SimpleStatementLine):
         self.report_change(original_node)
