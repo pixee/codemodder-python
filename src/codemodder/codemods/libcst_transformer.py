@@ -24,8 +24,7 @@ def update_code(file_path, new_code):
     """
     Write the `new_code` to the `file_path`
     """
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(new_code)
+    file_path.write_bytes(new_code.encode("utf-8"))
 
 
 class LibcstResultTransformer(BaseTransformer):
@@ -261,8 +260,7 @@ class LibcstTransformerPipeline(BaseTransformerPipeline):
 
         try:
             with file_context.timer.measure("parse"):
-                with open(file_path, "r", encoding="utf-8") as f:
-                    source_tree = cst.parse_module(f.read())
+                source_tree = cst.parse_module(file_path.read_bytes().decode("utf-8"))
         except Exception:
             file_context.add_failure(file_path, reason := "Failed to parse file")
             logger.exception("%s %s", reason, file_path)

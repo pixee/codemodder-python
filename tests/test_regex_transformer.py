@@ -70,3 +70,39 @@ def test_transformer(mocker, tmp_path_factory):
     assert changeset is not None
     assert code.read_text() == text.replace("hello", "bye")
     assert changeset.changes[0].lineNumber == 1
+
+
+def test_transformer_windows_carriage(mocker, tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp("foo")
+    code = base_dir / "code.py"
+    text = (
+        b"Hello, world!\r\nThis is a test string with Windows-style line endings.\r\n"
+    )
+    code.write_bytes(text)
+
+    file_context = FileContext(
+        base_dir,
+        code,
+    )
+    execution_context = CodemodExecutionContext(
+        directory=base_dir,
+        dry_run=False,
+        verbose=False,
+        registry=mocker.MagicMock(),
+        providers=None,
+        repo_manager=mocker.MagicMock(),
+        path_include=[],
+        path_exclude=[],
+    )
+    pipeline = RegexTransformerPipeline(
+        pattern=r"world", replacement="Earth", change_description="testing"
+    )
+
+    changeset = pipeline.apply(
+        context=execution_context,
+        file_context=file_context,
+        results=None,
+    )
+    assert changeset is not None
+    assert code.read_bytes() == text.replace(b"world", b"Earth")
+    assert changeset.changes[0].lineNumber == 1

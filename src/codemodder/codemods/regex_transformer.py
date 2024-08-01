@@ -34,8 +34,11 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
         changes = []
         updated_lines = []
 
-        with open(file_context.file_path, "r", encoding="utf-8") as f:
-            original_lines = f.readlines()
+        original_lines = (
+            file_context.file_path.read_bytes()
+            .decode("utf-8")
+            .splitlines(keepends=True)
+        )
 
         for lineno, line in enumerate(original_lines):
             # TODO: use results to filter out which lines to change
@@ -57,8 +60,7 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
         diff = create_diff(original_lines, updated_lines)
 
         if not context.dry_run:
-            with open(file_context.file_path, "w+", encoding="utf-8") as original:
-                original.writelines(updated_lines)
+            file_context.file_path.write_bytes("".join(updated_lines).encode("utf-8"))
 
         return ChangeSet(
             path=str(file_context.file_path.relative_to(context.directory)),

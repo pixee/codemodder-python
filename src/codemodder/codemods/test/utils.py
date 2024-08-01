@@ -129,8 +129,7 @@ class BaseCodemodTest:
         except AssertionError:
             raise DiffError(expected_diff, changes.diff)
 
-        with open(file_path, "r", encoding="utf-8") as tmp_file:
-            output_code = tmp_file.read()
+        output_code = file_path.read_bytes().decode("utf-8")
 
         try:
             assert output_code == (format_expected := dedent(expected))
