@@ -1,7 +1,11 @@
 import json
 
+import pytest
+
 from codemodder.codemods.test import BaseSASTCodemodTest
 from core_codemods.semgrep.semgrep_nan_injection import SemgrepNanInjection
+
+each_func = pytest.mark.parametrize("func", ["float", "bool", "complex"])
 
 
 class TestSemgrepNanInjection(BaseSASTCodemodTest):
@@ -11,22 +15,23 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
     def test_name(self):
         assert self.codemod.name == "nan-injection"
 
-    def test_wrap_if_statement(self, tmpdir):
-        input_code = """\
+    @each_func
+    def test_wrap_if_statement(self, tmpdir, func):
+        input_code = f"""\
         def home(request):
             uuid = request.POST.get("uuid")
         
-            x = float(uuid)
+            x = {func}(uuid)
             print(x)
         """
-        expected_output = """\
+        expected_output = f"""\
         def home(request):
             uuid = request.POST.get("uuid")
         
             if uuid.lower() == "nan":
                 raise ValueError
             else:
-                x = float(uuid)
+                x = {func}(uuid)
             print(x)
         """
 
@@ -43,13 +48,7 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
                                             "uri": "code.py",
                                             "uriBaseId": "%SRCROOT%",
                                         },
-                                        "region": {
-                                            "endColumn": 20,
-                                            "endLine": 4,
-                                            "snippet": {"text": "    x = float(uuid)"},
-                                            "startColumn": 9,
-                                            "startLine": 4,
-                                        },
+                                        "region": region_data_for_func(func),
                                     }
                                 }
                             ],
@@ -69,3 +68,30 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             results=json.dumps(results),
             num_changes=4,
         )
+
+
+def region_data_for_func(func):
+    data = {
+        "float": {
+            "endColumn": 20,
+            "endLine": 4,
+            "snippet": {"text": f"    x = {func}(uuid)"},
+            "startColumn": 9,
+            "startLine": 4,
+        },
+        "bool": {
+            "endColumn": 19,
+            "endLine": 4,
+            "snippet": {"text": f"    x = {func}(uuid)"},
+            "startColumn": 9,
+            "startLine": 4,
+        },
+        "complex": {
+            "endColumn": 22,
+            "endLine": 4,
+            "snippet": {"text": f"    x = {func}(uuid)"},
+            "startColumn": 9,
+            "startLine": 4,
+        },
+    }
+    return data.get(func)
