@@ -218,16 +218,19 @@ class XMLTransformerPipeline(BaseTransformerPipeline):
                 return None
 
             new_lines = output_file.readlines()
-            with open(file_path, "r") as original:
-                # TODO there's a failure potential here for very large files
-                diff = create_diff(
-                    original.readlines(),
-                    new_lines,
-                )
+            # TODO there's a failure potential here for very large files
+            original_lines = (
+                file_context.file_path.read_bytes()
+                .decode("utf-8")
+                .splitlines(keepends=True)
+            )
+            diff = create_diff(
+                original_lines,
+                new_lines,
+            )
 
             if not context.dry_run:
-                with open(file_path, "w+") as original:
-                    original.writelines(new_lines)
+                file_context.file_path.write_bytes("".join(new_lines).encode("utf-8"))
 
             return ChangeSet(
                 path=str(file_path.relative_to(context.directory)),

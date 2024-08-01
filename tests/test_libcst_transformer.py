@@ -13,6 +13,7 @@ from core_codemods.defectdojo.results import DefectDojoResult
 from core_codemods.sonar.results import SonarResult
 
 FILE_PATH = mock.MagicMock()
+FILE_PATH.read_bytes.return_value = b"# some code to codemod"
 DEFECTDOJO_RESULTS = [
     DefectDojoResult.from_result(
         {

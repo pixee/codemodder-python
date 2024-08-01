@@ -60,8 +60,7 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
         diff = create_diff(original_lines, updated_lines)
 
         if not context.dry_run:
-            with open(file_context.file_path, "w+", encoding="utf-8") as original:
-                original.writelines(updated_lines)
+            file_context.file_path.write_bytes("".join(updated_lines).encode("utf-8"))
 
         return ChangeSet(
             path=str(file_context.file_path.relative_to(context.directory)),

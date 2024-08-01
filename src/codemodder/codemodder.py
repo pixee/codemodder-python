@@ -23,14 +23,6 @@ from codemodder.sarifs import DuplicateToolError, detect_sarif_tools
 from codemodder.semgrep import run as run_semgrep
 
 
-def update_code(file_path, new_code):
-    """
-    Write the `new_code` to the `file_path`
-    """
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(new_code)
-
-
 def find_semgrep_results(
     context: CodemodExecutionContext,
     codemods: Sequence[BaseCodemod],

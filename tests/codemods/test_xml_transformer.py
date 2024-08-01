@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import mock
+
 from codemodder.codemods.xml_transformer import (
     ElementAttributeXMLTransformer,
     XMLTransformerPipeline,
@@ -7,18 +9,19 @@ from codemodder.codemods.xml_transformer import (
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
 
+FILE_PATH = mock.MagicMock()
+FILE_PATH.read_bytes.return_value = b"""<?xml version="1.0" encoding="utf-8"?>"""
+
 
 def test_transformer_failure(mocker, caplog):
     mocker.patch(
         "defusedxml.expatreader.DefusedExpatParser.parse",
         side_effect=Exception,
     )
-    file_context = FileContext(
-        Path("home"),
-        Path("test.xml"),
-    )
+    file_context = FileContext(parent_dir := Path("home"), FILE_PATH)
+
     execution_context = CodemodExecutionContext(
-        directory=mocker.MagicMock(),
+        directory=parent_dir,
         dry_run=True,
         verbose=False,
         registry=mocker.MagicMock(),
@@ -45,10 +48,7 @@ def test_transformer(mocker):
     )
     mocker.patch("builtins.open")
     mocker.patch("codemodder.codemods.xml_transformer.create_diff", return_value="diff")
-    file_context = FileContext(
-        parent_dir := Path("home"),
-        parent_dir / Path("test.xml"),
-    )
+    file_context = FileContext(parent_dir := Path("home"), FILE_PATH)
     execution_context = CodemodExecutionContext(
         directory=parent_dir,
         dry_run=True,
