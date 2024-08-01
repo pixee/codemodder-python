@@ -19,7 +19,7 @@ from core_codemods.semgrep.api import SemgrepCodemod, semgrep_url_from_id
 
 
 class NanInjectionTransformer(LibcstResultTransformer):
-    change_description = "Wrap typecast in if statement to check for `nan`"
+    change_description = "Add validation to untrusted numerical input to disallow `nan`"
 
     def leave_SimpleStatementLine(
         self,
