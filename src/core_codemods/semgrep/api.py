@@ -17,7 +17,7 @@ class SemgrepCodemod(SASTCodemod):
     def from_core_codemod(
         cls,
         name: str,
-        other: CoreCodemod,
+        other: CoreCodemod | SASTCodemod,
         rules: list[ToolRule],
         transformer: BaseTransformerPipeline | None = None,
     ):

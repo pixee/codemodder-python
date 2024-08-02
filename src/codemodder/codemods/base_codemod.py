@@ -164,6 +164,22 @@ class BaseCodemod(metaclass=ABCMeta):
         # TODO: eventually we need to be able to use fully specified IDs here
         return self.name
 
+    @abstractmethod
+    def get_files_to_analyze(
+        self,
+        context: CodemodExecutionContext,
+        all_paths: list[Path],
+        results: ResultSet | None,
+    ) -> list[Path]:
+        """
+        Get the list of files to analyze
+
+        This method is responsible for determining the list of files that should be analyzed by the codemod.
+
+        This method should return a list of `Path` objects representing the files to analyze.
+        """
+        ...
+
     def _apply(
         self,
         context: CodemodExecutionContext,
@@ -179,7 +195,7 @@ class BaseCodemod(metaclass=ABCMeta):
             )
             return
 
-        results = (
+        results: ResultSet | None = (
             # It seems like semgrep doesn't like our fully-specified id format so pass in short name instead.
             self.detector.apply(self._internal_name, context, files_to_analyze)
             if self.detector
@@ -190,15 +206,7 @@ class BaseCodemod(metaclass=ABCMeta):
             logger.debug("No results for %s", self.id)
             return
 
-        files_to_analyze = (
-            [
-                path
-                for path in files_to_analyze
-                if path.suffix in self.default_extensions
-            ]
-            if self.default_extensions
-            else files_to_analyze
-        )
+        files_to_analyze = self.get_files_to_analyze(context, files_to_analyze, results)
 
         process_file = functools.partial(
             self._process_file, context=context, results=results, rules=rules
@@ -274,3 +282,78 @@ class BaseCodemod(metaclass=ABCMeta):
 
     def __repr__(self) -> str:
         return f"{self.id}"
+
+
+class FindAndFixCodemod(BaseCodemod, metaclass=ABCMeta):
+    """
+    Base class for codemods that find and fix issues in code
+    """
+
+    def get_files_to_analyze(
+        self,
+        context: CodemodExecutionContext,
+        all_files: list[Path],
+        results: ResultSet | None,
+    ) -> list[Path]:
+        del context
+        del results
+        return (
+            [path for path in all_files if path.suffix in self.default_extensions]
+            if self.default_extensions
+            else all_files
+        )
+
+
+class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
+    """
+    Base class for codemods that apply remediations to code
+    """
+
+    requested_rules: list[str]
+
+    def __init__(
+        self,
+        *,
+        metadata: Metadata,
+        detector: BaseDetector | None = None,
+        transformer: BaseTransformerPipeline,
+        default_extensions: list[str] | None = None,
+        requested_rules: list[str] | None = None,
+    ):
+        super().__init__(
+            metadata=metadata,
+            detector=detector,
+            transformer=transformer,
+            default_extensions=default_extensions,
+        )
+        self.requested_rules = []
+        if requested_rules:
+            self.requested_rules.extend(requested_rules)
+
+    def apply(
+        self,
+        context: CodemodExecutionContext,
+        files_to_analyze: list[Path],
+    ) -> None:
+        self._apply(context, files_to_analyze, self.requested_rules)
+
+    def get_files_to_analyze(
+        self,
+        context: CodemodExecutionContext,
+        all_files: list[Path],
+        results: ResultSet | None,
+    ) -> list[Path]:
+        # only return files that have findings
+        return (
+            [
+                path
+                for path in all_files
+                if path.suffix in (self.default_extensions or [])
+                and any(
+                    results.results_for_rule_and_file(context, rule_id, path)
+                    for rule_id in self.requested_rules
+                )
+            ]
+            if results
+            else []
+        )
