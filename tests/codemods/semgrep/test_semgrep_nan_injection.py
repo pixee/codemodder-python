@@ -399,6 +399,63 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             num_changes=4,
         )
 
+    def test_binop(self, tmpdir):
+        input_code = """\
+        def view(request):
+            tid = request.POST.get("tid")
+            float(tid + str(10))
+        """
+        expected_output = """\
+        def view(request):
+            tid = request.POST.get("tid")
+            if tid + str(10).lower() == "nan":
+                raise ValueError
+            else:
+                float(tid + str(10))
+        """
+        results = {
+            "runs": [
+                {
+                    "results": [
+                        {
+                            "fingerprints": {"matchBasedId/v1": "asd2"},
+                            "locations": [
+                                {
+                                    "physicalLocation": {
+                                        "artifactLocation": {
+                                            "uri": "code.py",
+                                            "uriBaseId": "%SRCROOT%",
+                                        },
+                                        "region": {
+                                            "endColumn": 25,
+                                            "endLine": 3,
+                                            "snippet": {
+                                                "text": "    float(tid + str(10))"
+                                            },
+                                            "startColumn": 5,
+                                            "startLine": 3,
+                                        },
+                                    }
+                                }
+                            ],
+                            "message": {
+                                "text": "Found user input going directly into typecast for bool(), float(), or complex(). This allows an attacker to inject Python's not-a-number (NaN) into the typecast. This results in undefind behavior, particularly when doing comparisons. Either cast to a different type, or add a guard checking for all capitalizations of the string 'nan'."
+                            },
+                            "properties": {},
+                            "ruleId": "python.django.security.nan-injection.nan-injection",
+                        }
+                    ],
+                }
+            ]
+        }
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected_output,
+            results=json.dumps(results),
+            num_changes=4,
+        )
+
 
 def region_data_for_func(func):
     data = {

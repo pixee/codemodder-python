@@ -70,10 +70,8 @@ class NanInjectionTransformer(LibcstResultTransformer):
             ):
                 # bool(float(var)), complex(float(var)), bool(float(var)), etc
                 return self._get_target_in_call(wrapped_node)
-            case cst.Call():
+            case cst.Call() | cst.BinaryOperation():
                 return wrapped_node
-            # case cst.BinaryOperation():#
-            #     return node.args[0].value.left.args[0].value.value
 
     def _report_new_lines(self, original_node: cst.SimpleStatementLine):
         self.report_change(original_node)
