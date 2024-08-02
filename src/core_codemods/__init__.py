@@ -60,7 +60,7 @@ from .semgrep.semgrep_harden_pyyaml import SemgrepHardenPyyaml
 from .semgrep.semgrep_jwt_decode_verify import SemgrepJwtDecodeVerify
 from .semgrep.semgrep_no_csrf_exempt import SemgrepNoCsrfExempt
 from .semgrep.semgrep_rsa_key_size import SemgrepRsaKeySize
-from .semgrep.semgrep_sql_parametrization import SemgrepSQLParameterization
+from .semgrep.semgrep_sql_parameterization import SemgrepSQLParameterization
 from .semgrep.semgrep_subprocess_shell_false import SemgrepSubprocessShellFalse
 from .semgrep.semgrep_url_sandbox import SemgrepUrlSandbox
 from .semgrep.semgrep_use_defused_xml import SemgrepUseDefusedXml

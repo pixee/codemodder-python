@@ -1,7 +1,9 @@
 import json
 
 from codemodder.codemods.test import BaseSASTCodemodTest
-from core_codemods.semgrep.semgrep_sql_parametrization import SemgrepSQLParameterization
+from core_codemods.semgrep.semgrep_sql_parameterization import (
+    SemgrepSQLParameterization,
+)
 
 
 class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
