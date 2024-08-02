@@ -44,12 +44,12 @@ class NanInjectionTransformer(LibcstResultTransformer):
         original_node: cst.SimpleStatementLine,
         updated_node: cst.SimpleStatementLine,
     ):
-        if not (var_name := self._get_var_in_call(node)):
+        if not (target_node := self._get_target_in_call(node)):
             return original_node
 
         code = dedent(
             f"""\
-        if {var_name}.lower() == "nan":
+        if {self.code(target_node).strip()}.lower() == "nan":
             raise ValueError
         else:
             {self.code(original_node).strip()}
@@ -59,14 +59,21 @@ class NanInjectionTransformer(LibcstResultTransformer):
         new_statement = cst.parse_statement(code)
         return new_statement.with_changes(leading_lines=updated_node.leading_lines)
 
-    def _get_var_in_call(self, node: cst):
-        match node.args[0].value:
+    def _get_target_in_call(self, node: cst.Call) -> cst.CSTNode:
+        match (wrapped_node := node.args[0].value):
             case cst.Name():
                 # float(var)
-                return node.args[0].value.value
-            case cst.BinaryOperation():
-                # bool(float(var)), complex(float(var)), etc
-                return node.args[0].value.left.args[0].value.value
+                return wrapped_node
+
+            case cst.Call(
+                func=cst.Name("float") | cst.Name("bool") | cst.Name("complex")
+            ):
+                # bool(float(var)), complex(float(var)), bool(float(var)), etc
+                return self._get_target_in_call(wrapped_node)
+            case cst.Call():
+                return wrapped_node
+            # case cst.BinaryOperation():#
+            #     return node.args[0].value.left.args[0].value.value
 
     def _report_new_lines(self, original_node: cst.SimpleStatementLine):
         self.report_change(original_node)
