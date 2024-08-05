@@ -8,7 +8,6 @@ from typing import DefaultDict, Sequence
 
 from codemodder import __version__, providers, registry
 from codemodder.cli import parse_args
-from codemodder.code_directory import match_files
 from codemodder.codemods.api import BaseCodemod
 from codemodder.codemods.semgrep import SemgrepRuleDetector
 from codemodder.codetf import CodeTF
@@ -72,12 +71,10 @@ def log_report(context, argv, elapsed_ms, files_to_analyze):
 def apply_codemods(
     context: CodemodExecutionContext,
     codemods_to_run: Sequence[BaseCodemod],
-    semgrep_results: ResultSet,
-    files_to_analyze: list[Path],
 ):
     log_section("scanning")
 
-    if not files_to_analyze:
+    if not context.files_to_analyze:
         logger.info("no files to scan")
         return
 
@@ -85,25 +82,11 @@ def apply_codemods(
         logger.info("no codemods to run")
         return
 
-    semgrep_finding_ids = semgrep_results.all_rule_ids()
-
     # run codemods one at a time making sure to respect the given sequence
     for codemod in codemods_to_run:
         # NOTE: this may be used as a progress indicator by upstream tools
         logger.info("running codemod %s", codemod.id)
-
-        if isinstance(codemod.detector, SemgrepRuleDetector):
-            if codemod._internal_name not in semgrep_finding_ids:
-                logger.debug(
-                    "no results from semgrep for %s, skipping analysis",
-                    codemod.id,
-                )
-                continue
-
-            files_to_analyze = semgrep_results.files_for_rule(codemod._internal_name)
-
-        # Non-semgrep codemods ignore the semgrep results
-        codemod.apply(context, files_to_analyze)
+        codemod.apply(context)
         record_dependency_update(context.process_dependencies(codemod.id))
         context.log_changes(codemod.id)
 
@@ -197,37 +180,24 @@ def run(original_args) -> int:
         sast_only=argv.sonar_issues_json or argv.sarif,
     )
 
-    included_paths = argv.path_include or codemod_registry.default_include_paths
-
     log_section("setup")
     log_list(logging.INFO, "running", codemods_to_run, predicate=lambda c: c.id)
-    log_list(logging.INFO, "including paths", included_paths)
+    log_list(logging.INFO, "including paths", context.included_paths)
     log_list(logging.INFO, "excluding paths", argv.path_exclude)
 
-    files_to_analyze: list[Path] = [
-        path
-        for path in match_files(
-            context.directory,
-            argv.path_exclude,
-            included_paths,
-        )
-        if path.is_file() and not path.is_symlink()
-    ]
+    log_list(
+        logging.DEBUG, "matched files", (str(path) for path in context.files_to_analyze)
+    )
 
-    full_names = [str(path) for path in files_to_analyze]
-    log_list(logging.DEBUG, "matched files", full_names)
-
-    semgrep_results: ResultSet = find_semgrep_results(
+    context.semgrep_prefilter_results = find_semgrep_results(
         context,
         codemods_to_run,
-        files_to_analyze,
+        context.find_and_fix_paths,
     )
 
     apply_codemods(
         context,
         codemods_to_run,
-        semgrep_results,
-        files_to_analyze,
     )
 
     elapsed = datetime.datetime.now() - start
@@ -243,7 +213,10 @@ def run(original_args) -> int:
         codetf.write_report(argv.output)
 
     log_report(
-        context, argv, elapsed_ms, [] if not codemods_to_run else files_to_analyze
+        context,
+        argv,
+        elapsed_ms,
+        [] if not codemods_to_run else context.files_to_analyze,
     )
     return 0
 

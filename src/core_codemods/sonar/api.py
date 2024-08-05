@@ -47,6 +47,7 @@ class SonarCodemod(SASTCodemod):
             ),
             transformer=transformer if transformer else other.transformer,
             detector=SonarDetector(),
+            default_extensions=other.default_extensions,
             requested_rules=[rule_id],
         )
 

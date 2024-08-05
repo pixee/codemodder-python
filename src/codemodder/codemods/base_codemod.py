@@ -13,6 +13,7 @@ from pathlib import Path
 from codemodder.code_directory import file_line_patterns
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
+from codemodder.codemods.semgrep import SemgrepRuleDetector
 from codemodder.codetf import DetectionTool, Reference
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
@@ -195,6 +196,18 @@ class BaseCodemod(metaclass=ABCMeta):
             )
             return
 
+        if isinstance(self.detector, SemgrepRuleDetector):
+            if (
+                context.semgrep_prefilter_results
+                and self._internal_name
+                not in context.semgrep_prefilter_results.all_rule_ids()
+            ):
+                logger.debug(
+                    "no results from semgrep for %s, skipping analysis",
+                    self.id,
+                )
+                return
+
         results: ResultSet | None = (
             # It seems like semgrep doesn't like our fully-specified id format so pass in short name instead.
             self.detector.apply(self._internal_name, context, files_to_analyze)
@@ -271,8 +284,6 @@ class BaseCodemod(metaclass=ABCMeta):
             logger.debug("no findings for %s, short-circuiting analysis", filename)
             return file_context
 
-        # TODO: for SAST tools we should preemtively filter out files that are not part of the result set
-
         if change_set := self.transformer.apply(
             context, file_context, findings_for_rule
         ):
@@ -295,12 +306,15 @@ class FindAndFixCodemod(BaseCodemod, metaclass=ABCMeta):
         all_files: list[Path],
         results: ResultSet | None,
     ) -> list[Path]:
-        del context
         del results
         return (
-            [path for path in all_files if path.suffix in self.default_extensions]
+            [
+                path
+                for path in context.find_and_fix_paths or all_files
+                if path.suffix in self.default_extensions
+            ]
             if self.default_extensions
-            else all_files
+            else context.find_and_fix_paths
         )
 
 
@@ -343,11 +357,14 @@ class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
         all_files: list[Path],
         results: ResultSet | None,
     ) -> list[Path]:
-        # only return files that have findings
-        return (
+        """
+        Get the list of files to analyze based on which files have findings associated with the requested rules
+        """
+        del all_files
+        return context.filter_paths(
             [
                 path
-                for path in all_files
+                for path in context.files_to_analyze
                 if path.suffix in (self.default_extensions or [])
                 and any(
                     results.results_for_rule_and_file(context, rule_id, path)

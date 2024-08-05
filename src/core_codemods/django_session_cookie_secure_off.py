@@ -59,7 +59,7 @@ class DjangoSessionCookieSecureOff(SimpleCodemod):
 
         self.add_change(original_node, self.change_description, start=False)
         final_line = cst.parse_statement("SESSION_COOKIE_SECURE = True")
-        new_body = updated_node.body + (final_line,)
+        new_body = tuple(updated_node.body) + (final_line,)
         return updated_node.with_changes(body=new_body)
 
     def leave_Assign(

@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import itertools
 import logging
+from functools import cached_property
 from pathlib import Path
 from textwrap import indent
 from typing import TYPE_CHECKING, Iterator, List
 
+from codemodder.code_directory import files_for_directory, match_files
 from codemodder.codetf import ChangeSet
 from codemodder.codetf import Result as CodeTFResult
 from codemodder.codetf import UnfixedFinding
@@ -21,6 +23,7 @@ from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.providers import ProviderRegistry
 from codemodder.registry import CodemodRegistry
+from codemodder.result import ResultSet
 from codemodder.utils.timer import Timer
 
 if TYPE_CHECKING:
@@ -45,6 +48,7 @@ class CodemodExecutionContext:
     path_exclude: list[str]
     max_workers: int = 1
     tool_result_files_map: dict[str, list[str]]
+    semgrep_prefilter_results: ResultSet | None = None
     llm_client: OpenAI | None = None
 
     def __init__(
@@ -76,6 +80,7 @@ class CodemodExecutionContext:
         self.path_exclude = path_exclude
         self.max_workers = max_workers
         self.tool_result_files_map = tool_result_files_map or {}
+        self.semgrep_prefilter_results = None
         self.llm_client = setup_llm_client()
 
     def add_changesets(self, codemod_name: str, change_sets: List[ChangeSet]):
@@ -199,3 +204,36 @@ class CodemodExecutionContext:
             for change in changes:
                 logger.info("  - %s", change.path)
                 logger.debug("    diff:\n%s", indent(change.diff, " " * 6))
+
+    @property
+    def included_paths(self) -> list[str]:
+        return self.path_include or self.registry.default_include_paths
+
+    @cached_property
+    def files_to_analyze(self) -> list[Path]:
+        return files_for_directory(self.directory)
+
+    @cached_property
+    def find_and_fix_paths(self) -> list[Path]:
+        return match_files(
+            self.directory,
+            self.files_to_analyze,
+            # None is effectively a sentinel value to indicate that the default include/exclude paths should be used
+            self.path_exclude or None,
+            self.path_include or None,
+        )
+
+    def filter_paths(self, paths: list[Path]) -> list[Path]:
+        return match_files(
+            self.directory,
+            paths,
+            self.path_exclude,
+            self.included_paths,
+        )
+
+    def semgrep_results_for_rule(self, codemod_id: str) -> list[Path]:
+        return (
+            self.semgrep_prefilter_results.files_for_rule(codemod_id)
+            if self.semgrep_prefilter_results
+            else []
+        )

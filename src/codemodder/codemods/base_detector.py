@@ -11,5 +11,5 @@ class BaseDetector(metaclass=ABCMeta):
         self,
         codemod_id: str,
         context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
+        files_to_analyze: list[Path],  # TODO: should not be part of the interface
     ) -> ResultSet: ...

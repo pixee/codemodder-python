@@ -79,7 +79,7 @@ class BaseCodemodTest:
             registry=mock.MagicMock(),
             providers=load_providers(),
             repo_manager=mock.MagicMock(),
-            path_include=[f.name for f in files_to_check],
+            path_include=[f"*{f.name}" for f in files_to_check],
             path_exclude=path_exclude,
         )
 
@@ -197,7 +197,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
             registry=mock.MagicMock(),
             providers=load_providers(),
             repo_manager=mock.MagicMock(),
-            path_include=[f.name for f in files_to_check],
+            path_include=[f"*{f.name}" for f in files_to_check],
             path_exclude=path_exclude,
         )
 

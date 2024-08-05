@@ -48,6 +48,7 @@ class SemgrepRuleDetector(BaseDetector):
     ) -> ResultSet:
         yaml_files = self.get_yaml_files(codemod_id)
         with context.timer.measure("semgrep"):
+            files_to_analyze = context.semgrep_results_for_rule(codemod_id)
             return semgrep_run(context, yaml_files, files_to_analyze)
 
 
