@@ -169,7 +169,6 @@ class BaseCodemod(metaclass=ABCMeta):
     def get_files_to_analyze(
         self,
         context: CodemodExecutionContext,
-        all_paths: list[Path],
         results: ResultSet | None,
     ) -> list[Path]:
         """
@@ -184,7 +183,6 @@ class BaseCodemod(metaclass=ABCMeta):
     def _apply(
         self,
         context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
         rules: list[str],
     ) -> None:
         if self.provider and (
@@ -219,7 +217,7 @@ class BaseCodemod(metaclass=ABCMeta):
             logger.debug("No results for %s", self.id)
             return
 
-        files_to_analyze = self.get_files_to_analyze(context, files_to_analyze, results)
+        files_to_analyze = self.get_files_to_analyze(context, results)
 
         process_file = functools.partial(
             self._process_file, context=context, results=results, rules=rules
@@ -232,13 +230,9 @@ class BaseCodemod(metaclass=ABCMeta):
 
         context.process_results(self.id, contexts)
 
-    def apply(
-        self,
-        context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
-    ) -> None:
+    def apply(self, context: CodemodExecutionContext) -> None:
         """
-        Apply the codemod to the given list of files
+        Apply the codemod with the given codemod execution context
 
         This method is responsible for orchestrating the application of the codemod to a given list of files.
 
@@ -251,9 +245,8 @@ class BaseCodemod(metaclass=ABCMeta):
         Per-file processing can be parallelized based on the `max_workers` setting.
 
         :param context: The codemod execution context
-        :param files_to_analyze: The list of files to analyze
         """
-        self._apply(context, files_to_analyze, [self._internal_name])
+        self._apply(context, [self._internal_name])
 
     def _process_file(
         self,
@@ -303,14 +296,13 @@ class FindAndFixCodemod(BaseCodemod, metaclass=ABCMeta):
     def get_files_to_analyze(
         self,
         context: CodemodExecutionContext,
-        all_files: list[Path],
         results: ResultSet | None,
     ) -> list[Path]:
         del results
         return (
             [
                 path
-                for path in context.find_and_fix_paths or all_files
+                for path in context.find_and_fix_paths
                 if path.suffix in self.default_extensions
             ]
             if self.default_extensions
@@ -344,23 +336,17 @@ class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
         if requested_rules:
             self.requested_rules.extend(requested_rules)
 
-    def apply(
-        self,
-        context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
-    ) -> None:
-        self._apply(context, files_to_analyze, self.requested_rules)
+    def apply(self, context: CodemodExecutionContext) -> None:
+        self._apply(context, self.requested_rules)
 
     def get_files_to_analyze(
         self,
         context: CodemodExecutionContext,
-        all_files: list[Path],
         results: ResultSet | None,
     ) -> list[Path]:
         """
         Get the list of files to analyze based on which files have findings associated with the requested rules
         """
-        del all_files
         return context.filter_paths(
             [
                 path

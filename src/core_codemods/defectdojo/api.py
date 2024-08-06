@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from functools import cache
-from pathlib import Path
 from typing import cast
 
 from typing_extensions import override
@@ -77,11 +76,9 @@ class DefectDojoCodemod(SASTCodemod):
     def apply(
         self,
         context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
     ) -> None:
         self._apply(
             context,
-            files_to_analyze,
             # We know this has a tool because we created it with `from_core_codemod`
             cast(ToolMetadata, self._metadata.tool).rule_ids,
         )
