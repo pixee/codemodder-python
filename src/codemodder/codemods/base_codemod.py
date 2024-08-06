@@ -210,7 +210,7 @@ class BaseCodemod(metaclass=ABCMeta):
 
         results: ResultSet | None = (
             # It seems like semgrep doesn't like our fully-specified id format so pass in short name instead.
-            self.detector.apply(self._internal_name, context, files_to_analyze)
+            self.detector.apply(self._internal_name, context)
             if self.detector
             else None
         )

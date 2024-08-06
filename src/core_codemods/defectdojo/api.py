@@ -20,10 +20,8 @@ class DefectDojoDetector(BaseDetector):
         self,
         codemod_id: str,
         context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
     ) -> ResultSet:
         del codemod_id
-        del files_to_analyze
         result_files = tuple(context.tool_result_files_map.get("defectdojo", ()))
         return _process_results(result_files)
 
