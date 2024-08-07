@@ -298,6 +298,12 @@ class FindAndFixCodemod(BaseCodemod, metaclass=ABCMeta):
         context: CodemodExecutionContext,
         results: ResultSet | None,
     ) -> list[Path]:
+        """
+        Determine which files to analyze based on find-and-fix paths
+
+        Using `context.find_and_fix_paths` automatically accounts for any user-provided `path_include` and `path_exclude` settings
+        as well as defaults for find-and-fix codemods, so there's no need for additional filtering logic.
+        """
         del results
         return (
             [
@@ -346,6 +352,10 @@ class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
     ) -> list[Path]:
         """
         Get the list of files to analyze based on which files have findings associated with the requested rules
+
+        Using `context.files_to_analyze` includes all files in the directory. These paths are filtered by locations that are
+        associated with findings for the requested rules. Finally these paths are filtered according to user-provided `path_include`
+        and `path_exclude` settings using `context.filter_paths`.
         """
         return context.filter_paths(
             [

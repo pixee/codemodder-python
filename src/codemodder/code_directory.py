@@ -51,7 +51,10 @@ def filter_files(names: list[Path], patterns: Sequence[str], exclude: bool = Fal
     )
 
 
-def files_for_directory(parent_path: Path):
+def files_for_directory(parent_path: Path) -> list[Path]:
+    """
+    Return list of all (non-symlink) file paths within a directory, recursively.
+    """
     return [
         path
         for path in Path(parent_path).rglob("*")
