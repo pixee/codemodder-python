@@ -9,7 +9,7 @@ from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
 from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.codemods.utils import get_call_name
-from codemodder.codetf import Change, ChangeSet
+from codemodder.codetf import Change, ChangeSet, Finding
 from codemodder.context import CodemodExecutionContext
 from codemodder.dependency import Dependency
 from codemodder.diff import create_diff_from_tree
@@ -103,14 +103,8 @@ class LibcstResultTransformer(BaseTransformer):
     def add_change_from_position(
         self, position: CodeRange, description: str, start: bool = True
     ):
-        lineno = position.start.line if start else position.end.line
-        self.file_context.codemod_changes.append(
-            Change(
-                lineNumber=lineno,
-                description=description,
-                findings=self.file_context.get_findings_for_location(lineno),
-            )
-        )
+        line_number = position.start.line if start else position.end.line
+        self.report_change_for_line(line_number, description)
 
     def lineno_for_node(self, node):
         return self.node_position(node).start.line
@@ -120,11 +114,20 @@ class LibcstResultTransformer(BaseTransformer):
 
     def report_change(self, original_node, description: str | None = None):
         line_number = self.lineno_for_node(original_node)
+        self.report_change_for_line(line_number, description)
+
+    def report_change_for_line(
+        self,
+        line_number,
+        description: str | None = None,
+        findings: list[Finding] | None = None,
+    ):
         self.file_context.codemod_changes.append(
             Change(
                 lineNumber=line_number,
                 description=description or self.change_description,
-                findings=self.file_context.get_findings_for_location(line_number),
+                findings=findings
+                or self.file_context.get_findings_for_location(line_number),
             )
         )
 

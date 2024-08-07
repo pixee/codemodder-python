@@ -31,7 +31,6 @@ from codemodder.codemods.utils import (
     infer_expression_type,
 )
 from codemodder.codemods.utils_mixin import NameAndAncestorResolutionMixin
-from codemodder.codetf import Change
 from codemodder.utils.clean_code import (
     NormalizeFStrings,
     RemoveEmptyExpressionsFormatting,
@@ -249,15 +248,10 @@ class SQLQueryParameterizationTransformer(
                 result = tree.visit(ReplaceNodes(new_changed_nodes))
                 self.changed_nodes = {}
                 line_number = self.get_metadata(PositionProvider, call).start.line
-                self.file_context.codemod_changes.append(
-                    Change(
-                        lineNumber=line_number,
-                        description=SQLQueryParameterizationTransformer.change_description,
-                        findings=self.file_context.get_findings_for_location(
-                            line_number
-                        ),
-                    )
+                self.report_change_for_line(
+                    line_number, SQLQueryParameterizationTransformer.change_description
                 )
+
                 # Normalization and cleanup
                 result = CleanCode(self.context).transform_module(result)
 
