@@ -79,11 +79,11 @@ class BaseCodemodTest:
             registry=mock.MagicMock(),
             providers=load_providers(),
             repo_manager=mock.MagicMock(),
-            path_include=[f.name for f in files_to_check],
+            path_include=[f"*{f.name}" for f in files_to_check],
             path_exclude=path_exclude,
         )
 
-        self.codemod.apply(self.execution_context, files_to_check)
+        self.codemod.apply(self.execution_context)
         changes = self.execution_context.get_changesets(self.codemod.id)
 
         self.changeset = changes
@@ -197,11 +197,11 @@ class BaseSASTCodemodTest(BaseCodemodTest):
             registry=mock.MagicMock(),
             providers=load_providers(),
             repo_manager=mock.MagicMock(),
-            path_include=[f.name for f in files_to_check],
+            path_include=[f"*{f.name}" for f in files_to_check],
             path_exclude=path_exclude,
         )
 
-        self.codemod.apply(self.execution_context, files_to_check)
+        self.codemod.apply(self.execution_context)
         changes = self.execution_context.get_changesets(self.codemod.id)
 
         if input_code == expected:

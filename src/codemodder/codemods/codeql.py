@@ -1,5 +1,4 @@
 from functools import cache
-from pathlib import Path
 
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codeql import CodeQLResultSet
@@ -12,10 +11,8 @@ class CodeQLSarifFileDetector(BaseDetector):
         self,
         codemod_id: str,
         context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
     ) -> ResultSet:
         del codemod_id
-        del files_to_analyze
         return process_codeql_findings(
             tuple(context.tool_result_files_map.get("codeql", ()))
         )  # Convert list to tuple for cache hashability

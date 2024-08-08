@@ -13,6 +13,7 @@ from pathlib import Path
 from codemodder.code_directory import file_line_patterns
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
+from codemodder.codemods.semgrep import SemgrepRuleDetector
 from codemodder.codetf import DetectionTool, Reference
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
@@ -164,10 +165,24 @@ class BaseCodemod(metaclass=ABCMeta):
         # TODO: eventually we need to be able to use fully specified IDs here
         return self.name
 
+    @abstractmethod
+    def get_files_to_analyze(
+        self,
+        context: CodemodExecutionContext,
+        results: ResultSet | None,
+    ) -> list[Path]:
+        """
+        Get the list of files to analyze
+
+        This method is responsible for determining the list of files that should be analyzed by the codemod.
+
+        This method should return a list of `Path` objects representing the files to analyze.
+        """
+        ...
+
     def _apply(
         self,
         context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
         rules: list[str],
     ) -> None:
         if self.provider and (
@@ -179,9 +194,21 @@ class BaseCodemod(metaclass=ABCMeta):
             )
             return
 
-        results = (
+        if isinstance(self.detector, SemgrepRuleDetector):
+            if (
+                context.semgrep_prefilter_results
+                and self._internal_name
+                not in context.semgrep_prefilter_results.all_rule_ids()
+            ):
+                logger.debug(
+                    "no results from semgrep for %s, skipping analysis",
+                    self.id,
+                )
+                return
+
+        results: ResultSet | None = (
             # It seems like semgrep doesn't like our fully-specified id format so pass in short name instead.
-            self.detector.apply(self._internal_name, context, files_to_analyze)
+            self.detector.apply(self._internal_name, context)
             if self.detector
             else None
         )
@@ -190,15 +217,7 @@ class BaseCodemod(metaclass=ABCMeta):
             logger.debug("No results for %s", self.id)
             return
 
-        files_to_analyze = (
-            [
-                path
-                for path in files_to_analyze
-                if path.suffix in self.default_extensions
-            ]
-            if self.default_extensions
-            else files_to_analyze
-        )
+        files_to_analyze = self.get_files_to_analyze(context, results)
 
         process_file = functools.partial(
             self._process_file, context=context, results=results, rules=rules
@@ -211,13 +230,9 @@ class BaseCodemod(metaclass=ABCMeta):
 
         context.process_results(self.id, contexts)
 
-    def apply(
-        self,
-        context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
-    ) -> None:
+    def apply(self, context: CodemodExecutionContext) -> None:
         """
-        Apply the codemod to the given list of files
+        Apply the codemod with the given codemod execution context
 
         This method is responsible for orchestrating the application of the codemod to a given list of files.
 
@@ -230,9 +245,8 @@ class BaseCodemod(metaclass=ABCMeta):
         Per-file processing can be parallelized based on the `max_workers` setting.
 
         :param context: The codemod execution context
-        :param files_to_analyze: The list of files to analyze
         """
-        self._apply(context, files_to_analyze, [self._internal_name])
+        self._apply(context, [self._internal_name])
 
     def _process_file(
         self,
@@ -263,8 +277,6 @@ class BaseCodemod(metaclass=ABCMeta):
             logger.debug("no findings for %s, short-circuiting analysis", filename)
             return file_context
 
-        # TODO: for SAST tools we should preemtively filter out files that are not part of the result set
-
         if change_set := self.transformer.apply(
             context, file_context, findings_for_rule
         ):
@@ -274,3 +286,87 @@ class BaseCodemod(metaclass=ABCMeta):
 
     def __repr__(self) -> str:
         return f"{self.id}"
+
+
+class FindAndFixCodemod(BaseCodemod, metaclass=ABCMeta):
+    """
+    Base class for codemods that find and fix issues in code
+    """
+
+    def get_files_to_analyze(
+        self,
+        context: CodemodExecutionContext,
+        results: ResultSet | None,
+    ) -> list[Path]:
+        """
+        Determine which files to analyze based on find-and-fix paths
+
+        Using `context.find_and_fix_paths` automatically accounts for any user-provided `path_include` and `path_exclude` settings
+        as well as defaults for find-and-fix codemods, so there's no need for additional filtering logic.
+        """
+        del results
+        return (
+            [
+                path
+                for path in context.find_and_fix_paths
+                if path.suffix in self.default_extensions
+            ]
+            if self.default_extensions
+            else context.find_and_fix_paths
+        )
+
+
+class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
+    """
+    Base class for codemods that apply remediations to code
+    """
+
+    requested_rules: list[str]
+
+    def __init__(
+        self,
+        *,
+        metadata: Metadata,
+        detector: BaseDetector | None = None,
+        transformer: BaseTransformerPipeline,
+        default_extensions: list[str] | None = None,
+        requested_rules: list[str] | None = None,
+    ):
+        super().__init__(
+            metadata=metadata,
+            detector=detector,
+            transformer=transformer,
+            default_extensions=default_extensions,
+        )
+        self.requested_rules = []
+        if requested_rules:
+            self.requested_rules.extend(requested_rules)
+
+    def apply(self, context: CodemodExecutionContext) -> None:
+        self._apply(context, self.requested_rules)
+
+    def get_files_to_analyze(
+        self,
+        context: CodemodExecutionContext,
+        results: ResultSet | None,
+    ) -> list[Path]:
+        """
+        Get the list of files to analyze based on which files have findings associated with the requested rules
+
+        Using `context.files_to_analyze` includes all files in the directory. These paths are filtered by locations that are
+        associated with findings for the requested rules. Finally these paths are filtered according to user-provided `path_include`
+        and `path_exclude` settings using `context.filter_paths`.
+        """
+        return context.filter_paths(
+            [
+                path
+                for path in context.files_to_analyze
+                if path.suffix in (self.default_extensions or [])
+                and any(
+                    results.results_for_rule_and_file(context, rule_id, path)
+                    for rule_id in self.requested_rules
+                )
+            ]
+            if results
+            else []
+        )

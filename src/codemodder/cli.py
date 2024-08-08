@@ -3,7 +3,6 @@ import json
 import sys
 
 from codemodder import __version__
-from codemodder.code_directory import DEFAULT_EXCLUDED_PATHS
 from codemodder.logging import OutputFormat, logger
 from codemodder.registry import CodemodRegistry
 
@@ -143,7 +142,7 @@ def parse_args(argv, codemod_registry: CodemodRegistry):
     parser.add_argument(
         "--path-exclude",
         action=CsvListAction,
-        default=DEFAULT_EXCLUDED_PATHS,
+        default=[],
         help="Comma-separated set of UNIX glob patterns to exclude",
     )
     parser.add_argument(

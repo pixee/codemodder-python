@@ -1,7 +1,7 @@
 import logging
 import sys
 from enum import Enum
-from typing import Optional
+from typing import Generator, Optional
 
 from pythonjsonlogger import jsonlogger
 
@@ -46,10 +46,13 @@ def log_section(section_name: str):
     logger.info("\n[%s]", section_name)
 
 
-def log_list(level: int, header: str, items: list, predicate=None):
+def log_list(level: int, header: str, items: list | Generator, predicate=None):
     """
     Log a list of items.
     """
+    if logger.getEffectiveLevel() > level:
+        return
+
     logger.log(level, "%s:", header)
     for item in items:
         logger.log(level, "  - %s", predicate(item) if predicate else item)

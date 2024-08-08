@@ -31,7 +31,7 @@ def test_semgrep_sarif_codemode_detector(mocker):
     context.tool_result_files_map = {
         "semgrep": [SAMPLE_DATA_PATH / "pygoat.semgrep.sarif.json"]
     }
-    results = detector.apply(codemod_id="foo", context=context, files_to_analyze=[])
+    results = detector.apply(codemod_id="foo", context=context)
     assert isinstance(results, SemgrepResultSet)
     assert len(results) == 25
     assert (

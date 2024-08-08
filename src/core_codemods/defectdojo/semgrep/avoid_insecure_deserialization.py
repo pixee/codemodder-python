@@ -40,6 +40,7 @@ class AvoidInsecureDeserializationTransformer(
         return updated_node
 
 
+RULE_ID = "python.django.security.audit.avoid-insecure-deserialization.avoid-insecure-deserialization"
 AvoidInsecureDeserialization = DefectDojoCodemod(
     metadata=Metadata(
         name="avoid-insecure-deserialization",
@@ -49,7 +50,7 @@ AvoidInsecureDeserialization = DefectDojoCodemod(
             name="DefectDojo",
             rules=[
                 ToolRule(
-                    id="python.django.security.audit.avoid-insecure-deserialization.avoid-insecure-deserialization",
+                    id=RULE_ID,
                     name="avoid-insecure-deserialization",
                     url="https://semgrep.dev/playground/r/python.django.security.audit.avoid-insecure-deserialization.avoid-insecure-deserialization",
                 )
@@ -61,4 +62,5 @@ AvoidInsecureDeserialization = DefectDojoCodemod(
         AvoidInsecureDeserializationTransformer, HardenPickleLoad
     ),
     detector=DefectDojoDetector(),
+    requested_rules=[RULE_ID],
 )

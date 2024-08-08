@@ -44,10 +44,10 @@ class SemgrepRuleDetector(BaseDetector):
         self,
         codemod_id: str,
         context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
     ) -> ResultSet:
         yaml_files = self.get_yaml_files(codemod_id)
         with context.timer.measure("semgrep"):
+            files_to_analyze = context.semgrep_results_for_rule(codemod_id)
             return semgrep_run(context, yaml_files, files_to_analyze)
 
 
@@ -56,10 +56,8 @@ class SemgrepSarifFileDetector(BaseDetector):
         self,
         codemod_id: str,
         context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
     ) -> ResultSet:
         del codemod_id
-        del files_to_analyze
         return process_semgrep_findings(
             tuple(context.tool_result_files_map.get("semgrep", ()))
         )  # Convert list to tuple for cache hashability

@@ -39,54 +39,63 @@ def file_line_patterns(file_path: str | Path, patterns: Sequence[str]):
     ]
 
 
-def filter_files(names: Sequence[str], patterns: Sequence[str], exclude: bool = False):
+def filter_files(names: list[Path], patterns: Sequence[str], exclude: bool = False):
     patterns = (
         [x.split(":")[0] for x in (patterns or [])]
         if not exclude
         # An excluded line should not cause the entire file to be excluded
         else [x for x in (patterns or []) if ":" not in x]
     )
-    return itertools.chain(*[fnmatch.filter(names, pattern) for pattern in patterns])
+    return itertools.chain(
+        *[fnmatch.filter((str(x) for x in names), pattern) for pattern in patterns]
+    )
+
+
+def files_for_directory(parent_path: Path) -> list[Path]:
+    """
+    Return list of all (non-symlink) file paths within a directory, recursively.
+    """
+    return [
+        path
+        for path in Path(parent_path).rglob("*")
+        if Path(path).is_file() and not Path(path).is_symlink()
+    ]
 
 
 def match_files(
-    parent_path: str | Path,
+    parent_path: Path,
+    input_paths: list[Path],
     exclude_paths: Optional[Sequence[str]] = None,
     include_paths: Optional[Sequence[str]] = None,
-):
+) -> list[Path]:
     """
     Find pattern-matching files starting at the parent_path, recursively.
 
     If a file matches any exclude pattern, it is not matched. If any include
-    patterns are passed in, a file must match `*.py` and at least one include patterns.
+    patterns are passed in, a file must match at least one include patterns.
 
     :param parent_path: str name for starting directory
-    :param exclude_paths: list of UNIX glob patterns to exclude
-    :param include_paths: list of UNIX glob patterns to exclude
+    :param exclude_paths: list of UNIX glob patterns to exclude, uses DEFAULT_EXCLUDED_PATHS if None
+    :param include_paths: list of UNIX glob patterns to exclude, uses DEFAULT_INCLUDED_PATHS if None
 
     :return: list of <pathlib.PosixPath> files found within (including recursively) the parent directory
     that match the criteria of both exclude and include patterns.
     """
-    all_files = [
-        str(Path(path).relative_to(parent_path))
-        for path in Path(parent_path).rglob("*")
-    ]
+    paths = [p.relative_to(parent_path) for p in input_paths]
     included_files = set(
         filter_files(
-            all_files,
+            paths,
             include_paths if include_paths is not None else DEFAULT_INCLUDED_PATHS,
         )
     )
     excluded_files = set(
         filter_files(
-            all_files,
+            paths,
             exclude_paths if exclude_paths is not None else DEFAULT_EXCLUDED_PATHS,
             exclude=True,
         )
     )
 
     return [
-        path
-        for p in sorted(list(included_files - excluded_files))
-        if (path := Path(parent_path).joinpath(p)).is_file()
+        parent_path.joinpath(p) for p in sorted(list(included_files - excluded_files))
     ]

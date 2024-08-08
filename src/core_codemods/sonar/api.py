@@ -1,5 +1,4 @@
 from functools import cache
-from pathlib import Path
 
 from codemodder.codemods.base_codemod import Metadata, Reference, ToolMetadata, ToolRule
 from codemodder.codemods.base_detector import BaseDetector
@@ -47,6 +46,7 @@ class SonarCodemod(SASTCodemod):
             ),
             transformer=transformer if transformer else other.transformer,
             detector=SonarDetector(),
+            default_extensions=other.default_extensions,
             requested_rules=[rule_id],
         )
 
@@ -56,10 +56,8 @@ class SonarDetector(BaseDetector):
         self,
         codemod_id: str,
         context: CodemodExecutionContext,
-        files_to_analyze: list[Path],
     ) -> ResultSet:
         del codemod_id
-        del files_to_analyze
         sonar_findings = process_sonar_findings(
             tuple(
                 context.tool_result_files_map.get("sonar", ())

@@ -34,6 +34,7 @@ class DjangoSecureSetCookieTransformer(
         return updated_node
 
 
+RULE_ID = "python.django.security.audit.secure-cookies.django-secure-set-cookie"
 DjangoSecureSetCookie = DefectDojoCodemod(
     metadata=Metadata(
         name="django-secure-set-cookie",
@@ -43,7 +44,7 @@ DjangoSecureSetCookie = DefectDojoCodemod(
             name="DefectDojo",
             rules=[
                 ToolRule(
-                    id="python.django.security.audit.secure-cookies.django-secure-set-cookie",
+                    id=RULE_ID,
                     name="django-secure-set-cookie",
                     url="https://semgrep.dev/playground/r/python.django.security.audit.secure-cookies.django-secure-set-cookie",
                 )
@@ -53,4 +54,5 @@ DjangoSecureSetCookie = DefectDojoCodemod(
     ),
     transformer=LibcstTransformerPipeline(DjangoSecureSetCookieTransformer),
     detector=DefectDojoDetector(),
+    requested_rules=[RULE_ID],
 )
