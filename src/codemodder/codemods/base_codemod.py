@@ -331,12 +331,14 @@ class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
         transformer: BaseTransformerPipeline,
         default_extensions: list[str] | None = None,
         requested_rules: list[str] | None = None,
+        provider: str | None = None,
     ):
         super().__init__(
             metadata=metadata,
             detector=detector,
             transformer=transformer,
             default_extensions=default_extensions,
+            provider=provider,
         )
         self.requested_rules = []
         if requested_rules:
