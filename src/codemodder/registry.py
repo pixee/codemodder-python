@@ -53,6 +53,11 @@ class CodemodRegistry:
     def add_codemod_collection(self, collection: CodemodCollection):
         for codemod in collection.codemods:
             wrapper = codemod() if isinstance(codemod, type) else codemod
+            if wrapper.id in self._codemods_by_id:
+                raise KeyError(
+                    f"Codemod with id {wrapper.id} is already registered. Consider changing the codemod name or origin."
+                )
+
             self._codemods_by_id[wrapper.id] = wrapper
             self._default_include_paths.update(
                 chain(
