@@ -34,6 +34,7 @@ from .harden_pickle_load import HardenPickleLoad
 from .harden_pyyaml import HardenPyyaml
 from .harden_ruamel import HardenRuamel
 from .https_connection import HTTPSConnection
+from .invert_boolean_check import InvertedBooleanCheck
 from .jwt_decode_verify import JwtDecodeVerify
 from .lazy_logging import LazyLogging
 from .limit_readline import LimitReadline
@@ -167,6 +168,7 @@ registry = CodemodCollection(
         FixMathIsClose,
         BreakOrContinueOutOfLoop,
         DisableGraphQLIntrospection,
+        InvertedBooleanCheck,
     ],
 )
 
