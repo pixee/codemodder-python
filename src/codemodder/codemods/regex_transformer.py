@@ -77,12 +77,8 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
 
 
 class SastRegexTransformerPipeline(RegexTransformerPipeline):
-    def line_matches_result(self, lineno, results) -> bool:
-        for result in results or []:
-            for location in result.locations:
-                if location.start.line == lineno:
-                    return True
-        return False
+    def line_matches_result(self, lineno: int, result_linenums: list[int]) -> bool:
+        return lineno in result_linenums
 
     def report_unfixed(self, file_context: FileContext, line_number: int, reason: str):
         findings = file_context.get_findings_for_location(line_number)
@@ -92,10 +88,13 @@ class SastRegexTransformerPipeline(RegexTransformerPipeline):
         changes = []
         updated_lines = []
         if results is not None and not results:
-            changes, updated_lines
+            return changes, updated_lines
 
+        result_linenums = [
+            location.start.line for result in results for location in result.locations
+        ]
         for lineno, line in enumerate(original_lines):
-            if self.line_matches_result(one_idx_lineno := lineno + 1, results):
+            if self.line_matches_result(one_idx_lineno := lineno + 1, result_linenums):
                 changed_line = self._apply_regex(line)
                 updated_lines.append(changed_line)
                 if line == changed_line:
