@@ -80,6 +80,7 @@ from .sonar.sonar_fix_float_equality import SonarFixFloatEquality
 from .sonar.sonar_fix_math_isclose import SonarFixMathIsClose
 from .sonar.sonar_fix_missing_self_or_cls import SonarFixMissingSelfOrCls
 from .sonar.sonar_flask_json_response_type import SonarFlaskJsonResponseType
+from .sonar.sonar_invert_boolean_check import SonarInvertedBooleanCheck
 from .sonar.sonar_jwt_decode_verify import SonarJwtDecodeVerify
 from .sonar.sonar_literal_or_new_object_identity import SonarLiteralOrNewObjectIdentity
 from .sonar.sonar_numpy_nan_equality import SonarNumpyNanEquality
@@ -195,6 +196,7 @@ sonar_registry = CodemodCollection(
         SonarDjangoModelWithoutDunderStr,
         SonarBreakOrContinueOutOfLoop,
         SonarDisableGraphQLIntrospection,
+        SonarInvertedBooleanCheck,
     ],
 )
 
