@@ -13,68 +13,63 @@ class InvertedBooleanCheckTransformer(LibcstResultTransformer):
     def leave_UnaryOperation(
         self, original_node: cst.UnaryOperation, updated_node: cst.UnaryOperation
     ) -> cst.BaseExpression:
-        # Todo: add filter logic
+        if not self.node_is_selected(original_node):
+            return updated_node
 
         if isinstance(updated_node.operator, cst.Not) and isinstance(
-            updated_node.expression, cst.Comparison
+            (comparison := updated_node.expression), cst.Comparison
         ):
-            comparison = updated_node.expression
-
-            if len(comparison.comparisons) == 1:
-                comp_op = comparison.comparisons[0].operator
-                # Handle 'not status is True' -> 'not status'
-                if (
-                    isinstance(comp_op, cst.Is)
-                    and comparison.comparisons[0].comparator.value == "True"
-                ):
-                    self.report_change(original_node)
-                    return cst.UnaryOperation(
-                        operator=cst.Not(), expression=comparison.left
-                    )
-
-                # Handle 'not status is False' -> 'status'
-                if (
-                    isinstance(comp_op, cst.Is)
-                    and comparison.comparisons[0].comparator.value == "False"
-                ):
-                    self.report_change(original_node)
-                    return comparison.left
-
-            # Invert other comparison operators
-            inverted_comparisons = []
-            for comparison_op in comparison.comparisons:
-                if isinstance(comparison_op.operator, cst.Equal):
-                    inverted_comparisons.append(
-                        comparison_op.with_changes(operator=cst.NotEqual())
-                    )
-                elif isinstance(comparison_op.operator, cst.NotEqual):
-                    inverted_comparisons.append(
-                        comparison_op.with_changes(operator=cst.Equal())
-                    )
-                elif isinstance(comparison_op.operator, cst.LessThan):
-                    inverted_comparisons.append(
-                        comparison_op.with_changes(operator=cst.GreaterThanEqual())
-                    )
-                elif isinstance(comparison_op.operator, cst.GreaterThan):
-                    inverted_comparisons.append(
-                        comparison_op.with_changes(operator=cst.LessThanEqual())
-                    )
-                elif isinstance(comparison_op.operator, cst.LessThanEqual):
-                    inverted_comparisons.append(
-                        comparison_op.with_changes(operator=cst.GreaterThan())
-                    )
-                elif isinstance(comparison_op.operator, cst.GreaterThanEqual):
-                    inverted_comparisons.append(
-                        comparison_op.with_changes(operator=cst.LessThan())
-                    )
-                else:
-                    inverted_comparisons.append(comparison_op)
-            self.report_change(original_node)
-            return cst.Comparison(
-                left=comparison.left, comparisons=inverted_comparisons
-            )
-
+            return self.report_new_comparison(original_node, comparison)
         return updated_node
+
+    def report_new_comparison(
+        self, original_node: cst.UnaryOperation, comparison: cst.Comparison
+    ) -> cst.BaseExpression:
+        if len(comparison.comparisons) == 1 and isinstance(
+            comparison.comparisons[0].operator, cst.Is
+        ):
+            # Handle 'not status is True' -> 'not status'
+            if comparison.comparisons[0].comparator.value == "True":
+                self.report_change(original_node)
+                return cst.UnaryOperation(
+                    operator=cst.Not(), expression=comparison.left
+                )
+
+            # Handle 'not status is False' -> 'status'
+            if comparison.comparisons[0].comparator.value == "False":
+                self.report_change(original_node)
+                return comparison.left
+
+        inverted_comparisons = self._invert_comparisons(comparison)
+
+        self.report_change(original_node)
+        return cst.Comparison(left=comparison.left, comparisons=inverted_comparisons)
+
+    def _invert_comparisons(
+        self, comparison: cst.Comparison
+    ) -> list[cst.ComparisonTarget]:
+        inverted_comparisons = []
+        for comparison_op in comparison.comparisons:
+            match comparison_op.operator:
+                case cst.Equal():
+                    new_operator = cst.NotEqual()
+                case cst.NotEqual():
+                    new_operator = cst.Equal()
+                case cst.LessThan():
+                    new_operator = cst.GreaterThanEqual()
+                case cst.GreaterThan():
+                    new_operator = cst.LessThanEqual()
+                case cst.LessThanEqual():
+                    new_operator = cst.GreaterThan()
+                case cst.GreaterThanEqual():
+                    new_operator = cst.LessThan()
+                case _:
+                    new_operator = comparison_op
+
+            inverted_comparisons.append(
+                comparison_op.with_changes(operator=new_operator)
+            )
+        return inverted_comparisons
 
 
 InvertedBooleanCheck = CoreCodemod(
