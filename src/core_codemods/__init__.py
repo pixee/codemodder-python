@@ -93,6 +93,7 @@ from .sql_parameterization import SQLQueryParameterization
 from .str_concat_in_seq_literal import StrConcatInSeqLiteral
 from .subprocess_shell_false import SubprocessShellFalse
 from .tempfile_mktemp import TempfileMktemp
+from .timezone_aware_datetime import TimezoneAwareDatetime
 from .upgrade_sslcontext_minimum_version import UpgradeSSLContextMinimumVersion
 from .upgrade_sslcontext_tls import UpgradeSSLContextTLS
 from .url_sandbox import UrlSandbox
@@ -134,6 +135,7 @@ registry = CodemodCollection(
         UseDefusedXml,
         UseGenerator,
         UseSetLiteral,
+        TimezoneAwareDatetime,
         UseWalrusIf,
         WithThreadingLock,
         SQLQueryParameterization,
