@@ -1,3 +1,5 @@
+import pytest
+
 from codemodder.codemods.test import BaseCodemodTest
 from core_codemods.sql_parameterization import SQLQueryParameterization
 
@@ -180,6 +182,56 @@ class TestSQLQueryParameterization(BaseCodemodTest):
         connection = sqlite3.connect("my_db.db")
         cursor = connection.cursor()
         cursor.execute("SELECT * from USERS" "WHERE name =?", (name, ))
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
+
+    @pytest.mark.xfail(reason="https://github.com/pixee/codemodder-python/issues/441")
+    def test_donot_remove_variables(self, tmpdir):
+        input_code = """
+        def sql_lab(request):
+            if request.user.is_authenticated:
+                name=request.POST.get('name')
+                password=request.POST.get('pass')
+                if name:
+                    if login.objects.filter(user=name):
+                        sql_query = "SELECT * FROM introduction_login WHERE user='"+name+"'AND password='"+password+"'"
+                        print(sql_query)
+                        try:
+                            val=login.objects.execute(sql_query)
+                        except:
+                            pass
+                        if val:
+                            user=val[0].user
+                            return render(request, 'Lab/SQL/sql_lab.html',{"user1":user})
+        @csrf_exempt
+        def xxe_parse(request):
+            text='hi'
+            p=comments.objects.filter(id=1).update(comment=text)
+            return render(request, 'Lab/XXE/xxe_lab.html')
+
+        """
+        expected = """
+        def sql_lab(request):
+            if request.user.is_authenticated:
+                name=request.POST.get('name')
+                password=request.POST.get('pass')
+                if name:
+                    if login.objects.filter(user=name):
+                        sql_query = "SELECT * FROM introduction_login WHERE user=?"+"AND password=?"
+                        print(sql_query)
+                        try:
+                            val=login.objects.execute(sql_query, (name, password, ))
+                        except:
+                            pass
+                        if val:
+                            user=val[0].user
+                            return render(request, 'Lab/SQL/sql_lab.html',{"user1":user})
+        @csrf_exempt
+        def xxe_parse(request):
+            text='hi'
+            p=comments.objects.filter(id=1).update(comment=text)
+            return render(request, 'Lab/XXE/xxe_lab.html')
+
         """
         self.run_and_assert(tmpdir, input_code, expected)
 
