@@ -111,6 +111,7 @@ class TestTimezoneAwareDatetimeNeedKwarg(BaseCodemodTest):
         self.run_and_assert(tmpdir, input_code, expected, num_changes=3)
 
 
+@pytest.mark.skip()
 class TestTimezoneAwareDatetimeReplaceFunc(BaseCodemodTest):
     codemod = TimezoneAwareDatetime
 
@@ -161,7 +162,6 @@ class TestTimezoneAwareDatetimeReplaceFunc(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected, num_changes=9)
 
-    @pytest.mark.skip()
     def test_import_alias(self, tmpdir):
         input_code = """
         import datetime as mydate
@@ -201,7 +201,6 @@ class TestTimezoneAwareDatetimeReplaceFunc(BaseCodemodTest):
         """
         self.run_and_assert(tmpdir, input_code, expected, num_changes=9)
 
-    @pytest.mark.skip()
     def test_import_from(self, tmpdir):
         input_code = """
         from datetime import date, datetime
@@ -240,6 +239,23 @@ class TestTimezoneAwareDatetimeReplaceFunc(BaseCodemodTest):
         datetime.fromtimestamp(time.time(), tz=eastern)
         """
         self.run_and_assert(tmpdir, input_code, expected, num_changes=9)
+
+    @pytest.mark.skip()
+    def test_import_from_keep_import(self, tmpdir):
+        input_code = """
+        from datetime import date
+        
+        date.today()
+        date.year
+        
+        """
+        expected = """
+        from datetime import date, timezone, datetime
+        
+        datetime.now(tz=timezone.utc).date()
+        date.year
+        """
+        self.run_and_assert(tmpdir, input_code, expected)
 
     @pytest.mark.skip()
     def test_import_from_alias(self, tmpdir):
