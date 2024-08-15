@@ -1,8 +1,12 @@
 import logging
 
-from codemodder.codemods.regex_transformer import RegexTransformerPipeline
+from codemodder.codemods.regex_transformer import (
+    RegexTransformerPipeline,
+    SastRegexTransformerPipeline,
+)
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
+from codemodder.semgrep import SemgrepResult
 
 
 def test_transformer_no_change(mocker, caplog, tmp_path_factory):
@@ -105,4 +109,72 @@ def test_transformer_windows_carriage(mocker, tmp_path_factory):
     )
     assert changeset is not None
     assert code.read_bytes() == text.replace(b"world", b"Earth")
+    assert changeset.changes[0].lineNumber == 1
+
+
+def test_sast_transformer(mocker, tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp("foo")
+    code = base_dir / "code.py"
+    text = "# Something that will match pattern hello"
+    code.write_text(text)
+
+    file_context = FileContext(
+        base_dir,
+        code,
+    )
+    execution_context = CodemodExecutionContext(
+        directory=base_dir,
+        dry_run=False,
+        verbose=False,
+        registry=mocker.MagicMock(),
+        providers=mocker.MagicMock(),
+        repo_manager=mocker.MagicMock(),
+        path_include=[],
+        path_exclude=[],
+    )
+    pipeline = SastRegexTransformerPipeline(
+        pattern=r"hello", replacement="bye", change_description="testing"
+    )
+
+    data = {
+        "runs": [
+            {
+                "results": [
+                    {
+                        "fingerprints": {"matchBasedId/v1": "123"},
+                        "locations": [
+                            {
+                                "ruleId": "rule",
+                                "physicalLocation": {
+                                    "artifactLocation": {
+                                        "uri": "code.py",
+                                        "uriBaseId": "%SRCROOT%",
+                                    },
+                                    "region": {
+                                        "snippet": {"text": "snip"},
+                                        "endColumn": 1,
+                                        "endLine": 1,
+                                        "startColumn": 1,
+                                        "startLine": 1,
+                                    },
+                                },
+                            }
+                        ],
+                        "ruleId": "rule",
+                    }
+                ]
+            }
+        ]
+    }
+    sarif_run = data["runs"]
+    sarif_results = sarif_run[0]["results"]
+    results = [SemgrepResult.from_sarif(sarif_results[0], sarif_run)]
+
+    changeset = pipeline.apply(
+        context=execution_context,
+        file_context=file_context,
+        results=results,
+    )
+    assert changeset is not None
+    assert code.read_text() == text.replace("hello", "bye")
     assert changeset.changes[0].lineNumber == 1

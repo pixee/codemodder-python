@@ -23,26 +23,17 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
         self.replacement = replacement
         self.change_description = change_description
 
-    def apply(
-        self,
-        context: CodemodExecutionContext,
-        file_context: FileContext,
-        results: list[Result] | None,
-    ) -> ChangeSet | None:
+    def _apply_regex(self, line):
+        return re.sub(self.pattern, self.replacement, line)
+
+    def _apply(self, original_lines, file_context, results):
         del results
 
         changes = []
         updated_lines = []
 
-        original_lines = (
-            file_context.file_path.read_bytes()
-            .decode("utf-8")
-            .splitlines(keepends=True)
-        )
-
         for lineno, line in enumerate(original_lines):
-            # TODO: use results to filter out which lines to change
-            changed_line = re.sub(self.pattern, self.replacement, line)
+            changed_line = self._apply_regex(line)
             updated_lines.append(changed_line)
             if line != changed_line:
                 changes.append(
@@ -52,6 +43,22 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
                         findings=file_context.get_findings_for_location(lineno),
                     )
                 )
+        return changes, updated_lines
+
+    def apply(
+        self,
+        context: CodemodExecutionContext,
+        file_context: FileContext,
+        results: list[Result] | None,
+    ) -> ChangeSet | None:
+
+        original_lines = (
+            file_context.file_path.read_bytes()
+            .decode("utf-8")
+            .splitlines(keepends=True)
+        )
+
+        changes, updated_lines = self._apply(original_lines, file_context, results)
 
         if not changes:
             logger.debug("No changes produced for %s", file_context.file_path)
@@ -67,3 +74,46 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
             diff=diff,
             changes=changes,
         )
+
+
+class SastRegexTransformerPipeline(RegexTransformerPipeline):
+    def line_matches_result(self, lineno: int, result_linenums: list[int]) -> bool:
+        return lineno in result_linenums
+
+    def report_unfixed(self, file_context: FileContext, line_number: int, reason: str):
+        findings = file_context.get_findings_for_location(line_number)
+        file_context.add_unfixed_findings(findings, reason, line_number)
+
+    def _apply(self, original_lines, file_context, results):
+        changes = []
+        updated_lines = []
+        if results is not None and not results:
+            return changes, updated_lines
+
+        result_linenums = [
+            location.start.line for result in results for location in result.locations
+        ]
+        for lineno, line in enumerate(original_lines):
+            if self.line_matches_result(one_idx_lineno := lineno + 1, result_linenums):
+                changed_line = self._apply_regex(line)
+                updated_lines.append(changed_line)
+                if line == changed_line:
+                    logger.warn("Unable to update html line: %s", line)
+                    self.report_unfixed(
+                        file_context,
+                        one_idx_lineno,
+                        reason="Unable to update html line",
+                    )
+                    continue
+
+                changes.append(
+                    Change(
+                        lineNumber=lineno + 1,
+                        description=self.change_description,
+                        findings=file_context.get_findings_for_location(lineno),
+                    )
+                )
+
+            else:
+                updated_lines.append(line)
+        return changes, updated_lines
