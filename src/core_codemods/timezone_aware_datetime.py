@@ -124,10 +124,9 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                 "datetime.datetime.utcnow",
             ):
                 self.report_change(original_node)
-                maybe_name = self.get_aliased_prefix_name(
+                if maybe_name := self.get_aliased_prefix_name(
                     original_node, self._module_name
-                )
-                if maybe_name:
+                ):
                     # it's a regular import OR alias import
                     if maybe_name == self._module_name:
                         module = "datetime.datetime"
@@ -160,10 +159,9 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                 )
             case "datetime.date.today":
                 self.report_change(original_node)
-                maybe_name = self.get_aliased_prefix_name(
+                if maybe_name := self.get_aliased_prefix_name(
                     original_node, self._module_name
-                )
-                if maybe_name:
+                ):
                     # it's a regular import OR alias import
                     if maybe_name == self._module_name:
                         module = "datetime.datetime"
@@ -200,11 +198,10 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
 
             case "datetime.date.fromtimestamp":
                 self.report_change(original_node)
-                maybe_name = self.get_aliased_prefix_name(
-                    original_node, self._module_name
-                )
 
-                if maybe_name:
+                if maybe_name := self.get_aliased_prefix_name(
+                    original_node, self._module_name
+                ):
                     # it's a regular import OR alias import
                     if maybe_name == self._module_name:
                         module = "datetime.datetime"
@@ -244,10 +241,9 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
                 return cst.parse_expression(self.code(res).strip("\n") + ".date()")
             case "datetime.datetime.utcfromtimestamp":
                 self.report_change(original_node)
-                maybe_name = self.get_aliased_prefix_name(
+                if maybe_name := self.get_aliased_prefix_name(
                     original_node, self._module_name
-                )
-                if maybe_name:
+                ):
                     # it's a regular import OR alias import
                     if maybe_name == self._module_name:
                         module = "datetime.datetime"
