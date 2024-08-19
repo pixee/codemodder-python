@@ -14,6 +14,7 @@ EXPECTED_FINDINGS = [
     "pixee:python/url-sandbox",
     "pixee:python/use-defusedxml",
     "pixee:python/use-walrus-if",
+    "pixee:python/timezone-aware-datetime",
 ]
 
 

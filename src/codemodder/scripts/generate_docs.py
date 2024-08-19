@@ -318,11 +318,8 @@ SONAR_CODEMOD_NAMES = [
     "django-model-without-dunder-str",
     "break-or-continue-out-of-loop",
     "disable-graphql-introspection",
-<<<<<<< HEAD
     "invert-boolean-check",
-=======
     "timezone-aware-datetime",
->>>>>>> 0e9e1643 (add sonar codemod)
 ]
 SONAR_CODEMODS = {
     name: DocMetadata(
