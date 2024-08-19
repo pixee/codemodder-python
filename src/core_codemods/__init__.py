@@ -88,6 +88,7 @@ from .sonar.sonar_remove_assertion_in_pytest_raises import (
 from .sonar.sonar_secure_random import SonarSecureRandom
 from .sonar.sonar_sql_parameterization import SonarSQLParameterization
 from .sonar.sonar_tempfile_mktemp import SonarTempfileMktemp
+from .sonar.sonar_timezone_aware_datetime import SonarTimezoneAwareDatetime
 from .sonar.sonar_url_sandbox import SonarUrlSandbox
 from .sql_parameterization import SQLQueryParameterization
 from .str_concat_in_seq_literal import StrConcatInSeqLiteral
@@ -195,6 +196,7 @@ sonar_registry = CodemodCollection(
         SonarDjangoModelWithoutDunderStr,
         SonarBreakOrContinueOutOfLoop,
         SonarDisableGraphQLIntrospection,
+        SonarTimezoneAwareDatetime,
     ],
 )
 
