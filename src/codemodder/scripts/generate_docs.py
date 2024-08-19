@@ -287,6 +287,10 @@ DEFECTDOJO_CODEMODS = {
         guidance_explained="This change is generally safe and will prevent deserialization vulnerabilities.",
         need_sarif="Yes (DefectDojo)",
     ),
+    "timezone-aware-datetime": DocMetadata(
+        importance="Medium",
+        guidance_explained="This change makes your code more accurate with regards to timezones. However, it's possible you wish to specify a different timezone for your application needs.",
+    ),
 }
 
 SONAR_CODEMOD_NAMES = [
