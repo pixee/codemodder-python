@@ -275,6 +275,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="High",
         guidance_explained="This change may disable a feature that was left on purpose. Moreover the rule added may be framework specific.",
     ),
+    "timezone-aware-datetime": DocMetadata(
+        importance="Medium",
+        guidance_explained="This change makes your code more accurate with regards to timezones. However, it's possible you wish to specify a different timezone for your application needs.",
+    ),
 }
 DEFECTDOJO_CODEMODS = {
     "django-secure-set-cookie": DocMetadata(
@@ -286,10 +290,6 @@ DEFECTDOJO_CODEMODS = {
         importance="High",
         guidance_explained="This change is generally safe and will prevent deserialization vulnerabilities.",
         need_sarif="Yes (DefectDojo)",
-    ),
-    "timezone-aware-datetime": DocMetadata(
-        importance="Medium",
-        guidance_explained="This change makes your code more accurate with regards to timezones. However, it's possible you wish to specify a different timezone for your application needs.",
     ),
 }
 
@@ -314,6 +314,7 @@ SONAR_CODEMOD_NAMES = [
     "django-model-without-dunder-str",
     "break-or-continue-out-of-loop",
     "disable-graphql-introspection",
+    "timezone-aware-datetime",
 ]
 SONAR_CODEMODS = {
     name: DocMetadata(
