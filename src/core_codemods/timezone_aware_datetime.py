@@ -74,9 +74,8 @@ class TransformDatetimeWithTimezone(LibcstResultTransformer, NameResolutionMixin
         return updated_node
 
     def _determine_module_and_kwarg(self, original_node: cst.Call):
-        maybe_name = self.get_aliased_prefix_name(original_node, self._module_name)
 
-        if maybe_name:
+        if maybe_name := self.get_aliased_prefix_name(original_node, self._module_name):
             # it's a regular import OR alias import
             if maybe_name == self._module_name:
                 module = "datetime.datetime"
