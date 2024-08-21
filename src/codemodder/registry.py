@@ -128,7 +128,8 @@ class CodemodRegistry:
 def load_registered_codemods(ep_filter: Optional[Callable[[EntryPoint], bool]] = None):
     registry = CodemodRegistry()
     logger.debug("loading registered codemod collections")
-    for entry_point in entry_points().select(group="codemods"):
+
+    for entry_point in set(entry_points().select(group="codemods")):
         if ep_filter and not ep_filter(entry_point):
             logger.debug(
                 '- skipping codemod collection "%s" from "%s as requested"',
