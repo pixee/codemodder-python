@@ -279,6 +279,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="Low",
         guidance_explained="We believe this replacement is safe and should not result in any issues.",
     ),
+    "timezone-aware-datetime": DocMetadata(
+        importance="Medium",
+        guidance_explained="This change makes your code more accurate with regards to timezones. However, it's possible you wish to specify a different timezone for your application needs.",
+    ),
 }
 DEFECTDOJO_CODEMODS = {
     "django-secure-set-cookie": DocMetadata(
@@ -315,6 +319,7 @@ SONAR_CODEMOD_NAMES = [
     "break-or-continue-out-of-loop",
     "disable-graphql-introspection",
     "invert-boolean-check",
+    "timezone-aware-datetime",
 ]
 SONAR_CODEMODS = {
     name: DocMetadata(

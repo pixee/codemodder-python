@@ -90,11 +90,13 @@ from .sonar.sonar_remove_assertion_in_pytest_raises import (
 from .sonar.sonar_secure_random import SonarSecureRandom
 from .sonar.sonar_sql_parameterization import SonarSQLParameterization
 from .sonar.sonar_tempfile_mktemp import SonarTempfileMktemp
+from .sonar.sonar_timezone_aware_datetime import SonarTimezoneAwareDatetime
 from .sonar.sonar_url_sandbox import SonarUrlSandbox
 from .sql_parameterization import SQLQueryParameterization
 from .str_concat_in_seq_literal import StrConcatInSeqLiteral
 from .subprocess_shell_false import SubprocessShellFalse
 from .tempfile_mktemp import TempfileMktemp
+from .timezone_aware_datetime import TimezoneAwareDatetime
 from .upgrade_sslcontext_minimum_version import UpgradeSSLContextMinimumVersion
 from .upgrade_sslcontext_tls import UpgradeSSLContextTLS
 from .url_sandbox import UrlSandbox
@@ -136,6 +138,7 @@ registry = CodemodCollection(
         UseDefusedXml,
         UseGenerator,
         UseSetLiteral,
+        TimezoneAwareDatetime,
         UseWalrusIf,
         WithThreadingLock,
         SQLQueryParameterization,
@@ -197,6 +200,7 @@ sonar_registry = CodemodCollection(
         SonarBreakOrContinueOutOfLoop,
         SonarDisableGraphQLIntrospection,
         SonarInvertedBooleanCheck,
+        SonarTimezoneAwareDatetime,
     ],
 )
 
