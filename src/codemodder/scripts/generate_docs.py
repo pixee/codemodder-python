@@ -275,6 +275,10 @@ If you want to allow those protocols, change the incoming PR to look more like t
         importance="High",
         guidance_explained="This change may disable a feature that was left on purpose. Moreover the rule added may be framework specific.",
     ),
+    "invert-boolean-check": DocMetadata(
+        importance="Low",
+        guidance_explained="We believe this replacement is safe and should not result in any issues.",
+    ),
 }
 DEFECTDOJO_CODEMODS = {
     "django-secure-set-cookie": DocMetadata(
@@ -310,6 +314,7 @@ SONAR_CODEMOD_NAMES = [
     "django-model-without-dunder-str",
     "break-or-continue-out-of-loop",
     "disable-graphql-introspection",
+    "invert-boolean-check",
 ]
 SONAR_CODEMODS = {
     name: DocMetadata(

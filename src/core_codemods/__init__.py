@@ -34,6 +34,7 @@ from .harden_pickle_load import HardenPickleLoad
 from .harden_pyyaml import HardenPyyaml
 from .harden_ruamel import HardenRuamel
 from .https_connection import HTTPSConnection
+from .invert_boolean_check import InvertedBooleanCheck
 from .jwt_decode_verify import JwtDecodeVerify
 from .lazy_logging import LazyLogging
 from .limit_readline import LimitReadline
@@ -79,6 +80,7 @@ from .sonar.sonar_fix_float_equality import SonarFixFloatEquality
 from .sonar.sonar_fix_math_isclose import SonarFixMathIsClose
 from .sonar.sonar_fix_missing_self_or_cls import SonarFixMissingSelfOrCls
 from .sonar.sonar_flask_json_response_type import SonarFlaskJsonResponseType
+from .sonar.sonar_invert_boolean_check import SonarInvertedBooleanCheck
 from .sonar.sonar_jwt_decode_verify import SonarJwtDecodeVerify
 from .sonar.sonar_literal_or_new_object_identity import SonarLiteralOrNewObjectIdentity
 from .sonar.sonar_numpy_nan_equality import SonarNumpyNanEquality
@@ -167,6 +169,7 @@ registry = CodemodCollection(
         FixMathIsClose,
         BreakOrContinueOutOfLoop,
         DisableGraphQLIntrospection,
+        InvertedBooleanCheck,
     ],
 )
 
@@ -193,6 +196,7 @@ sonar_registry = CodemodCollection(
         SonarDjangoModelWithoutDunderStr,
         SonarBreakOrContinueOutOfLoop,
         SonarDisableGraphQLIntrospection,
+        SonarInvertedBooleanCheck,
     ],
 )
 
