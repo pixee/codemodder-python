@@ -63,6 +63,15 @@ def test_change_invalid_line_number():
         Change(lineNumber=0, description="Change 1 to 2")
 
 
+def test_change_empty_description():
+    with pytest.raises(ValueError):
+        Change(lineNumber=1, description="")
+
+
+def test_change_description_optional():
+    Change(lineNumber=1, description=None)
+
+
 def test_write_codetf(tmpdir, mocker, codetf_schema):
     path = tmpdir / "test.codetf.json"
 
