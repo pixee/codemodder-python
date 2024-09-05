@@ -25,6 +25,7 @@ from codemodder.providers import ProviderRegistry
 from codemodder.registry import CodemodRegistry
 from codemodder.result import ResultSet
 from codemodder.utils.timer import Timer
+from codemodder.utils.update_finding_metadata import update_finding_metadata
 
 if TYPE_CHECKING:
     from openai import OpenAI
@@ -180,6 +181,11 @@ class CodemodExecutionContext:
     def compile_results(self, codemods: list[BaseCodemod]) -> list[CodeTFResult]:
         results = []
         for codemod in codemods:
+            changesets = update_finding_metadata(
+                codemod.detection_tool_rules,
+                self.get_changesets(codemod.id),
+            )
+
             result = CodeTFResult(
                 codemod=codemod.id,
                 summary=codemod.summary,
@@ -188,7 +194,7 @@ class CodemodExecutionContext:
                 references=codemod.references,
                 properties={},
                 failedFiles=[str(file) for file in self.get_failures(codemod.id)],
-                changeset=self.get_changesets(codemod.id),
+                changeset=changesets,
                 unfixedFindings=self.get_unfixed_findings(codemod.id),
             )
 

@@ -49,8 +49,13 @@ class SonarResult(SASTResult):
             for flow in result.get("flows", [])
         ]
 
+        finding_id = result.get("key", rule_id)
+
+        # Both issues and hotspots have a `message` key
+        name = result.get("message", None) or rule_id
+
         return cls(
-            finding_id=rule_id,
+            finding_id=finding_id,
             rule_id=rule_id,
             locations=locations,
             codeflows=all_flows,
@@ -58,7 +63,7 @@ class SonarResult(SASTResult):
                 id=rule_id,
                 rule=Rule(
                     id=rule_id,
-                    name=rule_id,
+                    name=name,
                     url=sonar_url_from_id(rule_id),
                 ),
             ),
