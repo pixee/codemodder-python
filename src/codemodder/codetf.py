@@ -60,6 +60,12 @@ class Change(BaseModel):
             raise ValueError("lineNumber must be greater than 0")
         return self
 
+    @model_validator(mode="after")
+    def validate_description(self):
+        if self.description is not None and not self.description:
+            raise ValueError("description must not be empty")
+        return self
+
 
 class AIMetadata(BaseModel):
     provider: Optional[str] = None

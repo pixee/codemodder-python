@@ -95,7 +95,7 @@ class XMLTransformer(XMLGenerator, LexicalHandler):
         self.changes.append(
             Change(
                 lineNumber=line,
-                description=self.change_description,
+                description=self.change_description or None,
                 findings=self.file_context.get_findings_for_location(line),
             )
         )
