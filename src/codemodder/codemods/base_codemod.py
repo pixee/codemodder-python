@@ -131,6 +131,10 @@ class BaseCodemod(metaclass=ABCMeta):
             name=self._metadata.tool.name,
         )
 
+    @property
+    def detection_tool_rules(self) -> list[ToolRule]:
+        return self._metadata.tool.rules if self._metadata.tool else []
+
     @cached_property
     def docs_module(self) -> Traversable:
         return importlib.resources.files(self.docs_module_path)
