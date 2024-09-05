@@ -12,8 +12,7 @@ def update_finding_metadata(
     tool_rules: list[ToolRule],
     changesets: list[ChangeSet],
 ) -> list[ChangeSet]:
-    tool_rule_map = {rule.id: (rule.name, rule.url) for rule in tool_rules}
-    if not tool_rule_map:
+    if not (tool_rule_map := {rule.id: (rule.name, rule.url) for rule in tool_rules}):
         return changesets
 
     for changeset in changesets:
