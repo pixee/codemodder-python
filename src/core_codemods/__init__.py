@@ -87,6 +87,7 @@ from .sonar.sonar_numpy_nan_equality import SonarNumpyNanEquality
 from .sonar.sonar_remove_assertion_in_pytest_raises import (
     SonarRemoveAssertionInPytestRaises,
 )
+from .sonar.sonar_sandbox_process_creation import SonarSandboxProcessCreation
 from .sonar.sonar_secure_random import SonarSecureRandom
 from .sonar.sonar_sql_parameterization import SonarSQLParameterization
 from .sonar.sonar_tempfile_mktemp import SonarTempfileMktemp
@@ -201,6 +202,7 @@ sonar_registry = CodemodCollection(
         SonarDisableGraphQLIntrospection,
         SonarInvertedBooleanCheck,
         SonarTimezoneAwareDatetime,
+        SonarSandboxProcessCreation,
     ],
 )
 
