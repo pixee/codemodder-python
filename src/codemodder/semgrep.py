@@ -28,15 +28,18 @@ class SemgrepLocation(SarifLocation):
     def from_sarif(cls, sarif_location) -> Self:
         artifact_location = sarif_location["physicalLocation"]["artifactLocation"]
         file = Path(artifact_location["uri"])
+        snippet = (
+            sarif_location["physicalLocation"]["region"].get("snippet", {}).get("text")
+        )
         start = LineInfo(
             line=sarif_location["physicalLocation"]["region"]["startLine"],
             column=sarif_location["physicalLocation"]["region"]["startColumn"],
-            snippet=sarif_location["physicalLocation"]["region"]["snippet"]["text"],
+            snippet=snippet,
         )
         end = LineInfo(
             line=sarif_location["physicalLocation"]["region"]["endLine"],
             column=sarif_location["physicalLocation"]["region"]["endColumn"],
-            snippet=sarif_location["physicalLocation"]["region"]["snippet"]["text"],
+            snippet=snippet,
         )
         return cls(file=file, start=start, end=end)
 
