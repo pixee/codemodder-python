@@ -146,5 +146,5 @@ class TestMatchCodemods:
         assert self.registry.match_codemods(None, ["pixee*"], sast_only=False) == [
             c
             for c in self.registry.codemods
-            if not c.origin == "pixee" and c.id in self.all_ids
+            if c.origin != "pixee" and c.id in self.all_ids
         ]
