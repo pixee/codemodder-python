@@ -15,6 +15,7 @@ DEFAULT_EXCLUDED_PATHS = [
     "build/**",
     "dist/**",
     "venv/**",
+    "**/site-packages/**",
     ".venv/**",
     ".tox/**",
     ".nox/**",
