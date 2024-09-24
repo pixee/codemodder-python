@@ -222,6 +222,9 @@ class BaseCodemod(metaclass=ABCMeta):
             return
 
         files_to_analyze = self.get_files_to_analyze(context, results)
+        if not files_to_analyze:
+            logger.debug("No files matched for %s", self.id)
+            return
 
         process_file = functools.partial(
             self._process_file, context=context, results=results, rules=rules
