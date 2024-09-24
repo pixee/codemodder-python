@@ -221,8 +221,7 @@ class BaseCodemod(metaclass=ABCMeta):
             logger.debug("No results for %s", self.id)
             return
 
-        files_to_analyze = self.get_files_to_analyze(context, results)
-        if not files_to_analyze:
+        if not (files_to_analyze := self.get_files_to_analyze(context, results)):
             logger.debug("No files matched for %s", self.id)
             return
 
