@@ -40,7 +40,11 @@ class SonarResult(SASTResult):
         if not (rule_id := result.get("rule", None) or result.get("ruleKey", None)):
             raise ValueError("Could not extract rule id from sarif result.")
 
-        locations: list[Location] = [SonarLocation.from_json_location(result)]
+        locations: list[Location] = (
+            [SonarLocation.from_json_location(result)]
+            if result.get("textRange")
+            else []
+        )
         all_flows: list[list[Location]] = [
             [
                 SonarLocation.from_json_location(json_location)
