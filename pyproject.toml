@@ -49,7 +49,7 @@ get-hashes = 'codemodder.scripts.get_hashes:main'
 
 [project.optional-dependencies]
 test = [
-    "azure-ai-inference<2",
+    "azure-ai-inference>=1.0.0b1,<2.0",
     "coverage>=7.6,<7.7",
     "coverage-threshold~=0.4",
     "defusedxml==0.7.1",
@@ -88,7 +88,7 @@ openai = [
     "openai>=1.50,<1.52",
 ]
 azure = [
-    "azure-ai-inference<2",
+    "azure-ai-inference>=1.0.0b1,<2.0",
 ]
 
 all = [
