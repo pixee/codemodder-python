@@ -17,7 +17,7 @@ from codemodder.logging import logger
 
 __all__ = [
     "MODELS",
-    "setup_llm_client",
+    "setup_openai_llm_client",
     "MisconfiguredAIClient",
 ]
 
@@ -46,7 +46,7 @@ class ModelRegistry(dict):
 MODELS = ModelRegistry(models)
 
 
-def setup_llm_client() -> OpenAI | None:
+def setup_openai_llm_client() -> OpenAI | None:
     if not AzureOpenAI:
         logger.info("Azure OpenAI API client not available")
         return None

@@ -17,7 +17,7 @@ from codemodder.dependency import (
     build_failed_dependency_notification,
 )
 from codemodder.file_context import FileContext
-from codemodder.llm import setup_llm_client
+from codemodder.llm import setup_openai_llm_client
 from codemodder.logging import log_list, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
@@ -82,7 +82,7 @@ class CodemodExecutionContext:
         self.max_workers = max_workers
         self.tool_result_files_map = tool_result_files_map or {}
         self.semgrep_prefilter_results = None
-        self.llm_client = setup_llm_client()
+        self.openai_llm_client = setup_openai_llm_client()
 
     def add_changesets(self, codemod_name: str, change_sets: List[ChangeSet]):
         self._changesets_by_codemod.setdefault(codemod_name, []).extend(change_sets)

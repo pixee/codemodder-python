@@ -90,7 +90,7 @@ class TestContext:
             in description
         )
 
-    def test_setup_llm_client_no_env_vars(self, mocker):
+    def test_setup_openai_llm_client_no_env_vars(self, mocker):
         mocker.patch.dict(os.environ, clear=True)
         context = Context(
             mocker.Mock(),
@@ -102,7 +102,7 @@ class TestContext:
             [],
             [],
         )
-        assert context.llm_client is None
+        assert context.openai_llm_client is None
 
     def test_setup_openai_llm_client(self, mocker):
         mocker.patch.dict(os.environ, {"CODEMODDER_OPENAI_API_KEY": "test"})
@@ -116,7 +116,7 @@ class TestContext:
             [],
             [],
         )
-        assert isinstance(context.llm_client, OpenAI)
+        assert isinstance(context.openai_llm_client, OpenAI)
 
     def test_setup_azure_llm_client(self, mocker):
         mocker.patch.dict(
@@ -136,8 +136,10 @@ class TestContext:
             [],
             [],
         )
-        assert isinstance(context.llm_client, AzureOpenAI)
-        assert context.llm_client._api_version == DEFAULT_AZURE_OPENAI_API_VERSION
+        assert isinstance(context.openai_llm_client, AzureOpenAI)
+        assert (
+            context.openai_llm_client._api_version == DEFAULT_AZURE_OPENAI_API_VERSION
+        )
 
     @pytest.mark.parametrize(
         "env_var",
@@ -177,5 +179,5 @@ class TestContext:
             [],
             [],
         )
-        assert isinstance(context.llm_client, AzureOpenAI)
-        assert context.llm_client._api_version == version
+        assert isinstance(context.openai_llm_client, AzureOpenAI)
+        assert context.openai_llm_client._api_version == version
