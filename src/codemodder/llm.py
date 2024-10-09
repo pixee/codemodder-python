@@ -26,6 +26,7 @@ from codemodder.logging import logger
 __all__ = [
     "MODELS",
     "setup_openai_llm_client",
+    "setup_azure_llama_llm_client",
     "MisconfiguredAIClient",
 ]
 
