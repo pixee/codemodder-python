@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from azure.ai.inference import ChatCompletionsClient
 from openai import AzureOpenAI, OpenAI
 
 from codemodder.context import CodemodExecutionContext as Context
@@ -90,7 +91,7 @@ class TestContext:
             in description
         )
 
-    def test_setup_llm_client_no_env_vars(self, mocker):
+    def test_setup_llm_clients_no_env_vars(self, mocker):
         mocker.patch.dict(os.environ, clear=True)
         context = Context(
             mocker.Mock(),
@@ -102,7 +103,8 @@ class TestContext:
             [],
             [],
         )
-        assert context.llm_client is None
+        assert context.openai_llm_client is None
+        assert context.azure_llama_llm_client is None
 
     def test_setup_openai_llm_client(self, mocker):
         mocker.patch.dict(os.environ, {"CODEMODDER_OPENAI_API_KEY": "test"})
@@ -116,7 +118,29 @@ class TestContext:
             [],
             [],
         )
-        assert isinstance(context.llm_client, OpenAI)
+        assert isinstance(context.openai_llm_client, OpenAI)
+
+    def test_setup_both_llm_clients(self, mocker):
+        mocker.patch.dict(
+            os.environ,
+            {
+                "CODEMODDER_OPENAI_API_KEY": "test",
+                "CODEMODDER_AZURE_LLAMA_API_KEY": "test",
+                "CODEMODDER_AZURE_LLAMA_ENDPOINT": "test",
+            },
+        )
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            None,
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+        assert isinstance(context.openai_llm_client, OpenAI)
+        assert isinstance(context.azure_llama_llm_client, ChatCompletionsClient)
 
     def test_setup_azure_llm_client(self, mocker):
         mocker.patch.dict(
@@ -136,14 +160,54 @@ class TestContext:
             [],
             [],
         )
-        assert isinstance(context.llm_client, AzureOpenAI)
-        assert context.llm_client._api_version == DEFAULT_AZURE_OPENAI_API_VERSION
+        assert isinstance(context.openai_llm_client, AzureOpenAI)
+        assert (
+            context.openai_llm_client._api_version == DEFAULT_AZURE_OPENAI_API_VERSION
+        )
 
     @pytest.mark.parametrize(
         "env_var",
         ["CODEMODDER_AZURE_OPENAI_API_KEY", "CODEMODDER_AZURE_OPENAI_ENDPOINT"],
     )
     def test_setup_azure_llm_client_missing_one(self, mocker, env_var):
+        mocker.patch.dict(os.environ, {env_var: "test"})
+        with pytest.raises(MisconfiguredAIClient):
+            Context(
+                mocker.Mock(),
+                True,
+                False,
+                load_registered_codemods(),
+                None,
+                PythonRepoManager(mocker.Mock()),
+                [],
+                [],
+            )
+
+    def test_setup_azure_llama_llm_client(self, mocker):
+        mocker.patch.dict(
+            os.environ,
+            {
+                "CODEMODDER_AZURE_LLAMA_API_KEY": "test",
+                "CODEMODDER_AZURE_LLAMA_ENDPOINT": "test",
+            },
+        )
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            None,
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+        assert isinstance(context.azure_llama_llm_client, ChatCompletionsClient)
+
+    @pytest.mark.parametrize(
+        "env_var",
+        ["CODEMODDER_AZURE_LLAMA_API_KEY", "CODEMODDER_AZURE_LLAMA_ENDPOINT"],
+    )
+    def test_setup_azure_llama_llm_client_missing_one(self, mocker, env_var):
         mocker.patch.dict(os.environ, {env_var: "test"})
         with pytest.raises(MisconfiguredAIClient):
             Context(
@@ -177,5 +241,5 @@ class TestContext:
             [],
             [],
         )
-        assert isinstance(context.llm_client, AzureOpenAI)
-        assert context.llm_client._api_version == version
+        assert isinstance(context.openai_llm_client, AzureOpenAI)
+        assert context.openai_llm_client._api_version == version
