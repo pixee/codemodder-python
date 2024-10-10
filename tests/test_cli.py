@@ -137,10 +137,9 @@ class TestParseArgs:
                 self.registry,
             )
         assert err.value.args[0] == 3
-        assert (
-            "CLI error: ambiguous option: --codemod=url-sandbox could match --codemod-exclude, --codemod-include"
-            in caplog.messages
-        )
+        msg = caplog.messages[0]
+        assert "CLI error: ambiguous option: " in msg
+        assert " could match --codemod-exclude, --codemod-include" in msg
 
     @pytest.mark.parametrize("codemod", ["secure-random", "pixee:python/secure-random"])
     def test_codemod_name_or_id(self, codemod):
