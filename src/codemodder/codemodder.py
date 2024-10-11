@@ -14,7 +14,13 @@ from codemodder.codetf import CodeTF
 from codemodder.context import CodemodExecutionContext
 from codemodder.dependency import Dependency
 from codemodder.llm import MisconfiguredAIClient
-from codemodder.logging import configure_logger, log_list, log_section, logger
+from codemodder.logging import (
+    OutputFormat,
+    configure_logger,
+    log_list,
+    log_section,
+    logger,
+)
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.result import ResultSet
@@ -45,7 +51,7 @@ def find_semgrep_results(
     return run_semgrep(context, yaml_files, files_to_analyze)
 
 
-def log_report(context, argv, elapsed_ms, files_to_analyze):
+def log_report(context, output, elapsed_ms, files_to_analyze):
     log_section("report")
     logger.info("scanned: %s files", len(files_to_analyze))
     all_failures = context.get_failed_files()
@@ -60,7 +66,7 @@ def log_report(context, argv, elapsed_ms, files_to_analyze):
         len(all_changes),
         len(set(all_changes)),
     )
-    logger.info("report file: %s", argv.output)
+    logger.info("report file: %s", output)
     logger.info("total elapsed: %s ms", elapsed_ms)
     logger.info("  semgrep:     %s ms", context.timer.get_time_ms("semgrep"))
     logger.info("  parse:       %s ms", context.timer.get_time_ms("parse"))
@@ -111,39 +117,37 @@ def record_dependency_update(dependency_results: dict[Dependency, PackageStore |
             logger.debug("The following dependencies could not be added: %s", str_list)
 
 
-def run(original_args) -> int:
+def run(
+    verbose: bool,
+    log_format: OutputFormat,
+    project_name: str,
+    directory: Path | str,
+    dry_run: bool,
+    tool_result_files_map: dict[str, list[str]],
+    path_include: list[str] | None = None,
+    path_exclude: list[str] | None = None,
+    codemod_include: list[str] | None = None,
+    codemod_exclude: list[str] | None = None,
+    output: str | None = None,  # TODO: this should be a Path
+    max_workers: int = 1,
+    original_args: list[str] | None = None,
+    codemod_registry: registry.CodemodRegistry | None = None,
+) -> int:
     start = datetime.datetime.now()
 
-    codemod_registry = registry.load_registered_codemods()
+    codemod_registry = codemod_registry or registry.load_registered_codemods()
+
+    path_include = path_include or []
+    path_exclude = path_exclude or []
+    codemod_include = codemod_include or []
+    codemod_exclude = codemod_exclude or []
+
     provider_registry = providers.load_providers()
 
-    # A little awkward, but we need the codemod registry in order to validate potential arguments
-    argv = parse_args(original_args, codemod_registry)
-    if not os.path.exists(argv.directory):
-        logger.error(
-            "given directory '%s' doesn't exist or can’t be read",
-            argv.directory,
-        )
-        return 1
-
-    configure_logger(argv.verbose, argv.log_format, argv.project_name)
+    configure_logger(verbose, log_format, project_name)
 
     log_section("startup")
     logger.info("codemodder: python/%s", __version__)
-    logger.info("command: %s %s", Path(sys.argv[0]).name, " ".join(original_args))
-
-    try:
-        # TODO: this should be dict[str, list[Path]]
-        tool_result_files_map: DefaultDict[str, list[str]] = detect_sarif_tools(
-            [Path(name) for name in argv.sarif or []]
-        )
-    except (DuplicateToolError, FileNotFoundError) as err:
-        logger.error(err)
-        return 1
-
-    tool_result_files_map["sonar"].extend(argv.sonar_issues_json or [])
-    tool_result_files_map["sonar"].extend(argv.sonar_hotspots_json or [])
-    tool_result_files_map["defectdojo"] = argv.defectdojo_findings_json or []
 
     for file_name in itertools.chain(*tool_result_files_map.values()):
         if not os.path.exists(file_name):
@@ -152,20 +156,20 @@ def run(original_args) -> int:
             )
             return 1
 
-    repo_manager = PythonRepoManager(Path(argv.directory))
+    repo_manager = PythonRepoManager(Path(directory))
 
     try:
         context = CodemodExecutionContext(
-            Path(argv.directory),
-            argv.dry_run,
-            argv.verbose,
+            Path(directory),
+            dry_run,
+            verbose,
             codemod_registry,
             provider_registry,
             repo_manager,
-            argv.path_include,
-            argv.path_exclude,
+            path_include,
+            path_exclude,
             tool_result_files_map,
-            argv.max_workers,
+            max_workers,
         )
     except MisconfiguredAIClient as e:
         logger.error(e)
@@ -175,15 +179,14 @@ def run(original_args) -> int:
 
     # TODO: this should be a method of CodemodExecutionContext
     codemods_to_run = codemod_registry.match_codemods(
-        argv.codemod_include,
-        argv.codemod_exclude,
-        sast_only=argv.sonar_issues_json or argv.sarif,
+        codemod_include,
+        codemod_exclude,
     )
 
     log_section("setup")
     log_list(logging.INFO, "running", codemods_to_run, predicate=lambda c: c.id)
     log_list(logging.INFO, "including paths", context.included_paths)
-    log_list(logging.INFO, "excluding paths", argv.path_exclude)
+    log_list(logging.INFO, "excluding paths", path_exclude)
 
     log_list(
         logging.DEBUG, "matched files", (str(path) for path in context.files_to_analyze)
@@ -203,24 +206,64 @@ def run(original_args) -> int:
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
 
-    if argv.output:
+    if output:
         codetf = CodeTF.build(
             context,
             elapsed_ms,
             original_args,
             context.compile_results(codemods_to_run),
         )
-        codetf.write_report(argv.output)
+        codetf.write_report(output)
 
     log_report(
         context,
-        argv,
+        output,
         elapsed_ms,
         [] if not codemods_to_run else context.files_to_analyze,
     )
     return 0
 
 
+def _run_cli(original_args) -> int:
+    codemod_registry = registry.load_registered_codemods()
+    argv = parse_args(original_args, codemod_registry)
+    if not os.path.exists(argv.directory):
+        logger.error(
+            "given directory '%s' doesn't exist or can’t be read",
+            argv.directory,
+        )
+        return 1
+
+    try:
+        # TODO: this should be dict[str, list[Path]]
+        tool_result_files_map: DefaultDict[str, list[str]] = detect_sarif_tools(
+            [Path(name) for name in argv.sarif or []]
+        )
+    except (DuplicateToolError, FileNotFoundError) as err:
+        logger.error(err)
+        return 1
+
+    tool_result_files_map["sonar"].extend(argv.sonar_issues_json or [])
+    tool_result_files_map["sonar"].extend(argv.sonar_hotspots_json or [])
+    tool_result_files_map["defectdojo"] = argv.defectdojo_findings_json
+
+    logger.info("command: %s %s", Path(sys.argv[0]).name, " ".join(original_args))
+
+    return run(
+        argv.verbose,
+        argv.log_format,
+        argv.project_name,
+        argv.directory,
+        argv.dry_run,
+        tool_result_files_map,
+        argv.path_include,
+        argv.path_exclude,
+        argv.codemod_include,
+        argv.codemod_exclude,
+        codemod_registry=codemod_registry,
+    )
+
+
 def main():
     sys_argv = sys.argv[1:]
-    sys.exit(run(sys_argv))
+    sys.exit(_run_cli(sys_argv))
