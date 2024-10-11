@@ -229,10 +229,15 @@ class BaseCodemod(metaclass=ABCMeta):
             self._process_file, context=context, results=results, rules=rules
         )
 
-        with ThreadPoolExecutor() as executor:
-            logger.debug("using executor with %s workers", context.max_workers)
-            contexts = executor.map(process_file, files_to_analyze)
-            executor.shutdown(wait=True)
+        contexts = []
+        if context.max_workers == 1:
+            logger.debug("processing files serially")
+            contexts.extend([process_file(file) for file in files_to_analyze])
+        else:
+            with ThreadPoolExecutor() as executor:
+                logger.debug("using executor with %s workers", context.max_workers)
+                contexts.extend(executor.map(process_file, files_to_analyze))
+                executor.shutdown(wait=True)
 
         context.process_results(self.id, contexts)
 

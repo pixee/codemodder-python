@@ -173,7 +173,9 @@ class CodemodExecutionContext:
             unfixed_findings
         )
 
-    def process_results(self, codemod_id: str, results: Iterator[FileContext]):
+    def process_results(
+        self, codemod_id: str, results: Iterator[FileContext] | list[FileContext]
+    ):
         for file_context in results:
             self.add_changesets(codemod_id, file_context.changesets)
             self.add_failures(codemod_id, file_context.failures)
