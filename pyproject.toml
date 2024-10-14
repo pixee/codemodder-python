@@ -13,7 +13,7 @@ description = "A pluggable framework for building codemods in Python"
 dependencies = [
     "GitPython<4",
     "isort>=5.12,<5.14",
-    "libcst>=1.1,<1.5",
+    "libcst>=1.1,<1.6",
     "packaging>=23.2,<25.0",
     "pydantic~=2.9.0",
     "pylint>=3.3,<3.4",
