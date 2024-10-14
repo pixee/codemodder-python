@@ -28,6 +28,7 @@ from codemodder.utils.timer import Timer
 from codemodder.utils.update_finding_metadata import update_finding_metadata
 
 if TYPE_CHECKING:
+    from azure.ai.inference import ChatCompletionsClient
     from openai import OpenAI
 
     from codemodder.codemods.base_codemod import BaseCodemod
@@ -50,7 +51,8 @@ class CodemodExecutionContext:
     max_workers: int = 1
     tool_result_files_map: dict[str, list[str]]
     semgrep_prefilter_results: ResultSet | None = None
-    llm_client: OpenAI | None = None
+    openai_llm_client: OpenAI | None = None
+    azure_llama_llm_client: ChatCompletionsClient | None = None
 
     def __init__(
         self,
