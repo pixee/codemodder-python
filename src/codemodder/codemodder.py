@@ -175,7 +175,7 @@ def run(
         logger.error(e)
         return 3  # Codemodder instructions conflicted (according to spec)
 
-    repo_manager.parse_project()
+    context.repo_manager.parse_project()
 
     # TODO: this should be a method of CodemodExecutionContext
     codemods_to_run = codemod_registry.match_codemods(

@@ -21,8 +21,8 @@ from codemodder.llm import setup_azure_llama_llm_client, setup_openai_llm_client
 from codemodder.logging import log_list, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
-from codemodder.providers import ProviderRegistry
-from codemodder.registry import CodemodRegistry
+from codemodder.providers import ProviderRegistry, load_providers
+from codemodder.registry import CodemodRegistry, load_registered_codemods
 from codemodder.result import ResultSet
 from codemodder.utils.timer import Timer
 from codemodder.utils.update_finding_metadata import update_finding_metadata
@@ -57,13 +57,13 @@ class CodemodExecutionContext:
     def __init__(
         self,
         directory: Path,
-        dry_run: bool,
-        verbose: bool,
-        registry: CodemodRegistry,
-        providers: ProviderRegistry,
-        repo_manager: PythonRepoManager,
-        path_include: list[str],
-        path_exclude: list[str],
+        dry_run: bool = False,
+        verbose: bool = False,
+        registry: CodemodRegistry | None = None,
+        providers: ProviderRegistry | None = None,
+        repo_manager: PythonRepoManager | None = None,
+        path_include: list[str] | None = None,
+        path_exclude: list[str] | None = None,
         tool_result_files_map: dict[str, list[str]] | None = None,
         max_workers: int = 1,
     ):
@@ -75,12 +75,12 @@ class CodemodExecutionContext:
         self._dependency_update_by_codemod = {}
         self._unfixed_findings_by_codemod = {}
         self.dependencies = {}
-        self.registry = registry
-        self.providers = providers
-        self.repo_manager = repo_manager
+        self.registry = registry or load_registered_codemods()
+        self.providers = providers or load_providers()
+        self.repo_manager = repo_manager or PythonRepoManager(directory)
         self.timer = Timer()
-        self.path_include = path_include
-        self.path_exclude = path_exclude
+        self.path_include = path_include or []
+        self.path_exclude = path_exclude or []
         self.max_workers = max_workers
         self.tool_result_files_map = tool_result_files_map or {}
         self.semgrep_prefilter_results = None
