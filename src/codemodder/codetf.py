@@ -165,7 +165,7 @@ class CodeTF(BaseModel):
         cls,
         context: CodemodExecutionContext,
         elapsed_ms,
-        original_args,
+        original_args: list,
         results: list[Result],
     ):
         command_name = os.path.basename(sys.argv[0])

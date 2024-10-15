@@ -4,7 +4,7 @@ import libcst as cst
 import mock
 import pytest
 
-# from codemodder import run
+from codemodder import run
 from codemodder.codemodder import _run_cli, find_semgrep_results
 from codemodder.diff import create_diff_from_tree
 from codemodder.registry import load_registered_codemods
@@ -179,7 +179,7 @@ class TestRunCli:
         mock_reporting.return_value.write_report.assert_called_once()
 
 
-class TestCodemodIncludeExclude:
+class TestCliCodemodIncludeExclude:
 
     @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_codemod_include_no_match(self, write_report, dir_structure, caplog):
@@ -277,7 +277,7 @@ class TestCodemodIncludeExclude:
         assert codetf.exists()
 
 
-class TestExitCode:
+class TestCliExitCode:
     @mock.patch("codemodder.codetf.CodeTF.write_report")
     def test_no_changes_success_0(self, mock_report, dir_structure):
         del mock_report
@@ -388,3 +388,29 @@ SESSION_COOKIE_SECURE = True"""
         assert exit_code == 1
         assert "No such file or directory: 'bad.json'" in caplog.text
         mock_report.assert_not_called()
+
+
+class TestRun:
+    @mock.patch("libcst.parse_module")
+    def test_run_basic_call(self, mock_parse, dir_structure):
+        code_dir, codetf = dir_structure
+
+        codetf_output, status = run(code_dir)
+        assert status == 0
+        assert codetf_output
+        assert codetf_output.run.directory == str(code_dir)
+        mock_parse.assert_not_called()
+        assert not codetf.exists()
+
+    @mock.patch("libcst.parse_module")
+    def test_run_with_output(self, mock_parse, dir_structure):
+        code_dir, codetf = dir_structure
+
+        codetf_output, status = run(
+            code_dir, output=str(codetf), codemod_include=["pixee:python/url-sandbox"]
+        )
+        assert status == 0
+        assert codetf_output
+        assert codetf_output.run.directory == str(code_dir)
+        mock_parse.assert_not_called()
+        assert codetf.exists()

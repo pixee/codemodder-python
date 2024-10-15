@@ -134,7 +134,7 @@ def run(
     max_workers: int = 1,
     original_cli_args: list[str] | None = None,
     codemod_registry: registry.CodemodRegistry | None = None,
-) -> int:
+) -> tuple[CodeTF | None, int]:
     start = datetime.datetime.now()
 
     codemod_registry = codemod_registry or registry.load_registered_codemods()
@@ -156,7 +156,7 @@ def run(
             logger.error(
                 f"FileNotFoundError: [Errno 2] No such file or directory: '{file_name}'"
             )
-            return 1
+            return None, 1
 
     repo_manager = PythonRepoManager(Path(directory))
 
@@ -175,7 +175,7 @@ def run(
         )
     except MisconfiguredAIClient as e:
         logger.error(e)
-        return 3  # Codemodder instructions conflicted (according to spec)
+        return None, 3  # Codemodder instructions conflicted (according to spec)
 
     context.repo_manager.parse_project()
 
@@ -208,14 +208,14 @@ def run(
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
 
+    logger.debug("Output format %s", output_format)
+    codetf = CodeTF.build(
+        context,
+        elapsed_ms,
+        original_cli_args or [],
+        context.compile_results(codemods_to_run),
+    )
     if output:
-        logger.debug("Output format %s", output_format)
-        codetf = CodeTF.build(
-            context,
-            elapsed_ms,
-            original_cli_args,
-            context.compile_results(codemods_to_run),
-        )
         codetf.write_report(output)
 
     log_report(
@@ -224,7 +224,7 @@ def run(
         elapsed_ms,
         [] if not codemods_to_run else context.files_to_analyze,
     )
-    return 0
+    return codetf, 0
 
 
 def _run_cli(original_args) -> int:
@@ -252,7 +252,7 @@ def _run_cli(original_args) -> int:
 
     logger.info("command: %s %s", Path(sys.argv[0]).name, " ".join(original_args))
 
-    return run(
+    _, status = run(
         argv.directory,
         argv.output,
         argv.output_format,
@@ -269,6 +269,7 @@ def _run_cli(original_args) -> int:
         original_cli_args=original_args,
         codemod_registry=codemod_registry,
     )
+    return status
 
 
 def main():
