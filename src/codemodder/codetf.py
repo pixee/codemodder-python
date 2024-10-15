@@ -9,6 +9,7 @@ from __future__ import annotations
 import os
 import sys
 from enum import Enum
+from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 from pydantic import BaseModel, model_validator
@@ -165,7 +166,7 @@ class CodeTF(BaseModel):
         cls,
         context: CodemodExecutionContext,
         elapsed_ms,
-        original_args,
+        original_args: list,
         results: list[Result],
     ):
         command_name = os.path.basename(sys.argv[0])
@@ -183,10 +184,9 @@ class CodeTF(BaseModel):
         )
         return cls(run=run, results=results)
 
-    def write_report(self, outfile):
+    def write_report(self, outfile: Path | str):
         try:
-            with open(outfile, "w", encoding="utf-8") as f:
-                f.write(self.model_dump_json(exclude_none=True))
+            Path(outfile).write_text(self.model_dump_json(exclude_none=True))
         except Exception:
             logger.exception("failed to write report file.")
             # Any issues with writing the output file should exit status 2.
