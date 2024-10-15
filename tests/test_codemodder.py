@@ -395,7 +395,7 @@ class TestRun:
     def test_run_basic_call(self, mock_parse, dir_structure):
         code_dir, codetf = dir_structure
 
-        codetf_output, status = run(code_dir)
+        codetf_output, status = run(code_dir, dry_run=True)
         assert status == 0
         assert codetf_output
         assert codetf_output.run.directory == str(code_dir)
@@ -407,7 +407,10 @@ class TestRun:
         code_dir, codetf = dir_structure
 
         codetf_output, status = run(
-            code_dir, output=codetf, codemod_include=["pixee:python/url-sandbox"]
+            code_dir,
+            output=codetf,
+            dry_run=True,
+            codemod_include=["pixee:python/url-sandbox"],
         )
         assert status == 0
         assert codetf_output

@@ -30,9 +30,11 @@ To install the package from source, use `pip`:
 $ pip install /path/to/codemodder-python
 ```
 
-## Running Locally
+## Running `codemodder`
 
-The codemodder package provides an executable called `codemodder`. This should be available on your path by default after installation.
+### CLI
+
+Codemodder can be run as a CLI. The codemodder package provides an executable called `codemodder`. This should be available on your path by default after installation.
 
 For basic usage, run the `codemodder` command with a target directory path:
 
@@ -54,6 +56,19 @@ For a full list of options, use the `--help` flag:
 ```
 $ codemodder --help
 ```
+
+### Library
+
+You can also run `codemodder` as a library by importing the module and running `run`. For basic usage, pass a target directory path and the `dry_run` argument:
+
+```python
+import codemodder
+
+output, exit_code = codemodder.run("/path/to/my-project", dry_run=True)
+```
+
+Unlike the CLI which has a default `dry_run` of `False`, when calling `codemodder` as a library you must indicate if you want `codemodder` to make changes to your files.
+
 
 ## Architecture
 

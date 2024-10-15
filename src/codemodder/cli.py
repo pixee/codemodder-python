@@ -121,6 +121,7 @@ def parse_args(argv, codemod_registry: CodemodRegistry):
     parser.add_argument(
         "--dry-run",
         action=argparse.BooleanOptionalAction,
+        default=False,
         help="do everything except make changes to files",
     )
     parser.add_argument(

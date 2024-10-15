@@ -57,7 +57,7 @@ class CodemodExecutionContext:
     def __init__(
         self,
         directory: Path,
-        dry_run: bool = False,
+        dry_run: bool,
         verbose: bool = False,
         registry: CodemodRegistry | None = None,
         providers: ProviderRegistry | None = None,

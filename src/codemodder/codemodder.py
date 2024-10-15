@@ -120,9 +120,9 @@ def record_dependency_update(dependency_results: dict[Dependency, PackageStore |
 
 def run(
     directory: Path | str,
+    dry_run: bool,
     output: Path | str | None = None,
     output_format: str = "codetf",
-    dry_run: bool = True,
     verbose: bool = False,
     log_format: OutputFormat = OutputFormat.JSON,
     project_name: str | None = None,
@@ -254,9 +254,9 @@ def _run_cli(original_args) -> int:
 
     _, status = run(
         argv.directory,
+        argv.dry_run,
         argv.output,
         argv.output_format,
-        argv.dry_run,
         argv.verbose,
         argv.log_format,
         argv.project_name,
