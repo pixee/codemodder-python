@@ -120,7 +120,7 @@ def record_dependency_update(dependency_results: dict[Dependency, PackageStore |
 
 def run(
     directory: Path | str,
-    output: str | None = None,  # TODO: this should be a Path
+    output: Path | str | None = None,
     output_format: str = "codetf",
     dry_run: bool = True,
     verbose: bool = False,

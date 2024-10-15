@@ -407,7 +407,7 @@ class TestRun:
         code_dir, codetf = dir_structure
 
         codetf_output, status = run(
-            code_dir, output=str(codetf), codemod_include=["pixee:python/url-sandbox"]
+            code_dir, output=codetf, codemod_include=["pixee:python/url-sandbox"]
         )
         assert status == 0
         assert codetf_output
