@@ -3,6 +3,7 @@ import itertools
 import logging
 import os
 import sys
+from collections import defaultdict
 from pathlib import Path
 from typing import DefaultDict, Sequence
 
@@ -118,19 +119,20 @@ def record_dependency_update(dependency_results: dict[Dependency, PackageStore |
 
 
 def run(
-    verbose: bool,
-    log_format: OutputFormat,
-    project_name: str,
     directory: Path | str,
-    dry_run: bool,
-    tool_result_files_map: dict[str, list[str]],
+    output: str | None = None,  # TODO: this should be a Path
+    output_format: str = "codetf",
+    dry_run: bool = True,
+    verbose: bool = False,
+    log_format: OutputFormat = OutputFormat.JSON,
+    project_name: str | None = None,
+    tool_result_files_map: DefaultDict[str, list[str]] = defaultdict(list),
     path_include: list[str] | None = None,
     path_exclude: list[str] | None = None,
     codemod_include: list[str] | None = None,
     codemod_exclude: list[str] | None = None,
-    output: str | None = None,  # TODO: this should be a Path
     max_workers: int = 1,
-    original_args: list[str] | None = None,
+    original_cli_args: list[str] | None = None,
     codemod_registry: registry.CodemodRegistry | None = None,
 ) -> int:
     start = datetime.datetime.now()
@@ -207,10 +209,11 @@ def run(
     elapsed_ms = int(elapsed.total_seconds() * 1000)
 
     if output:
+        logger.debug("Output format %s", output_format)
         codetf = CodeTF.build(
             context,
             elapsed_ms,
-            original_args,
+            original_cli_args,
             context.compile_results(codemods_to_run),
         )
         codetf.write_report(output)
@@ -245,21 +248,25 @@ def _run_cli(original_args) -> int:
 
     tool_result_files_map["sonar"].extend(argv.sonar_issues_json or [])
     tool_result_files_map["sonar"].extend(argv.sonar_hotspots_json or [])
-    tool_result_files_map["defectdojo"] = argv.defectdojo_findings_json
+    tool_result_files_map["defectdojo"].extend(argv.defectdojo_findings_json or [])
 
     logger.info("command: %s %s", Path(sys.argv[0]).name, " ".join(original_args))
 
     return run(
+        argv.directory,
+        argv.output,
+        argv.output_format,
+        argv.dry_run,
         argv.verbose,
         argv.log_format,
         argv.project_name,
-        argv.directory,
-        argv.dry_run,
         tool_result_files_map,
         argv.path_include,
         argv.path_exclude,
         argv.codemod_include,
         argv.codemod_exclude,
+        max_workers=argv.max_workers,
+        original_cli_args=original_args,
         codemod_registry=codemod_registry,
     )
 

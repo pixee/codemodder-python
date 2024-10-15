@@ -4,7 +4,8 @@ import libcst as cst
 import mock
 import pytest
 
-from codemodder.codemodder import find_semgrep_results, run
+# from codemodder import run
+from codemodder.codemodder import _run_cli, find_semgrep_results
 from codemodder.diff import create_diff_from_tree
 from codemodder.registry import load_registered_codemods
 from codemodder.result import ResultSet
@@ -57,7 +58,7 @@ def dir_structure(tmp_path_factory):
     return code_dir, codetf
 
 
-class TestRun:
+class TestRunCli:
     @mock.patch("libcst.parse_module")
     def test_no_files_matched(self, mock_parse, dir_structure):
         code_dir, codetf = dir_structure
@@ -69,7 +70,7 @@ class TestRun:
             "--path-exclude",
             "*py",
         ]
-        res = run(args)
+        res = _run_cli(args)
         assert res == 0
 
         mock_parse.assert_not_called()
@@ -86,7 +87,7 @@ class TestRun:
             str(codetf),
             "--codemod-include=pixee:python/url-sandbox",
         ]
-        res = run(args)
+        res = _run_cli(args)
         assert res == 0
 
     @mock.patch("libcst.parse_module", side_effect=Exception)
@@ -103,7 +104,7 @@ class TestRun:
             "*request.py",
         ]
 
-        res = run(args)
+        res = _run_cli(args)
 
         assert res == 0
         mock_parse.assert_called()
@@ -145,7 +146,7 @@ class TestRun:
 
         assert not codetf.exists()
 
-        res = run(args)
+        res = _run_cli(args)
         assert res == 0
         assert codetf.exists()
         transform_apply.assert_called()
@@ -165,7 +166,7 @@ class TestRun:
         if dry_run:
             args += ["--dry-run"]
 
-        res = run(args)
+        res = _run_cli(args)
         assert res == 0
 
         mock_reporting.assert_called_once()
@@ -192,7 +193,7 @@ class TestCodemodIncludeExclude:
         ]
         caplog.set_level(logging.INFO)
 
-        run(args)
+        _run_cli(args)
         write_report.assert_called_once()
 
         assert "no codemods to run" in caplog.text
@@ -214,7 +215,7 @@ class TestCodemodIncludeExclude:
             f"--codemod-include={bad_codemod},{good_codemod}",
         ]
         caplog.set_level(logging.INFO)
-        run(args)
+        _run_cli(args)
         write_report.assert_called_once()
         assert f"running codemod {good_codemod}" in caplog.text
         assert (
@@ -234,7 +235,7 @@ class TestCodemodIncludeExclude:
             f"--codemod-exclude={bad_codemod},{good_codemod}",
         ]
         caplog.set_level(logging.INFO)
-        run(args)
+        _run_cli(args)
         write_report.assert_called_once()
 
         assert f"running codemod {good_codemod}" not in caplog.text
@@ -252,7 +253,7 @@ class TestCodemodIncludeExclude:
             f"--codemod-exclude={bad_codemod}",
         ]
         caplog.set_level(logging.INFO)
-        run(args)
+        _run_cli(args)
         write_report.assert_called_once()
         assert "running codemod " in caplog.text
 
@@ -270,7 +271,7 @@ class TestCodemodIncludeExclude:
             f"--codemod-exclude={names}",
         ]
 
-        exit_code = run(args)
+        exit_code = _run_cli(args)
         assert exit_code == 0
         mock_semgrep_run.assert_not_called()
         assert codetf.exists()
@@ -290,7 +291,7 @@ class TestExitCode:
             "*request.py",
         ]
 
-        exit_code = run(args)
+        exit_code = _run_cli(args)
         assert exit_code == 0
 
     @mock.patch("codemodder.codetf.CodeTF.write_report")
@@ -303,7 +304,7 @@ class TestExitCode:
             "--codemod-include=pixee:python/url-sandbox",
         ]
 
-        exit_code = run(args)
+        exit_code = _run_cli(args)
         assert exit_code == 1
 
     @mock.patch("codemodder.codetf.CodeTF.write_report")
@@ -319,7 +320,7 @@ class TestExitCode:
             "secure-random",
         ]
         with pytest.raises(SystemExit) as err:
-            run(args)
+            _run_cli(args)
         assert err.value.args[0] == 3
 
     def test_find_semgrep_results(self, mocker):
@@ -383,7 +384,7 @@ SESSION_COOKIE_SECURE = True"""
             f"--{flag}=bad.json",
         ]
 
-        exit_code = run(args)
+        exit_code = _run_cli(args)
         assert exit_code == 1
         assert "No such file or directory: 'bad.json'" in caplog.text
         mock_report.assert_not_called()
