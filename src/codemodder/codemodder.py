@@ -134,6 +134,7 @@ def run(
     max_workers: int = 1,
     original_cli_args: list[str] | None = None,
     codemod_registry: registry.CodemodRegistry | None = None,
+    sast_only: bool = False,
 ) -> tuple[CodeTF | None, int]:
     start = datetime.datetime.now()
 
@@ -183,6 +184,7 @@ def run(
     codemods_to_run = codemod_registry.match_codemods(
         codemod_include,
         codemod_exclude,
+        sast_only=sast_only,
     )
 
     log_section("setup")
@@ -268,6 +270,7 @@ def _run_cli(original_args) -> int:
         max_workers=argv.max_workers,
         original_cli_args=original_args,
         codemod_registry=codemod_registry,
+        sast_only=argv.sonar_issues_json or argv.sarif,
     )
     return status
 
