@@ -55,6 +55,11 @@ class TestResults:
             in combined["python:S5659"][Path("code.py")]
         )
 
+        assert combined.results_for_rules(["python:S5659"]) == [
+            result1["python:S5659"][Path("code.py")][0],
+            result2["python:S5659"][Path("code.py")][0],
+        ]
+
     def test_sonar_only_open_issues(self, tmpdir):
         issues = {
             "issues": [
