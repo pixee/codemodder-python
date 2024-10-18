@@ -126,7 +126,7 @@ def run(
     verbose: bool = False,
     log_format: OutputFormat = OutputFormat.JSON,
     project_name: str | None = None,
-    tool_result_files_map: DefaultDict[str, list[str]] = defaultdict(list),
+    tool_result_files_map: DefaultDict[str, list[Path]] = defaultdict(list),
     path_include: list[str] | None = None,
     path_exclude: list[str] | None = None,
     codemod_include: list[str] | None = None,
@@ -240,8 +240,7 @@ def _run_cli(original_args) -> int:
         return 1
 
     try:
-        # TODO: this should be dict[str, list[Path]]
-        tool_result_files_map: DefaultDict[str, list[str]] = detect_sarif_tools(
+        tool_result_files_map: DefaultDict[str, list[Path]] = detect_sarif_tools(
             [Path(name) for name in argv.sarif or []]
         )
     except (DuplicateToolError, FileNotFoundError) as err:

@@ -18,18 +18,27 @@ class AbstractSarifToolDetector(metaclass=ABCMeta):
 class DuplicateToolError(ValueError): ...
 
 
-def detect_sarif_tools(filenames: list[Path]) -> DefaultDict[str, list[str]]:
-    results: DefaultDict[str, list[str]] = defaultdict(list)
+def detect_sarif_tools(filenames: list[Path]) -> DefaultDict[str, list[Path]]:
+    results: DefaultDict[str, list[Path]] = defaultdict(list)
 
     logger.debug("loading registered SARIF tool detectors")
     detectors = {
         ent.name: ent.load() for ent in entry_points().select(group="sarif_detectors")
     }
     for fname in filenames:
-        data = json.loads(fname.read_text(encoding="utf-8-sig"))
+        try:
+            data = json.loads(fname.read_text(encoding="utf-8-sig"))
+        except json.JSONDecodeError:
+            logger.exception("Malformed JSON file: %s", fname)
+            raise
         for name, det in detectors.items():
-            # TODO: handle malformed sarif?
-            for run in data["runs"]:
+            try:
+                runs = data["runs"]
+            except KeyError:
+                logger.exception("Sarif file without `runs` data: %s", fname)
+                raise
+
+            for run in runs:
                 try:
                     if det.detect(run):
                         logger.debug("detected %s sarif: %s", name, fname)
@@ -39,7 +48,7 @@ def detect_sarif_tools(filenames: list[Path]) -> DefaultDict[str, list[str]]:
                             raise DuplicateToolError(
                                 f"duplicate tool sarif detected: {name}"
                             )
-                        results[name].append(str(fname))
+                        results[name].append(Path(fname))
                 except DuplicateToolError as err:
                     raise err
                 except (KeyError, AttributeError, ValueError):
