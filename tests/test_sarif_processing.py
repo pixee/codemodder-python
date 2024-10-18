@@ -45,6 +45,7 @@ class TestSarifProcessing:
 
         results = detect_sarif_tools([sarif_file_bom])
         assert len(results) == 1
+        assert isinstance(results["semgrep"][0], Path)
 
     @pytest.mark.parametrize("truncate", [True, False])
     def test_results_by_rule_id(self, truncate):
@@ -110,6 +111,32 @@ class TestSarifProcessing:
         with pytest.raises(DuplicateToolError) as exc:
             detect_sarif_tools([Path("tests/samples/webgoat_v8.2.0_codeql.sarif")] * 2)
         assert "duplicate tool sarif detected: codeql" in str(exc.value)
+
+    def test_bad_sarif(self, tmpdir, caplog):
+        sarif_file = Path("tests") / "samples" / "semgrep.sarif"
+        bad_json = tmpdir / "bad.sarif"
+        with open(bad_json, "w") as f:
+            # remove all { to make a badly formatted json
+            f.write(sarif_file.read_text(encoding="utf-8").replace("{", ""))
+
+        with pytest.raises(json.JSONDecodeError):
+            detect_sarif_tools([bad_json])
+        assert f"Malformed JSON file: {str(bad_json)}" in caplog.text
+
+    def test_bad_sarif_no_runs_data(self, tmpdir, caplog):
+        bad_json = tmpdir / "bad.sarif"
+        data = """
+            {
+              "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+              "version": "2.1.0"
+            }
+        """
+        with open(bad_json, "w") as f:
+            f.write(data)
+
+        with pytest.raises(KeyError):
+            detect_sarif_tools([bad_json])
+        assert f"Sarif file without `runs` data: {str(bad_json)}" in caplog.text
 
     def test_two_sarifs_different_tools(self):
         results = detect_sarif_tools(
