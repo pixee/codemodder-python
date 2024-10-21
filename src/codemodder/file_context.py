@@ -3,6 +3,7 @@ from pathlib import Path
 
 from codemodder.codetf import Change, ChangeSet, Finding, UnfixedFinding
 from codemodder.dependency import Dependency
+from codemodder.logging import logger
 from codemodder.result import Result
 from codemodder.utils.timer import Timer
 
@@ -59,6 +60,32 @@ class FileContext:
             )
             and result.finding is not None
         ]
+
+    def match_findings(self, line_numbers):
+        """
+        Find the first finding that applies to any of the changed lines
+        NOTE: this is necessarily heuristic and may not always be correct
+        """
+        findings = next(
+            (
+                findings
+                for line in line_numbers
+                if (findings := self.get_findings_for_location(line))
+            ),
+            None,
+        )
+
+        if (
+            findings is None
+            and line_numbers
+            and any(result.finding for result in self.results or [])
+        ):
+            logger.debug(
+                "Did not match line_numbers %s with one of these results: '%s'",
+                line_numbers,
+                self.results,
+            )
+        return findings
 
     def get_all_findings(self):
         return [
