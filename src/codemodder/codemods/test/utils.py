@@ -193,7 +193,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
             directory=root,
             dry_run=False,
             verbose=False,
-            tool_result_files_map={self.tool: [str(tmp_results_file_path)]},
+            tool_result_files_map={self.tool: [tmp_results_file_path]},
             registry=mock.MagicMock(),
             providers=load_providers(),
             repo_manager=mock.MagicMock(),
