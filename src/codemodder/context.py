@@ -49,7 +49,7 @@ class CodemodExecutionContext:
     path_include: list[str]
     path_exclude: list[str]
     max_workers: int = 1
-    tool_result_files_map: dict[str, list[str]]
+    tool_result_files_map: dict[str, list[Path]]
     semgrep_prefilter_results: ResultSet | None = None
     openai_llm_client: OpenAI | None = None
     azure_llama_llm_client: ChatCompletionsClient | None = None
@@ -64,7 +64,7 @@ class CodemodExecutionContext:
         repo_manager: PythonRepoManager | None = None,
         path_include: list[str] | None = None,
         path_exclude: list[str] | None = None,
-        tool_result_files_map: dict[str, list[str]] | None = None,
+        tool_result_files_map: dict[str, list[Path]] | None = None,
         max_workers: int = 1,
     ):
         self.directory = directory
