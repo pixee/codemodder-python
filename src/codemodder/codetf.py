@@ -21,18 +21,27 @@ if TYPE_CHECKING:
     from codemodder.context import CodemodExecutionContext
 
 
-class Action(Enum):
+class CaseInsensitiveEnum(str, Enum):
+    @classmethod
+    def _missing_(cls, value: object):
+        if not isinstance(value, str):
+            return super()._missing_(value)
+
+        return cls.__members__.get(value.upper())
+
+
+class Action(CaseInsensitiveEnum):
     ADD = "add"
     REMOVE = "remove"
 
 
-class PackageResult(Enum):
+class PackageResult(CaseInsensitiveEnum):
     COMPLETED = "completed"
     FAILED = "failed"
     SKIPPED = "skipped"
 
 
-class DiffSide(Enum):
+class DiffSide(CaseInsensitiveEnum):
     LEFT = "left"
     RIGHT = "right"
 
