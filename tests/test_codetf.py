@@ -4,6 +4,7 @@ from pathlib import Path
 import jsonschema
 import pytest
 import requests
+from pydantic import ValidationError
 
 from codemodder.codetf import Change, ChangeSet, CodeTF, DiffSide, Reference, Result
 
@@ -130,3 +131,39 @@ def test_write_codetf_with_results(tmpdir, mocker, codetf_schema):
 def test_reference_use_url_for_description():
     ref = Reference(url="https://example.com")
     assert ref.description == "https://example.com"
+
+
+def test_case_insensitive_change_validation():
+    json = {
+        "lineNumber": 1,
+        "description": "Change 1 to 2",
+        "diffSide": "RIGHT",
+        "packageActions": [
+            {
+                "action": "ADD",
+                "package": "foo",
+                "result": "COMPLETED",
+            }
+        ],
+    }
+
+    Change.model_validate(json)
+
+
+@pytest.mark.parametrize("bad_value", ["MIDDLE", "middle"])
+def test_still_invalidates_bad_value(bad_value):
+    json = {
+        "lineNumber": 1,
+        "description": "Change 1 to 2",
+        "diffSide": bad_value,
+        "packageActions": [
+            {
+                "action": "ADD",
+                "package": "foo",
+                "result": "COMPLETED",
+            }
+        ],
+    }
+
+    with pytest.raises(ValidationError):
+        Change.model_validate(json)
