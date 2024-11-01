@@ -15,13 +15,7 @@ from codemodder.codetf import CodeTF
 from codemodder.context import CodemodExecutionContext
 from codemodder.dependency import Dependency
 from codemodder.llm import MisconfiguredAIClient
-from codemodder.logging import (
-    OutputFormat,
-    configure_logger,
-    log_list,
-    log_section,
-    logger,
-)
+from codemodder.logging import configure_logger, log_list, log_section, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.result import ResultSet
@@ -124,8 +118,6 @@ def run(
     output: Path | str | None = None,
     output_format: str = "codetf",
     verbose: bool = False,
-    log_format: OutputFormat = OutputFormat.JSON,
-    project_name: str | None = None,
     tool_result_files_map: DefaultDict[str, list[Path]] = defaultdict(list),
     path_include: list[str] | None = None,
     path_exclude: list[str] | None = None,
@@ -147,8 +139,6 @@ def run(
     codemod_exclude = codemod_exclude or []
 
     provider_registry = providers.load_providers()
-
-    configure_logger(verbose, log_format, project_name)
 
     log_section("startup")
     logger.info("codemodder: python/%s", __version__)
@@ -254,6 +244,7 @@ def _run_cli(original_args) -> int:
     tool_result_files_map["defectdojo"].extend(argv.defectdojo_findings_json or [])
 
     logger.info("command: %s %s", Path(sys.argv[0]).name, " ".join(original_args))
+    configure_logger(argv.verbose, argv.log_format, argv.project_name)
 
     _, status = run(
         argv.directory,
@@ -261,8 +252,6 @@ def _run_cli(original_args) -> int:
         argv.output,
         argv.output_format,
         argv.verbose,
-        argv.log_format,
-        argv.project_name,
         tool_result_files_map,
         argv.path_include,
         argv.path_exclude,
