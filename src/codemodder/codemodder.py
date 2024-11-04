@@ -135,6 +135,7 @@ def run(
     original_cli_args: list[str] | None = None,
     codemod_registry: registry.CodemodRegistry | None = None,
     sast_only: bool = False,
+    ai_client: bool = True,
 ) -> tuple[CodeTF | None, int]:
     start = datetime.datetime.now()
 
@@ -173,6 +174,7 @@ def run(
             path_exclude,
             tool_result_files_map,
             max_workers,
+            ai_client,
         )
     except MisconfiguredAIClient as e:
         logger.error(e)

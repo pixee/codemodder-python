@@ -243,3 +243,58 @@ class TestContext:
         )
         assert isinstance(context.openai_llm_client, AzureOpenAI)
         assert context.openai_llm_client._api_version == version
+
+    def test_disable_ai_client_openai(self, mocker):
+        mocker.patch.dict(os.environ, {"CODEMODDER_OPENAI_API_KEY": "test"})
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            None,
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+            ai_client=False,
+        )
+        assert context.openai_llm_client is None
+
+    def test_disable_ai_client_azure(self, mocker):
+        mocker.patch.dict(
+            os.environ,
+            {
+                "CODEMODDER_AZURE_OPENAI_API_KEY": "test",
+                "CODEMODDER_AZURE_OPENAI_ENDPOINT": "test",
+            },
+        )
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            None,
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+            ai_client=False,
+        )
+        assert context.openai_llm_client is None
+
+    @pytest.mark.parametrize(
+        "env_var",
+        ["CODEMODDER_AZURE_OPENAI_API_KEY", "CODEMODDER_AZURE_OPENAI_ENDPOINT"],
+    )
+    def test_no_misconfiguration_ai_client_disabled(self, mocker, env_var):
+        mocker.patch.dict(os.environ, {env_var: "test"})
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            None,
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+            ai_client=False,
+        )
+        assert context.openai_llm_client is None
