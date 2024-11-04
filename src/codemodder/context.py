@@ -66,6 +66,7 @@ class CodemodExecutionContext:
         path_exclude: list[str] | None = None,
         tool_result_files_map: dict[str, list[Path]] | None = None,
         max_workers: int = 1,
+        ai_client: bool = True,
     ):
         self.directory = directory
         self.dry_run = dry_run
@@ -84,8 +85,10 @@ class CodemodExecutionContext:
         self.max_workers = max_workers
         self.tool_result_files_map = tool_result_files_map or {}
         self.semgrep_prefilter_results = None
-        self.openai_llm_client = setup_openai_llm_client()
-        self.azure_llama_llm_client = setup_azure_llama_llm_client()
+        self.openai_llm_client = setup_openai_llm_client() if ai_client else None
+        self.azure_llama_llm_client = (
+            setup_azure_llama_llm_client() if ai_client else None
+        )
 
     def add_changesets(self, codemod_name: str, change_sets: List[ChangeSet]):
         self._changesets_by_codemod.setdefault(codemod_name, []).extend(change_sets)
