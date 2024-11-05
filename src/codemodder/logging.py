@@ -85,6 +85,6 @@ def configure_logger(
 
     logging.basicConfig(
         format="%(message)s",
-        level=log_level,
         handlers=handlers,
     )
+    logger.setLevel(log_level)
