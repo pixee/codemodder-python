@@ -94,7 +94,7 @@ def setup_openai_llm_client() -> OpenAI | None:
 def setup_azure_llama_llm_client() -> ChatCompletionsClient | None:
     """Configure the Azure Llama LLM client."""
     if not ChatCompletionsClient:
-        logger.info("Azure API client not available")
+        logger.info("Azure Llama client not available")
         return None
 
     azure_llama_key = os.getenv("CODEMODDER_AZURE_LLAMA_API_KEY")
