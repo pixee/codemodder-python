@@ -6,10 +6,12 @@ from codemodder.codemods.regex_transformer import (
 )
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
+from codemodder.logging import OutputFormat, configure_logger
 from codemodder.semgrep import SemgrepResult
 
 
 def test_transformer_no_change(mocker, caplog, tmp_path_factory):
+    configure_logger(True, OutputFormat.HUMAN)
     with caplog.at_level(logging.DEBUG):
         base_dir = tmp_path_factory.mktemp("foo")
         code = base_dir / "code.py"
