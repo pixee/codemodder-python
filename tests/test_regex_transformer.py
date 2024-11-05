@@ -10,36 +10,36 @@ from codemodder.semgrep import SemgrepResult
 
 
 def test_transformer_no_change(mocker, caplog, tmp_path_factory):
-    caplog.set_level(logging.DEBUG)
-    base_dir = tmp_path_factory.mktemp("foo")
-    code = base_dir / "code.py"
-    code.write_text("# Something that won't match")
+    with caplog.at_level(logging.DEBUG):
+        base_dir = tmp_path_factory.mktemp("foo")
+        code = base_dir / "code.py"
+        code.write_text("# Something that won't match")
 
-    file_context = FileContext(
-        base_dir,
-        code,
-    )
-    execution_context = CodemodExecutionContext(
-        directory=base_dir,
-        dry_run=True,
-        verbose=False,
-        registry=mocker.MagicMock(),
-        providers=mocker.MagicMock(),
-        repo_manager=mocker.MagicMock(),
-        path_include=[],
-        path_exclude=[],
-    )
-    pipeline = RegexTransformerPipeline(
-        pattern=r"hello", replacement="bye", change_description="testing"
-    )
+        file_context = FileContext(
+            base_dir,
+            code,
+        )
+        execution_context = CodemodExecutionContext(
+            directory=base_dir,
+            dry_run=True,
+            verbose=False,
+            registry=mocker.MagicMock(),
+            providers=mocker.MagicMock(),
+            repo_manager=mocker.MagicMock(),
+            path_include=[],
+            path_exclude=[],
+        )
+        pipeline = RegexTransformerPipeline(
+            pattern=r"hello", replacement="bye", change_description="testing"
+        )
 
-    changeset = pipeline.apply(
-        context=execution_context,
-        file_context=file_context,
-        results=None,
-    )
-    assert changeset is None
-    assert "No changes produced for" in caplog.text
+        changeset = pipeline.apply(
+            context=execution_context,
+            file_context=file_context,
+            results=None,
+        )
+        assert changeset is None
+        assert "No changes produced for" in caplog.text
 
 
 def test_transformer(mocker, tmp_path_factory):
