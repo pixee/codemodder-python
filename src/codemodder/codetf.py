@@ -83,6 +83,12 @@ class AIMetadata(BaseModel):
     tokens: Optional[int] = None
 
 
+class Strategy(Enum):
+    ai = "ai"
+    hybrid = "hybrid"
+    deterministic = "deterministic"
+
+
 class ChangeSet(BaseModel):
     """A set of changes made to a file at `path`"""
 
@@ -90,6 +96,8 @@ class ChangeSet(BaseModel):
     diff: str
     changes: list[Change] = []
     ai: Optional[AIMetadata] = None
+    strategy: Optional[Strategy] = None
+    provisional: Optional[bool] = False
 
 
 class Reference(BaseModel):
