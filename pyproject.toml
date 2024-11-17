@@ -64,7 +64,7 @@ test = [
     "openai>=1.54,<1.55",
     "mock==5.1.*",
     "pre-commit<5",
-    "Pyjwt~=2.9.0",
+    "Pyjwt~=2.10.0",
     "pytest>=8.2,<9",
     "pytest-asyncio~=0.23",
     "pytest-cov>=4.1,<6.1",
