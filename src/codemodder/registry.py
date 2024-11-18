@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+from collections import defaultdict
 from dataclasses import dataclass
 from importlib.metadata import EntryPoint, entry_points
 from itertools import chain
@@ -36,6 +37,7 @@ class CodemodRegistry:
 
     def __init__(self):
         self._codemods_by_id = {}
+        self._codemods_by_tool = defaultdict(list)
         self._default_include_paths = set()
 
     @property
@@ -50,6 +52,9 @@ class CodemodRegistry:
     def default_include_paths(self) -> list[str]:
         return list(self._default_include_paths)
 
+    def codemods_by_tool(self, tool_name: str) -> list[BaseCodemod]:
+        return self._codemods_by_tool.get(tool_name, [])
+
     def add_codemod_collection(self, collection: CodemodCollection):
         for codemod in collection.codemods:
             wrapper = codemod() if isinstance(codemod, type) else codemod
@@ -59,6 +64,7 @@ class CodemodRegistry:
                 )
 
             self._codemods_by_id[wrapper.id] = wrapper
+            self._codemods_by_tool[collection.origin].append(wrapper)
             self._default_include_paths.update(
                 chain(
                     *[
