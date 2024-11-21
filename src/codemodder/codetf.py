@@ -115,10 +115,16 @@ class Rule(BaseModel):
     name: str
     url: Optional[str] = None
 
+    class Config:
+        frozen = True
+
 
 class Finding(BaseModel):
     id: str
     rule: Rule
+
+    class Config:
+        frozen = True
 
     def to_unfixed_finding(
         self,

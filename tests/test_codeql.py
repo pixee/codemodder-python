@@ -2,282 +2,40 @@ import json
 from pathlib import Path
 from unittest import TestCase, mock
 
+import pytest
+
+from codemodder.codemods.codeql import process_codeql_findings
 from codemodder.codeql import CodeQLResultSet
 
 
+@pytest.fixture(scope="module")
+def codeql_result_set():
+    yield Path(
+        __file__
+    ).parent / "samples" / "codeql" / "python" / "vulnerable-code-snippets.json"
+
+
+def test_from_file(codeql_result_set: Path):
+    result_set = process_codeql_findings(tuple([str(codeql_result_set)]))
+    assert len(result_set["py/path-injection"][Path("Path Traversal/py_ctf.py")]) == 1
+    assert len(result_set["py/path-injection"]) == 2
+
+
+def test_from_duplicate_files(codeql_result_set: Path):
+    result_set = process_codeql_findings(
+        tuple([str(codeql_result_set), str(codeql_result_set)])
+    )
+    assert len(result_set["py/path-injection"][Path("Path Traversal/py_ctf.py")]) == 1
+    assert len(result_set["py/path-injection"]) == 2
+
+
+# TODO: migrate to pytest
 class TestCodeQLResultSet(TestCase):
 
     def test_from_sarif(self):
-        sarif_content = {
-            "runs": [
-                {
-                    "tool": {
-                        "driver": {"name": "CodeQL"},
-                        "extensions": [
-                            {
-                                "rules": [
-                                    {"id": "python/sql-injection"},
-                                    {"id": "cs/web/missing-x-frame-options"},
-                                    {"id": "cs/web/xss"},
-                                ]
-                            },
-                        ],
-                    },
-                    "results": [
-                        {
-                            "ruleId": "python/sql-injection",
-                            "message": {"text": "Possible SQL injection"},
-                            "locations": [
-                                {
-                                    "physicalLocation": {
-                                        "artifactLocation": {"uri": "example.py"},
-                                        "region": {
-                                            "startLine": 10,
-                                            "startColumn": 5,
-                                            "endLine": 10,
-                                            "endColumn": 20,
-                                        },
-                                    }
-                                }
-                            ],
-                            "rule": {
-                                "toolComponent": {"index": 0},
-                                "index": 0,
-                            },
-                        },
-                        {
-                            "ruleId": "cs/web/missing-x-frame-options",
-                            "message": {
-                                "text": "Configuration file is missing the X-Frame-Options setting."
-                            },
-                            "locations": [
-                                {
-                                    "physicalLocation": {
-                                        "artifactLocation": {
-                                            "index": 5,
-                                            "uri": "Web.config",
-                                        }
-                                    }
-                                }
-                            ],
-                            "rule": {
-                                "id": "cs/web/missing-x-frame-options",
-                                "toolComponent": {"index": 0},
-                                "index": 1,
-                            },
-                        },
-                        {
-                            "codeFlows": [
-                                {
-                                    "threadFlows": [
-                                        {
-                                            "locations": [
-                                                {
-                                                    "location": {
-                                                        "message": {
-                                                            "text": "access to property QueryString : NameValueCollection"
-                                                        },
-                                                        "physicalLocation": {
-                                                            "artifactLocation": {
-                                                                "index": 8,
-                                                                "uri": "WebGoat/Content/PathManipulation.aspx.cs",
-                                                            },
-                                                            "region": {
-                                                                "endColumn": 48,
-                                                                "endLine": 33,
-                                                                "startColumn": 29,
-                                                                "startLine": 33,
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                                {
-                                                    "location": {
-                                                        "message": {
-                                                            "text": "access to local variable filename : String"
-                                                        },
-                                                        "physicalLocation": {
-                                                            "artifactLocation": {
-                                                                "index": 8,
-                                                                "uri": "WebGoat/Content/PathManipulation.aspx.cs",
-                                                            },
-                                                            "region": {
-                                                                "endColumn": 26,
-                                                                "endLine": 33,
-                                                                "startColumn": 18,
-                                                                "startLine": 33,
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                                {
-                                                    "location": {
-                                                        "message": {
-                                                            "text": "... + ..."
-                                                        },
-                                                        "physicalLocation": {
-                                                            "artifactLocation": {
-                                                                "index": 8,
-                                                                "uri": "WebGoat/Content/PathManipulation.aspx.cs",
-                                                            },
-                                                            "region": {
-                                                                "endColumn": 71,
-                                                                "endLine": 43,
-                                                                "startColumn": 42,
-                                                                "startLine": 43,
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "threadFlows": [
-                                        {
-                                            "locations": [
-                                                {
-                                                    "location": {
-                                                        "message": {
-                                                            "text": "access to property QueryString : NameValueCollection"
-                                                        },
-                                                        "physicalLocation": {
-                                                            "artifactLocation": {
-                                                                "index": 8,
-                                                                "uri": "WebGoat/Content/PathManipulation.aspx.cs",
-                                                            },
-                                                            "region": {
-                                                                "endColumn": 48,
-                                                                "endLine": 33,
-                                                                "startColumn": 29,
-                                                                "startLine": 33,
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                                {
-                                                    "location": {
-                                                        "message": {
-                                                            "text": "access to indexer : String"
-                                                        },
-                                                        "physicalLocation": {
-                                                            "artifactLocation": {
-                                                                "index": 8,
-                                                                "uri": "WebGoat/Content/PathManipulation.aspx.cs",
-                                                            },
-                                                            "region": {
-                                                                "endColumn": 60,
-                                                                "endLine": 33,
-                                                                "startColumn": 29,
-                                                                "startLine": 33,
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                                {
-                                                    "location": {
-                                                        "message": {
-                                                            "text": "access to local variable filename : String"
-                                                        },
-                                                        "physicalLocation": {
-                                                            "artifactLocation": {
-                                                                "index": 8,
-                                                                "uri": "WebGoat/Content/PathManipulation.aspx.cs",
-                                                            },
-                                                            "region": {
-                                                                "endColumn": 26,
-                                                                "endLine": 33,
-                                                                "startColumn": 18,
-                                                                "startLine": 33,
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                                {
-                                                    "location": {
-                                                        "message": {
-                                                            "text": "... + ..."
-                                                        },
-                                                        "physicalLocation": {
-                                                            "artifactLocation": {
-                                                                "index": 8,
-                                                                "uri": "WebGoat/Content/PathManipulation.aspx.cs",
-                                                            },
-                                                            "region": {
-                                                                "endColumn": 71,
-                                                                "endLine": 43,
-                                                                "startColumn": 42,
-                                                                "startLine": 43,
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            ]
-                                        }
-                                    ]
-                                },
-                            ],
-                            "correlationGuid": "d42b86b5-c4da-4af1-8c5b-5d0b83a34cb3",
-                            "level": "error",
-                            "locations": [
-                                {
-                                    "physicalLocation": {
-                                        "artifactLocation": {
-                                            "index": 8,
-                                            "uri": "WebGoat/Content/PathManipulation.aspx.cs",
-                                        },
-                                        "region": {
-                                            "endColumn": 71,
-                                            "endLine": 43,
-                                            "startColumn": 42,
-                                            "startLine": 43,
-                                        },
-                                    }
-                                }
-                            ],
-                            "message": {
-                                "text": "[User-provided value](1) flows to here and is written to HTML or JavaScript."
-                            },
-                            "partialFingerprints": {
-                                "primaryLocationLineHash": "f6cad8bc4c77c3d9:1"
-                            },
-                            "properties": {
-                                "github/alertNumber": 8,
-                                "github/alertUrl": "https://api.github.com/repos/pixee/ClassicWebGoat.NET/code-scanning/alerts/8",
-                            },
-                            "relatedLocations": [
-                                {
-                                    "id": 1,
-                                    "message": {"text": "User-provided value"},
-                                    "physicalLocation": {
-                                        "artifactLocation": {
-                                            "index": 0,
-                                            "uri": "WebGoat/Content/PathManipulation.aspx.cs",
-                                        },
-                                        "region": {
-                                            "endColumn": 48,
-                                            "endLine": 33,
-                                            "startColumn": 29,
-                                            "startLine": 33,
-                                        },
-                                    },
-                                }
-                            ],
-                            "rule": {
-                                "id": "cs/web/xss",
-                                "toolComponent": {"index": 0},
-                                "index": 2,
-                            },
-                            "ruleId": "cs/web/xss",
-                        },
-                    ],
-                }
-            ]
-        }
         sarif_file = Path("/path/to/sarif/file.sarif")
         with mock.patch(
-            "builtins.open", mock.mock_open(read_data=json.dumps(sarif_content))
+            "builtins.open", mock.mock_open(read_data=json.dumps(SARIF_CONTENT))
         ):
             result_set = CodeQLResultSet.from_sarif(sarif_file)
 
@@ -442,3 +200,268 @@ class TestCodeQLResultSet(TestCase):
                 .location.end.column,
                 48,
             )
+
+
+SARIF_CONTENT = {
+    "runs": [
+        {
+            "tool": {
+                "driver": {"name": "CodeQL"},
+                "extensions": [
+                    {
+                        "rules": [
+                            {"id": "python/sql-injection"},
+                            {"id": "cs/web/missing-x-frame-options"},
+                            {"id": "cs/web/xss"},
+                        ]
+                    },
+                ],
+            },
+            "results": [
+                {
+                    "ruleId": "python/sql-injection",
+                    "message": {"text": "Possible SQL injection"},
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {"uri": "example.py"},
+                                "region": {
+                                    "startLine": 10,
+                                    "startColumn": 5,
+                                    "endLine": 10,
+                                    "endColumn": 20,
+                                },
+                            }
+                        }
+                    ],
+                    "rule": {
+                        "toolComponent": {"index": 0},
+                        "index": 0,
+                    },
+                },
+                {
+                    "ruleId": "cs/web/missing-x-frame-options",
+                    "message": {
+                        "text": "Configuration file is missing the X-Frame-Options setting."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "index": 5,
+                                    "uri": "Web.config",
+                                }
+                            }
+                        }
+                    ],
+                    "rule": {
+                        "id": "cs/web/missing-x-frame-options",
+                        "toolComponent": {"index": 0},
+                        "index": 1,
+                    },
+                },
+                {
+                    "codeFlows": [
+                        {
+                            "threadFlows": [
+                                {
+                                    "locations": [
+                                        {
+                                            "location": {
+                                                "message": {
+                                                    "text": "access to property QueryString : NameValueCollection"
+                                                },
+                                                "physicalLocation": {
+                                                    "artifactLocation": {
+                                                        "index": 8,
+                                                        "uri": "WebGoat/Content/PathManipulation.aspx.cs",
+                                                    },
+                                                    "region": {
+                                                        "endColumn": 48,
+                                                        "endLine": 33,
+                                                        "startColumn": 29,
+                                                        "startLine": 33,
+                                                    },
+                                                },
+                                            }
+                                        },
+                                        {
+                                            "location": {
+                                                "message": {
+                                                    "text": "access to local variable filename : String"
+                                                },
+                                                "physicalLocation": {
+                                                    "artifactLocation": {
+                                                        "index": 8,
+                                                        "uri": "WebGoat/Content/PathManipulation.aspx.cs",
+                                                    },
+                                                    "region": {
+                                                        "endColumn": 26,
+                                                        "endLine": 33,
+                                                        "startColumn": 18,
+                                                        "startLine": 33,
+                                                    },
+                                                },
+                                            }
+                                        },
+                                        {
+                                            "location": {
+                                                "message": {"text": "... + ..."},
+                                                "physicalLocation": {
+                                                    "artifactLocation": {
+                                                        "index": 8,
+                                                        "uri": "WebGoat/Content/PathManipulation.aspx.cs",
+                                                    },
+                                                    "region": {
+                                                        "endColumn": 71,
+                                                        "endLine": 43,
+                                                        "startColumn": 42,
+                                                        "startLine": 43,
+                                                    },
+                                                },
+                                            }
+                                        },
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "threadFlows": [
+                                {
+                                    "locations": [
+                                        {
+                                            "location": {
+                                                "message": {
+                                                    "text": "access to property QueryString : NameValueCollection"
+                                                },
+                                                "physicalLocation": {
+                                                    "artifactLocation": {
+                                                        "index": 8,
+                                                        "uri": "WebGoat/Content/PathManipulation.aspx.cs",
+                                                    },
+                                                    "region": {
+                                                        "endColumn": 48,
+                                                        "endLine": 33,
+                                                        "startColumn": 29,
+                                                        "startLine": 33,
+                                                    },
+                                                },
+                                            }
+                                        },
+                                        {
+                                            "location": {
+                                                "message": {
+                                                    "text": "access to indexer : String"
+                                                },
+                                                "physicalLocation": {
+                                                    "artifactLocation": {
+                                                        "index": 8,
+                                                        "uri": "WebGoat/Content/PathManipulation.aspx.cs",
+                                                    },
+                                                    "region": {
+                                                        "endColumn": 60,
+                                                        "endLine": 33,
+                                                        "startColumn": 29,
+                                                        "startLine": 33,
+                                                    },
+                                                },
+                                            }
+                                        },
+                                        {
+                                            "location": {
+                                                "message": {
+                                                    "text": "access to local variable filename : String"
+                                                },
+                                                "physicalLocation": {
+                                                    "artifactLocation": {
+                                                        "index": 8,
+                                                        "uri": "WebGoat/Content/PathManipulation.aspx.cs",
+                                                    },
+                                                    "region": {
+                                                        "endColumn": 26,
+                                                        "endLine": 33,
+                                                        "startColumn": 18,
+                                                        "startLine": 33,
+                                                    },
+                                                },
+                                            }
+                                        },
+                                        {
+                                            "location": {
+                                                "message": {"text": "... + ..."},
+                                                "physicalLocation": {
+                                                    "artifactLocation": {
+                                                        "index": 8,
+                                                        "uri": "WebGoat/Content/PathManipulation.aspx.cs",
+                                                    },
+                                                    "region": {
+                                                        "endColumn": 71,
+                                                        "endLine": 43,
+                                                        "startColumn": 42,
+                                                        "startLine": 43,
+                                                    },
+                                                },
+                                            }
+                                        },
+                                    ]
+                                }
+                            ]
+                        },
+                    ],
+                    "correlationGuid": "d42b86b5-c4da-4af1-8c5b-5d0b83a34cb3",
+                    "level": "error",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "index": 8,
+                                    "uri": "WebGoat/Content/PathManipulation.aspx.cs",
+                                },
+                                "region": {
+                                    "endColumn": 71,
+                                    "endLine": 43,
+                                    "startColumn": 42,
+                                    "startLine": 43,
+                                },
+                            }
+                        }
+                    ],
+                    "message": {
+                        "text": "[User-provided value](1) flows to here and is written to HTML or JavaScript."
+                    },
+                    "partialFingerprints": {
+                        "primaryLocationLineHash": "f6cad8bc4c77c3d9:1"
+                    },
+                    "properties": {
+                        "github/alertNumber": 8,
+                        "github/alertUrl": "https://api.github.com/repos/pixee/ClassicWebGoat.NET/code-scanning/alerts/8",
+                    },
+                    "relatedLocations": [
+                        {
+                            "id": 1,
+                            "message": {"text": "User-provided value"},
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "index": 0,
+                                    "uri": "WebGoat/Content/PathManipulation.aspx.cs",
+                                },
+                                "region": {
+                                    "endColumn": 48,
+                                    "endLine": 33,
+                                    "startColumn": 29,
+                                    "startLine": 33,
+                                },
+                            },
+                        }
+                    ],
+                    "rule": {
+                        "id": "cs/web/xss",
+                        "toolComponent": {"index": 0},
+                        "index": 2,
+                    },
+                    "ruleId": "cs/web/xss",
+                },
+            ],
+        }
+    ]
+}

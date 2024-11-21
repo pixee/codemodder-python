@@ -27,7 +27,7 @@ class DefectDojoResult(SASTResult):
         return cls(
             finding_id=result["id"],
             rule_id=result["title"],
-            locations=[DefectDojoLocation.from_result(result)],
+            locations=tuple([DefectDojoLocation.from_result(result)]),
             finding=Finding(
                 id=str(result["id"]),
                 rule=Rule(

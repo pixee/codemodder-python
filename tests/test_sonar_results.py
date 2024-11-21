@@ -27,5 +27,5 @@ def test_result_without_textrange():
     sonar_result = SonarResult.from_result(result)
     assert sonar_result.rule_id == "php:S105"
     assert sonar_result.finding_id == "AZJnP4pZPJb5bI8DP25Y"
-    assert sonar_result.locations == []
-    assert sonar_result.codeflows == []
+    assert sonar_result.locations == ()
+    assert sonar_result.codeflows == ()
