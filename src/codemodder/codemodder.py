@@ -19,7 +19,7 @@ from codemodder.logging import configure_logger, log_list, log_section, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
 from codemodder.result import ResultSet
-from codemodder.sarifs import DuplicateToolError, detect_sarif_tools
+from codemodder.sarifs import detect_sarif_tools
 from codemodder.semgrep import run as run_semgrep
 
 
@@ -235,7 +235,7 @@ def _run_cli(original_args) -> int:
         tool_result_files_map: DefaultDict[str, list[Path]] = detect_sarif_tools(
             [Path(name) for name in argv.sarif or []]
         )
-    except (DuplicateToolError, FileNotFoundError) as err:
+    except FileNotFoundError as err:
         logger.error(err)
         return 1
 

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from codemodder.sarifs import DuplicateToolError, detect_sarif_tools
+from codemodder.sarifs import detect_sarif_tools
 from codemodder.semgrep import SemgrepResult, SemgrepResultSet
 
 
@@ -102,15 +102,14 @@ class TestSarifProcessing:
             check=False,
             capture_output=True,
         )
-        assert completed_process.returncode == 1
-        assert (
-            "duplicate tool sarif detected: codeql" in completed_process.stderr.decode()
-        )
+        assert completed_process.returncode == 0
 
     def test_two_sarifs_same_tool(self):
-        with pytest.raises(DuplicateToolError) as exc:
-            detect_sarif_tools([Path("tests/samples/webgoat_v8.2.0_codeql.sarif")] * 2)
-        assert "duplicate tool sarif detected: codeql" in str(exc.value)
+        results = detect_sarif_tools(
+            [Path("tests/samples/webgoat_v8.2.0_codeql.sarif")] * 2
+        )
+        assert len(results) == 1
+        assert len(results["codeql"]) == 2
 
     def test_bad_sarif(self, tmpdir, caplog):
         sarif_file = Path("tests") / "samples" / "semgrep.sarif"
