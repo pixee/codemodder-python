@@ -15,9 +15,6 @@ class AbstractSarifToolDetector(metaclass=ABCMeta):
         pass
 
 
-class DuplicateToolError(ValueError): ...
-
-
 def detect_sarif_tools(filenames: list[Path]) -> DefaultDict[str, list[Path]]:
     results: DefaultDict[str, list[Path]] = defaultdict(list)
 
@@ -42,15 +39,7 @@ def detect_sarif_tools(filenames: list[Path]) -> DefaultDict[str, list[Path]]:
                 try:
                     if det.detect(run):
                         logger.debug("detected %s sarif: %s", name, fname)
-                        # According to the Codemodder spec, it is invalid to have multiple SARIF results for the same tool
-                        # https://github.com/pixee/codemodder-specs/pull/36
-                        if name in results:
-                            raise DuplicateToolError(
-                                f"duplicate tool sarif detected: {name}"
-                            )
                         results[name].append(Path(fname))
-                except DuplicateToolError as err:
-                    raise err
                 except (KeyError, AttributeError, ValueError):
                     continue
 
