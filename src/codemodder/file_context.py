@@ -25,6 +25,7 @@ class FileContext:
     changesets: list[ChangeSet] = field(default_factory=list)
     failures: list[Path] = field(default_factory=list)
     timer: Timer = field(default_factory=Timer)
+    enrichment: dict[str] = field(default_factory=dict)
 
     def add_dependency(self, dependency: Dependency):
         self.dependencies.add(dependency)
