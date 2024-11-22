@@ -76,6 +76,16 @@ class Change(BaseModel):
             raise ValueError("description must not be empty")
         return self
 
+    def with_findings(self, findings: list[Finding] | None) -> Change:
+        return Change(
+            lineNumber=self.lineNumber,
+            description=self.description,
+            diffSide=self.diffSide,
+            properties=self.properties,
+            packageActions=self.packageActions,
+            findings=findings,
+        )
+
 
 class AIMetadata(BaseModel):
     provider: Optional[str] = None
@@ -98,6 +108,16 @@ class ChangeSet(BaseModel):
     ai: Optional[AIMetadata] = None
     strategy: Optional[Strategy] = None
     provisional: Optional[bool] = False
+
+    def with_changes(self, changes: list[Change]) -> ChangeSet:
+        return ChangeSet(
+            path=self.path,
+            diff=self.diff,
+            changes=changes,
+            ai=self.ai,
+            strategy=self.strategy,
+            provisional=self.provisional,
+        )
 
 
 class Reference(BaseModel):
@@ -139,6 +159,12 @@ class Finding(BaseModel):
             path=path,
             lineNumber=line_number,
             reason=reason,
+        )
+
+    def with_rule(self, name: str, url: Optional[str]) -> Finding:
+        return Finding(
+            id=self.id,
+            rule=Rule(id=self.rule.id, name=name, url=url),
         )
 
 

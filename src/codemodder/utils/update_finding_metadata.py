@@ -5,7 +5,7 @@ import typing
 if typing.TYPE_CHECKING:
     from codemodder.codemods.base_codemod import ToolRule
 
-from codemodder.codetf import ChangeSet
+from codemodder.codetf import Change, ChangeSet
 
 
 def update_finding_metadata(
@@ -15,12 +15,23 @@ def update_finding_metadata(
     if not (tool_rule_map := {rule.id: (rule.name, rule.url) for rule in tool_rules}):
         return changesets
 
+    new_changesets: list[ChangeSet] = []
     for changeset in changesets:
+        new_changes: list[Change] = []
         for change in changeset.changes:
-            for finding in change.findings or []:
-                if finding.id in tool_rule_map:
-                    finding.rule.name = tool_rule_map[finding.id][0]
-                    finding.rule.url = tool_rule_map[finding.id][1]
+            new_changes.append(
+                change.with_findings(
+                    [
+                        (
+                            finding.with_rule(*tool_rule_map[finding.rule.id])
+                            if finding.rule.id in tool_rule_map
+                            else finding
+                        )
+                        for finding in change.findings or []
+                    ]
+                    or None
+                )
+            )
+        new_changesets.append(changeset.with_changes(new_changes))
 
-    # TODO: eventually make this functional and return a new list
-    return changesets
+    return new_changesets
