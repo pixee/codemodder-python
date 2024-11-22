@@ -11,6 +11,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 description = "A pluggable framework for building codemods in Python"
 dependencies = [
+    "boltons~=21.0.0",
     "GitPython<4",
     "isort>=5.12,<5.14",
     "libcst>=1.1,<1.6",
@@ -118,6 +119,7 @@ version_file = "src/codemodder/_version.py"
 [tool.pytest.ini_options]
 # Ignore integration tests and ci tests by default
 testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.black]
 extend-exclude = '''

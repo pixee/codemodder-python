@@ -2,6 +2,7 @@ import json
 from dataclasses import replace
 from functools import cache
 from pathlib import Path
+from typing import Sequence
 
 import libcst as cst
 from typing_extensions import Self
@@ -40,18 +41,22 @@ class SonarResult(SASTResult):
         if not (rule_id := result.get("rule", None) or result.get("ruleKey", None)):
             raise ValueError("Could not extract rule id from sarif result.")
 
-        locations: list[Location] = (
+        locations: Sequence[Location] = tuple(
             [SonarLocation.from_json_location(result)]
             if result.get("textRange")
             else []
         )
-        all_flows: list[list[Location]] = [
+        all_flows: Sequence[Sequence[Location]] = tuple(
             [
-                SonarLocation.from_json_location(json_location)
-                for json_location in flow.get("locations", {})
+                tuple(
+                    [
+                        SonarLocation.from_json_location(json_location)
+                        for json_location in flow.get("locations", {})
+                    ]
+                )
+                for flow in result.get("flows", [])
             ]
-            for flow in result.get("flows", [])
-        ]
+        )
 
         finding_id = result.get("key", rule_id)
 

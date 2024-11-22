@@ -4,9 +4,10 @@ import itertools
 from abc import abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Type
+from typing import TYPE_CHECKING, Any, ClassVar, Sequence, Type
 
 import libcst as cst
+from boltons.setutils import IndexedSet
 from libcst._position import CodeRange
 from typing_extensions import Self
 
@@ -18,20 +19,21 @@ if TYPE_CHECKING:
     from codemodder.context import CodemodExecutionContext
 
 
-@dataclass
+@dataclass(frozen=True)
 class LineInfo:
     line: int
     column: int = -1
     snippet: str | None = None
 
 
-@dataclass
+@dataclass(frozen=True)
 class Location(ABCDataclass):
     file: Path
     start: LineInfo
     end: LineInfo
 
 
+@dataclass(frozen=True)
 class SarifLocation(Location):
     @classmethod
     @abstractmethod
@@ -39,18 +41,18 @@ class SarifLocation(Location):
         pass
 
 
-@dataclass
+@dataclass(frozen=True)
 class LocationWithMessage:
     location: Location
     message: str
 
 
-@dataclass(kw_only=True)
+@dataclass(frozen=True, kw_only=True)
 class Result(ABCDataclass):
     rule_id: str
-    locations: list[Location]
-    codeflows: list[list[Location]] = field(default_factory=list)
-    related_locations: list[LocationWithMessage] = field(default_factory=list)
+    locations: Sequence[Location]
+    codeflows: Sequence[Sequence[Location]] = field(default_factory=tuple)
+    related_locations: Sequence[LocationWithMessage] = field(default_factory=tuple)
     finding: Finding | None = None
 
     def match_location(self, pos: CodeRange, node: cst.CSTNode) -> bool:
@@ -67,13 +69,16 @@ class Result(ABCDataclass):
             for location in self.locations
         )
 
+    def __hash__(self):
+        return hash(self.rule_id)
 
-@dataclass(kw_only=True)
+
+@dataclass(frozen=True, kw_only=True)
 class SASTResult(Result):
     finding_id: str
 
 
-@dataclass(kw_only=True)
+@dataclass(frozen=True, kw_only=True)
 class SarifResult(SASTResult, ABCDataclass):
     location_type: ClassVar[Type[SarifLocation]]
 
@@ -84,32 +89,40 @@ class SarifResult(SASTResult, ABCDataclass):
         raise NotImplementedError
 
     @classmethod
-    def extract_locations(cls, sarif_result) -> list[Location]:
-        return [
-            cls.location_type.from_sarif(location)
-            for location in sarif_result["locations"]
-        ]
-
-    @classmethod
-    def extract_related_locations(cls, sarif_result) -> list[LocationWithMessage]:
-        return [
-            LocationWithMessage(
-                message=rel_location.get("message", {}).get("text", ""),
-                location=cls.location_type.from_sarif(rel_location),
-            )
-            for rel_location in sarif_result.get("relatedLocations", [])
-        ]
-
-    @classmethod
-    def extract_code_flows(cls, sarif_result) -> list[list[Location]]:
-        return [
+    def extract_locations(cls, sarif_result) -> Sequence[Location]:
+        return tuple(
             [
-                cls.location_type.from_sarif(locations.get("location"))
-                for locations in threadflow.get("locations", {})
+                cls.location_type.from_sarif(location)
+                for location in sarif_result["locations"]
             ]
-            for codeflow in sarif_result.get("codeFlows", {})
-            for threadflow in codeflow.get("threadFlows", {})
-        ]
+        )
+
+    @classmethod
+    def extract_related_locations(cls, sarif_result) -> Sequence[LocationWithMessage]:
+        return tuple(
+            [
+                LocationWithMessage(
+                    message=rel_location.get("message", {}).get("text", ""),
+                    location=cls.location_type.from_sarif(rel_location),
+                )
+                for rel_location in sarif_result.get("relatedLocations", [])
+            ]
+        )
+
+    @classmethod
+    def extract_code_flows(cls, sarif_result) -> Sequence[Sequence[Location]]:
+        return tuple(
+            [
+                tuple(
+                    [
+                        cls.location_type.from_sarif(locations.get("location"))
+                        for locations in threadflow.get("locations", {})
+                    ]
+                )
+                for codeflow in sarif_result.get("codeFlows", {})
+                for threadflow in codeflow.get("threadFlows", {})
+            ]
+        )
 
     @classmethod
     def extract_rule_id(cls, result, sarif_run, truncate_rule_id: bool = False) -> str:
@@ -199,5 +212,7 @@ def list_dict_or(
 ) -> dict[Any, list[Any]]:
     result_dict = {}
     for k in other.keys() | dictionary.keys():
-        result_dict[k] = dictionary.get(k, []) + other.get(k, [])
+        result_dict[k] = list(
+            IndexedSet(dictionary.get(k, [])) | (IndexedSet(other.get(k, [])))
+        )
     return result_dict

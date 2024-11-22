@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(frozen=True)
 class ABCDataclass(ABC):
     """Inspired by https://stackoverflow.com/a/60669138"""
 
