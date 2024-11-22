@@ -119,6 +119,7 @@ version_file = "src/codemodder/_version.py"
 [tool.pytest.ini_options]
 # Ignore integration tests and ci tests by default
 testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.black]
 extend-exclude = '''
