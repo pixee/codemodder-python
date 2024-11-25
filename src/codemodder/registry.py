@@ -52,6 +52,16 @@ class CodemodRegistry:
     def default_include_paths(self) -> list[str]:
         return list(self._default_include_paths)
 
+    @property
+    def all_tool_rules(self) -> list[str]:
+        return [
+            rule
+            for key, values in self._codemods_by_tool.items()
+            if key != "pixee"
+            for codemod in values
+            for rule in codemod.requested_rules
+        ]
+
     def codemods_by_tool(self, tool_name: str) -> list[BaseCodemod]:
         return self._codemods_by_tool.get(tool_name, [])
 
