@@ -23,7 +23,7 @@ dependencies = [
     "semgrep>=1.97,<1.98",
     "toml~=0.10.2",
     "tomlkit~=0.13.0",
-    "wrapt~=1.16.0",
+    "wrapt>=1.16,<1.18",
     "chardet~=5.2.0",
     "setuptools~=75.0",
 ]
