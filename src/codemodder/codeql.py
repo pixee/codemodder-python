@@ -43,12 +43,11 @@ class CodeQLResult(SarifResult):
     def from_sarif(
         cls, sarif_result, sarif_run, truncate_rule_id: bool = False
     ) -> Self:
+        rule_id = cls.extract_rule_id(sarif_result, sarif_run, truncate_rule_id)
+        text_for_rule = get_text_for_rule(rule_id, sarif_run)
+        finding_msg = f"""{sarif_result['message']['text']}\n{text_for_rule}"""
         return cls(
-            rule_id=(
-                rule_id := cls.extract_rule_id(
-                    sarif_result, sarif_run, truncate_rule_id
-                )
-            ),
+            rule_id=rule_id,
             locations=cls.extract_locations(sarif_result),
             codeflows=cls.extract_code_flows(sarif_result),
             related_locations=cls.extract_related_locations(sarif_result),
@@ -62,6 +61,7 @@ class CodeQLResult(SarifResult):
                     # url=,
                 ),
             ),
+            finding_msg=finding_msg,
         )
 
 
@@ -80,3 +80,12 @@ class CodeQLResultSet(ResultSet):
                     )
                     result_set.add_result(codeql_result)
         return result_set
+
+
+# TODO: cache, make hashable
+def get_text_for_rule(rule_id: str, sarif_run: dict) -> str:
+    for ext in sarif_run["tool"]["extensions"]:
+        for rule in ext.get("rules", []):
+            if rule["id"] == rule_id:
+                return f"{rule["fullDescription"]["text"]}\n{rule["help"]["text"]}"
+    return ""

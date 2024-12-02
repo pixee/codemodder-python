@@ -76,6 +76,7 @@ class Result(ABCDataclass):
 @dataclass(frozen=True, kw_only=True)
 class SASTResult(Result):
     finding_id: str
+    finding_msg: str | None
 
 
 @dataclass(frozen=True, kw_only=True)

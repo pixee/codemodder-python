@@ -72,6 +72,7 @@ class SemgrepResult(SarifResult):
                     url=semgrep_url_from_id(rule_id),
                 ),
             ),
+            finding_msg="TODO",
         )
 
 

@@ -76,6 +76,7 @@ class SonarResult(SASTResult):
                     url=sonar_url_from_id(rule_id),
                 ),
             ),
+            finding_msg="TODO",
         )
 
     def match_location(self, pos, node):

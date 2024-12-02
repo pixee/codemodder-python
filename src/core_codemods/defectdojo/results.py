@@ -37,6 +37,7 @@ class DefectDojoResult(SASTResult):
                     url=None,
                 ),
             ),
+            finding_msg="TODO",
         )
 
     @override
