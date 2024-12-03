@@ -58,6 +58,11 @@ class FileContext:
                 location.start.line <= line_number <= location.end.line
                 for location in result.locations
             )
+            or any(
+                location.start.line <= line_number <= location.end.line
+                for codeflow in result.codeflows
+                for location in codeflow
+            )
             and result.finding is not None
         ]
 
