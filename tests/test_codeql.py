@@ -209,11 +209,18 @@ SARIF_CONTENT = {
                 "driver": {"name": "CodeQL"},
                 "extensions": [
                     {
+                        "name": "codeql/python-queries",
                         "rules": [
-                            {"id": "python/sql-injection"},
+                            {
+                                "id": "python/sql-injection",
+                                "fullDescription": {
+                                    "text": "Some lengthy description."
+                                },
+                                "help": {"text": "Description\n"},
+                            },
                             {"id": "cs/web/missing-x-frame-options"},
                             {"id": "cs/web/xss"},
-                        ]
+                        ],
                     },
                 ],
             },
