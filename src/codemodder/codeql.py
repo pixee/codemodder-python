@@ -56,7 +56,7 @@ class CodeQLResult(SarifResult):
             finding=Finding(
                 id=rule_id,
                 rule=Rule(
-                    id=rule_id,
+                    id=sarif_result.get("correlationGuid", rule_id),
                     name=rule_id,
                     # TODO: map to URL
                     # url=,
