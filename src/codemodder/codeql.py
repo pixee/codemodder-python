@@ -3,7 +3,6 @@ from pathlib import Path
 
 from typing_extensions import Self
 
-from codemodder.codetf import Finding, Rule
 from codemodder.result import LineInfo, ResultSet, SarifLocation, SarifResult
 from codemodder.sarifs import AbstractSarifToolDetector
 
@@ -40,29 +39,10 @@ class CodeQLResult(SarifResult):
     location_type = CodeQLLocation
 
     @classmethod
-    def from_sarif(
-        cls, sarif_result, sarif_run, truncate_rule_id: bool = False
-    ) -> Self:
-        return cls(
-            rule_id=(
-                rule_id := cls.extract_rule_id(
-                    sarif_result, sarif_run, truncate_rule_id
-                )
-            ),
-            locations=cls.extract_locations(sarif_result),
-            codeflows=cls.extract_code_flows(sarif_result),
-            related_locations=cls.extract_related_locations(sarif_result),
-            finding_id=rule_id,
-            finding=Finding(
-                id=rule_id,
-                rule=Rule(
-                    id=sarif_result.get("correlationGuid", rule_id),
-                    name=rule_id,
-                    # TODO: map to URL
-                    # url=,
-                ),
-            ),
-        )
+    def rule_url_from_id(cls, result: dict, run: dict, rule_id: str) -> str:
+        del result, run, rule_id
+        # TODO: Implement this method to return the specific rule URL
+        return "https://codeql.github.com/codeql-query-help/"
 
 
 class CodeQLResultSet(ResultSet):

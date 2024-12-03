@@ -11,7 +11,7 @@ from boltons.setutils import IndexedSet
 from libcst._position import CodeRange
 from typing_extensions import Self
 
-from codemodder.codetf import Finding
+from codemodder.codetf import Finding, Rule
 
 from .utils.abc_dataclass import ABCDataclass
 
@@ -86,6 +86,26 @@ class SarifResult(SASTResult, ABCDataclass):
     def from_sarif(
         cls, sarif_result, sarif_run, truncate_rule_id: bool = False
     ) -> Self:
+        rule_id = cls.extract_rule_id(sarif_result, sarif_run, truncate_rule_id)
+        finding_id = cls.extract_finding_id(sarif_result) or rule_id
+        return cls(
+            rule_id=rule_id,
+            locations=cls.extract_locations(sarif_result),
+            codeflows=cls.extract_code_flows(sarif_result),
+            related_locations=cls.extract_related_locations(sarif_result),
+            finding_id=finding_id,
+            finding=Finding(
+                id=finding_id,
+                rule=Rule(
+                    id=rule_id,
+                    name=rule_id,
+                    url=cls.rule_url_from_id(sarif_result, sarif_run, rule_id),
+                ),
+            ),
+        )
+
+    @classmethod
+    def rule_url_from_id(cls, result: dict, run: dict, rule_id: str) -> str:
         raise NotImplementedError
 
     @classmethod
@@ -138,6 +158,10 @@ class SarifResult(SASTResult, ABCDataclass):
             ]
 
         raise ValueError("Could not extract rule id from sarif result.")
+
+    @classmethod
+    def extract_finding_id(cls, result) -> str | None:
+        return result.get("guid") or result.get("correlationGuid")
 
 
 def same_line(pos: CodeRange, location: Location) -> bool:
