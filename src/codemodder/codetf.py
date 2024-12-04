@@ -108,6 +108,8 @@ class ChangeSet(BaseModel):
     ai: Optional[AIMetadata] = None
     strategy: Optional[Strategy] = None
     provisional: Optional[bool] = False
+    # For fixed findings that are not associated with a specific change
+    fixedFindings: Optional[list[Finding]] = None
 
     def with_changes(self, changes: list[Change]) -> ChangeSet:
         return ChangeSet(
@@ -117,6 +119,7 @@ class ChangeSet(BaseModel):
             ai=self.ai,
             strategy=self.strategy,
             provisional=self.provisional,
+            fixedFindings=self.fixedFindings,
         )
 
 
