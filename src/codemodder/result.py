@@ -11,7 +11,8 @@ from boltons.setutils import IndexedSet
 from libcst._position import CodeRange
 from typing_extensions import Self
 
-from codemodder.codetf import Finding, Rule
+from codemodder.codetf import Finding
+from codemodder.codetf import Rule as CodetfRule
 
 from .utils.abc_dataclass import ABCDataclass
 
@@ -176,17 +177,32 @@ def fuzzy_column_match(pos: CodeRange, location: Location) -> bool:
     )
 
 
-class ResultSet(dict[str, dict[Path, list[Result]]]):
-    results_for_rule: dict[str, list[Result]]
+class Rule(CodetfRule):
+    short_description: str = ""
+    full_description: str = ""
+    help: str = ""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.results_for_rule = {}
+
+class ResultSet(dict[str, dict[Path, list[Result]]]):
+    results_for_rule: dict[str, list[Result]] = {}
+    metadata_for_rule: dict[str, list[Rule]] = {}
 
     def add_result(self, result: Result):
         self.results_for_rule.setdefault(result.rule_id, []).append(result)
         for loc in result.locations:
             self.setdefault(result.rule_id, {}).setdefault(loc.file, []).append(result)
+
+    def add_rule_metadata(self, rule_data: dict):
+        if (rule_id := rule_data["id"]) not in self.metadata_for_rule:
+            rule = Rule(
+                id=rule_id,
+                name=rule_data["name"],
+                short_description=rule_data.get("shortDescription", {}).get("text", ""),
+                full_description=rule_data.get("fullDescription", {}).get("text", ""),
+                help=rule_data.get("help", {}).get("text", "")
+                or rule_data.get("help", {}).get("markdown", ""),
+            )
+            self.metadata_for_rule[rule_id] = rule
 
     def results_for_rule_and_file(
         self, context: CodemodExecutionContext, rule_id: str, file: Path
