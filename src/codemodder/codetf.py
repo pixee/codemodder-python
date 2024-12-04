@@ -62,7 +62,7 @@ class Change(BaseModel):
     diffSide: DiffSide = DiffSide.RIGHT
     properties: Optional[dict] = None
     packageActions: Optional[list[PackageAction]] = None
-    findings: Optional[list[Finding]] = None
+    fixedFindings: Optional[list[Finding]] = None
 
     @model_validator(mode="after")
     def validate_lineNumber(self):
@@ -83,7 +83,7 @@ class Change(BaseModel):
             diffSide=self.diffSide,
             properties=self.properties,
             packageActions=self.packageActions,
-            findings=findings,
+            fixedFindings=findings,
         )
 
 

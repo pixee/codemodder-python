@@ -27,7 +27,7 @@ def update_finding_metadata(
                             if finding.rule.id in tool_rule_map
                             else finding
                         )
-                        for finding in change.findings or []
+                        for finding in change.fixedFindings or []
                     ]
                     or None
                 )

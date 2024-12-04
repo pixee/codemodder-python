@@ -12,14 +12,14 @@ def test_update_finding_metdata():
             Change(
                 lineNumber=1,
                 description="foo",
-                findings=[
+                fixedFindings=[
                     Finding(id="rule_id", rule=Rule(id="rule_id", name="other_name"))
                 ],
             ),
             Change(
                 lineNumber=2,
                 description="bar",
-                findings=[
+                fixedFindings=[
                     Finding(id="other_id", rule=Rule(id="other_id", name="other_name"))
                 ],
             ),
@@ -34,10 +34,10 @@ def test_update_finding_metdata():
         tool_rules=[tool_rule], changesets=[changeset]
     )
 
-    assert new_changesets[0].changes[0].findings
-    assert new_changesets[0].changes[0].findings[0].rule.name == "rule_name"
-    assert new_changesets[0].changes[0].findings[0].rule.url == "rule_url"
-    assert new_changesets[0].changes[1].findings
-    assert new_changesets[0].changes[1].findings[0].rule.name == "other_name"
-    assert new_changesets[0].changes[1].findings[0].rule.url is None
+    assert new_changesets[0].changes[0].fixedFindings
+    assert new_changesets[0].changes[0].fixedFindings[0].rule.name == "rule_name"
+    assert new_changesets[0].changes[0].fixedFindings[0].rule.url == "rule_url"
+    assert new_changesets[0].changes[1].fixedFindings
+    assert new_changesets[0].changes[1].fixedFindings[0].rule.name == "other_name"
+    assert new_changesets[0].changes[1].fixedFindings[0].rule.url is None
     assert new_changesets[0].changes[2] == changeset.changes[2]

@@ -195,4 +195,6 @@ class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
             expexted_output,
             results=json.dumps(results),
         )
-        assert len(changes[0].changes[0].findings) == len(results["runs"][0]["results"])
+        assert len(changes[0].changes[0].fixedFindings) == len(
+            results["runs"][0]["results"]
+        )
