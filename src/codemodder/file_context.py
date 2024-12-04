@@ -50,20 +50,22 @@ class FileContext:
             ]
         )
 
-    def get_findings_for_location(self, line_number: int):
+    def get_findings_for_location(self, line_number: int) -> list[Finding]:
         return [
             result.finding
             for result in (self.results or [])
-            if any(
-                location.start.line <= line_number <= location.end.line
-                for location in result.locations
+            if result.finding is not None
+            and (
+                any(
+                    location.start.line <= line_number <= location.end.line
+                    for location in result.locations
+                )
+                or any(
+                    location.start.line <= line_number <= location.end.line
+                    for codeflow in result.codeflows
+                    for location in codeflow
+                )
             )
-            or any(
-                location.start.line <= line_number <= location.end.line
-                for codeflow in result.codeflows
-                for location in codeflow
-            )
-            and result.finding is not None
         ]
 
     def match_findings(self, line_numbers):
