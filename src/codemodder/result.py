@@ -177,9 +177,14 @@ def fuzzy_column_match(pos: CodeRange, location: Location) -> bool:
 
 
 class ResultSet(dict[str, dict[Path, list[Result]]]):
-    results_for_rule: dict[str, list[Result]] = {}
+    results_for_rule: dict[str, list[Result]]
     # stores SARIF runs.tool data
-    tools: list[dict[str, dict]] = []
+    tools: list[dict[str, dict]]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.results_for_rule = {}
+        self.tools = []
 
     def add_result(self, result: Result):
         self.results_for_rule.setdefault(result.rule_id, []).append(result)
