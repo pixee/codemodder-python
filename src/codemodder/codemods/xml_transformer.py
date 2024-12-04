@@ -8,7 +8,7 @@ from xml.sax.xmlreader import AttributesImpl, Locator
 from defusedxml.sax import make_parser
 
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
-from codemodder.codetf import Change, ChangeSet
+from codemodder.codetf import Change, ChangeSet, Strategy
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff
 from codemodder.file_context import FileContext
@@ -209,9 +209,9 @@ class XMLTransformerPipeline(BaseTransformerPipeline):
                 output_file.seek(0)
             except Exception:
                 file_context.add_failure(
-                    file_path, reason := "Failed to parse XML file"
+                    file_context.file_path, reason := "Failed to parse XML file"
                 )
-                logger.exception("%s %s", reason, file_path)
+                logger.exception("%s %s", reason, file_context.file_path)
                 return None
 
             if not changes:
@@ -236,4 +236,6 @@ class XMLTransformerPipeline(BaseTransformerPipeline):
                 path=str(file_path.relative_to(context.directory)),
                 diff=diff,
                 changes=changes,
+                strategy=Strategy.deterministic,
+                provisional=False,
             )
