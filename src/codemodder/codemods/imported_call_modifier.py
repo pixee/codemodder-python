@@ -81,7 +81,7 @@ class ImportedCallModifier(
                     Change(
                         lineNumber=line_number,
                         description=self.change_description,
-                        findings=self.file_context.get_findings_for_location(
+                        fixedFindings=self.file_context.get_findings_for_location(
                             line_number
                         ),
                     )

@@ -229,7 +229,7 @@ class ResourceLeakFixer(MetadataPreservingTransformer, NameAndAncestorResolution
                     Change(
                         lineNumber=line_number,
                         description=FileResourceLeakTransformer.change_description,
-                        findings=self.file_context.get_findings_for_location(
+                        fixedFindings=self.file_context.get_findings_for_location(
                             line_number
                         ),
                     )

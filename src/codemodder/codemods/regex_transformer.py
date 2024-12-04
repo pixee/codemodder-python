@@ -40,7 +40,7 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
                     Change(
                         lineNumber=lineno + 1,
                         description=self.change_description,
-                        findings=file_context.get_findings_for_location(lineno),
+                        fixedFindings=file_context.get_findings_for_location(lineno),
                     )
                 )
         return changes, updated_lines
@@ -110,7 +110,7 @@ class SastRegexTransformerPipeline(RegexTransformerPipeline):
                     Change(
                         lineNumber=lineno + 1,
                         description=self.change_description,
-                        findings=file_context.get_findings_for_location(lineno),
+                        fixedFindings=file_context.get_findings_for_location(lineno),
                     )
                 )
 

@@ -224,5 +224,5 @@ class BaseSASTCodemodTest(BaseCodemodTest):
 
     def assert_findings(self, changes: list[Change]):
         assert all(
-            x.findings for x in changes
+            x.fixedFindings for x in changes
         ), f"Expected all changes to have findings: {changes}"

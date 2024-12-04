@@ -62,7 +62,7 @@ class Change(BaseModel):
     diffSide: DiffSide = DiffSide.RIGHT
     properties: Optional[dict] = None
     packageActions: Optional[list[PackageAction]] = None
-    findings: Optional[list[Finding]] = None
+    fixedFindings: Optional[list[Finding]] = None
 
     @model_validator(mode="after")
     def validate_lineNumber(self):
@@ -83,7 +83,7 @@ class Change(BaseModel):
             diffSide=self.diffSide,
             properties=self.properties,
             packageActions=self.packageActions,
-            findings=findings,
+            fixedFindings=findings,
         )
 
 
@@ -108,6 +108,8 @@ class ChangeSet(BaseModel):
     ai: Optional[AIMetadata] = None
     strategy: Optional[Strategy] = None
     provisional: Optional[bool] = False
+    # For fixed findings that are not associated with a specific change
+    fixedFindings: Optional[list[Finding]] = None
 
     def with_changes(self, changes: list[Change]) -> ChangeSet:
         return ChangeSet(
@@ -117,6 +119,7 @@ class ChangeSet(BaseModel):
             ai=self.ai,
             strategy=self.strategy,
             provisional=self.provisional,
+            fixedFindings=self.fixedFindings,
         )
 
 

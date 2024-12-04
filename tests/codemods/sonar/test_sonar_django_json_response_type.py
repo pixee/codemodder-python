@@ -50,7 +50,7 @@ class TestDjangoJsonResponseType(BaseSASTCodemodTest):
             tmpdir, input_code, expected, results=json.dumps(issues)
         )
         assert changes is not None
-        assert changes[0].changes[0].findings is not None
-        assert changes[0].changes[0].findings[0].id == rule_id
-        assert changes[0].changes[0].findings[0].rule.id == rule_id
-        assert changes[0].changes[0].findings[0].rule.name == rule_id
+        assert changes[0].changes[0].fixedFindings is not None
+        assert changes[0].changes[0].fixedFindings[0].id == rule_id
+        assert changes[0].changes[0].fixedFindings[0].rule.id == rule_id
+        assert changes[0].changes[0].fixedFindings[0].rule.name == rule_id

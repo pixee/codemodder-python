@@ -37,9 +37,9 @@ class TestDjangoSecureSetCookie(BaseSASTCodemodTest):
         )
 
         assert changes is not None
-        assert changes[0].changes[0].findings is not None
-        assert changes[0].changes[0].findings[0].id == "1"
+        assert changes[0].changes[0].fixedFindings is not None
+        assert changes[0].changes[0].fixedFindings[0].id == "1"
         assert (
-            changes[0].changes[0].findings[0].rule.id
+            changes[0].changes[0].fixedFindings[0].rule.id
             == "python.django.security.audit.secure-cookies.django-secure-set-cookie"
         )
