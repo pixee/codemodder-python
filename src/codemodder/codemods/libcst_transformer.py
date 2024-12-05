@@ -9,7 +9,7 @@ from libcst.codemod.visitors import AddImportsVisitor, RemoveImportsVisitor
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
 from codemodder.codemods.base_visitor import BaseTransformer
 from codemodder.codemods.utils import get_call_name
-from codemodder.codetf import Change, ChangeSet, Finding
+from codemodder.codetf import Change, ChangeSet, Finding, Strategy
 from codemodder.context import CodemodExecutionContext
 from codemodder.dependency import Dependency
 from codemodder.diff import create_diff_from_tree
@@ -291,6 +291,8 @@ class LibcstTransformerPipeline(BaseTransformerPipeline):
             path=str(file_context.file_path.relative_to(context.directory)),
             diff=diff,
             changes=file_context.codemod_changes,
+            strategy=Strategy.deterministic,
+            provisional=False,
         )
 
         if not context.dry_run:

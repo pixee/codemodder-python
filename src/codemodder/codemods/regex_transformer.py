@@ -2,7 +2,7 @@ import re
 from typing import Pattern
 
 from codemodder.codemods.base_transformer import BaseTransformerPipeline
-from codemodder.codetf import Change, ChangeSet
+from codemodder.codetf import Change, ChangeSet, Strategy
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff
 from codemodder.file_context import FileContext
@@ -73,6 +73,8 @@ class RegexTransformerPipeline(BaseTransformerPipeline):
             path=str(file_context.file_path.relative_to(context.directory)),
             diff=diff,
             changes=changes,
+            strategy=Strategy.deterministic,
+            provisional=False,
         )
 
 
