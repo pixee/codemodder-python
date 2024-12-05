@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from codemodder.codemods.semgrep import process_semgrep_findings
 from codemodder.sarifs import detect_sarif_tools
 from codemodder.semgrep import SemgrepResult, SemgrepResultSet
 
@@ -149,3 +150,9 @@ class TestSarifProcessing:
         assert "semgrep" in results
         assert len(results["codeql"]) == 1
         assert len(results["semgrep"]) == 1
+
+    def test_stores_tools(self):
+        sarif_file = Path("tests") / "samples" / "semgrep.sarif"
+        result_set = process_semgrep_findings(tuple([str(sarif_file)]))
+        assert result_set.tools
+        assert result_set.tools[0]["driver"]["rules"]

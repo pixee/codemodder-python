@@ -19,6 +19,8 @@ def test_from_file(codeql_result_set: Path):
     result_set = process_codeql_findings(tuple([str(codeql_result_set)]))
     assert len(result_set["py/path-injection"][Path("Path Traversal/py_ctf.py")]) == 1
     assert len(result_set["py/path-injection"]) == 2
+    assert result_set.tools
+    assert result_set.tools[0]["driver"]
 
 
 def test_from_duplicate_files(codeql_result_set: Path):

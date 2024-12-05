@@ -88,7 +88,7 @@ class SemgrepResultSet(ResultSet):
                     result, sarif_run, truncate_rule_id
                 )
                 result_set.add_result(sarif_result)
-
+            result_set.store_tool_data(sarif_run.get("tool", {}))
         return result_set
 
 
