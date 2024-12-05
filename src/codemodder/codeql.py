@@ -59,5 +59,5 @@ class CodeQLResultSet(ResultSet):
                         sarif_result, sarif_run, truncate_rule_id
                     )
                     result_set.add_result(codeql_result)
-                result_set.store_tool_data(sarif_run["tool"])
+                result_set.store_tool_data(sarif_run.get("tool", {}))
         return result_set

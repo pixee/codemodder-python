@@ -192,7 +192,8 @@ class ResultSet(dict[str, dict[Path, list[Result]]]):
             self.setdefault(result.rule_id, {}).setdefault(loc.file, []).append(result)
 
     def store_tool_data(self, tool_data: dict):
-        self.tools.append(tool_data)
+        if tool_data:
+            self.tools.append(tool_data)
 
     def results_for_rule_and_file(
         self, context: CodemodExecutionContext, rule_id: str, file: Path
