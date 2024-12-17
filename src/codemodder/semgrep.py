@@ -54,20 +54,18 @@ class SemgrepResult(SarifResult):
         # avoid circular import
         from core_codemods.semgrep.api import semgrep_url_from_id
 
+        rule_id = cls.extract_rule_id(sarif_result, sarif_run, truncate_rule_id)
+        finding_id = cls.extract_finding_id(sarif_result) or rule_id
         return cls(
-            rule_id=(
-                rule_id := cls.extract_rule_id(
-                    sarif_result, sarif_run, truncate_rule_id
-                )
-            ),
+            rule_id=rule_id,
             locations=cls.extract_locations(sarif_result),
             codeflows=cls.extract_code_flows(sarif_result),
             related_locations=cls.extract_related_locations(sarif_result),
-            finding_id=rule_id,
+            finding_id=finding_id,
             finding=Finding(
-                id=rule_id,
+                id=cls.extract_finding_id(sarif_result) or rule_id,
                 rule=Rule(
-                    id=rule_id,
+                    id=finding_id,
                     name=rule_id,
                     url=semgrep_url_from_id(rule_id),
                 ),
