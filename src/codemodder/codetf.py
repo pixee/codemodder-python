@@ -143,7 +143,7 @@ class Rule(BaseModel):
 
 
 class Finding(BaseModel):
-    id: str
+    id: Optional[str] = None
     rule: Rule
 
     class Config:
