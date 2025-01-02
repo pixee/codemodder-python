@@ -99,7 +99,7 @@ class SonarResultSet(ResultSet):
                 data = json.load(file)
 
             result_set = cls()
-            for result in data.get("issues") or [] + data.get("hotspots") or []:
+            for result in data.get("issues", []) + data.get("hotspots", []):
                 if result["status"].lower() in ("open", "to_review"):
                     result_set.add_result(SonarResult.from_result(result))
 

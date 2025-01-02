@@ -12,7 +12,7 @@ from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from codemodder import __version__
 from codemodder.logging import logger
@@ -138,16 +138,14 @@ class Rule(BaseModel):
     name: str
     url: Optional[str] = None
 
-    class Config:
-        frozen = True
+    model_config = ConfigDict(frozen=True)
 
 
 class Finding(BaseModel):
     id: Optional[str] = None
     rule: Rule
 
-    class Config:
-        frozen = True
+    model_config = ConfigDict(frozen=True)
 
     def to_unfixed_finding(
         self,

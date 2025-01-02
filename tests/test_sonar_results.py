@@ -1,4 +1,8 @@
-from core_codemods.sonar.results import SonarResult
+from pathlib import Path
+
+from core_codemods.sonar.results import SonarResult, SonarResultSet
+
+SAMPLE_DIR = Path(__file__).parent / "samples"
 
 
 def test_result_without_textrange():
@@ -29,3 +33,33 @@ def test_result_without_textrange():
     assert sonar_result.finding_id == "AZJnP4pZPJb5bI8DP25Y"
     assert sonar_result.locations == ()
     assert sonar_result.codeflows == ()
+
+
+def test_parse_issues_json():
+    results = SonarResultSet.from_json(SAMPLE_DIR / "sonar_issues.json")
+    assert len(results) == 34
+
+
+def test_parse_hotspots_json():
+    results = SonarResultSet.from_json(SAMPLE_DIR / "sonar_hotspots.json")
+    assert len(results) == 2
+
+
+def test_empty_issues(tmpdir, caplog):
+    empty_json = tmpdir / "empty.json"
+    empty_json.write_text('{"issues": []}', encoding="utf-8")
+
+    results = SonarResultSet.from_json(empty_json)
+
+    assert len(results) == 0
+    assert "Could not parse sonar json" not in caplog.text
+
+
+def test_empty_hotspots(tmpdir, caplog):
+    empty_json = tmpdir / "empty.json"
+    empty_json.write_text('{"hotspots": []}', encoding="utf-8")
+
+    results = SonarResultSet.from_json(empty_json)
+
+    assert len(results) == 0
+    assert "Could not parse sonar json" not in caplog.text
