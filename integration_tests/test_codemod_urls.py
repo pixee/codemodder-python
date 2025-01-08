@@ -10,7 +10,8 @@ registry = load_registered_codemods()
 
 async def visit_url(client, url):
     try:
-        response = await client.get(url)
+        response = await client.head(url)
+
         return url, response.status_code
     except httpx.RequestError:
         return url, None
