@@ -12,6 +12,7 @@ from codemodder.codemods.libcst_transformer import (
     NewArg,
 )
 from codemodder.codemods.semgrep import SemgrepSarifFileDetector
+from codemodder.codetf import Reference
 from codemodder.result import fuzzy_column_match, same_line
 from core_codemods.semgrep.api import SemgrepCodemod, semgrep_url_from_id
 
@@ -74,7 +75,9 @@ SemgrepRsaKeySize = SemgrepCodemod(
                 )
             ],
         ),
-        references=[],
+        references=[
+            Reference(url="https://cwe.mitre.org/data/definitions/326"),
+        ],
     ),
     transformer=LibcstTransformerPipeline(RsaKeySizeTransformer),
     detector=SemgrepSarifFileDetector(),

@@ -109,6 +109,7 @@ JwtDecodeVerify = CoreCodemod(
             Reference(
                 url="https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/347"),
         ],
     ),
     transformer=LibcstTransformerPipeline(JwtDecodeVerifyTransformer),

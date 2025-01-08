@@ -12,6 +12,7 @@ from codemodder.codemods.libcst_transformer import (
 )
 from codemodder.codemods.semgrep import SemgrepSarifFileDetector
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from codemodder.codetf import Reference
 from core_codemods.semgrep.api import SemgrepCodemod, semgrep_url_from_id
 
 
@@ -53,7 +54,9 @@ SemgrepNoCsrfExempt = SemgrepCodemod(
                 )
             ],
         ),
-        references=[],
+        references=[
+            Reference(url="https://cwe.mitre.org/data/definitions/352"),
+        ],
     ),
     transformer=LibcstTransformerPipeline(RemoveCsrfExemptTransformer),
     detector=SemgrepSarifFileDetector(),

@@ -10,7 +10,8 @@ registry = load_registered_codemods()
 
 async def visit_url(client, url):
     try:
-        response = await client.get(url)
+        response = await client.head(url)
+
         return url, response.status_code
     except httpx.RequestError:
         return url, None
@@ -36,9 +37,15 @@ async def check_accessible_urls(urls):
 
 @pytest.mark.asyncio
 async def test_codemod_reference_urls():
-    urls = [
-        ref.url for codemod in registry.codemods for ref in codemod._metadata.references
-    ]
+    urls = list(
+        set(
+            [
+                ref.url
+                for codemod in registry.codemods
+                for ref in codemod._metadata.references
+            ]
+        )
+    )
     await check_accessible_urls(urls)
 
 

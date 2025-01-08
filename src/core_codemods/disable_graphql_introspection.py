@@ -127,6 +127,12 @@ DisableGraphQLIntrospection = CoreCodemod(
             Reference(
                 url="https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/12-API_Testing/01-Testing_GraphQL#introspection-queries",
             ),
+            Reference(
+                url="https://cwe.mitre.org/data/definitions/200",
+            ),
+            Reference(
+                url="https://cwe.mitre.org/data/definitions/669",
+            ),
         ],
     ),
     transformer=LibcstTransformerPipeline(DisableGraphQLIntrospectionTransform),

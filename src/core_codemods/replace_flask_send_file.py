@@ -18,6 +18,7 @@ class ReplaceFlaskSendFile(SimpleCodemod, NameAndAncestorResolutionMixin):
                 url="https://flask.palletsprojects.com/en/3.0.x/api/#flask.send_from_directory"
             ),
             Reference(url="https://owasp.org/www-community/attacks/Path_Traversal"),
+            Reference(url="https://cwe.mitre.org/data/definitions/35"),
         ],
     )
 

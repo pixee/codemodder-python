@@ -32,7 +32,6 @@ UrlSandbox = CoreCodemod(
             Reference(
                 url="https://github.com/pixee/python-security/blob/main/src/security/safe_requests/api.py"
             ),
-            Reference(url="https://portswigger.net/web-security/ssrf"),
             Reference(
                 url="https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html"
             ),
@@ -40,6 +39,8 @@ UrlSandbox = CoreCodemod(
                 url="https://www.rapid7.com/blog/post/2021/11/23/owasp-top-10-deep-dive-defending-against-server-side-request-forgery/"
             ),
             Reference(url="https://blog.assetnote.io/2021/01/13/blind-ssrf-chains/"),
+            Reference(url="https://cwe.mitre.org/data/definitions/20"),
+            Reference(url="https://cwe.mitre.org/data/definitions/918"),
         ],
     ),
     detector=SemgrepRuleDetector(

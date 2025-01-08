@@ -59,6 +59,7 @@ class HTTPSConnection(SimpleCodemod):
             Reference(
                 url="https://urllib3.readthedocs.io/en/stable/reference/urllib3.connectionpool.html#urllib3.HTTPConnectionPool"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/319"),
         ],
     )
 

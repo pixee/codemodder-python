@@ -19,6 +19,7 @@ class FlaskEnableCSRFProtection(
         references=[
             Reference(url="https://owasp.org/www-community/attacks/csrf"),
             Reference(url="https://flask-wtf.readthedocs.io/en/1.2.x/csrf/"),
+            Reference(url="https://cwe.mitre.org/data/definitions/352"),
         ],
     )
 

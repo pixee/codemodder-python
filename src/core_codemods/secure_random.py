@@ -33,6 +33,18 @@ SecureRandom = CoreCodemod(
             Reference(
                 url="https://docs.python.org/3/library/random.html",
             ),
+            Reference(
+                url="https://cwe.mitre.org/data/definitions/338",
+            ),
+            Reference(
+                url="https://cwe.mitre.org/data/definitions/330",
+            ),
+            Reference(
+                url="https://cwe.mitre.org/data/definitions/326",
+            ),
+            Reference(
+                url="https://cwe.mitre.org/data/definitions/1241",
+            ),
         ],
     ),
     detector=SemgrepRuleDetector(

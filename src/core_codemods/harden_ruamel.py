@@ -11,6 +11,7 @@ class HardenRuamel(SimpleCodemod):
             Reference(
                 url="https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/502"),
         ],
     )
     change_description = (

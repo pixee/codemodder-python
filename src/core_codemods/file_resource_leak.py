@@ -73,8 +73,8 @@ FileResourceLeak = CoreCodemod(
         summary="Automatically Close Resources",
         review_guidance=ReviewGuidance.MERGE_WITHOUT_REVIEW,
         references=[
-            Reference(url="https://cwe.mitre.org/data/definitions/772.html"),
-            Reference(url="https://cwe.mitre.org/data/definitions/404.html"),
+            Reference(url="https://cwe.mitre.org/data/definitions/404"),
+            Reference(url="https://cwe.mitre.org/data/definitions/772"),
         ],
     ),
     transformer=LibcstTransformerPipeline(FileResourceLeakTransformer),

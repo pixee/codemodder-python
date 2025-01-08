@@ -169,6 +169,8 @@ TempfileMktemp = CoreCodemod(
             Reference(
                 url="https://docs.python.org/3/library/tempfile.html#tempfile.mktemp"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/377"),
+            Reference(url="https://cwe.mitre.org/data/definitions/379"),
         ],
     ),
     transformer=LibcstTransformerPipeline(TempfileMktempTransformer),

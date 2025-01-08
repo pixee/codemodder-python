@@ -17,6 +17,7 @@ class LxmlSafeParserDefaults(SimpleCodemod):
             Reference(
                 url="https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/611"),
         ],
     )
     change_description = "Replace `lxml` parser parameters with safe defaults."

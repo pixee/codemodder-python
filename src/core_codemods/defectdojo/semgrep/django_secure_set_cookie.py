@@ -6,6 +6,7 @@ from codemodder.codemods.libcst_transformer import (
     LibcstTransformerPipeline,
 )
 from codemodder.codemods.utils_mixin import NameResolutionMixin
+from codemodder.codetf import Reference
 from core_codemods.defectdojo.api import DefectDojoCodemod, DefectDojoDetector
 from core_codemods.secure_cookie_mixin import SecureCookieMixin
 
@@ -50,7 +51,9 @@ DjangoSecureSetCookie = DefectDojoCodemod(
                 )
             ],
         ),
-        references=[],
+        references=[
+            Reference(url="https://cwe.mitre.org/data/definitions/614"),
+        ],
     ),
     transformer=LibcstTransformerPipeline(DjangoSecureSetCookieTransformer),
     detector=DefectDojoDetector(),

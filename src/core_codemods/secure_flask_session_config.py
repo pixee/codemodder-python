@@ -23,6 +23,9 @@ class SecureFlaskSessionConfig(SimpleCodemod, Codemod):
             Reference(
                 url="https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/319"),
+            Reference(url="https://cwe.mitre.org/data/definitions/352"),
+            Reference(url="https://cwe.mitre.org/data/definitions/614"),
         ],
     )
     change_description = "Flip Flask session configuration if defined as insecure."

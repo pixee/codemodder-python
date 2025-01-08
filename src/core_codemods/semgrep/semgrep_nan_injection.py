@@ -15,6 +15,7 @@ from codemodder.codemods.libcst_transformer import (
     LibcstTransformerPipeline,
 )
 from codemodder.codemods.semgrep import SemgrepSarifFileDetector
+from codemodder.codetf import Reference
 from core_codemods.semgrep.api import SemgrepCodemod, semgrep_url_from_id
 
 
@@ -124,7 +125,9 @@ SemgrepNanInjection = SemgrepCodemod(
                 )
             ],
         ),
-        references=[],
+        references=[
+            Reference(url="https://cwe.mitre.org/data/definitions/704"),
+        ],
     ),
     transformer=LibcstTransformerPipeline(NanInjectionTransformer),
     detector=SemgrepSarifFileDetector(),
