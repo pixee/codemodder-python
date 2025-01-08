@@ -21,6 +21,9 @@ class HardenPickleLoad(SimpleCodemod, ImportModifierCodemod):
             Reference(
                 url="https://github.com/trailofbits/fickling",
             ),
+            Reference(
+                url="https://cwe.mitre.org/data/definitions/502.html",
+            ),
         ],
     )
 

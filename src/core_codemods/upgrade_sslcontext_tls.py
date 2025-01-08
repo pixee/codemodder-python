@@ -13,6 +13,7 @@ class UpgradeSSLContextTLS(SimpleCodemod):
             ),
             Reference(url="https://datatracker.ietf.org/doc/rfc8996/"),
             Reference(url="https://www.digicert.com/blog/depreciating-tls-1-0-and-1-1"),
+            Reference(url="https://cwe.mitre.org/data/definitions/326.html"),
         ],
     )
     change_description = "Replaces known insecure TLS/SSL protocol versions in SSLContext with secure ones."

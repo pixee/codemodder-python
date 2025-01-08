@@ -14,6 +14,7 @@ class SecureFlaskCookie(SimpleCodemod, SecureCookieMixin):
             Reference(
                 url="https://owasp.org/www-community/controls/SecureCookieAttribute"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/614.html"),
         ],
     )
     change_description = "Flask response `set_cookie` call should be called with `secure=True`, `httponly=True`, and `samesite='Lax'`."

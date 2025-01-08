@@ -27,6 +27,7 @@ AddRequestsTimeouts = CoreCodemod(
             Reference(
                 url="https://docs.python-requests.org/en/master/user/quickstart/#timeouts"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/1088.html"),
         ],
     ),
     detector=SemgrepRuleDetector(

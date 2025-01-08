@@ -13,6 +13,7 @@ class RequestsVerify(SimpleCodemod):
             Reference(
                 url="https://owasp.org/www-community/attacks/Manipulator-in-the-middle_attack"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/295.html"),
         ],
     )
     change_description = (

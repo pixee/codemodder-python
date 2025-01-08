@@ -13,6 +13,7 @@ class UpgradeSSLContextMinimumVersion(SimpleCodemod, NameResolutionMixin):
             ),
             Reference(url="https://datatracker.ietf.org/doc/rfc8996/"),
             Reference(url="https://www.digicert.com/blog/depreciating-tls-1-0-and-1-1"),
+            Reference(url="https://cwe.mitre.org/data/definitions/326.html"),
         ],
     )
     change_description = "Replaces minimum SSL/TLS version for SSLContext."
