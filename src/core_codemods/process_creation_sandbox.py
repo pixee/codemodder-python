@@ -16,6 +16,8 @@ class ProcessSandbox(SimpleCodemod):
             Reference(
                 url="https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/20"),
+            Reference(url="https://cwe.mitre.org/data/definitions/78"),
         ],
     )
     change_description = (

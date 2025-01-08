@@ -40,6 +40,8 @@ UrlSandbox = CoreCodemod(
                 url="https://www.rapid7.com/blog/post/2021/11/23/owasp-top-10-deep-dive-defending-against-server-side-request-forgery/"
             ),
             Reference(url="https://blog.assetnote.io/2021/01/13/blind-ssrf-chains/"),
+            Reference(url="https://cwe.mitre.org/data/definitions/20"),
+            Reference(url="https://cwe.mitre.org/data/definitions/918"),
         ],
     ),
     detector=SemgrepRuleDetector(

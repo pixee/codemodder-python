@@ -53,6 +53,7 @@ DjangoJsonResponseType = CoreCodemod(
             Reference(
                 url="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#output-encoding-for-javascript-contexts"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/79"),
         ],
     ),
     transformer=LibcstTransformerPipeline(DjangoJsonResponseTypeTransformer),

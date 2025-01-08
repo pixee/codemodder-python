@@ -30,6 +30,7 @@ EnableJinja2Autoescape = CoreCodemod(
             Reference(
                 url="https://jinja.palletsprojects.com/en/3.1.x/api/#autoescaping"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/79"),
         ],
     ),
     detector=SemgrepRuleDetector(
