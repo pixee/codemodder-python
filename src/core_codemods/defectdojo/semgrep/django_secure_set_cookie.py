@@ -52,7 +52,7 @@ DjangoSecureSetCookie = DefectDojoCodemod(
             ],
         ),
         references=[
-            Reference(url="https://cwe.mitre.org/data/definitions/614.html"),
+            Reference(url="https://cwe.mitre.org/data/definitions/614"),
         ],
     ),
     transformer=LibcstTransformerPipeline(DjangoSecureSetCookieTransformer),

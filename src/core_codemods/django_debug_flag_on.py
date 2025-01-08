@@ -16,7 +16,7 @@ class DjangoDebugFlagOn(SimpleCodemod):
             Reference(
                 url="https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-DEBUG"
             ),
-            Reference(url="https://cwe.mitre.org/data/definitions/489.html"),
+            Reference(url="https://cwe.mitre.org/data/definitions/489"),
         ],
     )
     change_description = "Flip `Django` debug flag to off."

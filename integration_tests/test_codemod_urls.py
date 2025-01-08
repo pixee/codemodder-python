@@ -37,9 +37,15 @@ async def check_accessible_urls(urls):
 
 @pytest.mark.asyncio
 async def test_codemod_reference_urls():
-    urls = [
-        ref.url for codemod in registry.codemods for ref in codemod._metadata.references
-    ]
+    urls = list(
+        set(
+            [
+                ref.url
+                for codemod in registry.codemods
+                for ref in codemod._metadata.references
+            ]
+        )
+    )
     await check_accessible_urls(urls)
 
 

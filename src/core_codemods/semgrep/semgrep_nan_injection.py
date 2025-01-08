@@ -126,7 +126,7 @@ SemgrepNanInjection = SemgrepCodemod(
             ],
         ),
         references=[
-            Reference(url="https://cwe.mitre.org/data/definitions/704.html"),
+            Reference(url="https://cwe.mitre.org/data/definitions/704"),
         ],
     ),
     transformer=LibcstTransformerPipeline(NanInjectionTransformer),

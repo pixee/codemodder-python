@@ -16,7 +16,7 @@ class DjangoSessionCookieSecureOff(SimpleCodemod):
             Reference(
                 url="https://docs.djangoproject.com/en/4.2/ref/settings/#session-cookie-secure"
             ),
-            Reference(url="https://cwe.mitre.org/data/definitions/614.html"),
+            Reference(url="https://cwe.mitre.org/data/definitions/614"),
         ],
     )
     change_description = "Sets Django's `SESSION_COOKIE_SECURE` flag if off or missing."

@@ -55,7 +55,7 @@ SemgrepNoCsrfExempt = SemgrepCodemod(
             ],
         ),
         references=[
-            Reference(url="https://cwe.mitre.org/data/definitions/352.html"),
+            Reference(url="https://cwe.mitre.org/data/definitions/352"),
         ],
     ),
     transformer=LibcstTransformerPipeline(RemoveCsrfExemptTransformer),

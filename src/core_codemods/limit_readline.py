@@ -11,7 +11,7 @@ class LimitReadline(SimpleCodemod):
         summary="Limit readline()",
         review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         references=[
-            Reference(url="https://cwe.mitre.org/data/definitions/400.html"),
+            Reference(url="https://cwe.mitre.org/data/definitions/400"),
         ],
     )
     change_description = "Adds a size limit argument to readline() calls."

@@ -370,7 +370,7 @@ SQLQueryParameterization = CoreCodemod(
         review_guidance=ReviewGuidance.MERGE_AFTER_CURSORY_REVIEW,
         references=[
             Reference(url="https://cwe.mitre.org/data/definitions/20"),
-            Reference(url="https://cwe.mitre.org/data/definitions/89.html"),
+            Reference(url="https://cwe.mitre.org/data/definitions/89"),
             Reference(url="https://owasp.org/www-community/attacks/SQL_Injection"),
         ],
     ),

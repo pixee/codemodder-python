@@ -76,7 +76,7 @@ SemgrepRsaKeySize = SemgrepCodemod(
             ],
         ),
         references=[
-            Reference(url="https://cwe.mitre.org/data/definitions/326.html"),
+            Reference(url="https://cwe.mitre.org/data/definitions/326"),
         ],
     ),
     transformer=LibcstTransformerPipeline(RsaKeySizeTransformer),
