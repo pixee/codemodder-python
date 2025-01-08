@@ -126,6 +126,7 @@ HardenPyyaml = CoreCodemod(
             Reference(
                 url="https://github.com/yaml/pyyaml/wiki/PyYAML-yaml.load(input)-Deprecation"
             ),
+            Reference(url="https://cwe.mitre.org/data/definitions/502.html"),
         ],
     ),
     detector=SemgrepRuleDetector(

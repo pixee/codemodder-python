@@ -79,6 +79,7 @@ SubprocessShellFalse = CoreCodemod(
                 url="https://en.wikipedia.org/wiki/Code_injection#Shell_injection"
             ),
             Reference(url="https://stackoverflow.com/a/3172488"),
+            Reference(url="https://cwe.mitre.org/data/definitions/78.html"),
         ],
     ),
     transformer=LibcstTransformerPipeline(SubprocessShellFalseTransformer),
