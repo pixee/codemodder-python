@@ -239,8 +239,20 @@ def _run_cli(original_args) -> int:
         logger.error(err)
         return 1
 
+    if argv.sonar_issues_json:
+        print(
+            "NOTE: --sonar-issues-json is deprecated, use --sonar-json instead",
+            file=sys.stderr,
+        )
+    if argv.sonar_hotspots_json:
+        print(
+            "NOTE: --sonar-hotspots-json is deprecated, use --sonar-json instead",
+            file=sys.stderr,
+        )
+
     tool_result_files_map["sonar"].extend(argv.sonar_issues_json or [])
     tool_result_files_map["sonar"].extend(argv.sonar_hotspots_json or [])
+    tool_result_files_map["sonar"].extend(argv.sonar_json or [])
     tool_result_files_map["defectdojo"].extend(argv.defectdojo_findings_json or [])
 
     logger.info("command: %s %s", Path(sys.argv[0]).name, " ".join(original_args))
