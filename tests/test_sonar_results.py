@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from core_codemods.sonar.results import SonarResult, SonarResultSet
@@ -43,6 +44,17 @@ def test_parse_issues_json():
 def test_parse_hotspots_json():
     results = SonarResultSet.from_json(SAMPLE_DIR / "sonar_hotspots.json")
     assert len(results) == 2
+
+
+def test_combined_json(tmpdir):
+    issues = json.loads(SAMPLE_DIR.joinpath("sonar_issues.json").read_text())
+    hotspots = json.loads(SAMPLE_DIR.joinpath("sonar_hotspots.json").read_text())
+    Path(tmpdir).joinpath("combined.json").write_text(
+        json.dumps({"issues": issues["issues"] + hotspots["hotspots"]})
+    )
+
+    results = SonarResultSet.from_json(Path(tmpdir).joinpath("combined.json"))
+    assert len(results) == 36
 
 
 def test_empty_issues(tmpdir, caplog):

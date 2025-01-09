@@ -175,6 +175,11 @@ def parse_args(argv, codemod_registry: CodemodRegistry):
         help="Comma-separated set of path(s) to Sonar hotspots JSON file(s) to feed to the codemods",
     )
     parser.add_argument(
+        "--sonar-json",
+        action=CsvListAction,
+        help="Comma-separated set of path(s) to Sonar JSON file(s) to feed to the codemods",
+    )
+    parser.add_argument(
         "--defectdojo-findings-json",
         action=CsvListAction,
         help="Comma-separated set of path(s) to DefectDojo's v2 Findings JSON file(s) to feed to the codemods",
