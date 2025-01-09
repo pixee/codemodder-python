@@ -105,6 +105,7 @@ class SarifResult(SASTResult, ABCDataclass):
         )
 
     @classmethod
+    @abstractmethod
     def rule_url_from_id(cls, result: dict, run: dict, rule_id: str) -> str:
         raise NotImplementedError
 

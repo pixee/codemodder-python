@@ -69,7 +69,7 @@ class SonarResult(SASTResult):
             locations=locations,
             codeflows=all_flows,
             finding=Finding(
-                id=rule_id,
+                id=finding_id,
                 rule=Rule(
                     id=rule_id,
                     name=name,
