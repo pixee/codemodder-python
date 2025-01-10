@@ -14,7 +14,7 @@ dependencies = [
     "boltons>=21.0,<24.2",
     "GitPython<4",
     "isort>=5.12,<5.14",
-    "libcst>=1.1,<1.6",
+    "libcst>=1.6,<1.7",
     "packaging>=23.2,<25.0",
     "pydantic~=2.10.1",
     "pylint>=3.3,<3.4",
