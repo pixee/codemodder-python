@@ -1,5 +1,5 @@
 from codemodder.codemods.test import BaseIntegrationTest
-from core_codemods.secure_flask_cookie import SecureFlaskCookie
+from core_codemods.secure_flask_cookie import SecureCookieTransformer, SecureFlaskCookie
 
 
 class TestSecureFlaskCookie(BaseIntegrationTest):
@@ -23,4 +23,4 @@ class TestSecureFlaskCookie(BaseIntegrationTest):
     ]
     expected_diff = "--- \n+++ \n@@ -5,5 +5,5 @@\n @app.route('/')\n def index():\n     resp = make_response('Custom Cookie Set')\n-    resp.set_cookie('custom_cookie', 'value')\n+    resp.set_cookie('custom_cookie', 'value', secure=True, httponly=True, samesite='Lax')\n     return resp\n"
     expected_line_change = "8"
-    change_description = SecureFlaskCookie.change_description
+    change_description = SecureCookieTransformer.change_description

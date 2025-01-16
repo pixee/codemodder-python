@@ -16,7 +16,7 @@ rules = [
     ToolRule(
         id="python:S2092",
         name='Creating cookies without the "secure" flag is security-sensitive',
-        url="ahttps://rules.sonarsource.com/python/RSPEC-2092/",
+        url="https://rules.sonarsource.com/python/RSPEC-2092/",
     ),
 ]
 

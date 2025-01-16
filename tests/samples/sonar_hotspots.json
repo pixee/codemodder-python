@@ -6,6 +6,46 @@
   },
   "hotspots": [
     {
+      "key": "AZRvB_g13jBxJiUZnPHJ",
+      "component": "pixee_codemodder-python:secure_cookie.py",
+      "project": "pixee_codemodder-python",
+      "securityCategory": "insecure-conf",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 8,
+      "message": "Make sure creating this cookie without the \"secure\" flag is safe.",
+      "creationDate": "2025-01-16T13:11:02+0100",
+      "updateDate": "2025-01-16T13:12:34+0100",
+      "textRange": {
+        "startLine": 8,
+        "endLine": 8,
+        "startOffset": 4,
+        "endOffset": 19
+      },
+      "flows": [],
+      "ruleKey": "python:S2092"
+    },
+    {
+      "key": "AZRvB_g13jBxJiUZnPHI",
+      "component": "pixee_codemodder-python:secure_cookie.py",
+      "project": "pixee_codemodder-python",
+      "securityCategory": "others",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 8,
+      "message": "Make sure creating this cookie without the \"HttpOnly\" flag is safe.",
+      "creationDate": "2025-01-16T13:11:02+0100",
+      "updateDate": "2025-01-16T13:12:34+0100",
+      "textRange": {
+        "startLine": 8,
+        "endLine": 8,
+        "startOffset": 4,
+        "endOffset": 19
+      },
+      "flows": [],
+      "ruleKey": "python:S3330"
+    },
+    {
       "key": "AY6fXn2rzaaymEtIucTd",
       "component": "pixee_codemodder-python:secure_random.py",
       "project": "pixee_codemodder-python",

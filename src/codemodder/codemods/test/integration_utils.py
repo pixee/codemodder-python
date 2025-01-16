@@ -124,8 +124,12 @@ class BaseIntegrationTest(DependencyTestMixin):
 
         # TODO: if/when we add description for each url
         for reference in result["references"][
-            # Last reference for Sonar has a different description
-            : (-1 if self.sonar_issues_json or self.sonar_hotspots_json else None)
+            # Last references for Sonar has a different description
+            : (
+                -len(self.codemod.requested_rules)
+                if self.sonar_issues_json or self.sonar_hotspots_json
+                else None
+            )
         ]:
             assert reference["url"] == reference["description"]
 
@@ -288,21 +292,25 @@ class SonarIntegrationTest(BaseIntegrationTest):
             (cls.sonar_issues_json, cls.sonar_hotspots_json)
         )
 
-        assert (
-            cls.codemod.requested_rules[-1] in sonar_results
+        assert any(
+            map(lambda x: x in sonar_results, cls.codemod.requested_rules)
         ), f"Make sure to add a sonar issue/hotspot for {cls.codemod.rule_id} in {cls.sonar_issues_json} or {cls.sonar_hotspots_json}"
         results_for_codemod = sonar_results[cls.codemod.requested_rules[-1]]
         file_path = pathlib.Path(cls.code_filename)
         assert (
             file_path in results_for_codemod
-        ), f"Make sure to add a sonar issue/hotspot for file `{cls.code_filename}` under rule `{cls.codemod.rule_id}`in {cls.sonar_issues_json} or {cls.sonar_hotspots_json}"
+        ), f"Make sure to add a sonar issue/hotspot for file `{cls.code_filename}` under one of the rules `{cls.codemod.requested_rules}`in {cls.sonar_issues_json} or {cls.sonar_hotspots_json}"
 
     def _assert_sonar_fields(self, result):
         assert self.codemod_instance._metadata.tool is not None
-        assert (
-            result["references"][-1]["description"]
-            == self.codemod_instance._metadata.tool.rules[0].name
-        )
+        rules = self.codemod_instance._metadata.tool.rules
+        for i in range(len(rules)):
+            assert (
+                result["references"][len(result["references"]) - len(rules) + i][
+                    "description"
+                ]
+                == self.codemod_instance._metadata.tool.rules[i].name
+            )
         assert result["detectionTool"]["name"] == "Sonar"
 
 
