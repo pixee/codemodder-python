@@ -328,6 +328,12 @@ SONAR_CODEMODS = {
         need_sarif="Yes (Sonar)",
     )
     for name in SONAR_CODEMOD_NAMES
+} | {
+    "secure-cookie": DocMetadata(
+        importance="Medium",
+        guidance_explained="Our change provides the most secure way to create cookies in Flask. However, it's possible you have configured your Flask application configurations to use secure cookies. In these cases, using the default parameters for `set_cookie` is safe.",
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 SEMGREP_CODEMOD_NAMES = [

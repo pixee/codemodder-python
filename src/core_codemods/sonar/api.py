@@ -15,6 +15,35 @@ class SonarCodemod(SASTCodemod):
         return "sonar"
 
     @classmethod
+    def from_core_codemod_with_multiple_rules(
+        cls,
+        name: str,
+        other: CoreCodemod,
+        rules: list[ToolRule],
+        transformer: BaseTransformerPipeline | None = None,
+    ):
+        return SonarCodemod(
+            metadata=Metadata(
+                name=name,
+                summary=other.summary,
+                review_guidance=other._metadata.review_guidance,
+                references=(
+                    other.references
+                    + [Reference(url=tr.url or "", description=tr.name) for tr in rules]
+                ),
+                description=other.description,
+                tool=ToolMetadata(
+                    name="Sonar",
+                    rules=rules,
+                ),
+            ),
+            transformer=transformer if transformer else other.transformer,
+            detector=SonarDetector(),
+            default_extensions=other.default_extensions,
+            requested_rules=[tr.id for tr in rules],
+        )
+
+    @classmethod
     def from_core_codemod(
         cls,
         name: str,
@@ -24,30 +53,15 @@ class SonarCodemod(SASTCodemod):
         transformer: BaseTransformerPipeline | None = None,
     ):
         rule_url = sonar_url_from_id(rule_id)
-        return SonarCodemod(
-            metadata=Metadata(
-                name=name,
-                summary=other.summary,
-                review_guidance=other._metadata.review_guidance,
-                references=(
-                    other.references + [Reference(url=rule_url, description=rule_name)]
-                ),
-                description=other.description,
-                tool=ToolMetadata(
-                    name="Sonar",
-                    rules=[
-                        ToolRule(
-                            id=rule_id,
-                            name=rule_name,
-                            url=rule_url,
-                        )
-                    ],
-                ),
+        rules = [
+            ToolRule(
+                id=rule_id,
+                name=rule_name,
+                url=rule_url,
             ),
-            transformer=transformer if transformer else other.transformer,
-            detector=SonarDetector(),
-            default_extensions=other.default_extensions,
-            requested_rules=[rule_id],
+        ]
+        return cls.from_core_codemod_with_multiple_rules(
+            name, other, rules, transformer
         )
 
 

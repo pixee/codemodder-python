@@ -89,6 +89,7 @@ from .sonar.sonar_remove_assertion_in_pytest_raises import (
     SonarRemoveAssertionInPytestRaises,
 )
 from .sonar.sonar_sandbox_process_creation import SonarSandboxProcessCreation
+from .sonar.sonar_secure_cookie import SonarSecureCookie
 from .sonar.sonar_secure_random import SonarSecureRandom
 from .sonar.sonar_sql_parameterization import SonarSQLParameterization
 from .sonar.sonar_tempfile_mktemp import SonarTempfileMktemp
@@ -204,6 +205,7 @@ sonar_registry = CodemodCollection(
         SonarInvertedBooleanCheck,
         SonarTimezoneAwareDatetime,
         SonarSandboxProcessCreation,
+        SonarSecureCookie,
     ],
 )
 
