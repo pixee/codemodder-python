@@ -25,7 +25,6 @@ class SonarSecureCookieTransformer(LibcstResultTransformer, SecureCookieMixin):
     change_description = "Flask response `set_cookie` call should be called with `secure=True`, `httponly=True`, and `samesite='Lax'`."
 
     def leave_Call(self, original_node, updated_node):
-        # Try to match the func
         if self.node_is_selected(original_node.func):
             self.report_change(original_node)
             new_args = self.replace_args(
