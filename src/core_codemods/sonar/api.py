@@ -10,6 +10,25 @@ from core_codemods.sonar.results import SonarResultSet, sonar_url_from_id
 
 
 class SonarCodemod(SASTCodemod):
+
+    def __init__(
+        self,
+        *,
+        metadata: Metadata,
+        transformer: BaseTransformerPipeline,
+        default_extensions: list[str] | None = None,
+        requested_rules: list[str] | None = None,
+        provider: str | None = None,
+    ):
+        super().__init__(
+            metadata=metadata,
+            detector=SonarDetector(),
+            transformer=transformer,
+            default_extensions=default_extensions,
+            requested_rules=requested_rules,
+            provider=provider,
+        )
+
     @property
     def origin(self):
         return "sonar"
@@ -38,7 +57,6 @@ class SonarCodemod(SASTCodemod):
                 ),
             ),
             transformer=transformer if transformer else other.transformer,
-            detector=SonarDetector(),
             default_extensions=other.default_extensions,
             requested_rules=[tr.id for tr in rules],
         )
