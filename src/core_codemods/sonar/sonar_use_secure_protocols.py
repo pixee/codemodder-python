@@ -1,7 +1,12 @@
 import libcst as cst
 from libcst.codemod import CodemodContext
 
-from codemodder.codemods.base_codemod import Metadata, ReviewGuidance, ToolRule
+from codemodder.codemods.base_codemod import (
+    Metadata,
+    ReviewGuidance,
+    ToolMetadata,
+    ToolRule,
+)
 from codemodder.codemods.libcst_transformer import (
     LibcstResultTransformer,
     LibcstTransformerPipeline,
@@ -188,7 +193,12 @@ SonarUseSecureProtocols = SonarCodemod(
             ),
             Reference(url="https://cwe.mitre.org/data/definitions/200"),
             Reference(url="https://cwe.mitre.org/data/definitions/319"),
-        ],
+        ]
+        + [Reference(url=tr.url or "", description=tr.name) for tr in rules],
+        tool=ToolMetadata(
+            name="Sonar",
+            rules=rules,
+        ),
     ),
     transformer=LibcstTransformerPipeline(SonarUseSecureProtocolsTransformer),
     default_extensions=[".py"],

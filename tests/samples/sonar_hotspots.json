@@ -128,6 +128,26 @@
       },
       "flows": [],
       "ruleKey": "python:S5247"
+    },
+    {
+      "key": "AZSN_hIp0UcGAUz9sZqH",
+      "component": "pixee_codemodder-python:use_secure_protocols.py",
+      "project": "pixee_codemodder-python",
+      "securityCategory": "encrypt-data",
+      "vulnerabilityProbability": "LOW",
+      "status": "TO_REVIEW",
+      "line": 5,
+      "message": "Using http protocol is insecure. Use https instead",
+      "creationDate": "2025-01-22T13:20:10+0100",
+      "updateDate": "2025-01-22T13:29:45+0100",
+      "textRange": {
+        "startLine": 5,
+        "endLine": 5,
+        "startOffset": 6,
+        "endOffset": 26
+      },
+      "flows": [],
+      "ruleKey": "python:S5332"
     }
   ],
   "components": [
