@@ -43,7 +43,7 @@ def test_parse_issues_json():
 
 def test_parse_hotspots_json():
     results = SonarResultSet.from_json(SAMPLE_DIR / "sonar_hotspots.json")
-    assert len(results) == 4
+    assert len(results) == 5
 
 
 def test_combined_json(tmpdir):
@@ -54,7 +54,7 @@ def test_combined_json(tmpdir):
     )
 
     results = SonarResultSet.from_json(Path(tmpdir).joinpath("combined.json"))
-    assert len(results) == 38
+    assert len(results) == 39
 
 
 def test_empty_issues(tmpdir, caplog):
