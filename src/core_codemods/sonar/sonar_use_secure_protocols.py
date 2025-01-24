@@ -84,7 +84,6 @@ class SonarUseSecureProtocolsTransformer(
         match original_node.body:
             # match the first statement that is either selected or is an assignment whose value is selected
             case [cst.Assign() as a, *_] if self.node_is_selected(a.value):
-
                 return self._match_and_handle_statement(
                     a.value, original_node, updated_node
                 )
@@ -126,10 +125,9 @@ class SonarUseSecureProtocolsTransformer(
                     )
                     match maybe_port_value:
                         case None:
-                            self._change_to_smtp_ssl(original_node, updated_node)
-                        case cst.Integer() if maybe_port_value == "0":
-                            self._change_to_smtp_ssl(original_node, updated_node)
-
+                            return self._change_to_smtp_ssl(original_node, updated_node)
+                        case cst.Integer() if maybe_port_value.value == "0":
+                            return self._change_to_smtp_ssl(original_node, updated_node)
         return updated_node
 
     def _change_to_smtp_ssl(self, original_node, updated_node):
