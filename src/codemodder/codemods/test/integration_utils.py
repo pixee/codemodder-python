@@ -99,9 +99,11 @@ class BaseIntegrationTest(DependencyTestMixin):
         assert run[
             "commandLine"
         ] == f'codemodder {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.id} --path-include={self.code_filename} --path-exclude=""' + (
-            f" --sonar-json={self.sonar_issues_json}" if self.sonar_issues_json else ""
+            f" --sonar-issues-json={self.sonar_issues_json}"
+            if self.sonar_issues_json
+            else ""
         ) + (
-            f" --sonar-json={self.sonar_hotspots_json}"
+            f" --sonar-hotspots-json={self.sonar_hotspots_json}"
             if self.sonar_hotspots_json
             else ""
         )
@@ -140,7 +142,6 @@ class BaseIntegrationTest(DependencyTestMixin):
         change = [
             result for result in result["changeset"] if result["path"] == output_path
         ][0]
-        print(change["diff"])
         assert change["path"] == output_path
         assert change["diff"] == self.expected_diff
 
@@ -196,9 +197,9 @@ class BaseIntegrationTest(DependencyTestMixin):
         ]
 
         if self.sonar_issues_json:
-            command.append(f"--sonar-json={self.sonar_issues_json}")
+            command.append(f"--sonar-issues-json={self.sonar_issues_json}")
         if self.sonar_hotspots_json:
-            command.append(f"--sonar-json={self.sonar_hotspots_json}")
+            command.append(f"--sonar-hotspots-json={self.sonar_hotspots_json}")
 
         self.write_original_code()
         self.write_original_dependencies()
