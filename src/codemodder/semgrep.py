@@ -9,7 +9,7 @@ from typing_extensions import Self, override
 
 from codemodder.context import CodemodExecutionContext
 from codemodder.logging import logger
-from codemodder.result import LineInfo, Result, ResultSet, SarifLocation, SarifResult
+from codemodder.result import Result, ResultSet, SarifLocation, SarifResult
 from codemodder.sarifs import AbstractSarifToolDetector
 
 
@@ -23,24 +23,11 @@ class SemgrepSarifToolDetector(AbstractSarifToolDetector):
 
 
 class SemgrepLocation(SarifLocation):
-    @classmethod
-    def from_sarif(cls, sarif_location) -> Self:
-        artifact_location = sarif_location["physicalLocation"]["artifactLocation"]
-        file = Path(artifact_location["uri"])
-        snippet = (
+    @staticmethod
+    def get_snippet(sarif_location) -> str:
+        return (
             sarif_location["physicalLocation"]["region"].get("snippet", {}).get("text")
         )
-        start = LineInfo(
-            line=sarif_location["physicalLocation"]["region"]["startLine"],
-            column=sarif_location["physicalLocation"]["region"]["startColumn"],
-            snippet=snippet,
-        )
-        end = LineInfo(
-            line=sarif_location["physicalLocation"]["region"]["endLine"],
-            column=sarif_location["physicalLocation"]["region"]["endColumn"],
-            snippet=snippet,
-        )
-        return cls(file=file, start=start, end=end)
 
 
 class SemgrepResult(SarifResult):
