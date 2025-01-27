@@ -14,6 +14,10 @@ class CodeQLSarifToolDetector(AbstractSarifToolDetector):
 
 
 class CodeQLLocation(SarifLocation):
+    @staticmethod
+    def get_snippet(sarif_location) -> str:
+        return ""
+
     @classmethod
     def from_sarif(cls, sarif_location) -> Self:
         artifact_location = sarif_location["physicalLocation"]["artifactLocation"]

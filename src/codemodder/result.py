@@ -35,10 +35,27 @@ class Location(ABCDataclass):
 
 @dataclass(frozen=True)
 class SarifLocation(Location):
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def from_sarif(cls, sarif_location) -> Self:
+    def get_snippet(sarif_location) -> str:
         pass
+
+    @classmethod
+    def from_sarif(cls, sarif_location) -> Self:
+        artifact_location = sarif_location["physicalLocation"]["artifactLocation"]
+        file = Path(artifact_location["uri"])
+        snippet = cls.get_snippet(sarif_location)
+        start = LineInfo(
+            line=sarif_location["physicalLocation"]["region"]["startLine"],
+            column=sarif_location["physicalLocation"]["region"]["startColumn"],
+            snippet=snippet,
+        )
+        end = LineInfo(
+            line=sarif_location["physicalLocation"]["region"]["endLine"],
+            column=sarif_location["physicalLocation"]["region"]["endColumn"],
+            snippet=snippet,
+        )
+        return cls(file=file, start=start, end=end)
 
 
 @dataclass(frozen=True)
