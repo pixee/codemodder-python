@@ -334,6 +334,11 @@ SONAR_CODEMODS = {
         guidance_explained="Our change provides the most secure way to create cookies in Flask. However, it's possible you have configured your Flask application configurations to use secure cookies. In these cases, using the default parameters for `set_cookie` is safe.",
         need_sarif="Yes (Sonar)",
     ),
+    "use-secure-protocols": DocMetadata(
+        importance="High",
+        guidance_explained="While secure protocols are widely supported by a variety of application and server software, it may require explicit configuration to support those protocols.",
+        need_sarif="Yes (Sonar)",
+    ),
 }
 
 SEMGREP_CODEMOD_NAMES = [
