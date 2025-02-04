@@ -91,6 +91,8 @@ class AIMetadata(BaseModel):
     provider: Optional[str] = None
     model: Optional[str] = None
     tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
+    prompt_tokens: Optional[int] = None
 
 
 class Strategy(Enum):
