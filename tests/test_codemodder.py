@@ -7,6 +7,7 @@ import pytest
 from codemodder import run
 from codemodder.codemodder import _run_cli, find_semgrep_results
 from codemodder.diff import create_diff_from_tree
+from codemodder.llm import TokenUsage
 from codemodder.registry import load_registered_codemods
 from codemodder.result import ResultSet
 from codemodder.semgrep import run as semgrep_run
@@ -30,7 +31,9 @@ def disable_codemod_apply(mocker, request):
         "test_run_codemod_name_or_id",
     ):
         return
-    mocker.patch("codemodder.codemods.base_codemod.BaseCodemod.apply")
+    mocker.patch(
+        "codemodder.codemods.base_codemod.BaseCodemod.apply", return_value=TokenUsage()
+    )
 
 
 @pytest.fixture(scope="function")
@@ -395,7 +398,8 @@ class TestRun:
     def test_run_basic_call(self, mock_parse, dir_structure):
         code_dir, codetf = dir_structure
 
-        codetf_output, status = run(code_dir, dry_run=True)
+        codetf_output, status, token_usage = run(code_dir, dry_run=True)
+        assert token_usage.total == 0
         assert status == 0
         assert codetf_output
         assert codetf_output.run.directory == str(code_dir)
@@ -406,7 +410,7 @@ class TestRun:
     def test_run_with_output(self, mock_parse, dir_structure):
         code_dir, codetf = dir_structure
 
-        codetf_output, status = run(
+        codetf_output, status, _ = run(
             code_dir,
             output=codetf,
             dry_run=True,
