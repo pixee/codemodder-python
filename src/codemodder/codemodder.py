@@ -14,7 +14,7 @@ from codemodder.codemods.semgrep import SemgrepRuleDetector
 from codemodder.codetf import CodeTF
 from codemodder.context import CodemodExecutionContext
 from codemodder.dependency import Dependency
-from codemodder.llm import MisconfiguredAIClient
+from codemodder.llm import MisconfiguredAIClient, TokenUsage, log_token_usage
 from codemodder.logging import configure_logger, log_list, log_section, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
@@ -46,7 +46,7 @@ def find_semgrep_results(
     return run_semgrep(context, yaml_files, files_to_analyze)
 
 
-def log_report(context, output, elapsed_ms, files_to_analyze):
+def log_report(context, output, elapsed_ms, files_to_analyze, token_usage):
     log_section("report")
     logger.info("scanned: %s files", len(files_to_analyze))
     all_failures = context.get_failed_files()
@@ -62,6 +62,7 @@ def log_report(context, output, elapsed_ms, files_to_analyze):
         len(set(all_changes)),
     )
     logger.info("report file: %s", output)
+    log_token_usage("All", token_usage)
     logger.info("total elapsed: %s ms", elapsed_ms)
     logger.info("  semgrep:     %s ms", context.timer.get_time_ms("semgrep"))
     logger.info("  parse:       %s ms", context.timer.get_time_ms("parse"))
@@ -72,24 +73,30 @@ def log_report(context, output, elapsed_ms, files_to_analyze):
 def apply_codemods(
     context: CodemodExecutionContext,
     codemods_to_run: Sequence[BaseCodemod],
-):
+) -> TokenUsage:
     log_section("scanning")
+    token_usage = TokenUsage()
 
     if not context.files_to_analyze:
         logger.info("no files to scan")
-        return
+        return token_usage
 
     if not codemods_to_run:
         logger.info("no codemods to run")
-        return
+        return token_usage
 
     # run codemods one at a time making sure to respect the given sequence
     for codemod in codemods_to_run:
         # NOTE: this may be used as a progress indicator by upstream tools
         logger.info("running codemod %s", codemod.id)
-        codemod.apply(context)
+        codemod_token_usage = codemod.apply(context)
+        if codemod_token_usage:
+            log_token_usage(f"Codemod {codemod.id}", codemod_token_usage)
+            token_usage += codemod_token_usage
+
         record_dependency_update(context.process_dependencies(codemod.id))
         context.log_changes(codemod.id)
+    return token_usage
 
 
 def record_dependency_update(dependency_results: dict[Dependency, PackageStore | None]):
@@ -128,7 +135,7 @@ def run(
     codemod_registry: registry.CodemodRegistry | None = None,
     sast_only: bool = False,
     ai_client: bool = True,
-) -> tuple[CodeTF | None, int]:
+) -> tuple[CodeTF | None, int, TokenUsage]:
     start = datetime.datetime.now()
 
     codemod_registry = codemod_registry or registry.load_registered_codemods()
@@ -139,6 +146,7 @@ def run(
     codemod_exclude = codemod_exclude or []
 
     provider_registry = providers.load_providers()
+    token_usage = TokenUsage()
 
     log_section("startup")
     logger.info("codemodder: python/%s", __version__)
@@ -148,7 +156,7 @@ def run(
             logger.error(
                 f"FileNotFoundError: [Errno 2] No such file or directory: '{file_name}'"
             )
-            return None, 1
+            return None, 1, token_usage
 
     repo_manager = PythonRepoManager(Path(directory))
 
@@ -168,7 +176,8 @@ def run(
         )
     except MisconfiguredAIClient as e:
         logger.error(e)
-        return None, 3  # Codemodder instructions conflicted (according to spec)
+        # Codemodder instructions conflicted (according to spec)
+        return None, 3, token_usage
 
     context.repo_manager.parse_project()
 
@@ -194,10 +203,7 @@ def run(
         context.find_and_fix_paths,
     )
 
-    apply_codemods(
-        context,
-        codemods_to_run,
-    )
+    token_usage = apply_codemods(context, codemods_to_run)
 
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
@@ -217,8 +223,9 @@ def run(
         output,
         elapsed_ms,
         [] if not codemods_to_run else context.files_to_analyze,
+        token_usage,
     )
-    return codetf, 0
+    return codetf, 0, token_usage
 
 
 def _run_cli(original_args) -> int:
@@ -258,7 +265,7 @@ def _run_cli(original_args) -> int:
     logger.info("command: %s %s", Path(sys.argv[0]).name, " ".join(original_args))
     configure_logger(argv.verbose, argv.log_format, argv.project_name)
 
-    _, status = run(
+    _, status, _ = run(
         argv.directory,
         argv.dry_run,
         argv.output,
