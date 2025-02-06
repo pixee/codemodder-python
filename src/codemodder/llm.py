@@ -63,8 +63,8 @@ MODELS = ModelRegistry(models)
 def setup_openai_llm_client() -> OpenAI | None:
     """Configure either the Azure OpenAI LLM client or the OpenAI client, in that order."""
     if not AzureOpenAI:
-        return None
         logger.info("Azure OpenAI API client not available")
+        return None
 
     azure_openapi_key = os.getenv("CODEMODDER_AZURE_OPENAI_API_KEY")
     azure_openapi_endpoint = os.getenv("CODEMODDER_AZURE_OPENAI_ENDPOINT")
