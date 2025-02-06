@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from codemodder.llm import MODELS, models
+from codemodder.llm import MODELS, TokenUsage, models
 
 
 class TestModels:
@@ -20,3 +20,11 @@ class TestModels:
             },
         )
         assert getattr(MODELS, attr_name) == name
+
+
+def test_token_usage():
+    token_usage = TokenUsage()
+    token_usage += TokenUsage(10, 5)
+    assert token_usage.completion_tokens == 10
+    assert token_usage.prompt_tokens == 5
+    assert token_usage.total == 15

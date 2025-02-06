@@ -17,6 +17,7 @@ from codemodder.codemods.semgrep import SemgrepRuleDetector
 from codemodder.codetf import DetectionTool, Reference
 from codemodder.context import CodemodExecutionContext
 from codemodder.file_context import FileContext
+from codemodder.llm import TokenUsage
 from codemodder.logging import logger
 from codemodder.result import ResultSet
 
@@ -188,7 +189,7 @@ class BaseCodemod(metaclass=ABCMeta):
         self,
         context: CodemodExecutionContext,
         rules: list[str],
-    ) -> None:
+    ) -> None | TokenUsage:
         if self.provider and (
             not (provider := context.providers.get_provider(self.provider))
             or not provider.is_available
@@ -196,7 +197,7 @@ class BaseCodemod(metaclass=ABCMeta):
             logger.warning(
                 "provider %s is not available, skipping codemod", self.provider
             )
-            return
+            return None
 
         if isinstance(self.detector, SemgrepRuleDetector):
             if (
@@ -208,7 +209,7 @@ class BaseCodemod(metaclass=ABCMeta):
                     "no results from semgrep for %s, skipping analysis",
                     self.id,
                 )
-                return
+                return None
 
         results: ResultSet | None = (
             # It seems like semgrep doesn't like our fully-specified id format so pass in short name instead.
@@ -219,11 +220,11 @@ class BaseCodemod(metaclass=ABCMeta):
 
         if results is not None and not results:
             logger.debug("No results for %s", self.id)
-            return
+            return None
 
         if not (files_to_analyze := self.get_files_to_analyze(context, results)):
             logger.debug("No files matched for %s", self.id)
-            return
+            return None
 
         process_file = functools.partial(
             self._process_file, context=context, results=results, rules=rules
@@ -240,8 +241,9 @@ class BaseCodemod(metaclass=ABCMeta):
                 executor.shutdown(wait=True)
 
         context.process_results(self.id, contexts)
+        return None
 
-    def apply(self, context: CodemodExecutionContext) -> None:
+    def apply(self, context: CodemodExecutionContext) -> None | TokenUsage:
         """
         Apply the codemod with the given codemod execution context
 
@@ -257,7 +259,7 @@ class BaseCodemod(metaclass=ABCMeta):
 
         :param context: The codemod execution context
         """
-        self._apply(context, [self._internal_name])
+        return self._apply(context, [self._internal_name])
 
     def _process_file(
         self,
@@ -355,8 +357,8 @@ class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
         if requested_rules:
             self.requested_rules.extend(requested_rules)
 
-    def apply(self, context: CodemodExecutionContext) -> None:
-        self._apply(context, self.requested_rules)
+    def apply(self, context: CodemodExecutionContext) -> None | TokenUsage:
+        return self._apply(context, self.requested_rules)
 
     def get_files_to_analyze(
         self,

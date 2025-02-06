@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import os
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+from typing_extensions import Self
 
 try:
     from openai import AzureOpenAI, OpenAI
@@ -28,6 +31,8 @@ __all__ = [
     "setup_openai_llm_client",
     "setup_azure_llama_llm_client",
     "MisconfiguredAIClient",
+    "TokenUsage",
+    "log_token_usage",
 ]
 
 models = ["gpt-4-turbo-2024-04-09", "gpt-4o-2024-05-13", "gpt-35-turbo-0125"]
@@ -58,8 +63,8 @@ MODELS = ModelRegistry(models)
 def setup_openai_llm_client() -> OpenAI | None:
     """Configure either the Azure OpenAI LLM client or the OpenAI client, in that order."""
     if not AzureOpenAI:
-        logger.info("Azure OpenAI API client not available")
         return None
+        logger.info("Azure OpenAI API client not available")
 
     azure_openapi_key = os.getenv("CODEMODDER_AZURE_OPENAI_API_KEY")
     azure_openapi_endpoint = os.getenv("CODEMODDER_AZURE_OPENAI_ENDPOINT")
@@ -115,3 +120,27 @@ def setup_azure_llama_llm_client() -> ChatCompletionsClient | None:
 
 class MisconfiguredAIClient(ValueError):
     pass
+
+
+@dataclass
+class TokenUsage:
+    completion_tokens: int = 0
+    prompt_tokens: int = 0
+
+    def __iadd__(self, other: Self) -> Self:
+        self.completion_tokens += other.completion_tokens
+        self.prompt_tokens += other.prompt_tokens
+        return self
+
+    @property
+    def total(self):
+        return self.completion_tokens + self.prompt_tokens
+
+
+def log_token_usage(header: str, token_usage: TokenUsage):
+    logger.info(
+        "%s token usage\n\tcompletion_tokens = %s\n\tprompt_tokens = %s",
+        header,
+        token_usage.completion_tokens,
+        token_usage.prompt_tokens,
+    )
