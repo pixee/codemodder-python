@@ -128,7 +128,7 @@ def expressions_from_replacements(
 
 
 def dict_to_values_dict(
-    expr_dict: dict[cst.BaseExpression, cst.BaseExpression]
+    expr_dict: dict[cst.BaseExpression, cst.BaseExpression],
 ) -> dict[str | cst.BaseExpression, cst.BaseExpression]:
     return {
         extract_raw_value(k): v

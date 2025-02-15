@@ -308,9 +308,9 @@ class NameResolutionMixin(MetadataDependent):
         """Check if a given class definition implements a method of name `method_name`."""
         for node in classdef.body.body:
             match node:
-                case cst.FunctionDef(
-                    name=cst.Name(value=value)
-                ) if value == method_name:
+                case cst.FunctionDef(name=cst.Name(value=value)) if (
+                    value == method_name
+                ):
                     return True
         return False
 
@@ -331,7 +331,9 @@ class AncestorPatternsMixin(MetadataDependent):
                 | cst.Assign(value=value)
                 | cst.WithItem(item=value)
                 | cst.NamedExpr(value=value)
-            ) if expr == value:  # type: ignore
+            ) if (
+                expr == value
+            ):  # type: ignore
                 return parent
         return None
 
