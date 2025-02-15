@@ -89,8 +89,7 @@ def apply_codemods(
     for codemod in codemods_to_run:
         # NOTE: this may be used as a progress indicator by upstream tools
         logger.info("running codemod %s", codemod.id)
-        codemod_token_usage = codemod.apply(context)
-        if codemod_token_usage:
+        if codemod_token_usage := codemod.apply(context):
             log_token_usage(f"Codemod {codemod.id}", codemod_token_usage)
             token_usage += codemod_token_usage
 
