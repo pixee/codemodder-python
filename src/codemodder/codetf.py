@@ -101,6 +101,17 @@ class Strategy(Enum):
     deterministic = "deterministic"
 
 
+class Rating(BaseModel):
+    score: float
+    description: Optional[str] = None
+
+
+class FixQuality(BaseModel):
+    safetyRating: Rating
+    effectivenessRating: Rating
+    cleanlinessRating: Rating
+
+
 class ChangeSet(BaseModel):
     """A set of changes made to a file at `path`"""
 
@@ -112,6 +123,7 @@ class ChangeSet(BaseModel):
     provisional: Optional[bool] = False
     # For fixed findings that are not associated with a specific change
     fixedFindings: Optional[list[Finding]] = None
+    fixQuality: Optional[FixQuality] = None
 
     def with_changes(self, changes: list[Change]) -> ChangeSet:
         return ChangeSet(
