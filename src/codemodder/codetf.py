@@ -102,7 +102,7 @@ class Strategy(Enum):
 
 
 class Rating(BaseModel):
-    score: float
+    score: int
     description: Optional[str] = None
 
 
