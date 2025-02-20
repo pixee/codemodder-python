@@ -127,7 +127,13 @@ class TokenUsage:
     completion_tokens: int = 0
     prompt_tokens: int = 0
 
-    def __iadd__(self, other: Self) -> Self:
+    def __add__(self, other: TokenUsage) -> TokenUsage:
+        return TokenUsage(
+            completion_tokens=self.completion_tokens + other.completion_tokens,
+            prompt_tokens=self.prompt_tokens + other.prompt_tokens,
+        )
+
+    def __iadd__(self, other: TokenUsage) -> Self:
         self.completion_tokens += other.completion_tokens
         self.prompt_tokens += other.prompt_tokens
         return self
