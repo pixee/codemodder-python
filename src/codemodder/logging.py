@@ -3,7 +3,7 @@ import sys
 from enum import Enum
 from typing import Generator, Optional
 
-from pythonjsonlogger import jsonlogger
+from pythonjsonlogger import json
 
 logger = logging.getLogger("codemodder")
 
@@ -21,7 +21,7 @@ class OutputFormat(Enum):
         return self.value.lower()
 
 
-class CodemodderJsonFormatter(jsonlogger.JsonFormatter):
+class CodemodderJsonFormatter(json.JsonFormatter):
     project_name: Optional[str]
 
     def __init__(self, *args, project_name: Optional[str] = None, **kwargs):

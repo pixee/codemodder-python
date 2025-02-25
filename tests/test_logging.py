@@ -1,4 +1,4 @@
-from pythonjsonlogger import jsonlogger
+from pythonjsonlogger import json
 
 from codemodder.logging import OutputFormat, configure_logger
 
@@ -10,7 +10,7 @@ def test_json_logger(mocker):
     assert basic_config.call_args[1]["format"] == "%(message)s"
     assert isinstance(
         basic_config.call_args[1]["handlers"][0].formatter,
-        jsonlogger.JsonFormatter,
+        json.JsonFormatter,
     )
     assert (
         basic_config.call_args[1]["handlers"][0].formatter.project_name
