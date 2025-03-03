@@ -35,7 +35,13 @@ __all__ = [
     "log_token_usage",
 ]
 
-models = ["gpt-4-turbo-2024-04-09", "gpt-4o-2024-05-13", "gpt-35-turbo-0125"]
+models = [
+    "gpt-4-turbo-2024-04-09",
+    "gpt-4o-2024-05-13",
+    "gpt-35-turbo-0125",
+    "o1-mini",
+    "o1",
+]
 DEFAULT_AZURE_OPENAI_API_VERSION = "2024-02-01"
 
 
