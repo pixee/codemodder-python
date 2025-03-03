@@ -293,7 +293,7 @@ class SonarIntegrationTest(BaseIntegrationTest):
         )
 
         assert any(
-            [x in sonar_results for x in cls.codemod.requested_rules]
+            x in sonar_results for x in cls.codemod.requested_rules
         ), f"Make sure to add a sonar issue/hotspot for {cls.codemod.rule_id} in {cls.sonar_issues_json} or {cls.sonar_hotspots_json}"
         results_for_codemod = sonar_results[cls.codemod.requested_rules[-1]]
         file_path = pathlib.Path(cls.code_filename)
