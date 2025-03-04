@@ -100,7 +100,7 @@ class SastRegexTransformerPipeline(RegexTransformerPipeline):
                 changed_line = self._apply_regex(line)
                 updated_lines.append(changed_line)
                 if line == changed_line:
-                    logger.warn("Unable to update html line: %s", line)
+                    logger.warning("Unable to update html line: %s", line)
                     self.report_unfixed(
                         file_context,
                         one_idx_lineno,
