@@ -9,25 +9,16 @@ from __future__ import annotations
 import os
 import sys
 from enum import Enum
-from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from codemodder import __version__
-from codemodder.logging import logger
+
+from ..common import CaseInsensitiveEnum, CodeTFWriter
 
 if TYPE_CHECKING:
     from codemodder.context import CodemodExecutionContext
-
-
-class CaseInsensitiveEnum(str, Enum):
-    @classmethod
-    def _missing_(cls, value: object):
-        if not isinstance(value, str):
-            return super()._missing_(value)
-
-        return cls.__members__.get(value.upper())
 
 
 class Action(CaseInsensitiveEnum):
@@ -221,7 +212,7 @@ class Run(BaseModel):
     sarifs: list[Sarif] = []
 
 
-class CodeTF(BaseModel):
+class CodeTF(CodeTFWriter, BaseModel):
     run: Run
     results: list[Result]
 
@@ -247,13 +238,3 @@ class CodeTF(BaseModel):
             sarifs=[],
         )
         return cls(run=run, results=results)
-
-    def write_report(self, outfile: Path | str):
-        try:
-            Path(outfile).write_text(self.model_dump_json(exclude_none=True))
-        except Exception:
-            logger.exception("failed to write report file.")
-            # Any issues with writing the output file should exit status 2.
-            return 2
-        logger.debug("wrote report to %s", outfile)
-        return 0
