@@ -39,7 +39,7 @@ class FixStatusType(str, Enum):
 class FixStatus(BaseModel):
     """Metadata describing fix outcome"""
 
-    status: FixStatus
+    status: FixStatusType
     reason: Optional[str]
     details: Optional[str]
 
