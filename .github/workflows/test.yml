@@ -30,7 +30,7 @@ jobs:
       - name: Set Up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'pip'
       - name: Install build dependencies
         run: pip install build twine
@@ -49,7 +49,7 @@ jobs:
       - name: Set Up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'pip'
       - name: Install Codemodder Package
         # Only install what most users would, not optional dependencies
