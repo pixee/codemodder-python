@@ -38,6 +38,31 @@ class TestSonarJwtDecodeVerify(BaseSASTCodemodTest):
         decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)
         decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": True})
         """
+
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -8,5 +8,5 @@
+ }
+ 
+ encoded_jwt = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+-decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=False)
++decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=True)
+ decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": False})
+""",
+            """\
+--- 
++++ 
+@@ -9,4 +9,4 @@
+ 
+ encoded_jwt = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+ decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], verify=False)
+-decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": False})
++decoded_payload = jwt.decode(encoded_jwt, SECRET_KEY, algorithms=["HS256"], options={"verify_signature": True})
+""",
+        ]
+
         issues = {
             "issues": [
                 {
@@ -65,5 +90,10 @@ class TestSonarJwtDecodeVerify(BaseSASTCodemodTest):
             ]
         }
         self.run_and_assert(
-            tmpdir, input_code, expected, results=json.dumps(issues), num_changes=2
+            tmpdir,
+            input_code,
+            expected,
+            expected_diff_per_change,
+            results=json.dumps(issues),
+            num_changes=2,
         )
