@@ -226,21 +226,54 @@ class BaseCodemod(metaclass=ABCMeta):
             logger.debug("No files matched for %s", self.id)
             return None
 
-        process_file = functools.partial(
-            self._process_file, context=context, results=results, rules=rules
-        )
+        # Do each result independently
+        if results:
+            # gather positional arguments for the map
+            resultset_arguments = []
+            path_arguments = []
+            for result in results.results_for_rules(rules):
+                # this need to be the same type of ResultSet as results
+                singleton = results.__class__()
+                singleton.add_result(result)
+                result_locations = self.get_files_to_analyze(context, singleton)
+                # We do an execution for each location in the result
+                # So we duplicate the resultset argument for each location
+                for loc in result_locations:
+                    resultset_arguments.append(singleton)
+                    path_arguments.append(loc)
 
-        contexts = []
-        if context.max_workers == 1:
-            logger.debug("processing files serially")
-            contexts.extend([process_file(file) for file in files_to_analyze])
-        else:
+            contexts: list = []
             with ThreadPoolExecutor() as executor:
                 logger.debug("using executor with %s workers", context.max_workers)
-                contexts.extend(executor.map(process_file, files_to_analyze))
+                contexts.extend(
+                    executor.map(
+                        lambda path, resultset: self._process_file(
+                            path, context, resultset, rules
+                        ),
+                        path_arguments,
+                        resultset_arguments,
+                    )
+                )
                 executor.shutdown(wait=True)
 
-        context.process_results(self.id, contexts)
+            context.process_results(self.id, contexts)
+        # for find and fix codemods
+        else:
+            process_file = functools.partial(
+                self._process_file, context=context, results=results, rules=rules
+            )
+
+            contexts = []
+            if context.max_workers == 1:
+                logger.debug("processing files serially")
+                contexts.extend([process_file(file) for file in files_to_analyze])
+            else:
+                with ThreadPoolExecutor() as executor:
+                    logger.debug("using executor with %s workers", context.max_workers)
+                    contexts.extend(executor.map(process_file, files_to_analyze))
+                    executor.shutdown(wait=True)
+
+            context.process_results(self.id, contexts)
         return None
 
     def apply(self, context: CodemodExecutionContext) -> None | TokenUsage:
