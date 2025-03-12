@@ -1,3 +1,4 @@
+import difflib
 import os
 from pathlib import Path
 from textwrap import dedent
@@ -58,6 +59,7 @@ class BaseCodemodTest:
         tmpdir,
         input_code,
         expected,
+        expected_diff_per_change: list[str] = [],
         num_changes: int = 1,
         min_num_changes: int | None = None,
         root: Path | None = None,
@@ -99,13 +101,19 @@ class BaseCodemodTest:
             tmp_file_path,
             input_code,
             expected,
-            changes[0],
+            expected_diff_per_change,
+            num_changes,
+            changes,
         )
 
     def assert_num_changes(self, changes, expected_num_changes, min_num_changes):
-        assert len(changes) == 1
+        print(len(changes))
+        print(changes)
+        for c in changes:
+            print(c.diff)
+        assert len(changes) == expected_num_changes
 
-        actual_num = len(changes[0].changes)
+        actual_num = len(changes)
 
         if min_num_changes is not None:
             assert (
@@ -116,25 +124,54 @@ class BaseCodemodTest:
                 actual_num == expected_num_changes
             ), f"Expected {expected_num_changes} changes but {actual_num} were created."
 
-    def assert_changes(self, root, file_path, input_code, expected, changes):
-        assert os.path.relpath(file_path, root) == changes.path
-        assert all(change.description for change in changes.changes)
-
-        expected_diff = create_diff(
-            dedent(input_code).splitlines(keepends=True),
-            dedent(expected).splitlines(keepends=True),
+    def assert_changes(
+        self,
+        root,
+        file_path,
+        input_code,
+        expected,
+        expected_diff_per_change,
+        num_changes,
+        changes,
+    ):
+        assert all(
+            os.path.relpath(file_path, root) == change.path for change in changes
         )
-        try:
-            assert expected_diff == changes.diff
-        except AssertionError:
-            raise DiffError(expected_diff, changes.diff)
+        assert all(c.description for change in changes for c in change.changes)
 
-        output_code = file_path.read_bytes().decode("utf-8")
+        # assert each change individually
+        if num_changes > 1:
+            assert num_changes == len(expected_diff_per_change)
+            for change, diff in zip(changes, expected_diff_per_change):
+                print(change.diff)
+                print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+                print(diff)
+                print("+++++++++++++++++++++++++++++++")
+                print(
+                    "\n".join(
+                        difflib.ndiff(diff.splitlines(), change.diff.splitlines())
+                    )
+                    .replace(" ", "␣")
+                    .replace("\t", "→")
+                )
+                assert change.diff == diff
+        else:
+            # generate diff from expected code
+            expected_diff = create_diff(
+                dedent(input_code).splitlines(keepends=True),
+                dedent(expected).splitlines(keepends=True),
+            )
+            try:
+                assert expected_diff == changes.diff
+            except AssertionError:
+                raise DiffError(expected_diff, changes.diff)
 
-        try:
-            assert output_code == (format_expected := dedent(expected))
-        except AssertionError:
-            raise DiffError(format_expected, output_code)
+            output_code = file_path.read_bytes().decode("utf-8")
+
+            try:
+                assert output_code == (format_expected := dedent(expected))
+            except AssertionError:
+                raise DiffError(format_expected, output_code)
 
     def run_and_assert_filepath(
         self,
@@ -171,6 +208,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
         tmpdir,
         input_code,
         expected,
+        expected_diff_per_change: list[str] | None = None,
         num_changes: int = 1,
         min_num_changes: int | None = None,
         root: Path | None = None,
@@ -217,7 +255,9 @@ class BaseSASTCodemodTest(BaseCodemodTest):
             tmp_file_path,
             input_code,
             expected,
-            changes[0],
+            expected_diff_per_change,
+            num_changes,
+            changes,
         )
 
         return changes
