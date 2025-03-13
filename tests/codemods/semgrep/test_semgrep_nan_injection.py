@@ -67,7 +67,6 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             input_code,
             expected_output,
             results=json.dumps(results),
-            num_changes=4,
         )
 
     def test_multiple(self, tmpdir):
@@ -228,7 +227,6 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             input_code,
             expected_output,
             results=json.dumps(results),
-            num_changes=16,
         )
 
     def test_once_nested(self, tmpdir):
@@ -287,7 +285,6 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             input_code,
             expected_output,
             results=json.dumps(results),
-            num_changes=4,
         )
 
     def test_twice_nested(self, tmpdir):
@@ -345,7 +342,6 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             input_code,
             expected_output,
             results=json.dumps(results),
-            num_changes=4,
         )
 
     def test_direct_source(self, tmpdir):
@@ -401,7 +397,6 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             input_code,
             expected_output,
             results=json.dumps(results),
-            num_changes=4,
         )
 
     def test_binop(self, tmpdir):
@@ -459,7 +454,6 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             input_code,
             expected_output,
             results=json.dumps(results),
-            num_changes=4,
         )
 
 

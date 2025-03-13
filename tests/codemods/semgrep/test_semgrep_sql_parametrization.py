@@ -46,6 +46,37 @@ class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
             conn = sqlite3.connect("example")
             conn.cursor().execute(sql, ((user), ))
         '''
+        expected_diff_per_change = [
+            '''\
+--- 
++++ 
+@@ -8,7 +8,7 @@
+ @app.route("/example")
+ def f():
+     user = request.args["user"]
+-    sql = """SELECT user FROM users WHERE user = '%s'"""
++    sql = """SELECT user FROM users WHERE user = ?"""
+ 
+     conn = sqlite3.connect("example")
+-    conn.cursor().execute(sql % (user))
++    conn.cursor().execute(sql, ((user), ))
+''',
+            '''\
+--- 
++++ 
+@@ -8,7 +8,7 @@
+ @app.route("/example")
+ def f():
+     user = request.args["user"]
+-    sql = """SELECT user FROM users WHERE user = '%s'"""
++    sql = """SELECT user FROM users WHERE user = ?"""
+ 
+     conn = sqlite3.connect("example")
+-    conn.cursor().execute(sql % (user))
++    conn.cursor().execute(sql, ((user), ))
+''',
+        ]
+
         results = {
             "runs": [
                 {
@@ -190,12 +221,11 @@ class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
                 }
             ]
         }
-        changes = self.run_and_assert(
+        self.run_and_assert(
             tmpdir,
             input_code,
             expexted_output,
+            expected_diff_per_change,
             results=json.dumps(results),
-        )
-        assert len(changes[0].changes[0].fixedFindings) == len(
-            results["runs"][0]["results"]
+            num_changes=2,
         )
