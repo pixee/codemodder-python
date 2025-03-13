@@ -8,7 +8,7 @@ import mock
 
 from codemodder import registry
 from codemodder.codemods.api import BaseCodemod
-from codemodder.codetf import Change
+from codemodder.codetf.v2.codetf import ChangeSet
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff
 from codemodder.providers import load_providers
@@ -107,10 +107,12 @@ class BaseCodemodTest:
         )
 
     def assert_num_changes(self, changes, expected_num_changes, min_num_changes):
-        print(len(changes))
-        print(changes)
+        print("expected_diff_per_change = [")
         for c in changes:
-            print(c.diff)
+            print('"""\\')
+            print(c.diff.replace("\t", "    "), end="")
+            print('""",')
+        print("]")
         assert len(changes) == expected_num_changes
 
         actual_num = len(changes)
@@ -248,7 +250,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
 
         self.assert_num_changes(changes, num_changes, min_num_changes)
 
-        self.assert_findings(changes[0].changes)
+        self.assert_findings(changes)
 
         self.assert_changes(
             tmpdir,
@@ -262,7 +264,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
 
         return changes
 
-    def assert_findings(self, changes: list[Change]):
+    def assert_findings(self, changes: list[ChangeSet]):
         assert all(
-            x.fixedFindings for x in changes
+            c.fixedFindings for a in changes for c in a.changes
         ), f"Expected all changes to have findings: {changes}"

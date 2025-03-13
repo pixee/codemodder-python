@@ -48,7 +48,31 @@ class TestSemgrepNoCsrfExempt(BaseSASTCodemodTest):
         def foo():
             pass
         """
-
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -3,7 +3,6 @@
+ from django.dispatch import receiver
+ from django.core.signals import request_finished
+ 
+-@csrf_exempt
+ def ssrf_code_checker(request):
+     if request.user.is_authenticated:
+         if request.method == 'POST':
+""",
+            """\
+--- 
++++ 
+@@ -12,6 +12,5 @@
+ 
+ 
+ @receiver(request_finished)
+-@csrf_exempt
+ def foo():
+     pass
+""",
+        ]
         results = {
             "runs": [
                 {
@@ -114,6 +138,7 @@ class TestSemgrepNoCsrfExempt(BaseSASTCodemodTest):
             tmpdir,
             input_code,
             expected_output,
+            expected_diff_per_change,
             results=json.dumps(results),
             num_changes=2,
         )
