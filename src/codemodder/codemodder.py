@@ -134,6 +134,7 @@ def run(
     codemod_registry: registry.CodemodRegistry | None = None,
     sast_only: bool = False,
     ai_client: bool = True,
+    log_matched_files: bool = False,
 ) -> tuple[CodeTF | None, int, TokenUsage]:
     start = datetime.datetime.now()
 
@@ -192,9 +193,12 @@ def run(
     log_list(logging.INFO, "including paths", context.included_paths)
     log_list(logging.INFO, "excluding paths", path_exclude)
 
-    log_list(
-        logging.DEBUG, "matched files", (str(path) for path in context.files_to_analyze)
-    )
+    if log_matched_files:
+        log_list(
+            logging.DEBUG,
+            "matched files",
+            (str(path) for path in context.files_to_analyze),
+        )
 
     context.semgrep_prefilter_results = find_semgrep_results(
         context,
@@ -279,6 +283,7 @@ def _run_cli(original_args) -> int:
         original_cli_args=original_args,
         codemod_registry=codemod_registry,
         sast_only=argv.sonar_issues_json or argv.sarif,
+        log_matched_files=True,
     )
     return status
 
