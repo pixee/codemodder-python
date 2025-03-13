@@ -164,9 +164,9 @@ class BaseCodemodTest:
                 dedent(expected).splitlines(keepends=True),
             )
             try:
-                assert expected_diff == changes.diff
+                assert expected_diff == changes[0].diff
             except AssertionError:
-                raise DiffError(expected_diff, changes.diff)
+                raise DiffError(expected_diff, changes[0].diff)
 
             output_code = file_path.read_bytes().decode("utf-8")
 
