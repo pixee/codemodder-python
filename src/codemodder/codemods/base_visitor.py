@@ -58,6 +58,21 @@ class UtilsMixin(MetadataDependent):
             pos_to_match
         )
 
+    def node_is_selected_by_line_only(self, node) -> bool:
+        pos_to_match = self.node_position(node)
+        return self.filter_by_result_line_only(
+            pos_to_match
+        ) and self.filter_by_path_includes_or_excludes(pos_to_match)
+
+    def filter_by_result_line_only(self, pos_to_match) -> bool:
+        # Codemods with detectors will only run their transformations if there are results.
+        return self.results is None or any(
+            pos_to_match.start.line >= location.start.line
+            and pos_to_match.end.line <= location.end.line
+            for r in self.results
+            for location in r.locations
+        )
+
     def node_position(self, node):
         # See https://github.com/Instagram/LibCST/blob/main/libcst/_metadata_dependent.py#L112
         match node:
