@@ -25,8 +25,38 @@ class TestSecureRandom(BaseCodemodTest):
         secrets.SystemRandom().getrandbits(1)
         var = "hello"
         """
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -1,6 +1,7 @@
+ 
+ import random
++import secrets
+ 
+-random.random()
++secrets.SystemRandom().random()
+ random.getrandbits(1)
+ var = "hello"
+""",
+            """\
+--- 
++++ 
+@@ -1,6 +1,7 @@
+ 
+ import random
++import secrets
+ 
+ random.random()
+-random.getrandbits(1)
++secrets.SystemRandom().getrandbits(1)
+ var = "hello"
+""",
+        ]
 
-        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
+        self.run_and_assert(
+            tmpdir, input_code, expected_output, expected_diff_per_change, num_changes=2
+        )
 
     def test_from_random(self, tmpdir):
         input_code = """
@@ -109,7 +139,38 @@ class TestSecureRandom(BaseCodemodTest):
         secrets.SystemRandom().randint()
         var = "hello"
         """
-        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=2)
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -1,6 +1,7 @@
+ 
+ import random
++import secrets
+ 
+-random.random()
++secrets.SystemRandom().random()
+ random.randint()
+ var = "hello"
+""",
+            """\
+--- 
++++ 
+@@ -1,6 +1,7 @@
+ 
+ import random
++import secrets
+ 
+ random.random()
+-random.randint()
++secrets.SystemRandom().randint()
+ var = "hello"
+""",
+        ]
+
+        self.run_and_assert(
+            tmpdir, input_code, expected_output, expected_diff_per_change, num_changes=2
+        )
 
     @pytest.mark.parametrize(
         "input_code,expected_output",
@@ -217,8 +278,51 @@ class TestSecureRandom(BaseCodemodTest):
         secrets.choice(["a", "b"])
         secrets.SystemRandom().choices(["a", "b"])
         """
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -1,6 +1,7 @@
+ 
+ import random
++import secrets
+ 
+-random.sample(["a", "b"], 1)
++secrets.SystemRandom().sample(["a", "b"], 1)
+ random.choice(["a", "b"])
+ random.choices(["a", "b"])
+""",
+            """\
+--- 
++++ 
+@@ -1,6 +1,7 @@
+ 
+ import random
++import secrets
+ 
+ random.sample(["a", "b"], 1)
+-random.choice(["a", "b"])
++secrets.choice(["a", "b"])
+ random.choices(["a", "b"])
+""",
+            """\
+--- 
++++ 
+@@ -1,6 +1,7 @@
+ 
+ import random
++import secrets
+ 
+ random.sample(["a", "b"], 1)
+ random.choice(["a", "b"])
+-random.choices(["a", "b"])
++secrets.SystemRandom().choices(["a", "b"])
+""",
+        ]
 
-        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=3)
+        self.run_and_assert(
+            tmpdir, input_code, expected_output, expected_diff_per_change, num_changes=3
+        )
 
     def test_from_import_choice(self, tmpdir):
         input_code = """

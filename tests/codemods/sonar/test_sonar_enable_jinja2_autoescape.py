@@ -24,6 +24,29 @@ class TestEnableJinja2Autoescape(BaseSASTCodemodTest):
         env = Environment(autoescape=True)
         env = Environment(autoescape=True)
         """
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -1,4 +1,4 @@
+ 
+ from jinja2 import Environment
+-env = Environment()
++env = Environment(autoescape=True)
+ env = Environment(autoescape=False)
+""",
+            """\
+--- 
++++ 
+@@ -1,4 +1,4 @@
+ 
+ from jinja2 import Environment
+ env = Environment()
+-env = Environment(autoescape=False)
++env = Environment(autoescape=True)
+""",
+        ]
+
         hotspots = {
             "hotspots": [
                 {
@@ -54,6 +77,7 @@ class TestEnableJinja2Autoescape(BaseSASTCodemodTest):
             tmpdir,
             input_code,
             expected_output,
+            expected_diff_per_change,
             results=json.dumps(hotspots),
             num_changes=2,
         )
