@@ -94,7 +94,9 @@ class BaseCodemodTest:
             assert not changes
             return
 
-        self.assert_num_changes(changes, num_changes, min_num_changes)
+        self.assert_num_changes(
+            changes, num_changes, expected_diff_per_change, min_num_changes
+        )
 
         self.assert_changes(
             tmpdir,
@@ -106,16 +108,25 @@ class BaseCodemodTest:
             changes,
         )
 
-    def assert_num_changes(self, changes, expected_num_changes, min_num_changes):
+    def assert_num_changes(
+        self, changes, expected_num_changes, expected_diff_per_change, min_num_changes
+    ):
         print("expected_diff_per_change = [")
         for c in changes:
             print('"""\\')
-            print(c.diff.replace("\t", "    "), end="")
+            diff_lines = c.diff.replace("\t", "    ").splitlines()
+            for line in diff_lines:
+                print(line)
             print('""",')
         print("]")
-        assert len(changes) == expected_num_changes
+        if expected_diff_per_change:
+            assert len(changes) == expected_num_changes
+            actual_num = len(changes)
+        else:
+            assert len(changes[0].changes) == expected_num_changes
+            actual_num = len(changes[0].changes)
 
-        actual_num = len(changes)
+        # actual_num = len(changes)
 
         if min_num_changes is not None:
             assert (
@@ -142,7 +153,7 @@ class BaseCodemodTest:
         assert all(c.description for change in changes for c in change.changes)
 
         # assert each change individually
-        if num_changes > 1:
+        if expected_diff_per_change and num_changes > 1:
             assert num_changes == len(expected_diff_per_change)
             for change, diff in zip(changes, expected_diff_per_change):
                 print(change.diff)
@@ -248,7 +259,9 @@ class BaseSASTCodemodTest(BaseCodemodTest):
             assert not changes
             return
 
-        self.assert_num_changes(changes, num_changes, min_num_changes)
+        self.assert_num_changes(
+            changes, num_changes, expected_diff_per_change, min_num_changes
+        )
 
         self.assert_findings(changes)
 

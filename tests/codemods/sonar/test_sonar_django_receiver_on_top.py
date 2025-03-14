@@ -13,8 +13,8 @@ class TestSonarDjangoReceiverOnTop(BaseSASTCodemodTest):
 
     def assert_findings(self, changes):
         # For now we can only link the finding to the line with the receiver decorator
-        assert changes[0].fixedFindings
-        assert not changes[1].fixedFindings
+        assert changes[0].changes[0].fixedFindings
+        assert not changes[0].changes[1].fixedFindings
 
     def test_simple(self, tmpdir):
         input_code = """
