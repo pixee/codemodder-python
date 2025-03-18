@@ -20,7 +20,7 @@ dependencies = [
     "pylint>=3.3,<3.4",
     "python-json-logger~=3.3.0",
     "PyYAML~=6.0.0",
-    "semgrep>=1.111,<1.112",
+    "semgrep>=1.113,<1.114",
     "toml~=0.10.2",
     "tomlkit~=0.13.0",
     "wrapt~=1.17.0",
@@ -51,7 +51,7 @@ get-hashes = 'codemodder.scripts.get_hashes:main'
 [project.optional-dependencies]
 test = [
     "azure-ai-inference>=1.0.0b1,<2.0",
-    "coverage>=7.6,<7.7",
+    "coverage>=7.7,<7.8",
     "coverage-threshold~=0.4",
     "defusedxml==0.7.1",
     "types-defusedxml==0.7.0.20240218",
