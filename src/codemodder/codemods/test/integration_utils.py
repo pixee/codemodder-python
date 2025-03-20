@@ -9,6 +9,7 @@ from textwrap import dedent
 from types import ModuleType
 
 import jsonschema
+import unidiff
 
 from codemodder import __version__
 from core_codemods.sonar.api import process_sonar_findings
@@ -33,6 +34,252 @@ class DependencyTestMixin:
             with open(self.dependency_path, "r", encoding="utf-8") as f:
                 new_requirements_txt = f.read()
             assert new_requirements_txt == self.expected_requirements
+
+
+class BaseRemediationIntegrationTest:
+    codemod = NotImplementedError
+    original_code = NotImplementedError
+    expected_diff_per_change = NotImplementedError
+    num_changes = 1
+    num_changed_files = 1
+    allowed_exceptions = ()
+    sonar_issues_json: str | None = None
+    sonar_hotspots_json: str | None = None
+
+    @classmethod
+    def setup_class(cls):
+        codemod_id = (
+            cls.codemod().id if isinstance(cls.codemod, type) else cls.codemod.id
+        )
+        cls.codemod_instance = validate_codemod_registration(codemod_id)
+
+        cls.output_path = tempfile.mkstemp()[1]
+        cls.code_dir = tempfile.mkdtemp()
+
+        if not hasattr(cls, "code_filename"):
+            # Only a few codemods require the analyzed file to have a specific filename
+            # All others can just be `code.py`
+            cls.code_filename = "code.py"
+
+        cls.code_path = os.path.join(cls.code_dir, cls.code_filename)
+
+        if cls.code_filename == "settings.py" and "Django" in str(cls):
+            # manage.py must be in the directory above settings.py for this codemod to run
+            parent_dir = Path(cls.code_dir).parent
+            manage_py_path = parent_dir / "manage.py"
+            manage_py_path.touch()
+
+    @classmethod
+    def teardown_class(cls):
+        """Ensure any re-written file is undone after integration test class"""
+        pass
+
+    def _assert_run_fields(self, run, output_path):
+        assert run["vendor"] == "pixee"
+        assert run["tool"] == "codemodder-python"
+        assert run["version"] == __version__
+        assert run["elapsed"] != ""
+        assert run[
+            "commandLine"
+        ] == f'codemodder {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.id} --path-include={self.code_filename} --path-exclude=""' + (
+            f" --sonar-issues-json={self.sonar_issues_json}"
+            if self.sonar_issues_json
+            else ""
+        ) + (
+            f" --sonar-hotspots-json={self.sonar_hotspots_json}"
+            if self.sonar_hotspots_json
+            else ""
+        )
+        assert run["directory"] == os.path.abspath(self.code_dir)
+        assert run["sarifs"] == []
+
+    def _assert_results_fields(self, results, output_path):
+        assert len(results) == 1
+        result = results[0]
+        assert result["codemod"] == self.codemod_instance.id
+        assert result["references"] == [
+            ref.model_dump(exclude_none=True)
+            for ref in self.codemod_instance.references
+        ]
+
+        assert ("detectionTool" in result) == bool(self.sonar_issues_json)
+        assert ("detectionTool" in result) == bool(self.sonar_hotspots_json)
+
+        # TODO: if/when we add description for each url
+        for reference in result["references"][
+            # Last references for Sonar has a different description
+            : (
+                -len(self.codemod.requested_rules)
+                if self.sonar_issues_json or self.sonar_hotspots_json
+                else None
+            )
+        ]:
+            assert reference["url"] == reference["description"]
+
+        self._assert_sonar_fields(result)
+
+        # There should be a changeset for every expected change
+        assert len(result["changeset"]) == self.num_changes
+        # gather all the change files and test against the expected number
+        assert len({c["path"] for c in result["changeset"]}) == self.num_changed_files
+
+        # A codemod may change multiple files. For now we will
+        # assert the resulting data for one file only.
+        changes = [
+            result for result in result["changeset"] if result["path"] == output_path
+        ]
+        assert {c["path"] for c in changes} == {output_path}
+
+        changes_diff = [c["diff"] for c in changes]
+        print(changes_diff)
+        assert changes_diff == self.expected_diff_per_change
+
+        assert len(changes) == self.num_changes
+        lines_changed = [c["changes"][0]["lineNumber"] for c in changes]
+        assert lines_changed == self.expected_lines_changed
+        assert {c["changes"][0]["description"] for c in changes} == {
+            self.change_description
+        }
+
+    def _assert_sonar_fields(self, result):
+        del result
+
+    def _assert_codetf_output(self, codetf_schema):
+        with open(self.output_path, "r", encoding="utf-8") as f:
+            codetf = json.load(f)
+
+        jsonschema.validate(codetf, codetf_schema)
+
+        assert sorted(codetf.keys()) == ["results", "run"]
+        run = codetf["run"]
+        self._assert_run_fields(run, self.output_path)
+        results = codetf["results"]
+        # CodeTf2 spec requires relative paths
+        self._assert_results_fields(results, self.code_filename)
+
+    def test_codetf_output(self, codetf_schema):
+        """
+        Tests correct codetf output.
+        """
+        command = [
+            "codemodder",
+            self.code_dir,
+            "--output",
+            self.output_path,
+            f"--codemod-include={self.codemod_instance.id}",
+            f"--path-include={self.code_filename}",
+            '--path-exclude=""',
+        ]
+
+        if self.sonar_issues_json:
+            command.append(f"--sonar-issues-json={self.sonar_issues_json}")
+        if self.sonar_hotspots_json:
+            command.append(f"--sonar-hotspots-json={self.sonar_hotspots_json}")
+
+        completed_process = subprocess.run(
+            command,
+            check=False,
+            shell=False,
+        )
+        assert completed_process.returncode == 0
+
+        self._assert_codetf_output(codetf_schema)
+        patched_codes = self._get_patched_code_for_each_change()
+        self._check_code_after(patched_codes)
+
+    def apply_hunk_to_lines(self, lines, hunk):
+        # The hunk target line numbers are 1-indexed.
+        start_index = hunk.target_start - 1
+        new_lines = lines[:start_index]
+        orig_index = start_index
+
+        for hunk_line in hunk:
+            if hunk_line.is_context:
+                # For a context line, check that content matches.
+                if orig_index >= len(lines):
+                    raise ValueError(
+                        "Context line beyond available lines: " + hunk_line.value
+                    )
+                if lines[orig_index].rstrip("\n") != hunk_line.value.rstrip("\n"):
+                    raise ValueError(
+                        "Context line mismatch:\nExpected: "
+                        + lines[orig_index]
+                        + "\nGot: "
+                        + hunk_line.value
+                    )
+                new_lines.append(lines[orig_index])
+                orig_index += 1
+            elif hunk_line.is_removed:
+                # Expect the original line to match, but then skip it.
+                if orig_index >= len(lines):
+                    raise ValueError(
+                        "Removal line beyond available lines: " + hunk_line.value
+                    )
+                if lines[orig_index].rstrip("\n") != hunk_line.value.rstrip("\n"):
+                    raise ValueError(
+                        "Removal line mismatch:\nExpected: "
+                        + lines[orig_index]
+                        + "\nGot: "
+                        + hunk_line.value
+                    )
+                orig_index += 1
+            elif hunk_line.is_added:
+                # For an added line, insert the new content.
+                new_lines.append(hunk_line.value)
+        # Append any remaining lines after the hunk.
+        new_lines.extend(lines[orig_index:])
+        return new_lines
+
+    def apply_diff(self, diff_str, original_str):
+        # unidiff expect the hunk header to have a filename, append it
+        diff_lines = diff_str.splitlines()
+        patched_diff = []
+        for line in diff_lines:
+            if line.startswith("+++") or line.startswith("---"):
+                line = line + " " + self.code_filename
+            patched_diff.append(line)
+        fixed_diff_str = "\n".join(patched_diff)
+
+        patch_set = unidiff.PatchSet(fixed_diff_str)
+
+        # Make a list of lines from the original string.
+        # Assumes original_str uses newline characters.
+        patched_lines = original_str.splitlines(keepends=True)
+
+        # For simplicity, assume the diff only contains modifications for one file.
+        if len(patch_set) != 1:
+            raise ValueError("Only single-file patches are supported in this example.")
+
+        file_patch = list(patch_set)[0]
+        # Process each hunk from the patch sequentially.
+        for hunk in file_patch:
+            try:
+                patched_lines = self.apply_hunk_to_lines(patched_lines, hunk)
+            except ValueError as e:
+                print("Error applying hunk:", e)
+                sys.exit(1)
+
+        return "".join(patched_lines)
+
+    def _get_patched_code_for_each_change(self) -> list[str]:
+        with open(self.output_path, "r", encoding="utf-8") as f:
+            codetf = json.load(f)
+        changes = codetf["results"][0]["changeset"]
+        patched_codes = []
+        with open(self.code_path, "r", encoding="utf-8") as f:  # type: ignore
+            original_code = f.read()
+        for c in changes:
+            patched_codes.append(self.apply_diff(c["diff"], original_code))
+        return patched_codes
+
+    def _check_code_after(self, patched_codes):
+        """
+        Check if each change will produce executable code.
+        """
+        for patched_code in patched_codes:
+            execute_code(
+                code=patched_code, allowed_exceptions=self.allowed_exceptions  # type: ignore
+            )
 
 
 class BaseIntegrationTest(DependencyTestMixin):
@@ -166,10 +413,6 @@ class BaseIntegrationTest(DependencyTestMixin):
         # CodeTf2 spec requires relative paths
         self._assert_results_fields(results, self.code_filename)
 
-    def write_original_code(self):
-        with open(self.code_path, "w", encoding="utf-8") as f:
-            f.write(self.original_code)
-
     def check_code_after(self) -> ModuleType:
         with open(self.code_path, "r", encoding="utf-8") as f:  # type: ignore
             new_code = f.read()
@@ -177,6 +420,10 @@ class BaseIntegrationTest(DependencyTestMixin):
         return execute_code(
             path=self.code_path, allowed_exceptions=self.allowed_exceptions  # type: ignore
         )
+
+    def write_original_code(self):
+        with open(self.code_path, "w", encoding="utf-8") as f:
+            f.write(self.original_code)
 
     def test_file_rewritten(self, codetf_schema):
         """
@@ -236,6 +483,62 @@ class BaseIntegrationTest(DependencyTestMixin):
 SAMPLES_DIR = "tests/samples"
 # Enable import of test modules from test directory
 sys.path.append(SAMPLES_DIR)
+
+
+class SonarRemediationIntegrationTest(BaseRemediationIntegrationTest):
+    """
+    Sonar integration tests must use code from a file in tests/samples
+    because those files are what appears in sonar_issues.json
+    """
+
+    code_path = NotImplementedError
+    sonar_issues_json = "tests/samples/sonar_issues.json"
+    sonar_hotspots_json = "tests/samples/sonar_hotspots.json"
+
+    @classmethod
+    def setup_class(cls):
+        codemod_id = (
+            cls.codemod().id if isinstance(cls.codemod, type) else cls.codemod.id
+        )
+        cls.codemod_instance = validate_codemod_registration(codemod_id)
+
+        cls.output_path = tempfile.mkstemp()[1]
+        cls.code_dir = SAMPLES_DIR
+        cls.code_filename = os.path.relpath(cls.code_path, SAMPLES_DIR)
+
+        # TODO: support sonar integration tests that add a dependency to
+        # `requirements_file_name`. These tests would not be able to run
+        # in parallel at this time since they would all override the same
+        # tests/samples/requirements.txt file, unless we change that to
+        # a temporary file.
+        cls.check_sonar_issues()
+
+    @classmethod
+    def check_sonar_issues(cls):
+        sonar_results = process_sonar_findings(
+            (cls.sonar_issues_json, cls.sonar_hotspots_json)
+        )
+
+        assert any(
+            x in sonar_results for x in cls.codemod.requested_rules
+        ), f"Make sure to add a sonar issue/hotspot for {cls.codemod.rule_id} in {cls.sonar_issues_json} or {cls.sonar_hotspots_json}"
+        results_for_codemod = sonar_results[cls.codemod.requested_rules[-1]]
+        file_path = pathlib.Path(cls.code_filename)
+        assert (
+            file_path in results_for_codemod
+        ), f"Make sure to add a sonar issue/hotspot for file `{cls.code_filename}` under one of the rules `{cls.codemod.requested_rules}`in {cls.sonar_issues_json} or {cls.sonar_hotspots_json}"
+
+    def _assert_sonar_fields(self, result):
+        assert self.codemod_instance._metadata.tool is not None
+        rules = self.codemod_instance._metadata.tool.rules
+        for i in range(len(rules)):
+            assert (
+                result["references"][len(result["references"]) - len(rules) + i][
+                    "description"
+                ]
+                == self.codemod_instance._metadata.tool.rules[i].name
+            )
+        assert result["detectionTool"]["name"] == "Sonar"
 
 
 class SonarIntegrationTest(BaseIntegrationTest):
