@@ -69,6 +69,14 @@ class BaseRemediationIntegrationTest:
             manage_py_path = parent_dir / "manage.py"
             manage_py_path.touch()
 
+        if cls.original_code is not NotImplementedError:
+            # Some tests are easier to understand with the expected new code provided
+            # instead of calculated
+            cls.original_code = dedent(cls.original_code).strip("\n")
+        else:
+            with open(cls.code_path, "r", encoding="utf-8") as f:  # type: ignore
+                cls.original_code = f.read()
+
     def _assert_run_fields(self, run, output_path):
         assert run["vendor"] == "pixee"
         assert run["tool"] == "codemodder-python"
@@ -152,13 +160,14 @@ class BaseRemediationIntegrationTest:
         # CodeTf2 spec requires relative paths
         self._assert_results_fields(results, self.code_filename)
 
+    def write_original_code(self):
+        with open(self.code_path, "w", encoding="utf-8") as f:
+            f.write(self.original_code)
+
     def test_codetf_output(self, codetf_schema):
         """
         Tests correct codetf output.
         """
-
-        with open(self.code_path, "r", encoding="utf-8") as f:  # type: ignore
-            original_code = f.read()
 
         command = [
             "codemodder",
@@ -175,6 +184,8 @@ class BaseRemediationIntegrationTest:
         if self.sonar_hotspots_json:
             command.append(f"--sonar-hotspots-json={self.sonar_hotspots_json}")
 
+        self.write_original_code()
+
         completed_process = subprocess.run(
             command,
             check=False,
@@ -189,7 +200,7 @@ class BaseRemediationIntegrationTest:
         # check that the original file is not rewritten
         with open(self.code_path, "r", encoding="utf-8") as f:
             original_file_code = f.read()
-            assert original_file_code == original_code
+            assert original_file_code == self.original_code
 
     def apply_hunk_to_lines(self, lines, hunk):
         # The hunk target line numbers are 1-indexed.
@@ -266,7 +277,7 @@ class BaseRemediationIntegrationTest:
         return "".join(patched_lines)
 
     def _get_patched_code_for_each_change(self) -> list[str]:
-        with open(self.output_path, "r", encoding="utf-8") as f:
+        with open(self.output_path, "r", encoding="utf-8") as f:  # type: ignore
             codetf = json.load(f)
         changes = codetf["results"][0]["changeset"]
         patched_codes = []
@@ -349,7 +360,7 @@ class BaseIntegrationTest(DependencyTestMixin):
         assert run["elapsed"] != ""
         assert run[
             "commandLine"
-        ] == f'codemodder {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.id} --path-include={self.code_filename} --path-exclude=""' + (
+        ] == f'codemodder_hardening {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.id} --path-include={self.code_filename} --path-exclude=""' + (
             f" --sonar-issues-json={self.sonar_issues_json}"
             if self.sonar_issues_json
             else ""
@@ -438,7 +449,7 @@ class BaseIntegrationTest(DependencyTestMixin):
         output files
         """
         command = [
-            "codemodder",
+            "codemodder_hardening",
             self.code_dir,
             "--output",
             self.output_path,
@@ -509,6 +520,15 @@ class SonarRemediationIntegrationTest(BaseRemediationIntegrationTest):
         cls.output_path = tempfile.mkstemp()[1]
         cls.code_dir = SAMPLES_DIR
         cls.code_filename = os.path.relpath(cls.code_path, SAMPLES_DIR)
+
+        if cls.original_code is not NotImplementedError:
+            # Some tests are easier to understand with the expected new code provided
+            # instead of calculated
+            cls.original_code = dedent(cls.original_code).strip("\n")
+        else:
+            with open(cls.code_path, "r", encoding="utf-8") as f:  # type: ignore
+                cls.original_code = f.read()
+            print(cls.original_code)
 
         # TODO: support sonar integration tests that add a dependency to
         # `requirements_file_name`. These tests would not be able to run
