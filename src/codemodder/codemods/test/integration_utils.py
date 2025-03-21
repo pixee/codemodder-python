@@ -69,11 +69,6 @@ class BaseRemediationIntegrationTest:
             manage_py_path = parent_dir / "manage.py"
             manage_py_path.touch()
 
-    @classmethod
-    def teardown_class(cls):
-        """Ensure any re-written file is undone after integration test class"""
-        pass
-
     def _assert_run_fields(self, run, output_path):
         assert run["vendor"] == "pixee"
         assert run["tool"] == "codemodder-python"
@@ -161,6 +156,10 @@ class BaseRemediationIntegrationTest:
         """
         Tests correct codetf output.
         """
+
+        with open(self.code_path, "r", encoding="utf-8") as f:  # type: ignore
+            original_code = f.read()
+
         command = [
             "codemodder",
             self.code_dir,
@@ -186,6 +185,11 @@ class BaseRemediationIntegrationTest:
         self._assert_codetf_output(codetf_schema)
         patched_codes = self._get_patched_code_for_each_change()
         self._check_code_after(patched_codes)
+
+        # check that the original file is not rewritten
+        with open(self.code_path, "r", encoding="utf-8") as f:
+            original_file_code = f.read()
+            assert original_file_code == original_code
 
     def apply_hunk_to_lines(self, lines, hunk):
         # The hunk target line numbers are 1-indexed.
