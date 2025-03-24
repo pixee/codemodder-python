@@ -292,21 +292,17 @@ def _run_cli(original_args, hardening=False) -> int:
     return status
 
 
-"""
-Hardens a project. The application will write all the fixes into the files.
-"""
-
-
 def harden():
+    """
+    Hardens a project. The application will write all the fixes into the files.
+    """
     sys_argv = sys.argv[1:]
     sys.exit(_run_cli(sys_argv, True))
 
 
-"""
-Remediates a project. The application will suggest fix for each separate issue found. No files will be written.
-"""
-
-
 def main():
+    """
+    Remediates a project. The application will suggest fix for each separate issue found. No files will be written.
+    """
     sys_argv = sys.argv[1:]
     sys.exit(_run_cli(sys_argv))
