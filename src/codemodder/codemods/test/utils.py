@@ -73,9 +73,10 @@ class BaseCodemodTest:
 
         path_exclude = [f"{tmp_file_path}:{line}" for line in lines_to_exclude or []]
 
+        print(expected_diff_per_change)
         self.execution_context = CodemodExecutionContext(
             directory=root,
-            dry_run=False,
+            dry_run=True if expected_diff_per_change else False,
             verbose=False,
             registry=mock.MagicMock(),
             providers=load_providers(),
@@ -220,9 +221,10 @@ class BaseSASTCodemodTest(BaseCodemodTest):
 
         path_exclude = [f"{tmp_file_path}:{line}" for line in lines_to_exclude or []]
 
+        print(expected_diff_per_change)
         self.execution_context = CodemodExecutionContext(
             directory=root,
-            dry_run=False,
+            dry_run=True if expected_diff_per_change else False,
             verbose=False,
             tool_result_files_map={self.tool: [tmp_results_file_path]},
             registry=mock.MagicMock(),
