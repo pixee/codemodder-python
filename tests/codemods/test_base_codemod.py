@@ -81,7 +81,7 @@ def test_core_codemod_filter_apply_by_extension(mocker, ext, call_count):
         Path("file2.py"),
     ]
 
-    codemod.apply(context)
+    codemod.apply(context, hardening=True)
 
     assert process_file.call_count == call_count
 
