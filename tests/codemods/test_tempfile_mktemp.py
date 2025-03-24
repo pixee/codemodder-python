@@ -79,7 +79,7 @@ class TestTempfileMktemp(BaseCodemodTest):
             filename = tf.name
         var = "hello"
         """
-        self.run_and_assert(tmpdir, input_code, expected_output, 5)
+        self.run_and_assert(tmpdir, input_code, expected_output, num_changes=5)
 
     def test_from_import(self, tmpdir):
         input_code = """
