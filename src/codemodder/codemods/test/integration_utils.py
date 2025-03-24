@@ -139,6 +139,7 @@ class BaseRemediationIntegrationTest:
 
         assert len(changes) == self.num_changes
         lines_changed = [c["changes"][0]["lineNumber"] for c in changes]
+        print(lines_changed)
         assert lines_changed == self.expected_lines_changed
         assert {c["changes"][0]["description"] for c in changes} == {
             self.change_description
