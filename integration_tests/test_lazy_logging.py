@@ -1,8 +1,8 @@
-from codemodder.codemods.test import BaseIntegrationTest
+from codemodder.codemods.test.integration_utils import BaseRemediationIntegrationTest
 from core_codemods.lazy_logging import LazyLogging
 
 
-class TestLazyLogging(BaseIntegrationTest):
+class TestLazyLogging(BaseRemediationIntegrationTest):
     codemod = LazyLogging
     original_code = """
     import logging
@@ -10,23 +10,11 @@ class TestLazyLogging(BaseIntegrationTest):
     logging.error("Error occurred: %s" % e)
     logging.error("Error occurred: " + e)
     """
-    replacement_lines = [
-        (3, """logging.error("Error occurred: %s", e)\n"""),
-        (4, """logging.error("Error occurred: %s", e)\n"""),
+    expected_diff_per_change = [
+        '--- \n+++ \n@@ -1,4 +1,4 @@\n import logging\n e = "Some error"\n-logging.error("Error occurred: %s" % e)\n+logging.error("Error occurred: %s", e)\n logging.error("Error occurred: " + e)',
+        '--- \n+++ \n@@ -1,4 +1,4 @@\n import logging\n e = "Some error"\n logging.error("Error occurred: %s" % e)\n-logging.error("Error occurred: " + e)\n+logging.error("Error occurred: %s", e)',
     ]
-    # fmt: off
-    expected_diff = (
-    """--- \n"""
-    """+++ \n"""
-    """@@ -1,4 +1,4 @@\n"""
-    """ import logging\n"""
-    """ e = "Some error"\n"""
-    """-logging.error("Error occurred: %s" % e)\n"""
-    """-logging.error("Error occurred: " + e)\n"""
-    """+logging.error("Error occurred: %s", e)\n"""
-    """+logging.error("Error occurred: %s", e)\n""")
-    # fmt: on
 
-    expected_line_change = "3"
+    expected_lines_changed = [3, 4]
     change_description = LazyLogging.change_description
     num_changes = 2
