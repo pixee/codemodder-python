@@ -134,12 +134,10 @@ class BaseRemediationIntegrationTest:
         assert {c["path"] for c in changes} == {output_path}
 
         changes_diff = [c["diff"] for c in changes]
-        print(changes_diff)
         assert changes_diff == self.expected_diff_per_change
 
         assert len(changes) == self.num_changes
         lines_changed = [c["changes"][0]["lineNumber"] for c in changes]
-        print(lines_changed)
         assert lines_changed == self.expected_lines_changed
         assert {c["changes"][0]["description"] for c in changes} == {
             self.change_description
@@ -529,7 +527,6 @@ class SonarRemediationIntegrationTest(BaseRemediationIntegrationTest):
         else:
             with open(cls.code_path, "r", encoding="utf-8") as f:  # type: ignore
                 cls.original_code = f.read()
-            print(cls.original_code)
 
         # TODO: support sonar integration tests that add a dependency to
         # `requirements_file_name`. These tests would not be able to run
