@@ -25,7 +25,7 @@ class TestMultipleCodemods:
         shutil.copy(pathlib.Path(SAMPLES_DIR) / source_file_name, directory)
 
         command = [
-            "codemodder",
+            "codemodder_hardening",
             directory,
             "--output",
             str(codetf_path),
