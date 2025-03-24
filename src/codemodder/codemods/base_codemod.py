@@ -189,6 +189,7 @@ class BaseCodemod(metaclass=ABCMeta):
         self,
         context: CodemodExecutionContext,
         rules: list[str],
+        hardening: bool,
     ) -> None | TokenUsage:
         if self.provider and (
             not (provider := context.providers.get_provider(self.provider))
@@ -226,21 +227,26 @@ class BaseCodemod(metaclass=ABCMeta):
             logger.debug("No files matched for %s", self.id)
             return None
 
-        # Do each result independently
-        if results:
+        # Do each result independently and outputs the diffs
+        if not hardening:
             # gather positional arguments for the map
-            resultset_arguments = []
+            resultset_arguments: list[ResultSet | None] = []
             path_arguments = []
-            for result in results.results_for_rules(rules):
-                # this need to be the same type of ResultSet as results
-                singleton = results.__class__()
-                singleton.add_result(result)
-                result_locations = self.get_files_to_analyze(context, singleton)
-                # We do an execution for each location in the result
-                # So we duplicate the resultset argument for each location
-                for loc in result_locations:
-                    resultset_arguments.append(singleton)
-                    path_arguments.append(loc)
+            if results:
+                for result in results.results_for_rules(rules):
+                    # this need to be the same type of ResultSet as results
+                    singleton = results.__class__()
+                    singleton.add_result(result)
+                    result_locations = self.get_files_to_analyze(context, singleton)
+                    # We do an execution for each location in the result
+                    # So we duplicate the resultset argument for each location
+                    for loc in result_locations:
+                        resultset_arguments.append(singleton)
+                        path_arguments.append(loc)
+            # An exception for find-and-fix codemods
+            else:
+                resultset_arguments = [None]
+                path_arguments = files_to_analyze
 
             contexts: list = []
             with ThreadPoolExecutor() as executor:
@@ -251,13 +257,13 @@ class BaseCodemod(metaclass=ABCMeta):
                             path, context, resultset, rules
                         ),
                         path_arguments,
-                        resultset_arguments,
+                        resultset_arguments or [None],
                     )
                 )
                 executor.shutdown(wait=True)
 
             context.process_results(self.id, contexts)
-        # for find and fix codemods
+        # Hardens all findings per file at once and writes the fixed code into the file
         else:
             process_file = functools.partial(
                 self._process_file, context=context, results=results, rules=rules
@@ -276,7 +282,9 @@ class BaseCodemod(metaclass=ABCMeta):
             context.process_results(self.id, contexts)
         return None
 
-    def apply(self, context: CodemodExecutionContext) -> None | TokenUsage:
+    def apply(
+        self, context: CodemodExecutionContext, hardening: bool = False
+    ) -> None | TokenUsage:
         """
         Apply the codemod with the given codemod execution context
 
@@ -292,7 +300,7 @@ class BaseCodemod(metaclass=ABCMeta):
 
         :param context: The codemod execution context
         """
-        return self._apply(context, [self._internal_name])
+        return self._apply(context, [self._internal_name], hardening)
 
     def _process_file(
         self,
@@ -390,8 +398,10 @@ class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
         if requested_rules:
             self.requested_rules.extend(requested_rules)
 
-    def apply(self, context: CodemodExecutionContext) -> None | TokenUsage:
-        return self._apply(context, self.requested_rules)
+    def apply(
+        self, context: CodemodExecutionContext, hardening: bool = False
+    ) -> None | TokenUsage:
+        return self._apply(context, self.requested_rules, hardening)
 
     def get_files_to_analyze(
         self,
