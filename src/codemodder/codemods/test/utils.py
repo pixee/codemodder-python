@@ -1,4 +1,3 @@
-import difflib
 import os
 from pathlib import Path
 from textwrap import dedent
@@ -111,14 +110,6 @@ class BaseCodemodTest:
     def assert_num_changes(
         self, changes, expected_num_changes, expected_diff_per_change, min_num_changes
     ):
-        print("expected_diff_per_change = [")
-        for c in changes:
-            print('"""\\')
-            diff_lines = c.diff.replace("\t", "    ").splitlines()
-            for line in diff_lines:
-                print(line)
-            print('""",')
-        print("]")
         if expected_diff_per_change:
             assert len(changes) == expected_num_changes
             actual_num = len(changes)
@@ -156,17 +147,6 @@ class BaseCodemodTest:
         if expected_diff_per_change and num_changes > 1:
             assert num_changes == len(expected_diff_per_change)
             for change, diff in zip(changes, expected_diff_per_change):
-                print(change.diff)
-                print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
-                print(diff)
-                print("+++++++++++++++++++++++++++++++")
-                print(
-                    "\n".join(
-                        difflib.ndiff(diff.splitlines(), change.diff.splitlines())
-                    )
-                    .replace(" ", "␣")
-                    .replace("\t", "→")
-                )
                 assert change.diff == diff
         else:
             # generate diff from expected code
