@@ -82,7 +82,7 @@ test = [
     "flask_wtf~=1.2.0",
     "fickling~=0.1.0,>=0.1.3",
     "graphql-server~=3.0.0b7",
-    "unidiff>=0.75",
+    "unidiff>=0.7.5",
 ]
 complexity = [
     "radon==6.0.*",
