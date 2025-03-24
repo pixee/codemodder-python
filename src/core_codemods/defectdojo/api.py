@@ -76,9 +76,11 @@ class DefectDojoCodemod(SASTCodemod):
     def apply(
         self,
         context: CodemodExecutionContext,
+        hardening: bool = False,
     ) -> None:
         self._apply(
             context,
             # We know this has a tool because we created it with `from_core_codemod`
             cast(ToolMetadata, self._metadata.tool).rule_ids,
+            hardening,
         )
