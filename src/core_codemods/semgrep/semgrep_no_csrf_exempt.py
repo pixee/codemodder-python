@@ -27,13 +27,12 @@ class RemoveCsrfExemptTransformer(LibcstResultTransformer, NameResolutionMixin):
         ):
             return updated_node
         # Due to semgrep's odd way of reporting the position for this (decorators + functiondef), we match by line only
-        if self.node_is_selected_by_line_only(original_node):
-            if (
-                self.find_base_name(original_node.decorator)
-                == "django.views.decorators.csrf.csrf_exempt"
-            ):
-                self.report_change(original_node)
-                return cst.RemovalSentinel.REMOVE
+        if self.node_is_selected_by_line_only(original_node) and (
+            self.find_base_name(original_node.decorator)
+            == "django.views.decorators.csrf.csrf_exempt"
+        ):
+            self.report_change(original_node)
+            return cst.RemovalSentinel.REMOVE
         return updated_node
 
 
