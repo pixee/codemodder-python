@@ -118,8 +118,6 @@ class BaseCodemodTest:
             assert len(changes[0].changes) == expected_num_changes
             actual_num = len(changes[0].changes)
 
-        # actual_num = len(changes)
-
         if min_num_changes is not None:
             assert (
                 actual_num >= min_num_changes
