@@ -37,6 +37,30 @@ class DependencyTestMixin:
 
 
 class BaseIntegrationTestMixin:
+
+    @classmethod
+    def setup_class(cls):
+        codemod_id = (
+            cls.codemod().id if isinstance(cls.codemod, type) else cls.codemod.id
+        )
+        cls.codemod_instance = validate_codemod_registration(codemod_id)
+
+        cls.output_path = tempfile.mkstemp()[1]
+        cls.code_dir = tempfile.mkdtemp()
+
+        if not hasattr(cls, "code_filename"):
+            # Only a few codemods require the analyzed file to have a specific filename
+            # All others can just be `code.py`
+            cls.code_filename = "code.py"
+
+        cls.code_path = os.path.join(cls.code_dir, cls.code_filename)
+
+        if cls.code_filename == "settings.py" and "Django" in str(cls):
+            # manage.py must be in the directory above settings.py for this codemod to run
+            parent_dir = Path(cls.code_dir).parent
+            manage_py_path = parent_dir / "manage.py"
+            manage_py_path.touch()
+
     def _assert_sonar_fields(self, result):
         del result
 
@@ -107,26 +131,7 @@ class BaseRemediationIntegrationTest(BaseIntegrationTestMixin):
 
     @classmethod
     def setup_class(cls):
-        codemod_id = (
-            cls.codemod().id if isinstance(cls.codemod, type) else cls.codemod.id
-        )
-        cls.codemod_instance = validate_codemod_registration(codemod_id)
-
-        cls.output_path = tempfile.mkstemp()[1]
-        cls.code_dir = tempfile.mkdtemp()
-
-        if not hasattr(cls, "code_filename"):
-            # Only a few codemods require the analyzed file to have a specific filename
-            # All others can just be `code.py`
-            cls.code_filename = "code.py"
-
-        cls.code_path = os.path.join(cls.code_dir, cls.code_filename)
-
-        if cls.code_filename == "settings.py" and "Django" in str(cls):
-            # manage.py must be in the directory above settings.py for this codemod to run
-            parent_dir = Path(cls.code_dir).parent
-            manage_py_path = parent_dir / "manage.py"
-            manage_py_path.touch()
+        super().setup_class()
 
         if cls.original_code is not NotImplementedError:
             # Some tests are easier to understand with the expected new code provided
@@ -319,27 +324,7 @@ class BaseIntegrationTest(BaseIntegrationTestMixin, DependencyTestMixin):
 
     @classmethod
     def setup_class(cls):
-        codemod_id = (
-            cls.codemod().id if isinstance(cls.codemod, type) else cls.codemod.id
-        )
-        cls.codemod_instance = validate_codemod_registration(codemod_id)
-
-        cls.output_path = tempfile.mkstemp()[1]
-        cls.code_dir = tempfile.mkdtemp()
-
-        if not hasattr(cls, "code_filename"):
-            # Only a few codemods require the analyzed file to have a specific filename
-            # All others can just be `code.py`
-            cls.code_filename = "code.py"
-
-        cls.code_path = os.path.join(cls.code_dir, cls.code_filename)
-
-        if cls.code_filename == "settings.py" and "Django" in str(cls):
-            # manage.py must be in the directory above settings.py for this codemod to run
-            parent_dir = Path(cls.code_dir).parent
-            manage_py_path = parent_dir / "manage.py"
-            manage_py_path.touch()
-
+        super().setup_class()
         if hasattr(cls, "expected_new_code"):
             # Some tests are easier to understand with the expected new code provided
             # instead of calculated
