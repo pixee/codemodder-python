@@ -36,7 +36,66 @@ class DependencyTestMixin:
             assert new_requirements_txt == self.expected_requirements
 
 
-class BaseRemediationIntegrationTest:
+class BaseIntegrationTestMixin:
+    def _assert_sonar_fields(self, result):
+        del result
+
+    def _assert_codetf_output(self, codetf_schema):
+        with open(self.output_path, "r", encoding="utf-8") as f:
+            codetf = json.load(f)
+
+        jsonschema.validate(codetf, codetf_schema)
+
+        assert sorted(codetf.keys()) == ["results", "run"]
+        run = codetf["run"]
+        self._assert_run_fields(run, self.output_path)
+        results = codetf["results"]
+        # CodeTf2 spec requires relative paths
+        self._assert_results_fields(results, self.code_filename)
+
+    def write_original_code(self):
+        with open(self.code_path, "w", encoding="utf-8") as f:
+            f.write(self.original_code)
+
+    def _assert_results_fields(self, results, output_path):
+        assert len(results) == 1
+        result = results[0]
+        assert result["codemod"] == self.codemod_instance.id
+        assert result["references"] == [
+            ref.model_dump(exclude_none=True)
+            for ref in self.codemod_instance.references
+        ]
+
+        assert ("detectionTool" in result) == bool(self.sonar_issues_json)
+        assert ("detectionTool" in result) == bool(self.sonar_hotspots_json)
+
+        # TODO: if/when we add description for each url
+        for reference in result["references"][
+            # Last references for Sonar has a different description
+            : (
+                -len(self.codemod.requested_rules)
+                if self.sonar_issues_json or self.sonar_hotspots_json
+                else None
+            )
+        ]:
+            assert reference["url"] == reference["description"]
+
+        self._assert_sonar_fields(result)
+
+    def _assert_command_line(self, run, output_path):
+        pass
+
+    def _assert_run_fields(self, run, output_path):
+        self._assert_command_line(run, output_path)
+        assert run["vendor"] == "pixee"
+        assert run["tool"] == "codemodder-python"
+        assert run["version"] == __version__
+        assert run["elapsed"] != ""
+        assert run["directory"] == os.path.abspath(self.code_dir)
+        assert run["sarifs"] == []
+
+
+class BaseRemediationIntegrationTest(BaseIntegrationTestMixin):
     codemod = NotImplementedError
     original_code = NotImplementedError
     expected_diff_per_change = NotImplementedError
@@ -77,11 +136,7 @@ class BaseRemediationIntegrationTest:
             with open(cls.code_path, "r", encoding="utf-8") as f:  # type: ignore
                 cls.original_code = f.read()
 
-    def _assert_run_fields(self, run, output_path):
-        assert run["vendor"] == "pixee"
-        assert run["tool"] == "codemodder-python"
-        assert run["version"] == __version__
-        assert run["elapsed"] != ""
+    def _assert_command_line(self, run, output_path):
         assert run[
             "commandLine"
         ] == f'codemodder {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.id} --path-include={self.code_filename} --path-exclude=""' + (
@@ -93,35 +148,10 @@ class BaseRemediationIntegrationTest:
             if self.sonar_hotspots_json
             else ""
         )
-        assert run["directory"] == os.path.abspath(self.code_dir)
-        assert run["sarifs"] == []
 
     def _assert_results_fields(self, results, output_path):
-        assert len(results) == 1
+        super()._assert_results_fields(results, output_path)
         result = results[0]
-        assert result["codemod"] == self.codemod_instance.id
-        assert result["references"] == [
-            ref.model_dump(exclude_none=True)
-            for ref in self.codemod_instance.references
-        ]
-
-        assert ("detectionTool" in result) == bool(self.sonar_issues_json)
-        assert ("detectionTool" in result) == bool(self.sonar_hotspots_json)
-
-        # TODO: if/when we add description for each url
-        for reference in result["references"][
-            # Last references for Sonar has a different description
-            : (
-                -len(self.codemod.requested_rules)
-                if self.sonar_issues_json or self.sonar_hotspots_json
-                else None
-            )
-        ]:
-            assert reference["url"] == reference["description"]
-
-        self._assert_sonar_fields(result)
-
-        # There should be a changeset for every expected change
         assert len(result["changeset"]) == self.num_changes
         # gather all the change files and test against the expected number
         assert len({c["path"] for c in result["changeset"]}) == self.num_changed_files
@@ -142,26 +172,6 @@ class BaseRemediationIntegrationTest:
         assert {c["changes"][0]["description"] for c in changes} == {
             self.change_description
         }
-
-    def _assert_sonar_fields(self, result):
-        del result
-
-    def _assert_codetf_output(self, codetf_schema):
-        with open(self.output_path, "r", encoding="utf-8") as f:
-            codetf = json.load(f)
-
-        jsonschema.validate(codetf, codetf_schema)
-
-        assert sorted(codetf.keys()) == ["results", "run"]
-        run = codetf["run"]
-        self._assert_run_fields(run, self.output_path)
-        results = codetf["results"]
-        # CodeTf2 spec requires relative paths
-        self._assert_results_fields(results, self.code_filename)
-
-    def write_original_code(self):
-        with open(self.code_path, "w", encoding="utf-8") as f:
-            f.write(self.original_code)
 
     def test_codetf_output(self, codetf_schema):
         """
@@ -296,7 +306,7 @@ class BaseRemediationIntegrationTest:
             )
 
 
-class BaseIntegrationTest(DependencyTestMixin):
+class BaseIntegrationTest(BaseIntegrationTestMixin, DependencyTestMixin):
     codemod = NotImplementedError
     original_code = NotImplementedError
     replacement_lines = NotImplementedError
@@ -352,11 +362,7 @@ class BaseIntegrationTest(DependencyTestMixin):
         if cls.requirements_file_name:
             pathlib.Path(cls.dependency_path).unlink(missing_ok=True)
 
-    def _assert_run_fields(self, run, output_path):
-        assert run["vendor"] == "pixee"
-        assert run["tool"] == "codemodder-python"
-        assert run["version"] == __version__
-        assert run["elapsed"] != ""
+    def _assert_command_line(self, run, output_path):
         assert run[
             "commandLine"
         ] == f'codemodder_hardening {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.id} --path-include={self.code_filename} --path-exclude=""' + (
@@ -368,34 +374,11 @@ class BaseIntegrationTest(DependencyTestMixin):
             if self.sonar_hotspots_json
             else ""
         )
-        assert run["directory"] == os.path.abspath(self.code_dir)
-        assert run["sarifs"] == []
 
     def _assert_results_fields(self, results, output_path):
-        assert len(results) == 1
+        super()._assert_results_fields(results, output_path)
+
         result = results[0]
-        assert result["codemod"] == self.codemod_instance.id
-        assert result["references"] == [
-            ref.model_dump(exclude_none=True)
-            for ref in self.codemod_instance.references
-        ]
-
-        assert ("detectionTool" in result) == bool(self.sonar_issues_json)
-        assert ("detectionTool" in result) == bool(self.sonar_hotspots_json)
-
-        # TODO: if/when we add description for each url
-        for reference in result["references"][
-            # Last references for Sonar has a different description
-            : (
-                -len(self.codemod.requested_rules)
-                if self.sonar_issues_json or self.sonar_hotspots_json
-                else None
-            )
-        ]:
-            assert reference["url"] == reference["description"]
-
-        self._assert_sonar_fields(result)
-
         assert len(result["changeset"]) == self.num_changed_files
 
         # A codemod may change multiple files. For now we will
@@ -411,22 +394,6 @@ class BaseIntegrationTest(DependencyTestMixin):
         assert line_change["lineNumber"] == int(self.expected_line_change)
         assert line_change["description"] == self.change_description
 
-    def _assert_sonar_fields(self, result):
-        del result
-
-    def _assert_codetf_output(self, codetf_schema):
-        with open(self.output_path, "r", encoding="utf-8") as f:
-            codetf = json.load(f)
-
-        jsonschema.validate(codetf, codetf_schema)
-
-        assert sorted(codetf.keys()) == ["results", "run"]
-        run = codetf["run"]
-        self._assert_run_fields(run, self.output_path)
-        results = codetf["results"]
-        # CodeTf2 spec requires relative paths
-        self._assert_results_fields(results, self.code_filename)
-
     def check_code_after(self) -> ModuleType:
         with open(self.code_path, "r", encoding="utf-8") as f:  # type: ignore
             new_code = f.read()
@@ -434,10 +401,6 @@ class BaseIntegrationTest(DependencyTestMixin):
         return execute_code(
             path=self.code_path, allowed_exceptions=self.allowed_exceptions  # type: ignore
         )
-
-    def write_original_code(self):
-        with open(self.code_path, "w", encoding="utf-8") as f:
-            f.write(self.original_code)
 
     def test_file_rewritten(self, codetf_schema):
         """
