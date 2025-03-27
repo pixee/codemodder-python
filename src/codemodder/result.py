@@ -96,7 +96,8 @@ class SASTResult(Result):
 
 
 @dataclass(frozen=True, kw_only=True)
-class SarifResult(SASTResult, ABCDataclass):
+class SarifResult(SASTResult):
+    finding_msg: str | None = None
     location_type: ClassVar[Type[SarifLocation]]
 
     @classmethod
@@ -119,12 +120,17 @@ class SarifResult(SASTResult, ABCDataclass):
                     url=cls.rule_url_from_id(sarif_result, sarif_run, rule_id),
                 ),
             ),
+            finding_msg=cls.extract_finding_message(sarif_result, sarif_run),
         )
 
     @classmethod
-    @abstractmethod
-    def rule_url_from_id(cls, result: dict, run: dict, rule_id: str) -> str:
-        raise NotImplementedError
+    def extract_finding_message(cls, sarif_result: dict, sarif_run: dict) -> str | None:
+        return sarif_result.get("message", {}).get("text", None)
+
+    @classmethod
+    def rule_url_from_id(cls, result: dict, run: dict, rule_id: str) -> str | None:
+        del result, run, rule_id
+        return None
 
     @classmethod
     def extract_locations(cls, sarif_result) -> Sequence[Location]:
