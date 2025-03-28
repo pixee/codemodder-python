@@ -189,7 +189,7 @@ class BaseCodemod(metaclass=ABCMeta):
         self,
         context: CodemodExecutionContext,
         rules: list[str],
-        hardening: bool,
+        remediation: bool,
     ) -> None | TokenUsage:
         if self.provider and (
             not (provider := context.providers.get_provider(self.provider))
@@ -228,7 +228,7 @@ class BaseCodemod(metaclass=ABCMeta):
             return None
 
         # Do each result independently and outputs the diffs
-        if not hardening:
+        if remediation:
             # gather positional arguments for the map
             resultset_arguments: list[ResultSet | None] = []
             path_arguments = []
@@ -283,7 +283,7 @@ class BaseCodemod(metaclass=ABCMeta):
         return None
 
     def apply(
-        self, context: CodemodExecutionContext, hardening: bool = False
+        self, context: CodemodExecutionContext, remediation: bool = False
     ) -> None | TokenUsage:
         """
         Apply the codemod with the given codemod execution context
@@ -300,7 +300,7 @@ class BaseCodemod(metaclass=ABCMeta):
 
         :param context: The codemod execution context
         """
-        return self._apply(context, [self._internal_name], hardening)
+        return self._apply(context, [self._internal_name], remediation)
 
     def _process_file(
         self,
@@ -399,9 +399,9 @@ class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
             self.requested_rules.extend(requested_rules)
 
     def apply(
-        self, context: CodemodExecutionContext, hardening: bool = False
+        self, context: CodemodExecutionContext, remediation: bool = False
     ) -> None | TokenUsage:
-        return self._apply(context, self.requested_rules, hardening)
+        return self._apply(context, self.requested_rules, remediation)
 
     def get_files_to_analyze(
         self,

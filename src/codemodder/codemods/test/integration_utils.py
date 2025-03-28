@@ -144,7 +144,7 @@ class BaseRemediationIntegrationTest(BaseIntegrationTestMixin):
     def _assert_command_line(self, run, output_path):
         assert run[
             "commandLine"
-        ] == f'codemodder {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.id} --path-include={self.code_filename} --path-exclude=""' + (
+        ] == f'codemodder-remediation {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.id} --path-include={self.code_filename} --path-exclude=""' + (
             f" --sonar-issues-json={self.sonar_issues_json}"
             if self.sonar_issues_json
             else ""
@@ -184,7 +184,7 @@ class BaseRemediationIntegrationTest(BaseIntegrationTestMixin):
         """
 
         command = [
-            "codemodder",
+            "codemodder-remediation",
             self.code_dir,
             "--output",
             self.output_path,
@@ -350,7 +350,7 @@ class BaseIntegrationTest(BaseIntegrationTestMixin, DependencyTestMixin):
     def _assert_command_line(self, run, output_path):
         assert run[
             "commandLine"
-        ] == f'codemodder_hardening {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.id} --path-include={self.code_filename} --path-exclude=""' + (
+        ] == f'codemodder {self.code_dir} --output {output_path} --codemod-include={self.codemod_instance.id} --path-include={self.code_filename} --path-exclude=""' + (
             f" --sonar-issues-json={self.sonar_issues_json}"
             if self.sonar_issues_json
             else ""
@@ -396,7 +396,7 @@ class BaseIntegrationTest(BaseIntegrationTestMixin, DependencyTestMixin):
         output files
         """
         command = [
-            "codemodder_hardening",
+            "codemodder",
             self.code_dir,
             "--output",
             self.output_path,
