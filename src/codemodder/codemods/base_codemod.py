@@ -185,12 +185,98 @@ class BaseCodemod(metaclass=ABCMeta):
         """
         ...
 
-    def _apply(
+    def _apply_remediation(
         self,
         context: CodemodExecutionContext,
         rules: list[str],
-        remediation: bool,
     ) -> None | TokenUsage:
+        """
+        Applies remediation behavior to a codemod, that is, each changeset will only be associated with a single finging and no files will be written.
+        """
+        results: ResultSet | None = self._apply_detector(context)
+
+        if results is not None and not results:
+            logger.debug("No results for %s", self.id)
+            return None
+
+        if not (files_to_analyze := self.get_files_to_analyze(context, results)):
+            logger.debug("No files matched for %s", self.id)
+            return None
+
+        # Do each result independently and outputs the diffs
+        # gather positional arguments for the map
+        resultset_arguments: list[ResultSet | None] = []
+        path_arguments = []
+        if results:
+            for result in results.results_for_rules(rules):
+                # this need to be the same type of ResultSet as results
+                singleton = results.__class__()
+                singleton.add_result(result)
+                result_locations = self.get_files_to_analyze(context, singleton)
+                # We do an execution for each location in the result
+                # So we duplicate the resultset argument for each location
+                for loc in result_locations:
+                    resultset_arguments.append(singleton)
+                    path_arguments.append(loc)
+        # An exception for find-and-fix codemods
+        else:
+            resultset_arguments = [None]
+            path_arguments = files_to_analyze
+
+        contexts: list = []
+        with ThreadPoolExecutor() as executor:
+            logger.debug("using executor with %s workers", context.max_workers)
+            contexts.extend(
+                executor.map(
+                    lambda path, resultset: self._process_file(
+                        path, context, resultset, rules
+                    ),
+                    path_arguments,
+                    resultset_arguments or [None],
+                )
+            )
+            executor.shutdown(wait=True)
+
+        context.process_results(self.id, contexts)
+        return None
+
+    def _apply_hardening(
+        self,
+        context: CodemodExecutionContext,
+        rules: list[str],
+    ) -> None | TokenUsage:
+        """
+        Applies hardening behavior to a codemod with the goal of integrating all fixes for each finding into the files.
+        """
+        results: ResultSet | None = self._apply_detector(context)
+
+        if results is not None and not results:
+            logger.debug("No results for %s", self.id)
+            return None
+
+        if not (files_to_analyze := self.get_files_to_analyze(context, results)):
+            logger.debug("No files matched for %s", self.id)
+            return None
+
+        # Hardens all findings per file at once and writes the fixed code into the file
+        process_file = functools.partial(
+            self._process_file, context=context, results=results, rules=rules
+        )
+
+        contexts = []
+        if context.max_workers == 1:
+            logger.debug("processing files serially")
+            contexts.extend([process_file(file) for file in files_to_analyze])
+        else:
+            with ThreadPoolExecutor() as executor:
+                logger.debug("using executor with %s workers", context.max_workers)
+                contexts.extend(executor.map(process_file, files_to_analyze))
+                executor.shutdown(wait=True)
+
+        context.process_results(self.id, contexts)
+        return None
+
+    def _apply_detector(self, context: CodemodExecutionContext) -> ResultSet | None:
         if self.provider and (
             not (provider := context.providers.get_provider(self.provider))
             or not provider.is_available
@@ -219,68 +305,7 @@ class BaseCodemod(metaclass=ABCMeta):
             else None
         )
 
-        if results is not None and not results:
-            logger.debug("No results for %s", self.id)
-            return None
-
-        if not (files_to_analyze := self.get_files_to_analyze(context, results)):
-            logger.debug("No files matched for %s", self.id)
-            return None
-
-        # Do each result independently and outputs the diffs
-        if remediation:
-            # gather positional arguments for the map
-            resultset_arguments: list[ResultSet | None] = []
-            path_arguments = []
-            if results:
-                for result in results.results_for_rules(rules):
-                    # this need to be the same type of ResultSet as results
-                    singleton = results.__class__()
-                    singleton.add_result(result)
-                    result_locations = self.get_files_to_analyze(context, singleton)
-                    # We do an execution for each location in the result
-                    # So we duplicate the resultset argument for each location
-                    for loc in result_locations:
-                        resultset_arguments.append(singleton)
-                        path_arguments.append(loc)
-            # An exception for find-and-fix codemods
-            else:
-                resultset_arguments = [None]
-                path_arguments = files_to_analyze
-
-            contexts: list = []
-            with ThreadPoolExecutor() as executor:
-                logger.debug("using executor with %s workers", context.max_workers)
-                contexts.extend(
-                    executor.map(
-                        lambda path, resultset: self._process_file(
-                            path, context, resultset, rules
-                        ),
-                        path_arguments,
-                        resultset_arguments or [None],
-                    )
-                )
-                executor.shutdown(wait=True)
-
-            context.process_results(self.id, contexts)
-        # Hardens all findings per file at once and writes the fixed code into the file
-        else:
-            process_file = functools.partial(
-                self._process_file, context=context, results=results, rules=rules
-            )
-
-            contexts = []
-            if context.max_workers == 1:
-                logger.debug("processing files serially")
-                contexts.extend([process_file(file) for file in files_to_analyze])
-            else:
-                with ThreadPoolExecutor() as executor:
-                    logger.debug("using executor with %s workers", context.max_workers)
-                    contexts.extend(executor.map(process_file, files_to_analyze))
-                    executor.shutdown(wait=True)
-
-            context.process_results(self.id, contexts)
-        return None
+        return results
 
     def apply(
         self, context: CodemodExecutionContext, remediation: bool = False
@@ -300,7 +325,9 @@ class BaseCodemod(metaclass=ABCMeta):
 
         :param context: The codemod execution context
         """
-        return self._apply(context, [self._internal_name], remediation)
+        if remediation:
+            return self._apply_remediation(context, [self._internal_name])
+        return self._apply_hardening(context, [self._internal_name])
 
     def _process_file(
         self,
@@ -401,7 +428,9 @@ class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
     def apply(
         self, context: CodemodExecutionContext, remediation: bool = False
     ) -> None | TokenUsage:
-        return self._apply(context, self.requested_rules, remediation)
+        if remediation:
+            return self._apply_remediation(context, self.requested_rules)
+        return self._apply_hardening(context, self.requested_rules)
 
     def get_files_to_analyze(
         self,
