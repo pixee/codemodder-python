@@ -193,6 +193,8 @@ class BaseCodemod(metaclass=ABCMeta):
         """
         Applies remediation behavior to a codemod, that is, each changeset will only be associated with a single finging and no files will be written.
         """
+        if self._should_skip(context):
+            return None
         results: ResultSet | None = self._apply_detector(context)
 
         if results is not None and not results:
@@ -248,6 +250,8 @@ class BaseCodemod(metaclass=ABCMeta):
         """
         Applies hardening behavior to a codemod with the goal of integrating all fixes for each finding into the files.
         """
+        if self._should_skip(context):
+            return None
         results: ResultSet | None = self._apply_detector(context)
 
         if results is not None and not results:
@@ -276,7 +280,7 @@ class BaseCodemod(metaclass=ABCMeta):
         context.process_results(self.id, contexts)
         return None
 
-    def _apply_detector(self, context: CodemodExecutionContext) -> ResultSet | None:
+    def _should_skip(self, context: CodemodExecutionContext):
         if self.provider and (
             not (provider := context.providers.get_provider(self.provider))
             or not provider.is_available
@@ -284,7 +288,7 @@ class BaseCodemod(metaclass=ABCMeta):
             logger.warning(
                 "provider %s is not available, skipping codemod", self.provider
             )
-            return None
+            return True
 
         if isinstance(self.detector, SemgrepRuleDetector):
             if (
@@ -296,7 +300,10 @@ class BaseCodemod(metaclass=ABCMeta):
                     "no results from semgrep for %s, skipping analysis",
                     self.id,
                 )
-                return None
+                return True
+        return False
+
+    def _apply_detector(self, context: CodemodExecutionContext) -> ResultSet | None:
 
         results: ResultSet | None = (
             # It seems like semgrep doesn't like our fully-specified id format so pass in short name instead.
@@ -429,6 +436,7 @@ class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
         self, context: CodemodExecutionContext, remediation: bool = False
     ) -> None | TokenUsage:
         if remediation:
+            print("0000000000000000000000000000000000000000000000000000000000")
             return self._apply_remediation(context, self.requested_rules)
         return self._apply_hardening(context, self.requested_rules)
 
