@@ -38,6 +38,6 @@ jobs:
           repository: pixee/pygoat
           path: pygoat
       - name: Run Codemodder
-        run: codemodder_hardening --dry-run --output output.codetf pygoat
+        run: codemodder --dry-run --output output.codetf pygoat
       - name: Check PyGoat Findings
         run: make pygoat-test
