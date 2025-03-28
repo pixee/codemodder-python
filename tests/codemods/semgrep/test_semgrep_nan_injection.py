@@ -65,8 +65,8 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             tmpdir,
             input_code,
             expected_output,
-            results=json.dumps(results),
             num_changes=4,
+            results=json.dumps(results),
         )
 
     def test_multiple(self, tmpdir):
@@ -108,6 +108,68 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             else:
                 return [1, 2, float(tid), 3]
         """
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -2,7 +2,10 @@
+     tid = request.POST.get("tid")
+     some_list = [1, 2, 3, float('nan')]
+ 
+-    float(tid) in some_list
++    if tid.lower() == "nan":
++        raise ValueError
++    else:
++        float(tid) in some_list
+ 
+     z = [1, 2, complex(tid), 3]
+ 
+""",
+            """\
+--- 
++++ 
+@@ -4,7 +4,10 @@
+ 
+     float(tid) in some_list
+ 
+-    z = [1, 2, complex(tid), 3]
++    if tid.lower() == "nan":
++        raise ValueError
++    else:
++        z = [1, 2, complex(tid), 3]
+ 
+     x = [float(tid), 1.0, 2.0]
+ 
+""",
+            """\
+--- 
++++ 
+@@ -6,6 +6,9 @@
+ 
+     z = [1, 2, complex(tid), 3]
+ 
+-    x = [float(tid), 1.0, 2.0]
++    if tid.lower() == "nan":
++        raise ValueError
++    else:
++        x = [float(tid), 1.0, 2.0]
+ 
+     return [1, 2, float(tid), 3]
+""",
+            """\
+--- 
++++ 
+@@ -8,4 +8,7 @@
+ 
+     x = [float(tid), 1.0, 2.0]
+ 
+-    return [1, 2, float(tid), 3]
++    if tid.lower() == "nan":
++        raise ValueError
++    else:
++        return [1, 2, float(tid), 3]
+""",
+        ]
 
         results = {
             "runs": [
@@ -225,8 +287,9 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             tmpdir,
             input_code,
             expected_output,
+            expected_diff_per_change,
+            num_changes=4,
             results=json.dumps(results),
-            num_changes=16,
         )
 
     def test_once_nested(self, tmpdir):
@@ -283,8 +346,8 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             tmpdir,
             input_code,
             expected_output,
-            results=json.dumps(results),
             num_changes=4,
+            results=json.dumps(results),
         )
 
     def test_twice_nested(self, tmpdir):
@@ -340,8 +403,8 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             tmpdir,
             input_code,
             expected_output,
-            results=json.dumps(results),
             num_changes=4,
+            results=json.dumps(results),
         )
 
     def test_direct_source(self, tmpdir):
@@ -395,8 +458,8 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             tmpdir,
             input_code,
             expected_output,
-            results=json.dumps(results),
             num_changes=4,
+            results=json.dumps(results),
         )
 
     def test_binop(self, tmpdir):
@@ -452,8 +515,8 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
             tmpdir,
             input_code,
             expected_output,
-            results=json.dumps(results),
             num_changes=4,
+            results=json.dumps(results),
         )
 
 

@@ -37,7 +37,75 @@ class TestTransformFixHasattrCall(BaseCodemodTest):
         if callable(obj):
             print(1)
         """
-        self.run_and_assert(tmpdir, input_code, expected, num_changes=5)
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -2,7 +2,7 @@
+ class Test:
+     pass
+ 
+-hasattr(Test(), "__call__")
++callable(Test())
+ hasattr("hi", '__call__')
+ 
+ assert hasattr(1, '__call__')
+""",
+            """\
+--- 
++++ 
+@@ -3,7 +3,7 @@
+     pass
+ 
+ hasattr(Test(), "__call__")
+-hasattr("hi", '__call__')
++callable("hi")
+ 
+ assert hasattr(1, '__call__')
+ obj = Test()
+""",
+            """\
+--- 
++++ 
+@@ -5,7 +5,7 @@
+ hasattr(Test(), "__call__")
+ hasattr("hi", '__call__')
+ 
+-assert hasattr(1, '__call__')
++assert callable(1)
+ obj = Test()
+ var = hasattr(obj, "__call__")
+ 
+""",
+            """\
+--- 
++++ 
+@@ -7,7 +7,7 @@
+ 
+ assert hasattr(1, '__call__')
+ obj = Test()
+-var = hasattr(obj, "__call__")
++var = callable(obj)
+ 
+ if hasattr(obj, "__call__"):
+     print(1)
+""",
+            """\
+--- 
++++ 
+@@ -9,5 +9,5 @@
+ obj = Test()
+ var = hasattr(obj, "__call__")
+ 
+-if hasattr(obj, "__call__"):
++if callable(obj):
+     print(1)
+""",
+        ]
+
+        self.run_and_assert(
+            tmpdir, input_code, expected, expected_diff_per_change, num_changes=5
+        )
 
     def test_other_hasattr(self, tmpdir):
         code = """

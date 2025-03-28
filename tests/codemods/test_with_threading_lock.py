@@ -93,7 +93,7 @@ class TestThreadingNameResolution(BaseCodemodTest):
     codemod = WithThreadingLock
 
     @pytest.mark.parametrize(
-        "input_code,expected_code,num_changes",
+        "input_code,expected_code,expected_diff_per_change,num_changes",
         [
             (
                 """
@@ -111,6 +111,7 @@ class TestThreadingNameResolution(BaseCodemodTest):
                 with lock_1:
                     ...
                 """,
+                [],
                 1,
             ),
             (
@@ -127,6 +128,7 @@ class TestThreadingNameResolution(BaseCodemodTest):
                 with lock_1:
                     ...
                 """,
+                [],
                 1,
             ),
             (
@@ -147,6 +149,7 @@ class TestThreadingNameResolution(BaseCodemodTest):
                     with lock_2:
                         return [lock_1 for lock_1 in l]
                 """,
+                [],
                 1,
             ),
             (
@@ -173,24 +176,48 @@ class TestThreadingNameResolution(BaseCodemodTest):
                 with lock_2:
                     print()
                 """,
+                [
+                    """\
+--- 
++++ 
+@@ -1,6 +1,7 @@
+ 
+ import threading
+-with threading.Lock():
++lock = threading.Lock()
++with lock:
+     int("1")
+ with threading.Lock():
+     print()
+""",
+                    """\
+--- 
++++ 
+@@ -2,7 +2,8 @@
+ import threading
+ with threading.Lock():
+     int("1")
+-with threading.Lock():
++lock = threading.Lock()
++with lock:
+     print()
+ var = 1
+ with threading.Lock():
+""",
+                    """\
+--- 
++++ 
+@@ -5,5 +5,6 @@
+ with threading.Lock():
+     print()
+ var = 1
+-with threading.Lock():
++lock = threading.Lock()
++with lock:
+     print()
+""",
+                ],
                 3,
-            ),
-            (
-                """
-                import threading
-                with threading.Lock():
-                    with threading.Lock():
-                        print()
-                """,
-                """
-                import threading
-                lock_1 = threading.Lock()
-                with lock_1:
-                    lock = threading.Lock()
-                    with lock:
-                        print()
-                """,
-                2,
             ),
             (
                 """
@@ -210,9 +237,18 @@ class TestThreadingNameResolution(BaseCodemodTest):
                     with lock_1:
                         foo()
                 """,
+                [],
                 1,
             ),
         ],
     )
-    def test_name_resolution(self, tmpdir, input_code, expected_code, num_changes):
-        self.run_and_assert(tmpdir, input_code, expected_code, num_changes=num_changes)
+    def test_name_resolution(
+        self, tmpdir, input_code, expected_code, expected_diff_per_change, num_changes
+    ):
+        self.run_and_assert(
+            tmpdir,
+            input_code,
+            expected_code,
+            expected_diff_per_change,
+            num_changes=num_changes,
+        )
