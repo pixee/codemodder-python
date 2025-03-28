@@ -136,7 +136,7 @@ class TestDependencyManager:
         os.chmod(tmp_repo / self.requirements_file, 0o400)
 
         command = [
-            "codemodder_hardening",
+            "codemodder",
             tmp_repo,
             "--output",
             self.output_path,

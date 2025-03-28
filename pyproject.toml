@@ -46,7 +46,7 @@ Repository = "https://github.com/pixee/codemodder-python"
 
 [project.scripts]
 codemodder = "codemodder.codemodder:main"
-codemodder_hardening = "codemodder.codemodder:harden"
+codemodder-remediation = "codemodder.codemodder:remediate"
 generate-docs = 'codemodder.scripts.generate_docs:main'
 get-hashes = 'codemodder.scripts.get_hashes:main'
 

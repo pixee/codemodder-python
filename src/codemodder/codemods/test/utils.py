@@ -73,7 +73,6 @@ class BaseCodemodTest:
 
         path_exclude = [f"{tmp_file_path}:{line}" for line in lines_to_exclude or []]
 
-        print(expected_diff_per_change)
         self.execution_context = CodemodExecutionContext(
             directory=root,
             dry_run=True if expected_diff_per_change else False,
@@ -85,7 +84,10 @@ class BaseCodemodTest:
             path_exclude=path_exclude,
         )
 
-        self.codemod.apply(self.execution_context)
+        self.codemod.apply(
+            self.execution_context,
+            remediation=True if expected_diff_per_change else False,
+        )
         changes = self.execution_context.get_changesets(self.codemod.id)
 
         self.changeset = changes
@@ -219,7 +221,6 @@ class BaseSASTCodemodTest(BaseCodemodTest):
 
         path_exclude = [f"{tmp_file_path}:{line}" for line in lines_to_exclude or []]
 
-        print(expected_diff_per_change)
         self.execution_context = CodemodExecutionContext(
             directory=root,
             dry_run=True if expected_diff_per_change else False,
@@ -232,7 +233,10 @@ class BaseSASTCodemodTest(BaseCodemodTest):
             path_exclude=path_exclude,
         )
 
-        self.codemod.apply(self.execution_context)
+        self.codemod.apply(
+            self.execution_context,
+            remediation=True if expected_diff_per_change else False,
+        )
         changes = self.execution_context.get_changesets(self.codemod.id)
 
         if input_code == expected:
