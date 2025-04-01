@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from codemodder.codemods.semgrep import process_semgrep_findings
 from codemodder.sarifs import detect_sarif_tools
@@ -119,9 +120,9 @@ class TestSarifProcessing:
             # remove all { to make a badly formatted json
             f.write(sarif_file.read_text(encoding="utf-8").replace("{", ""))
 
-        with pytest.raises(json.JSONDecodeError):
+        with pytest.raises(ValidationError):
             detect_sarif_tools([bad_json])
-        assert f"Malformed JSON file: {str(bad_json)}" in caplog.text
+        assert f"Invalid SARIF file: {str(bad_json)}" in caplog.text
 
     def test_bad_sarif_no_runs_data(self, tmpdir, caplog):
         bad_json = tmpdir / "bad.sarif"
@@ -134,9 +135,9 @@ class TestSarifProcessing:
         with open(bad_json, "w") as f:
             f.write(data)
 
-        with pytest.raises(KeyError):
+        with pytest.raises(ValidationError):
             detect_sarif_tools([bad_json])
-        assert f"Sarif file without `runs` data: {str(bad_json)}" in caplog.text
+        assert f"Invalid SARIF file: {str(bad_json)}" in caplog.text
 
     def test_two_sarifs_different_tools(self):
         results = detect_sarif_tools(

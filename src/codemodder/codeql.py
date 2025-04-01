@@ -4,13 +4,13 @@ from pathlib import Path
 from typing_extensions import Self
 
 from codemodder.result import LineInfo, ResultSet, SarifLocation, SarifResult
-from codemodder.sarifs import AbstractSarifToolDetector
+from codemodder.sarifs import AbstractSarifToolDetector, Run
 
 
 class CodeQLSarifToolDetector(AbstractSarifToolDetector):
     @classmethod
-    def detect(cls, run_data: dict) -> bool:
-        return "tool" in run_data and "CodeQL" in run_data["tool"]["driver"]["name"]
+    def detect(cls, run_data: Run) -> bool:
+        return "CodeQL" in run_data.tool.driver.name
 
 
 class CodeQLLocation(SarifLocation):
