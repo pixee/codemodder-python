@@ -163,7 +163,8 @@ class TestElementAttributeXMLTransformer:
             }
         )
         sarif_run = data.runs[0]
-        sarif_results = sarif_run.results or []
+        assert sarif_run.results
+        sarif_results = sarif_run.results
         results = [SemgrepResult.from_sarif(sarif_results[0], sarif_run)]
         self.run_and_assert(name_attr_map, input_code, expected_output, results, True)
 

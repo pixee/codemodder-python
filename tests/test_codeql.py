@@ -36,7 +36,6 @@ def test_from_duplicate_files(codeql_result_set: Path):
 class TestCodeQLResultSet(TestCase):
 
     def test_from_sarif(self):
-        sarif_file = Path("/path/to/sarif/file.sarif")
         with tempfile.TemporaryDirectory() as tempdir:
             sarif_file = Path(tempdir) / "file.sarif"
             sarif_file.write_text(json.dumps(SARIF_CONTENT))
