@@ -25,7 +25,7 @@ dependencies = [
     "tomlkit~=0.13.0",
     "wrapt~=1.17.0",
     "chardet~=5.2.0",
-    "sarif-pydantic~=0.1.0",
+    "sarif-pydantic~=0.2.0",
     "setuptools~=78.1",
 ]
 keywords = ["codemod", "codemods", "security", "fix", "fixes"]

@@ -1,6 +1,6 @@
-import json
 from pathlib import Path
 
+from sarif_pydantic import Sarif
 from typing_extensions import Self
 
 from codemodder.result import LineInfo, ResultSet, SarifLocation, SarifResult
@@ -52,16 +52,17 @@ class CodeQLResult(SarifResult):
 class CodeQLResultSet(ResultSet):
     @classmethod
     def from_sarif(cls, sarif_file: str | Path, truncate_rule_id: bool = False) -> Self:
-        with open(sarif_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        data = Sarif.model_validate_json(
+            Path(sarif_file).read_text(encoding="utf-8-sig")
+        )
 
         result_set = cls()
-        for sarif_run in data["runs"]:
+        for sarif_run in data.runs:
             if CodeQLSarifToolDetector.detect(sarif_run):
-                for sarif_result in sarif_run["results"]:
+                for sarif_result in sarif_run.results or []:
                     codeql_result = CodeQLResult.from_sarif(
                         sarif_result, sarif_run, truncate_rule_id
                     )
                     result_set.add_result(codeql_result)
-                result_set.store_tool_data(sarif_run.get("tool", {}))
+                result_set.store_tool_data(sarif_run.tool.model_dump())
         return result_set
