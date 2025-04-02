@@ -15,6 +15,7 @@ class TestSemgrepRsaKeySize(BaseSASTCodemodTest):
         results = {
             "runs": [
                 {
+                    "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
                             "fingerprints": {"matchBasedId/v1": "123"},
@@ -43,7 +44,7 @@ class TestSemgrepRsaKeySize(BaseSASTCodemodTest):
                             "properties": {},
                             "ruleId": "python.cryptography.security.insufficient-rsa-key-size.insufficient-rsa-key-size",
                         }
-                    ]
+                    ],
                 }
             ]
         }

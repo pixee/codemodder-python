@@ -1,6 +1,7 @@
 import json
+import tempfile
 from pathlib import Path
-from unittest import TestCase, mock
+from unittest import TestCase
 
 import pytest
 
@@ -36,9 +37,9 @@ class TestCodeQLResultSet(TestCase):
 
     def test_from_sarif(self):
         sarif_file = Path("/path/to/sarif/file.sarif")
-        with mock.patch(
-            "builtins.open", mock.mock_open(read_data=json.dumps(SARIF_CONTENT))
-        ):
+        with tempfile.TemporaryDirectory() as tempdir:
+            sarif_file = Path(tempdir) / "file.sarif"
+            sarif_file.write_text(json.dumps(SARIF_CONTENT))
             result_set = CodeQLResultSet.from_sarif(sarif_file)
 
             self.assertEqual(len(result_set), 3)
@@ -211,11 +212,12 @@ SARIF_CONTENT = {
                 "driver": {"name": "CodeQL"},
                 "extensions": [
                     {
+                        "name": "CodeQL",
                         "rules": [
                             {"id": "python/sql-injection"},
                             {"id": "cs/web/missing-x-frame-options"},
                             {"id": "cs/web/xss"},
-                        ]
+                        ],
                     },
                 ],
             },

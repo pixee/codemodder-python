@@ -1,9 +1,9 @@
-import json
 import subprocess
 from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
+from sarif_pydantic import Sarif
 
 from codemodder.codemods.semgrep import process_semgrep_findings
 from codemodder.sarifs import detect_sarif_tools
@@ -14,11 +14,11 @@ class TestSarifProcessing:
     def test_extract_rule_id_codeql(self):
         sarif_file = Path("tests") / "samples" / "webgoat_v8.2.0_codeql.sarif"
 
-        with open(sarif_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        data = Sarif.model_validate_json(sarif_file.read_text())
 
-        sarif_run = data["runs"][0]
-        result = sarif_run["results"][0]
+        sarif_run = data.runs[0]
+        assert sarif_run.results, "No results found in SARIF file"
+        result = sarif_run.results[0]
         rule_id = SemgrepResult.extract_rule_id(
             result, sarif_run, truncate_rule_id=True
         )
@@ -27,11 +27,11 @@ class TestSarifProcessing:
     def test_extract_rule_id_semgrep(self):
         sarif_file = Path("tests") / "samples" / "semgrep.sarif"
 
-        with open(sarif_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        data = Sarif.model_validate_json(sarif_file.read_text())
 
-        sarif_run = data["runs"][0]
-        result = sarif_run["results"][0]
+        sarif_run = data.runs[0]
+        assert sarif_run.results, "No results found in SARIF file"
+        result = sarif_run.results[0]
         rule_id = SemgrepResult.extract_rule_id(
             result, sarif_run, truncate_rule_id=True
         )

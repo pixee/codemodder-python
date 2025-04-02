@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from sarif_pydantic import Location as LocationModel
+from sarif_pydantic import Result as ResultModel
 from sarif_pydantic import Sarif
 from typing_extensions import Self
 
@@ -14,27 +16,30 @@ class CodeQLSarifToolDetector(AbstractSarifToolDetector):
 
 
 class CodeQLLocation(SarifLocation):
-    @staticmethod
-    def get_snippet(sarif_location) -> str:
-        return ""
-
     @classmethod
-    def from_sarif(cls, sarif_location) -> Self:
-        artifact_location = sarif_location["physicalLocation"]["artifactLocation"]
-        file = Path(artifact_location["uri"])
+    def from_sarif(cls, sarif_location: LocationModel) -> Self:
+        if (physical_location := sarif_location.physical_location) is None:
+            raise ValueError("Location does not contain a physicalLocation")
+        if (artifact_location := physical_location.artifact_location) is None:
+            raise ValueError("PhysicalLocation does not contain an artifactLocation")
+        if (uri := artifact_location.uri) is None:
+            raise ValueError("ArtifactLocation does not contain a uri")
 
-        try:
-            region = sarif_location["physicalLocation"]["region"]
-        except KeyError:
+        file = Path(uri)
+
+        if not (region := physical_location.region):
             # A location without a region indicates a result for the entire file.
             # Use sentinel values of 0 index for start/end
             zero = LineInfo(0)
             return cls(file=file, start=zero, end=zero)
 
-        start = LineInfo(line=region["startLine"], column=region.get("startColumn"))
+        if not region.start_line:
+            raise ValueError("Region does not contain a startLine")
+
+        start = LineInfo(line=region.start_line, column=region.start_column or -1)
         end = LineInfo(
-            line=region.get("endLine", start.line),
-            column=region.get("endColumn", start.column),
+            line=region.end_line or start.line,
+            column=region.end_column or start.column,
         )
         return cls(file=file, start=start, end=end)
 
@@ -43,7 +48,7 @@ class CodeQLResult(SarifResult):
     location_type = CodeQLLocation
 
     @classmethod
-    def rule_url_from_id(cls, result: dict, run: dict, rule_id: str) -> str:
+    def rule_url_from_id(cls, result: ResultModel, run: Run, rule_id: str) -> str:
         del result, run, rule_id
         # TODO: Implement this method to return the specific rule URL
         return "https://codeql.github.com/codeql-query-help/"

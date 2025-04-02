@@ -1,38 +1,52 @@
 import itertools
-import json
 import subprocess
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Iterable, Optional
 
+from sarif_pydantic import Sarif
 from typing_extensions import Self, override
 
 from codemodder.context import CodemodExecutionContext
 from codemodder.logging import logger
-from codemodder.result import Result, ResultSet, SarifLocation, SarifResult
+from codemodder.result import (
+    LocationModel,
+    Result,
+    ResultModel,
+    ResultSet,
+    SarifLocation,
+    SarifResult,
+)
 from codemodder.sarifs import AbstractSarifToolDetector, Run
 
 
 class SemgrepSarifToolDetector(AbstractSarifToolDetector):
     @classmethod
     def detect(cls, run_data: Run) -> bool:
-        return "semgrep" in run_data.tool.driver.name
+        return "semgrep" in run_data.tool.driver.name.lower()
 
 
 class SemgrepLocation(SarifLocation):
     @staticmethod
-    def get_snippet(sarif_location) -> str:
+    def get_snippet(sarif_location: LocationModel) -> str | None:
         return (
-            sarif_location["physicalLocation"]["region"].get("snippet", {}).get("text")
+            sarif_location.physical_location.region.snippet.text
+            if sarif_location.physical_location
+            and sarif_location.physical_location.region
+            and sarif_location.physical_location.region.snippet
+            else SarifLocation.get_snippet(sarif_location)
         )
 
 
 class SemgrepResult(SarifResult):
     location_type = SemgrepLocation
 
+    @override
     @classmethod
-    def rule_url_from_id(cls, sarif_result, sarif_run, rule_id):
-        del sarif_result, sarif_run
+    def rule_url_from_id(
+        cls, result: ResultModel, run: Run, rule_id: str
+    ) -> str | None:
+        del result, run
         from core_codemods.semgrep.api import semgrep_url_from_id
 
         return semgrep_url_from_id(rule_id)
@@ -41,17 +55,16 @@ class SemgrepResult(SarifResult):
 class SemgrepResultSet(ResultSet):
     @classmethod
     def from_sarif(cls, sarif_file: str | Path, truncate_rule_id: bool = False) -> Self:
-        with open(sarif_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        data = Sarif.model_validate_json(Path(sarif_file).read_text())
 
         result_set = cls()
-        for sarif_run in data["runs"]:
-            for result in sarif_run["results"]:
+        for sarif_run in data.runs:
+            for result in sarif_run.results or []:
                 sarif_result = SemgrepResult.from_sarif(
                     result, sarif_run, truncate_rule_id
                 )
                 result_set.add_result(sarif_result)
-            result_set.store_tool_data(sarif_run.get("tool", {}))
+            result_set.store_tool_data(sarif_run.tool.model_dump())
         return result_set
 
 

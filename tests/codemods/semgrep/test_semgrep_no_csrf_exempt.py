@@ -52,6 +52,7 @@ class TestSemgrepNoCsrfExempt(BaseSASTCodemodTest):
         results = {
             "runs": [
                 {
+                    "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
                             "fingerprints": {"matchBasedId/v1": "a3ca2"},

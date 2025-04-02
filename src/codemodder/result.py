@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import itertools
-from abc import abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Sequence, Type
@@ -39,23 +38,30 @@ class Location(ABCDataclass):
 @dataclass(frozen=True)
 class SarifLocation(Location):
     @staticmethod
-    @abstractmethod
-    def get_snippet(sarif_location) -> str:
-        pass
+    def get_snippet(sarif_location: LocationModel) -> str | None:
+        return sarif_location.message.text if sarif_location.message else None
 
     @classmethod
     def from_sarif(cls, sarif_location: LocationModel) -> Self:
-        artifact_location = sarif_location["physicalLocation"]["artifactLocation"]
-        file = Path(artifact_location["uri"])
+        if not (physical_location := sarif_location.physical_location):
+            raise ValueError("Sarif location does not have a physical location")
+        if not (artifact_location := physical_location.artifact_location):
+            raise ValueError("Sarif location does not have an artifact location")
+        if not (region := physical_location.region):
+            raise ValueError("Sarif location does not have a region")
+        if not (uri := artifact_location.uri):
+            raise ValueError("Sarif location does not have a uri")
+
+        file = Path(uri)
         snippet = cls.get_snippet(sarif_location)
         start = LineInfo(
-            line=sarif_location["physicalLocation"]["region"]["startLine"],
-            column=sarif_location["physicalLocation"]["region"]["startColumn"],
+            line=region.start_line or -1,
+            column=region.start_column or -1,
             snippet=snippet,
         )
         end = LineInfo(
-            line=sarif_location["physicalLocation"]["region"]["endLine"],
-            column=sarif_location["physicalLocation"]["region"]["endColumn"],
+            line=region.end_line or -1,
+            column=region.end_column or -1,
             snippet=snippet,
         )
         return cls(file=file, start=start, end=end)
@@ -150,14 +156,17 @@ class SarifResult(SASTResult):
         )
 
     @classmethod
-    def extract_related_locations(cls, sarif_result) -> Sequence[LocationWithMessage]:
+    def extract_related_locations(
+        cls, sarif_result: ResultModel
+    ) -> Sequence[LocationWithMessage]:
         return tuple(
             [
                 LocationWithMessage(
-                    message=rel_location.get("message", {}).get("text", ""),
+                    message=rel_location.message.text,
                     location=cls.location_type.from_sarif(rel_location),
                 )
-                for rel_location in sarif_result.get("relatedLocations", [])
+                for rel_location in sarif_result.related_locations or []
+                if rel_location.message
             ]
         )
 
@@ -187,7 +196,12 @@ class SarifResult(SASTResult):
             return rule_id.split(".")[-1] if truncate_rule_id else rule_id
 
         # it may be contained in the 'rule' field through the tool component in the sarif file
-        if (rule := result.rule) and sarif_run.tool.extensions and rule.tool_component:
+        if (
+            (rule := result.rule)
+            and sarif_run.tool.extensions
+            and rule.tool_component
+            and rule.tool_component.index is not None
+        ):
             tool_index = rule.tool_component.index
             rule_index = rule.index
             return sarif_run.tool.extensions[tool_index].rules[rule_index].id

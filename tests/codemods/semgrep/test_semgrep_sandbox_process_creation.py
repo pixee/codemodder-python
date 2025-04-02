@@ -53,6 +53,7 @@ SARIF = """
 {
   "runs": [
     {
+      "tool": {"driver": {"name": "Semgrep OSS"}},
       "automationDetails": {
         "id": ".github/workflows/semgrep.yml:semgrep_scan/"
       },

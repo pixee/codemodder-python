@@ -26,6 +26,7 @@ class TestSemgrepHardenPyyaml(BaseSASTCodemodTest):
         results = {
             "runs": [
                 {
+                    "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
                             "fingerprints": {"matchBasedId/v1": "123"},
@@ -54,7 +55,7 @@ class TestSemgrepHardenPyyaml(BaseSASTCodemodTest):
                             "properties": {},
                             "ruleId": "python.lang.security.deserialization.avoid-pyyaml-load.avoid-pyyaml-load",
                         }
-                    ]
+                    ],
                 }
             ]
         }
@@ -84,6 +85,7 @@ class TestSemgrepHardenPyyaml(BaseSASTCodemodTest):
         results = {
             "runs": [
                 {
+                    "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
                             "fingerprints": {"matchBasedId/v1": "123"},
@@ -112,7 +114,7 @@ class TestSemgrepHardenPyyaml(BaseSASTCodemodTest):
                             "properties": {},
                             "ruleId": "python.django.security.audit.avoid-insecure-deserialization.avoid-insecure-deserialization",
                         }
-                    ]
+                    ],
                 }
             ]
         }
