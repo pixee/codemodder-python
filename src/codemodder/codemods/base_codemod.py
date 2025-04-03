@@ -436,7 +436,6 @@ class RemediationCodemod(BaseCodemod, metaclass=ABCMeta):
         self, context: CodemodExecutionContext, remediation: bool = False
     ) -> None | TokenUsage:
         if remediation:
-            print("0000000000000000000000000000000000000000000000000000000000")
             return self._apply_remediation(context, self.requested_rules)
         return self._apply_hardening(context, self.requested_rules)
 
