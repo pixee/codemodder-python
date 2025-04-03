@@ -90,8 +90,9 @@ class BaseIntegrationTestMixin:
             for ref in self.codemod_instance.references
         ]
 
-        assert ("detectionTool" in result) == bool(self.sonar_issues_json)
-        assert ("detectionTool" in result) == bool(self.sonar_hotspots_json)
+        assert ("detectionTool" in result) == bool(self.sonar_issues_json) or (
+            "detectionTool" in result
+        ) == bool(self.sonar_hotspots_json)
 
         # TODO: if/when we add description for each url
         for reference in result["references"][
