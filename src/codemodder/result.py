@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import itertools
-from abc import abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Sequence, Type
@@ -9,6 +8,9 @@ from typing import TYPE_CHECKING, Any, ClassVar, Sequence, Type
 import libcst as cst
 from boltons.setutils import IndexedSet
 from libcst._position import CodeRange
+from sarif_pydantic import Location as LocationModel
+from sarif_pydantic import Result as ResultModel
+from sarif_pydantic import Run
 from typing_extensions import Self
 
 from codemodder.codetf import Finding, Rule
@@ -36,23 +38,30 @@ class Location(ABCDataclass):
 @dataclass(frozen=True)
 class SarifLocation(Location):
     @staticmethod
-    @abstractmethod
-    def get_snippet(sarif_location) -> str:
-        pass
+    def get_snippet(sarif_location: LocationModel) -> str | None:
+        return sarif_location.message.text if sarif_location.message else None
 
     @classmethod
-    def from_sarif(cls, sarif_location) -> Self:
-        artifact_location = sarif_location["physicalLocation"]["artifactLocation"]
-        file = Path(artifact_location["uri"])
+    def from_sarif(cls, sarif_location: LocationModel) -> Self:
+        if not (physical_location := sarif_location.physical_location):
+            raise ValueError("Sarif location does not have a physical location")
+        if not (artifact_location := physical_location.artifact_location):
+            raise ValueError("Sarif location does not have an artifact location")
+        if not (region := physical_location.region):
+            raise ValueError("Sarif location does not have a region")
+        if not (uri := artifact_location.uri):
+            raise ValueError("Sarif location does not have a uri")
+
+        file = Path(uri)
         snippet = cls.get_snippet(sarif_location)
         start = LineInfo(
-            line=sarif_location["physicalLocation"]["region"]["startLine"],
-            column=sarif_location["physicalLocation"]["region"]["startColumn"],
+            line=region.start_line or -1,
+            column=region.start_column or -1,
             snippet=snippet,
         )
         end = LineInfo(
-            line=sarif_location["physicalLocation"]["region"]["endLine"],
-            column=sarif_location["physicalLocation"]["region"]["endColumn"],
+            line=region.end_line or -1,
+            column=region.end_column or -1,
             snippet=snippet,
         )
         return cls(file=file, start=start, end=end)
@@ -102,7 +111,7 @@ class SarifResult(SASTResult):
 
     @classmethod
     def from_sarif(
-        cls, sarif_result, sarif_run, truncate_rule_id: bool = False
+        cls, sarif_result: ResultModel, sarif_run: Run, truncate_rule_id: bool = False
     ) -> Self:
         rule_id = cls.extract_rule_id(sarif_result, sarif_run, truncate_rule_id)
         finding_id = cls.extract_finding_id(sarif_result) or rule_id
@@ -124,68 +133,84 @@ class SarifResult(SASTResult):
         )
 
     @classmethod
-    def extract_finding_message(cls, sarif_result: dict, sarif_run: dict) -> str | None:
-        return sarif_result.get("message", {}).get("text", None)
+    def extract_finding_message(
+        cls, sarif_result: ResultModel, sarif_run: Run
+    ) -> str | None:
+        del sarif_run
+        return sarif_result.message.text
 
     @classmethod
-    def rule_url_from_id(cls, result: dict, run: dict, rule_id: str) -> str | None:
+    def rule_url_from_id(
+        cls, result: ResultModel, run: Run, rule_id: str
+    ) -> str | None:
         del result, run, rule_id
         return None
 
     @classmethod
-    def extract_locations(cls, sarif_result) -> Sequence[Location]:
+    def extract_locations(cls, sarif_result: ResultModel) -> Sequence[Location]:
         return tuple(
             [
                 cls.location_type.from_sarif(location)
-                for location in sarif_result["locations"]
+                for location in sarif_result.locations or []
             ]
         )
 
     @classmethod
-    def extract_related_locations(cls, sarif_result) -> Sequence[LocationWithMessage]:
+    def extract_related_locations(
+        cls, sarif_result: ResultModel
+    ) -> Sequence[LocationWithMessage]:
         return tuple(
             [
                 LocationWithMessage(
-                    message=rel_location.get("message", {}).get("text", ""),
+                    message=rel_location.message.text,
                     location=cls.location_type.from_sarif(rel_location),
                 )
-                for rel_location in sarif_result.get("relatedLocations", [])
+                for rel_location in sarif_result.related_locations or []
+                if rel_location.message
             ]
         )
 
     @classmethod
-    def extract_code_flows(cls, sarif_result) -> Sequence[Sequence[Location]]:
+    def extract_code_flows(
+        cls, sarif_result: ResultModel
+    ) -> Sequence[Sequence[Location]]:
         return tuple(
             [
                 tuple(
                     [
-                        cls.location_type.from_sarif(locations.get("location"))
-                        for locations in threadflow.get("locations", {})
+                        cls.location_type.from_sarif(locations.location)
+                        for locations in threadflow.locations or []
+                        if locations.location
                     ]
                 )
-                for codeflow in sarif_result.get("codeFlows", {})
-                for threadflow in codeflow.get("threadFlows", {})
+                for codeflow in sarif_result.code_flows or []
+                for threadflow in codeflow.thread_flows or []
             ]
         )
 
     @classmethod
-    def extract_rule_id(cls, result, sarif_run, truncate_rule_id: bool = False) -> str:
-        if rule_id := result.get("ruleId"):
+    def extract_rule_id(
+        cls, result: ResultModel, sarif_run: Run, truncate_rule_id: bool = False
+    ) -> str:
+        if rule_id := result.rule_id:
             return rule_id.split(".")[-1] if truncate_rule_id else rule_id
 
         # it may be contained in the 'rule' field through the tool component in the sarif file
-        if "rule" in result:
-            tool_index = result["rule"]["toolComponent"]["index"]
-            rule_index = result["rule"]["index"]
-            return sarif_run["tool"]["extensions"][tool_index]["rules"][rule_index][
-                "id"
-            ]
+        if (
+            (rule := result.rule)
+            and sarif_run.tool.extensions
+            and rule.tool_component
+            and rule.tool_component.index is not None
+        ):
+            tool_index = rule.tool_component.index
+            rule_index = rule.index
+            return sarif_run.tool.extensions[tool_index].rules[rule_index].id
 
         raise ValueError("Could not extract rule id from sarif result.")
 
     @classmethod
-    def extract_finding_id(cls, result) -> str | None:
-        return result.get("guid") or result.get("correlationGuid")
+    def extract_finding_id(cls, result: ResultModel) -> str | None:
+        return str(result.guid or "") or str(result.correlation_guid or "") or None
 
 
 def same_line(pos: CodeRange, location: Location) -> bool:

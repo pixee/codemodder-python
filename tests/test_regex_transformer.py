@@ -1,5 +1,7 @@
 import logging
 
+from sarif_pydantic import Sarif
+
 from codemodder.codemods.regex_transformer import (
     RegexTransformerPipeline,
     SastRegexTransformerPipeline,
@@ -138,38 +140,42 @@ def test_sast_transformer(mocker, tmp_path_factory):
         pattern=r"hello", replacement="bye", change_description="testing"
     )
 
-    data = {
-        "runs": [
-            {
-                "results": [
-                    {
-                        "fingerprints": {"matchBasedId/v1": "123"},
-                        "locations": [
-                            {
-                                "ruleId": "rule",
-                                "physicalLocation": {
-                                    "artifactLocation": {
-                                        "uri": "code.py",
-                                        "uriBaseId": "%SRCROOT%",
+    data = Sarif.model_validate(
+        {
+            "runs": [
+                {
+                    "tool": {"driver": {"name": "Semgrep OSS"}},
+                    "results": [
+                        {
+                            "message": {"text": "message"},
+                            "fingerprints": {"matchBasedId/v1": "123"},
+                            "locations": [
+                                {
+                                    "ruleId": "rule",
+                                    "physicalLocation": {
+                                        "artifactLocation": {
+                                            "uri": "code.py",
+                                            "uriBaseId": "%SRCROOT%",
+                                        },
+                                        "region": {
+                                            "snippet": {"text": "snip"},
+                                            "endColumn": 1,
+                                            "endLine": 1,
+                                            "startColumn": 1,
+                                            "startLine": 1,
+                                        },
                                     },
-                                    "region": {
-                                        "snippet": {"text": "snip"},
-                                        "endColumn": 1,
-                                        "endLine": 1,
-                                        "startColumn": 1,
-                                        "startLine": 1,
-                                    },
-                                },
-                            }
-                        ],
-                        "ruleId": "rule",
-                    }
-                ]
-            }
-        ]
-    }
-    sarif_run = data["runs"]
-    sarif_results = sarif_run[0]["results"]
+                                }
+                            ],
+                            "ruleId": "rule",
+                        }
+                    ],
+                }
+            ]
+        }
+    )
+    sarif_run = data.runs[0]
+    sarif_results = sarif_run.results or []
     results = [SemgrepResult.from_sarif(sarif_results[0], sarif_run)]
 
     changeset = pipeline.apply(

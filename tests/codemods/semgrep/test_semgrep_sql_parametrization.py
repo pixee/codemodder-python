@@ -49,6 +49,7 @@ class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
         results = {
             "runs": [
                 {
+                    "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
                             "fingerprints": {"matchBasedId/v1": "123"},
@@ -185,7 +186,7 @@ class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
                             "properties": {},
                             "ruleId": "python.flask.security.injection.tainted-sql-string.tainted-sql-string",
                         },
-                    ]
+                    ],
                 }
             ]
         }

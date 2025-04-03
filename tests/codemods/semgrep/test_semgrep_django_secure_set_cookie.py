@@ -38,6 +38,7 @@ class TestSemgrepDjangoSecureSetCookie(BaseSASTCodemodTest):
         results = {
             "runs": [
                 {
+                    "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
                             "fingerprints": {"matchBasedId/v1": "123"},
@@ -66,7 +67,7 @@ class TestSemgrepDjangoSecureSetCookie(BaseSASTCodemodTest):
                             "properties": {},
                             "ruleId": "python.django.security.audit.secure-cookies.django-secure-set-cookie",
                         }
-                    ]
+                    ],
                 }
             ]
         }

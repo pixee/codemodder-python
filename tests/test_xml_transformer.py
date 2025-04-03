@@ -6,6 +6,7 @@ import mock
 import pytest
 from defusedxml import ExternalReferenceForbidden
 from defusedxml.sax import make_parser
+from sarif_pydantic import Sarif
 
 from codemodder.codemods.xml_transformer import (
     ElementAttributeXMLTransformer,
@@ -127,38 +128,43 @@ class TestElementAttributeXMLTransformer:
           </element>
         </configuration>"""
         name_attr_map = {"element": {"first": "one"}}
-        data = {
-            "runs": [
-                {
-                    "results": [
-                        {
-                            "fingerprints": {"matchBasedId/v1": "123"},
-                            "locations": [
-                                {
-                                    "ruleId": "rule",
-                                    "physicalLocation": {
-                                        "artifactLocation": {
-                                            "uri": "code.py",
-                                            "uriBaseId": "%SRCROOT%",
+        data = Sarif.model_validate(
+            {
+                "runs": [
+                    {
+                        "tool": {"driver": {"name": "Semgrep OSS"}},
+                        "results": [
+                            {
+                                "message": {"text": "message"},
+                                "fingerprints": {"matchBasedId/v1": "123"},
+                                "locations": [
+                                    {
+                                        "ruleId": "rule",
+                                        "physicalLocation": {
+                                            "artifactLocation": {
+                                                "uri": "code.py",
+                                                "uriBaseId": "%SRCROOT%",
+                                            },
+                                            "region": {
+                                                "snippet": {"text": "snip"},
+                                                "endColumn": 1,
+                                                "endLine": 5,
+                                                "startColumn": 1,
+                                                "startLine": 5,
+                                            },
                                         },
-                                        "region": {
-                                            "snippet": {"text": "snip"},
-                                            "endColumn": 1,
-                                            "endLine": 5,
-                                            "startColumn": 1,
-                                            "startLine": 5,
-                                        },
-                                    },
-                                }
-                            ],
-                            "ruleId": "rule",
-                        }
-                    ]
-                }
-            ]
-        }
-        sarif_run = data["runs"]
-        sarif_results = sarif_run[0]["results"]
+                                    }
+                                ],
+                                "ruleId": "rule",
+                            }
+                        ],
+                    }
+                ]
+            }
+        )
+        sarif_run = data.runs[0]
+        assert sarif_run.results
+        sarif_results = sarif_run.results
         results = [SemgrepResult.from_sarif(sarif_results[0], sarif_run)]
         self.run_and_assert(name_attr_map, input_code, expected_output, results, True)
 

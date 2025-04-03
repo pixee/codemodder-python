@@ -26,6 +26,7 @@ class TestSemgrepSubprocessShellFalse(BaseSASTCodemodTest):
         results = {
             "runs": [
                 {
+                    "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
                             "fingerprints": {"matchBasedId/v1": "123"},
@@ -54,7 +55,7 @@ class TestSemgrepSubprocessShellFalse(BaseSASTCodemodTest):
                             "properties": {},
                             "ruleId": "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true",
                         }
-                    ]
+                    ],
                 }
             ]
         }

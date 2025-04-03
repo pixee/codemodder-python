@@ -31,6 +31,7 @@ class TestSemgrepUseDefusedXml(BaseSASTCodemodTest):
         results = {
             "runs": [
                 {
+                    "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
                             "fingerprints": {"matchBasedId/v1": "123"},
@@ -58,7 +59,7 @@ class TestSemgrepUseDefusedXml(BaseSASTCodemodTest):
                             },
                             "ruleId": "python.lang.security.use-defused-xml-parse.use-defused-xml-parse",
                         }
-                    ]
+                    ],
                 }
             ]
         }

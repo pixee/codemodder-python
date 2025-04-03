@@ -1,7 +1,7 @@
-import json
 from pathlib import Path
 
 import pytest
+from sarif_pydantic import Sarif
 
 from codemodder.codemods.semgrep import SemgrepSarifFileDetector
 from codemodder.context import CodemodExecutionContext
@@ -20,8 +20,8 @@ SAMPLE_DATA_PATH = Path(__file__).parent / "samples"
 def test_semgrep_sarif_tool_detector(filename, expected):
     detector = SemgrepSarifToolDetector()
     sarif_path = SAMPLE_DATA_PATH / filename
-    data = json.load(sarif_path.open())
-    assert detector.detect(data["runs"][0]) is expected
+    data = Sarif.model_validate_json(sarif_path.read_text())
+    assert detector.detect(data.runs[0]) is expected
 
 
 def test_semgrep_sarif_codemode_detector(mocker):

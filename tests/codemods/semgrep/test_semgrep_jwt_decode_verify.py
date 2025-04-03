@@ -25,6 +25,7 @@ class TestSemgrepJwtDecodeVerify(BaseSASTCodemodTest):
         results = {
             "runs": [
                 {
+                    "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
                             "fingerprints": {"matchBasedId/v1": "123"},
@@ -52,7 +53,7 @@ class TestSemgrepJwtDecodeVerify(BaseSASTCodemodTest):
                             },
                             "ruleId": "python.jwt.security.unverified-jwt-decode.unverified-jwt-decode",
                         }
-                    ]
+                    ],
                 }
             ]
         }

@@ -27,6 +27,7 @@ class TestEnableJinja2Autoescape(BaseSASTCodemodTest):
         results = {
             "runs": [
                 {
+                    "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
                             "fingerprints": {"matchBasedId/v1": "123"},
@@ -55,7 +56,7 @@ class TestEnableJinja2Autoescape(BaseSASTCodemodTest):
                             "properties": {},
                             "ruleId": "python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2",
                         }
-                    ]
+                    ],
                 }
             ]
         }
