@@ -34,6 +34,55 @@ class TestSonarSecureCookie(BaseSASTCodemodTest):
         var = "hello"
         response2.set_cookie("name", "value", secure=True, httponly=True, samesite='Lax')
         """
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -3,7 +3,7 @@
+ 
+ response = flask.make_response()
+ var = "hello"
+-response.set_cookie("name", "value")
++response.set_cookie("name", "value", secure=True, httponly=True, samesite='Lax')
+ 
+ response2 = flask.Response()
+ var = "hello"
+""",
+            """\
+--- 
++++ 
+@@ -7,4 +7,4 @@
+ 
+ response2 = flask.Response()
+ var = "hello"
+-response2.set_cookie("name", "value")
++response2.set_cookie("name", "value", secure=True, httponly=True, samesite='Lax')
+""",
+            """\
+--- 
++++ 
+@@ -3,7 +3,7 @@
+ 
+ response = flask.make_response()
+ var = "hello"
+-response.set_cookie("name", "value")
++response.set_cookie("name", "value", secure=True, httponly=True, samesite='Lax')
+ 
+ response2 = flask.Response()
+ var = "hello"
+""",
+            """\
+--- 
++++ 
+@@ -7,4 +7,4 @@
+ 
+ response2 = flask.Response()
+ var = "hello"
+-response2.set_cookie("name", "value")
++response2.set_cookie("name", "value", secure=True, httponly=True, samesite='Lax')
+""",
+        ]
+
         issues = {
             "hotspots": [
                 {
@@ -83,5 +132,10 @@ class TestSonarSecureCookie(BaseSASTCodemodTest):
             ],
         }
         self.run_and_assert(
-            tmpdir, input_code, expected, results=json.dumps(issues), num_changes=2
+            tmpdir,
+            input_code,
+            expected,
+            expected_diff_per_change,
+            results=json.dumps(issues),
+            num_changes=4,
         )

@@ -26,6 +26,48 @@ class TestSonarSecureRandom(BaseSASTCodemodTest):
         secrets.SystemRandom().randint(0, 9)
         secrets.SystemRandom().random()
         """
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -1,6 +1,7 @@
+ 
+ import random
++import secrets
+ 
+-random.getrandbits(1)
++secrets.SystemRandom().getrandbits(1)
+ random.randint(0, 9)
+ random.random()
+""",
+            """\
+--- 
++++ 
+@@ -1,6 +1,7 @@
+ 
+ import random
++import secrets
+ 
+ random.getrandbits(1)
+-random.randint(0, 9)
++secrets.SystemRandom().randint(0, 9)
+ random.random()
+""",
+            """\
+--- 
++++ 
+@@ -1,6 +1,7 @@
+ 
+ import random
++import secrets
+ 
+ random.getrandbits(1)
+ random.randint(0, 9)
+-random.random()
++secrets.SystemRandom().random()
+""",
+        ]
+
         hotspots = {
             "hotspots": [
                 {
@@ -67,6 +109,7 @@ class TestSonarSecureRandom(BaseSASTCodemodTest):
             tmpdir,
             input_code,
             expected_output,
+            expected_diff_per_change,
             results=json.dumps(hotspots),
             num_changes=3,
         )
