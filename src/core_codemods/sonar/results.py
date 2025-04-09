@@ -13,14 +13,34 @@ from codemodder.result import LineInfo, Location, ResultSet, SASTResult
 
 
 def sonar_url_from_id(rule_id: str) -> str:
-    # convert "python:SXXX" or "pythonsecurity:SXXX" to XXX
+    language = "python"
     try:
-        rule_id = rule_id.split(":")[1][1:]
+        # convert "python:SXXX" or "pythonsecurity:SXXX" to python and XXX
+        prefix, number = rule_id.split(":")
+        number = number[1:]
+        match prefix:
+            case "python" | "pythonsecurity":
+                language = "python"
+            case "java" | "javasecurity":
+                language = "java"
+            case "javascript" | "jssecurity":
+                language = "javascript"
+            case "typescript" | "tssecurity":
+                language = "typescript"
+            case "roslyn.sonaranalyzer.security.cs" | "csharpsquid":
+                language = "dotnet"
+            case "phpsecurity":
+                language = "php"
+            case "xml":
+                language = "xml"
+            case _:
+                logger.debug(f"Unknown language in sonar rule: {prefix}")
+
     except IndexError:
         logger.debug("Invalid sonar rule id: %s", rule_id)
         raise
 
-    return f"https://rules.sonarsource.com/python/RSPEC-{rule_id}/"
+    return f"https://rules.sonarsource.com/{language}/RSPEC-{number}/"
 
 
 class SonarLocation(Location):
