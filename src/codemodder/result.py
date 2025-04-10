@@ -3,7 +3,7 @@ from __future__ import annotations
 import itertools
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Sequence, Type
+from typing import TYPE_CHECKING, Any, ClassVar, Sequence, Type, TypeVar
 
 import libcst as cst
 from boltons.setutils import IndexedSet
@@ -225,8 +225,11 @@ def fuzzy_column_match(pos: CodeRange, location: Location) -> bool:
     )
 
 
-class ResultSet(dict[str, dict[Path, list[Result]]]):
-    results_for_rule: dict[str, list[Result]]
+ResultType = TypeVar("ResultType", bound=Result)
+
+
+class ResultSet(dict[str, dict[Path, list[ResultType]]]):
+    results_for_rule: dict[str, list[ResultType]]
     # stores SARIF runs.tool data
     tools: list[dict[str, dict]]
 
@@ -235,7 +238,7 @@ class ResultSet(dict[str, dict[Path, list[Result]]]):
         self.results_for_rule = {}
         self.tools = []
 
-    def add_result(self, result: Result):
+    def add_result(self, result: ResultType):
         self.results_for_rule.setdefault(result.rule_id, []).append(result)
         for loc in result.locations:
             self.setdefault(result.rule_id, {}).setdefault(loc.file, []).append(result)
@@ -246,7 +249,7 @@ class ResultSet(dict[str, dict[Path, list[Result]]]):
 
     def results_for_rule_and_file(
         self, context: CodemodExecutionContext, rule_id: str, file: Path
-    ) -> list[Result]:
+    ) -> list[ResultType]:
         """
         Return list of results for a given rule and file.
 
@@ -258,7 +261,7 @@ class ResultSet(dict[str, dict[Path, list[Result]]]):
         """
         return self.get(rule_id, {}).get(file.relative_to(context.directory), [])
 
-    def results_for_rules(self, rule_ids: list[str]) -> list[Result]:
+    def results_for_rules(self, rule_ids: list[str]) -> list[ResultType]:
         """
         Returns flat list of all results that match any of the given rule IDs.
         """
