@@ -41,8 +41,13 @@ class SarifLocation(Location):
     def get_snippet(sarif_location: LocationModel) -> str | None:
         return sarif_location.message.text if sarif_location.message else None
 
+    @staticmethod
+    def process_uri(run: Run, sarif_location: LocationModel, uri: str) -> Path:
+        del sarif_location
+        return Path(uri)
+
     @classmethod
-    def from_sarif(cls, sarif_location: LocationModel) -> Self:
+    def from_sarif(cls, run: Run, sarif_location: LocationModel) -> Self:
         if not (physical_location := sarif_location.physical_location):
             raise ValueError("Sarif location does not have a physical location")
         if not (artifact_location := physical_location.artifact_location):
@@ -52,7 +57,7 @@ class SarifLocation(Location):
         if not (uri := artifact_location.uri):
             raise ValueError("Sarif location does not have a uri")
 
-        file = Path(uri)
+        file = cls.process_uri(run, sarif_location, uri)
         snippet = cls.get_snippet(sarif_location)
         start = LineInfo(
             line=region.start_line or -1,
@@ -117,9 +122,9 @@ class SarifResult(SASTResult):
         finding_id = cls.extract_finding_id(sarif_result) or rule_id
         return cls(
             rule_id=rule_id,
-            locations=cls.extract_locations(sarif_result),
-            codeflows=cls.extract_code_flows(sarif_result),
-            related_locations=cls.extract_related_locations(sarif_result),
+            locations=cls.extract_locations(sarif_result, sarif_run),
+            codeflows=cls.extract_code_flows(sarif_result, sarif_run),
+            related_locations=cls.extract_related_locations(sarif_result, sarif_run),
             finding_id=finding_id,
             finding=Finding(
                 id=finding_id,
@@ -147,23 +152,25 @@ class SarifResult(SASTResult):
         return None
 
     @classmethod
-    def extract_locations(cls, sarif_result: ResultModel) -> Sequence[Location]:
+    def extract_locations(
+        cls, sarif_result: ResultModel, run: Run
+    ) -> Sequence[Location]:
         return tuple(
             [
-                cls.location_type.from_sarif(location)
+                cls.location_type.from_sarif(run, location)
                 for location in sarif_result.locations or []
             ]
         )
 
     @classmethod
     def extract_related_locations(
-        cls, sarif_result: ResultModel
+        cls, sarif_result: ResultModel, run: Run
     ) -> Sequence[LocationWithMessage]:
         return tuple(
             [
                 LocationWithMessage(
                     message=rel_location.message.text,
-                    location=cls.location_type.from_sarif(rel_location),
+                    location=cls.location_type.from_sarif(run, rel_location),
                 )
                 for rel_location in sarif_result.related_locations or []
                 if rel_location.message
@@ -172,13 +179,13 @@ class SarifResult(SASTResult):
 
     @classmethod
     def extract_code_flows(
-        cls, sarif_result: ResultModel
+        cls, sarif_result: ResultModel, run: Run
     ) -> Sequence[Sequence[Location]]:
         return tuple(
             [
                 tuple(
                     [
-                        cls.location_type.from_sarif(locations.location)
+                        cls.location_type.from_sarif(run, locations.location)
                         for locations in threadflow.locations or []
                         if locations.location
                     ]

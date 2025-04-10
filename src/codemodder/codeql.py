@@ -17,7 +17,8 @@ class CodeQLSarifToolDetector(AbstractSarifToolDetector):
 
 class CodeQLLocation(SarifLocation):
     @classmethod
-    def from_sarif(cls, sarif_location: LocationModel) -> Self:
+    def from_sarif(cls, run: Run, sarif_location: LocationModel) -> Self:
+        del run
         if (physical_location := sarif_location.physical_location) is None:
             raise ValueError("Location does not contain a physicalLocation")
         if (artifact_location := physical_location.artifact_location) is None:
