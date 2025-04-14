@@ -4,7 +4,7 @@ from codemodder.codemods.test import BaseSASTCodemodTest
 from core_codemods.sonar.sonar_timezone_aware_datetime import SonarTimezoneAwareDatetime
 
 
-class TestSonarSQLParameterization(BaseSASTCodemodTest):
+class TestSonarTimezoneAwareDatetime(BaseSASTCodemodTest):
     codemod = SonarTimezoneAwareDatetime
     tool = "sonar"
 
@@ -26,6 +26,30 @@ class TestSonarSQLParameterization(BaseSASTCodemodTest):
         timestamp = 1571595618.0
         datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
         """
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -1,5 +1,5 @@
+ import datetime
+ 
+-datetime.datetime.utcnow()
++datetime.datetime.now(tz=datetime.timezone.utc)
+ timestamp = 1571595618.0
+ datetime.datetime.utcfromtimestamp(timestamp)
+""",
+            """\
+--- 
++++ 
+@@ -2,4 +2,4 @@
+ 
+ datetime.datetime.utcnow()
+ timestamp = 1571595618.0
+-datetime.datetime.utcfromtimestamp(timestamp)
++datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
+""",
+        ]
+
         issues = {
             "issues": [
                 {
@@ -60,5 +84,10 @@ class TestSonarSQLParameterization(BaseSASTCodemodTest):
             ]
         }
         self.run_and_assert(
-            tmpdir, input_code, expected, results=json.dumps(issues), num_changes=2
+            tmpdir,
+            input_code,
+            expected,
+            expected_diff_per_change,
+            results=json.dumps(issues),
+            num_changes=2,
         )

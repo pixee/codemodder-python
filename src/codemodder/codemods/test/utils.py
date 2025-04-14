@@ -7,7 +7,7 @@ import mock
 
 from codemodder import registry
 from codemodder.codemods.api import BaseCodemod
-from codemodder.codetf import Change
+from codemodder.codetf.v2.codetf import ChangeSet
 from codemodder.context import CodemodExecutionContext
 from codemodder.diff import create_diff
 from codemodder.providers import load_providers
@@ -58,6 +58,7 @@ class BaseCodemodTest:
         tmpdir,
         input_code,
         expected,
+        expected_diff_per_change: list[str] = [],
         num_changes: int = 1,
         min_num_changes: int | None = None,
         root: Path | None = None,
@@ -74,7 +75,7 @@ class BaseCodemodTest:
 
         self.execution_context = CodemodExecutionContext(
             directory=root,
-            dry_run=False,
+            dry_run=True if expected_diff_per_change else False,
             verbose=False,
             registry=mock.MagicMock(),
             providers=load_providers(),
@@ -83,7 +84,10 @@ class BaseCodemodTest:
             path_exclude=path_exclude,
         )
 
-        self.codemod.apply(self.execution_context)
+        self.codemod.apply(
+            self.execution_context,
+            remediation=True if expected_diff_per_change else False,
+        )
         changes = self.execution_context.get_changesets(self.codemod.id)
 
         self.changeset = changes
@@ -92,20 +96,29 @@ class BaseCodemodTest:
             assert not changes
             return
 
-        self.assert_num_changes(changes, num_changes, min_num_changes)
+        self.assert_num_changes(
+            changes, num_changes, expected_diff_per_change, min_num_changes
+        )
 
         self.assert_changes(
             tmpdir,
             tmp_file_path,
             input_code,
             expected,
-            changes[0],
+            expected_diff_per_change,
+            num_changes,
+            changes,
         )
 
-    def assert_num_changes(self, changes, expected_num_changes, min_num_changes):
-        assert len(changes) == 1
-
-        actual_num = len(changes[0].changes)
+    def assert_num_changes(
+        self, changes, expected_num_changes, expected_diff_per_change, min_num_changes
+    ):
+        if expected_diff_per_change:
+            assert len(changes) == expected_num_changes
+            actual_num = len(changes)
+        else:
+            assert len(changes[0].changes) == expected_num_changes
+            actual_num = len(changes[0].changes)
 
         if min_num_changes is not None:
             assert (
@@ -116,25 +129,43 @@ class BaseCodemodTest:
                 actual_num == expected_num_changes
             ), f"Expected {expected_num_changes} changes but {actual_num} were created."
 
-    def assert_changes(self, root, file_path, input_code, expected, changes):
-        assert os.path.relpath(file_path, root) == changes.path
-        assert all(change.description for change in changes.changes)
-
-        expected_diff = create_diff(
-            dedent(input_code).splitlines(keepends=True),
-            dedent(expected).splitlines(keepends=True),
+    def assert_changes(
+        self,
+        root,
+        file_path,
+        input_code,
+        expected,
+        expected_diff_per_change,
+        num_changes,
+        changes,
+    ):
+        assert all(
+            os.path.relpath(file_path, root) == change.path for change in changes
         )
-        try:
-            assert expected_diff == changes.diff
-        except AssertionError:
-            raise DiffError(expected_diff, changes.diff)
+        assert all(c.description for change in changes for c in change.changes)
 
-        output_code = file_path.read_bytes().decode("utf-8")
+        # assert each change individually
+        if expected_diff_per_change and num_changes > 1:
+            assert num_changes == len(expected_diff_per_change)
+            for change, diff in zip(changes, expected_diff_per_change):
+                assert change.diff == diff
+        else:
+            # generate diff from expected code
+            expected_diff = create_diff(
+                dedent(input_code).splitlines(keepends=True),
+                dedent(expected).splitlines(keepends=True),
+            )
+            try:
+                assert expected_diff == changes[0].diff
+            except AssertionError:
+                raise DiffError(expected_diff, changes[0].diff)
 
-        try:
-            assert output_code == (format_expected := dedent(expected))
-        except AssertionError:
-            raise DiffError(format_expected, output_code)
+            output_code = file_path.read_bytes().decode("utf-8")
+
+            try:
+                assert output_code == (format_expected := dedent(expected))
+            except AssertionError:
+                raise DiffError(format_expected, output_code)
 
     def run_and_assert_filepath(
         self,
@@ -171,6 +202,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
         tmpdir,
         input_code,
         expected,
+        expected_diff_per_change: list[str] | None = None,
         num_changes: int = 1,
         min_num_changes: int | None = None,
         root: Path | None = None,
@@ -191,7 +223,7 @@ class BaseSASTCodemodTest(BaseCodemodTest):
 
         self.execution_context = CodemodExecutionContext(
             directory=root,
-            dry_run=False,
+            dry_run=True if expected_diff_per_change else False,
             verbose=False,
             tool_result_files_map={self.tool: [tmp_results_file_path]},
             registry=mock.MagicMock(),
@@ -201,28 +233,35 @@ class BaseSASTCodemodTest(BaseCodemodTest):
             path_exclude=path_exclude,
         )
 
-        self.codemod.apply(self.execution_context)
+        self.codemod.apply(
+            self.execution_context,
+            remediation=True if expected_diff_per_change else False,
+        )
         changes = self.execution_context.get_changesets(self.codemod.id)
 
         if input_code == expected:
             assert not changes
             return
 
-        self.assert_num_changes(changes, num_changes, min_num_changes)
+        self.assert_num_changes(
+            changes, num_changes, expected_diff_per_change, min_num_changes
+        )
 
-        self.assert_findings(changes[0].changes)
+        self.assert_findings(changes)
 
         self.assert_changes(
             tmpdir,
             tmp_file_path,
             input_code,
             expected,
-            changes[0],
+            expected_diff_per_change,
+            num_changes,
+            changes,
         )
 
         return changes
 
-    def assert_findings(self, changes: list[Change]):
+    def assert_findings(self, changes: list[ChangeSet]):
         assert all(
-            x.fixedFindings for x in changes
+            c.fixedFindings for a in changes for c in a.changes
         ), f"Expected all changes to have findings: {changes}"

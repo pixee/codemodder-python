@@ -30,6 +30,32 @@ class TestSonarFixMissingSelfOrCls(BaseSASTCodemodTest):
             def class_method(cls):
                 pass
         """
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -1,6 +1,6 @@
+ 
+ class A:
+-    def instance_method():
++    def instance_method(self):
+         pass
+ 
+     @classmethod
+""",
+            """\
+--- 
++++ 
+@@ -4,5 +4,5 @@
+         pass
+ 
+     @classmethod
+-    def class_method():
++    def class_method(cls):
+         pass
+""",
+        ]
+
         issues = {
             "issues": [
                 {
@@ -60,6 +86,7 @@ class TestSonarFixMissingSelfOrCls(BaseSASTCodemodTest):
             tmpdir,
             input_code,
             expected_output,
+            expected_diff_per_change,
             results=json.dumps(issues),
             num_changes=2,
         )

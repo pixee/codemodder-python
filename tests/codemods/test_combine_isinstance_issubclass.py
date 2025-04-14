@@ -60,7 +60,7 @@ class TestCombineIsinstanceIssubclass(BaseCodemodTest):
             tmpdir,
             input_code.replace("{func}", func),
             expected.replace("{func}", func),
-            num_changes,
+            num_changes=num_changes,
         )
 
     @each_func

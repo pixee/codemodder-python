@@ -73,6 +73,7 @@ def log_report(context, output, elapsed_ms, files_to_analyze, token_usage):
 def apply_codemods(
     context: CodemodExecutionContext,
     codemods_to_run: Sequence[BaseCodemod],
+    remediation: bool,
 ) -> TokenUsage:
     log_section("scanning")
     token_usage = TokenUsage()
@@ -89,7 +90,7 @@ def apply_codemods(
     for codemod in codemods_to_run:
         # NOTE: this may be used as a progress indicator by upstream tools
         logger.info("running codemod %s", codemod.id)
-        if codemod_token_usage := codemod.apply(context):
+        if codemod_token_usage := codemod.apply(context, remediation):
             log_token_usage(f"Codemod {codemod.id}", codemod_token_usage)
             token_usage += codemod_token_usage
 
@@ -135,6 +136,7 @@ def run(
     sast_only: bool = False,
     ai_client: bool = True,
     log_matched_files: bool = False,
+    remediation: bool = False,
 ) -> tuple[CodeTF | None, int, TokenUsage]:
     start = datetime.datetime.now()
 
@@ -206,7 +208,7 @@ def run(
         context.find_and_fix_paths,
     )
 
-    token_usage = apply_codemods(context, codemods_to_run)
+    token_usage = apply_codemods(context, codemods_to_run, remediation)
 
     elapsed = datetime.datetime.now() - start
     elapsed_ms = int(elapsed.total_seconds() * 1000)
@@ -231,7 +233,7 @@ def run(
     return codetf, 0, token_usage
 
 
-def _run_cli(original_args) -> int:
+def _run_cli(original_args, remediation=False) -> int:
     codemod_registry = registry.load_registered_codemods()
     argv = parse_args(original_args, codemod_registry)
     if not os.path.exists(argv.directory):
@@ -270,7 +272,8 @@ def _run_cli(original_args) -> int:
 
     _, status, _ = run(
         argv.directory,
-        argv.dry_run,
+        # Force dry-run if remediation
+        True if remediation else argv.dry_run,
         argv.output,
         argv.output_format,
         argv.verbose,
@@ -284,10 +287,22 @@ def _run_cli(original_args) -> int:
         codemod_registry=codemod_registry,
         sast_only=argv.sonar_issues_json or argv.sarif,
         log_matched_files=True,
+        remediation=remediation,
     )
     return status
 
 
 def main():
+    """
+    Hardens a project. The application will write all the fixes into the files.
+    """
     sys_argv = sys.argv[1:]
     sys.exit(_run_cli(sys_argv))
+
+
+def remediate():
+    """
+    Remediates a project. The application will suggest fix for each separate issue found. No files will be written.
+    """
+    sys_argv = sys.argv[1:]
+    sys.exit(_run_cli(sys_argv, True))

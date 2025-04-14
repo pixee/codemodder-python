@@ -284,6 +284,15 @@ class ResultSet(dict[str, dict[Path, list[ResultType]]]):
     def all_rule_ids(self) -> list[str]:
         return list(self.keys())
 
+    @classmethod
+    def from_single_result(cls, result: ResultType) -> Self:
+        """
+        Creates a new ResultSet of the same type with a give result.
+        """
+        new = cls()
+        new.add_result(result)
+        return new
+
     def __or__(self, other):
         result = self.__class__()
         for k in self.keys() | other.keys():

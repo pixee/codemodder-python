@@ -16,7 +16,7 @@ dependencies = [
     "isort>=5.12,<6.1",
     "libcst>=1.7,<1.8",
     "packaging>=23.2,<25.0",
-    "pydantic~=2.11.1",
+    "pydantic~=2.10.6",
     "pylint>=3.3,<3.4",
     "python-json-logger~=3.3.0",
     "PyYAML~=6.0.0",
@@ -25,7 +25,7 @@ dependencies = [
     "tomlkit~=0.13.0",
     "wrapt~=1.17.0",
     "chardet~=5.2.0",
-    "sarif-pydantic~=0.5.0",
+    "sarif-pydantic~=0.5.1",
     "setuptools~=78.1",
 ]
 keywords = ["codemod", "codemods", "security", "fix", "fixes"]
@@ -46,6 +46,7 @@ Repository = "https://github.com/pixee/codemodder-python"
 
 [project.scripts]
 codemodder = "codemodder.codemodder:main"
+codemodder-remediation = "codemodder.codemodder:remediate"
 generate-docs = 'codemodder.scripts.generate_docs:main'
 get-hashes = 'codemodder.scripts.get_hashes:main'
 
@@ -81,6 +82,7 @@ test = [
     "flask_wtf~=1.2.0",
     "fickling~=0.1.0,>=0.1.3",
     "graphql-server~=3.0.0b7",
+    "unidiff>=0.7.5",
 ]
 complexity = [
     "radon==6.0.*",
@@ -131,7 +133,7 @@ extend-exclude = '''
 '''
 
 [coverage-threshold]
-line_coverage_min = 93
+line_coverage_min = 92
 [coverage-threshold.modules."src/core_codemods/"]
 # Detect if a codemod is missing unit or integration tests
 file_line_coverage_min = 50

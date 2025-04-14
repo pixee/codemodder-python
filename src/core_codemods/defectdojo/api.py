@@ -8,6 +8,7 @@ from typing_extensions import override
 from codemodder.codemods.api import Metadata, Reference, ToolMetadata, ToolRule
 from codemodder.codemods.base_detector import BaseDetector
 from codemodder.context import CodemodExecutionContext
+from codemodder.llm import TokenUsage
 from codemodder.result import ResultSet
 from core_codemods.api import CoreCodemod, SASTCodemod
 
@@ -76,8 +77,15 @@ class DefectDojoCodemod(SASTCodemod):
     def apply(
         self,
         context: CodemodExecutionContext,
-    ) -> None:
-        self._apply(
+        remediation: bool = False,
+    ) -> None | TokenUsage:
+        if remediation:
+            return self._apply_remediation(
+                context,
+                # We know this has a tool because we created it with `from_core_codemod`
+                cast(ToolMetadata, self._metadata.tool).rule_ids,
+            )
+        return self._apply_hardening(
             context,
             # We know this has a tool because we created it with `from_core_codemod`
             cast(ToolMetadata, self._metadata.tool).rule_ids,

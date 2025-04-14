@@ -13,9 +13,9 @@ class TestSonarFixAssertTuple(BaseSASTCodemodTest):
 
     def assert_findings(self, changes):
         # For now we can only link the finding to the first line changed
-        assert changes[0].fixedFindings
-        assert not changes[1].fixedFindings
-        assert not changes[2].fixedFindings
+        assert changes[0].changes[0].fixedFindings
+        assert not changes[0].changes[1].fixedFindings
+        assert not changes[0].changes[2].fixedFindings
 
     def test_simple(self, tmpdir):
         input_code = """

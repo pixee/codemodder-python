@@ -62,7 +62,6 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
 
         result = fickling.load("data")
         """
-
         findings = {
             "results": [
                 {
@@ -100,6 +99,31 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
         result = fickling.load("data")
         result = yaml.load("data", Loader=yaml.SafeLoader)
         """
+        expected_diff_per_change = [
+            """\
+--- 
++++ 
+@@ -1,6 +1,6 @@
+ 
+-import pickle
+ import yaml
++import fickling
+ 
+-result = pickle.load("data")
++result = fickling.load("data")
+ result = yaml.load("data")
+""",
+            """\
+--- 
++++ 
+@@ -3,4 +3,4 @@
+ import yaml
+ 
+ result = pickle.load("data")
+-result = yaml.load("data")
++result = yaml.load("data", Loader=yaml.SafeLoader)
+""",
+        ]
 
         findings = {
             "results": [
@@ -122,6 +146,7 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
             tmpdir,
             input_code,
             expected,
+            expected_diff_per_change,
             results=json.dumps(findings),
             num_changes=2,
         )
@@ -129,11 +154,11 @@ class TestDjangoAvoidInsecureDeserialization(BaseSASTCodemodTest):
 
         assert changes is not None
         assert changes[0].changes[0].fixedFindings is not None
-        assert changes[0].changes[0].fixedFindings[0].id == "4"
+        assert changes[0].changes[0].fixedFindings[0].id == "3"
         assert changes[0].changes[0].fixedFindings[0].rule.id == RULE_ID
-        assert changes[0].changes[1].fixedFindings is not None
-        assert changes[0].changes[1].fixedFindings[0].id == "3"
-        assert changes[0].changes[1].fixedFindings[0].rule.id == RULE_ID
+        assert changes[1].changes[0].fixedFindings is not None
+        assert changes[1].changes[0].fixedFindings[0].id == "4"
+        assert changes[1].changes[0].fixedFindings[0].rule.id == RULE_ID
 
     @mock.patch("codemodder.codemods.api.FileContext.add_dependency")
     def test_pickle_loads(self, adds_dependency, tmpdir):
