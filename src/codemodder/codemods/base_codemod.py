@@ -212,8 +212,7 @@ class BaseCodemod(metaclass=ABCMeta):
         if results:
             for result in results.results_for_rules(rules):
                 # this need to be the same type of ResultSet as results
-                singleton = results.__class__()
-                singleton.add_result(result)
+                singleton = results.from_single_result(result)
                 result_locations = self.get_files_to_analyze(context, singleton)
                 # We do an execution for each location in the result
                 # So we duplicate the resultset argument for each location
