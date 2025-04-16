@@ -130,12 +130,18 @@ class SarifResult(SASTResult):
                 id=finding_id,
                 rule=Rule(
                     id=rule_id,
-                    name=rule_id,
+                    name=cls.extract_finding_rule_name(sarif_result, sarif_run),
                     url=cls.rule_url_from_id(sarif_result, sarif_run, rule_id),
                 ),
             ),
             finding_msg=cls.extract_finding_message(sarif_result, sarif_run),
         )
+
+    @classmethod
+    def extract_finding_rule_name(
+        cls, sarif_result: ResultModel, sarif_run: Run
+    ) -> str:
+        return cls.extract_rule_id(sarif_result, sarif_run)
 
     @classmethod
     def extract_finding_message(
