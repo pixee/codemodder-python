@@ -24,6 +24,11 @@ The `codemodder` package is available [on PyPI](https://pypi.org/project/codemod
 $ pip install codemodder
 ```
 
+> **WARNING:** You should also install the semgrep optional dependency for now as it isn't deprecated yet:
+ ```
+ $ pip install codemodder[semgrep]
+ ```
+
 To install the package from source, use `pip`:
 
 ```
