@@ -16,6 +16,7 @@ dependencies = [
     "isort>=5.12,<6.1",
     "libcst>=1.7,<1.8",
     "packaging>=23.2,<25.0",
+    # do not update pydantic due to inconsistent test failures
     "pydantic~=2.10.6",
     "pylint>=3.3,<3.4",
     "python-json-logger~=3.3.0",
@@ -64,7 +65,7 @@ test = [
     "Jinja2~=3.1.2",
     "jsonschema~=4.23.0",
     "lxml>=5.3.0,<6.0.0",
-    "openai>=1.72,<1.73",
+    "openai>=1.74,<1.75",
     "mock==5.2.*",
     "pre-commit<5",
     "Pyjwt~=2.10.0",
@@ -89,7 +90,7 @@ complexity = [
     "xenon==0.9.*",
 ]
 openai = [
-    "openai>=1.72,<1.73",
+    "openai>=1.74,<1.75",
 ]
 azure = [
     "azure-ai-inference>=1.0.0b1,<2.0",
