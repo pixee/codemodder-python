@@ -284,6 +284,18 @@ class ResultSet(dict[str, dict[Path, list[ResultType]]]):
             )
         )
 
+    def result_by_finding_id(self, finding_id: str) -> ResultType | None:
+        """Returns first result matching the given finding ID."""
+        return next(
+            (
+                result
+                for results in self.results_for_rule.values()
+                for result in results
+                if result.finding and result.finding.id == finding_id
+            ),
+            None,
+        )
+
     def files_for_rule(self, rule_id: str) -> list[Path]:
         return list(self.get(rule_id, {}).keys())
 
