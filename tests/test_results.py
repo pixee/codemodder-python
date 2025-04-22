@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
+from uuid import uuid4
 
+from codemodder.semgrep import SemgrepResultSet
 from core_codemods.sonar.results import SonarResultSet
 
 
@@ -298,3 +300,72 @@ class TestResults:
         result = SonarResultSet.from_json(sonar_json)
         # did not crash and returned an empty ResultSet
         assert not result
+
+    def test_sonar_result_by_finding_id(self, tmpdir):
+        issues = {
+            "issues": [
+                {
+                    "rule": "python:S5659",
+                    "status": "OPEN",
+                    "component": "code.py",
+                    "textRange": {
+                        "startLine": 2,
+                        "endLine": 2,
+                        "startOffset": 2,
+                        "endOffset": 2,
+                    },
+                    "key": "1234",
+                }
+            ]
+        }
+        sonar_json = Path(tmpdir) / "sonar1.json"
+        sonar_json.write_text(json.dumps(issues))
+
+        result_set = SonarResultSet.from_json(sonar_json)
+        result = result_set.result_by_finding_id("1234")
+        assert result is not None
+        assert result.finding.rule.id == "python:S5659"
+
+    def test_semgrep_sarif_result_by_finding_id(self, tmpdir):
+        uuid = str(uuid4())
+        issues = {
+            "runs": [
+                {
+                    "tool": {
+                        "driver": {
+                            "name": "Semgrep",
+                            "version": "0.100.0",
+                        }
+                    },
+                    "results": [
+                        {
+                            "message": {
+                                "text": "Found a potential issue",
+                            },
+                            "guid": uuid,
+                            "ruleId": "python:fake.rule.name",
+                            "locations": [
+                                {
+                                    "physicalLocation": {
+                                        "artifactLocation": {
+                                            "uri": str(Path(tmpdir) / "code.py"),
+                                        },
+                                        "region": {
+                                            "startLine": 2,
+                                            "startColumn": 2,
+                                        },
+                                    }
+                                }
+                            ],
+                        }
+                    ],
+                }
+            ]
+        }
+        sarif_json = Path(tmpdir) / "semgrep.sarif"
+        sarif_json.write_text(json.dumps(issues))
+
+        result_set = SemgrepResultSet.from_sarif(sarif_json)
+        result = result_set.result_by_finding_id(uuid)
+        assert result is not None
+        assert result.finding.rule.id == "python:fake.rule.name"
