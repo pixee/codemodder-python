@@ -26,7 +26,7 @@ dependencies = [
     "wrapt~=1.17.0",
     "chardet~=5.2.0",
     "sarif-pydantic~=0.5.1",
-    "setuptools~=78.1",
+    "setuptools~=79.0",
 ]
 keywords = ["codemod", "codemods", "security", "fix", "fixes"]
 classifiers = [
