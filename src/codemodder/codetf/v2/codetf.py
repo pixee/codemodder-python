@@ -11,11 +11,21 @@ import sys
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, model_validator
 
 from codemodder import __version__
 
-from ..common import CaseInsensitiveEnum, CodeTFWriter
+from ..common import (
+    CaseInsensitiveEnum,
+)
+from ..common import Change as CommonChange
+from ..common import (
+    CodeTFWriter,
+)
+from ..common import Finding as CommonFinding
+from ..common import (
+    Rule,
+)
 
 if TYPE_CHECKING:
     from codemodder.context import CodemodExecutionContext
@@ -46,10 +56,6 @@ class PackageAction(BaseModel):
 class Change(BaseModel):
     lineNumber: int
     description: Optional[str]
-    # All of our changes are currently treated as additive, so it makes sense
-    # for the comments to appear on the RIGHT side of the split diff. Eventually we
-    # may want to differentiate between LEFT and RIGHT, but for now we'll just
-    # default to RIGHT.
     diffSide: DiffSide = DiffSide.RIGHT
     properties: Optional[dict] = None
     packageActions: Optional[list[PackageAction]] = None
@@ -75,6 +81,15 @@ class Change(BaseModel):
             properties=self.properties,
             packageActions=self.packageActions,
             fixedFindings=findings,
+        )
+
+    def to_common(self) -> CommonChange:
+        return CommonChange(
+            lineNumber=self.lineNumber,
+            description=self.description,
+            diffSide=self.diffSide,
+            properties=self.properties,
+            packageActions=self.packageActions,
         )
 
 
@@ -138,20 +153,7 @@ class Reference(BaseModel):
         return self
 
 
-class Rule(BaseModel):
-    id: str
-    name: str
-    url: Optional[str] = None
-
-    model_config = ConfigDict(frozen=True)
-
-
-class Finding(BaseModel):
-    id: Optional[str] = None
-    rule: Rule
-
-    model_config = ConfigDict(frozen=True)
-
+class Finding(CommonFinding):
     def to_unfixed_finding(
         self,
         *,
@@ -170,7 +172,7 @@ class Finding(BaseModel):
     def with_rule(self, name: str, url: Optional[str]) -> Finding:
         return Finding(
             id=self.id,
-            rule=Rule(id=self.rule.id, name=name, url=url),
+            rule=Rule(id=self.rule.id, name=name, url=url) if self.rule else None,
         )
 
 
