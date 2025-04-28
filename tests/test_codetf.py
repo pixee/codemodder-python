@@ -6,7 +6,17 @@ import pytest
 import requests
 from pydantic import ValidationError
 
-from codemodder.codetf import Change, ChangeSet, CodeTF, DiffSide, Reference, Result
+from codemodder.codetf import (
+    Change,
+    ChangeSet,
+    CodeTF,
+    DiffSide,
+    Finding,
+    Reference,
+    Result,
+    Rule,
+)
+from codemodder.codetf.v3.codetf import Finding as FindingV3
 
 
 @pytest.fixture(autouse=True)
@@ -167,3 +177,12 @@ def test_still_invalidates_bad_value(bad_value):
 
     with pytest.raises(ValidationError):
         Change.model_validate(json)
+
+
+def test_v2_finding_id_optional():
+    Finding(id=None, rule=Rule(id="foo", name="whatever"))
+
+
+def test_v3_finding_id_not_optional():
+    with pytest.raises(ValidationError):
+        FindingV3(id=None, rule=Rule(id="foo", name="whatever"))  # type: ignore[arg-type]

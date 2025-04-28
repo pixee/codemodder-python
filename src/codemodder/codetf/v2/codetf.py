@@ -11,7 +11,7 @@ import sys
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from codemodder import __version__
 
@@ -21,9 +21,6 @@ from ..common import (
 from ..common import Change as CommonChange
 from ..common import (
     CodeTFWriter,
-)
-from ..common import Finding as CommonFinding
-from ..common import (
     Rule,
 )
 
@@ -153,7 +150,12 @@ class Reference(BaseModel):
         return self
 
 
-class Finding(CommonFinding):
+class Finding(BaseModel):
+    id: Optional[str] = None
+    rule: Rule
+
+    model_config = ConfigDict(frozen=True)
+
     def to_unfixed_finding(
         self,
         *,
@@ -172,7 +174,7 @@ class Finding(CommonFinding):
     def with_rule(self, name: str, url: Optional[str]) -> Finding:
         return Finding(
             id=self.id,
-            rule=Rule(id=self.rule.id, name=name, url=url) if self.rule else None,
+            rule=Rule(id=self.rule.id, name=name, url=url),
         )
 
 
