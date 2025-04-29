@@ -84,7 +84,7 @@ class Result(ABCDataclass):
     locations: Sequence[Location]
     codeflows: Sequence[Sequence[Location]] = field(default_factory=tuple)
     related_locations: Sequence[LocationWithMessage] = field(default_factory=tuple)
-    finding: Finding | None = None
+    finding: Finding
 
     def match_location(self, pos: CodeRange, node: cst.CSTNode) -> bool:
         del node
