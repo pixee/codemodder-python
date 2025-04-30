@@ -84,7 +84,7 @@ class Result(ABCDataclass):
     locations: Sequence[Location]
     codeflows: Sequence[Sequence[Location]] = field(default_factory=tuple)
     related_locations: Sequence[LocationWithMessage] = field(default_factory=tuple)
-    finding: Finding | None = None
+    finding: Finding
 
     def match_location(self, pos: CodeRange, node: cst.CSTNode) -> bool:
         del node
@@ -102,6 +102,13 @@ class Result(ABCDataclass):
 
     def __hash__(self):
         return hash(self.rule_id)
+
+    def get_locations(self) -> Sequence[Sequence[Location]]:
+        return self.codeflows or (
+            [self.locations]
+            if self.locations
+            else [[loc.location for loc in self.related_locations]]
+        )
 
 
 @dataclass(frozen=True, kw_only=True)
