@@ -108,7 +108,7 @@ class FixResult(BaseModel):
 
     finding: Finding | V2Finding
     fixStatus: FixStatus
-    changeSets: list[ChangeSet]
+    changeSets: list[ChangeSet] = []
     fixMetadata: Optional[FixMetadata] = None
     fixQuality: Optional[FixQuality] = None
     # A description of the reasoning process that led to the fix
