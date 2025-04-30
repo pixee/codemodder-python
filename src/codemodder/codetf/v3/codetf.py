@@ -41,14 +41,14 @@ class FixStatus(BaseModel):
     """Metadata describing fix outcome"""
 
     status: FixStatusType
-    reason: Optional[str]
-    details: Optional[str]
+    reason: Optional[str] = None
+    details: Optional[str] = None
 
 
 class ChangeSet(BaseModel):
     path: str
     diff: str
-    changes: list[Change]
+    changes: list[Change] = []
 
 
 class Reference(BaseModel):
@@ -88,7 +88,7 @@ class FixMetadata(BaseModel):
     summary: str
     # A detailed description of the fix
     description: str
-    references: list[Reference]
+    references: list[Reference] = []
     generation: GenerationMetadata
 
 
