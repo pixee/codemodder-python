@@ -15,7 +15,7 @@ dependencies = [
     "GitPython<4",
     "isort>=5.12,<6.1",
     "libcst>=1.7,<1.8",
-    "packaging>=25,<25.1",
+    "packaging>=24.2,<25.1",
     # do not update pydantic due to inconsistent test failures
     "pydantic~=2.10.6",
     "pylint>=3.3,<3.4",
