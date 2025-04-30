@@ -103,6 +103,13 @@ class Result(ABCDataclass):
     def __hash__(self):
         return hash(self.rule_id)
 
+    def get_locations(self) -> Sequence[Sequence[Location]]:
+        return self.codeflows or (
+            [self.locations]
+            if self.locations
+            else [[loc.location for loc in self.related_locations]]
+        )
+
 
 @dataclass(frozen=True, kw_only=True)
 class SASTResult(Result):
