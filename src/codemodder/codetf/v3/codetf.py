@@ -5,7 +5,7 @@ from typing import Optional
 
 from pydantic import BaseModel, model_validator
 
-from ..common import Change, CodeTFWriter, Finding
+from ..common import Change, CodeTFWriter, Finding, FixQuality
 from ..v2.codetf import Finding as V2Finding
 
 
@@ -41,14 +41,14 @@ class FixStatus(BaseModel):
     """Metadata describing fix outcome"""
 
     status: FixStatusType
-    reason: Optional[str]
-    details: Optional[str]
+    reason: Optional[str] = None
+    details: Optional[str] = None
 
 
 class ChangeSet(BaseModel):
     path: str
     diff: str
-    changes: list[Change]
+    changes: list[Change] = []
 
 
 class Reference(BaseModel):
@@ -88,19 +88,8 @@ class FixMetadata(BaseModel):
     summary: str
     # A detailed description of the fix
     description: str
-    references: list[Reference]
+    references: list[Reference] = []
     generation: GenerationMetadata
-
-
-class Rating(BaseModel):
-    score: int
-    description: Optional[str] = None
-
-
-class FixQuality(BaseModel):
-    safetyRating: Rating
-    effectivenessRating: Rating
-    cleanlinessRating: Rating
 
 
 class FixResult(BaseModel):
@@ -108,7 +97,7 @@ class FixResult(BaseModel):
 
     finding: Finding | V2Finding
     fixStatus: FixStatus
-    changeSets: list[ChangeSet]
+    changeSets: list[ChangeSet] = []
     fixMetadata: Optional[FixMetadata] = None
     fixQuality: Optional[FixQuality] = None
     # A description of the reasoning process that led to the fix

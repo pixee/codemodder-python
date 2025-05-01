@@ -21,6 +21,7 @@ from ..common import (
 from ..common import Change as CommonChange
 from ..common import (
     CodeTFWriter,
+    FixQuality,
     Rule,
 )
 
@@ -102,17 +103,6 @@ class Strategy(Enum):
     ai = "ai"
     hybrid = "hybrid"
     deterministic = "deterministic"
-
-
-class Rating(BaseModel):
-    score: int
-    description: Optional[str] = None
-
-
-class FixQuality(BaseModel):
-    safetyRating: Rating
-    effectivenessRating: Rating
-    cleanlinessRating: Rating
 
 
 class ChangeSet(BaseModel):
