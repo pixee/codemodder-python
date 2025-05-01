@@ -5,7 +5,7 @@ from typing import Optional
 
 from pydantic import BaseModel, model_validator
 
-from ..common import Change, CodeTFWriter, Finding
+from ..common import Change, CodeTFWriter, Finding, FixQuality
 from ..v2.codetf import Finding as V2Finding
 
 
@@ -90,17 +90,6 @@ class FixMetadata(BaseModel):
     description: str
     references: list[Reference] = []
     generation: GenerationMetadata
-
-
-class Rating(BaseModel):
-    score: int
-    description: Optional[str] = None
-
-
-class FixQuality(BaseModel):
-    safetyRating: Rating
-    effectivenessRating: Rating
-    cleanlinessRating: Rating
 
 
 class FixResult(BaseModel):

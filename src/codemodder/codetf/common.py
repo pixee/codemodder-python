@@ -84,3 +84,14 @@ class Change(BaseModel):
         if self.description is not None and not self.description:
             raise ValueError("description must not be empty")
         return self
+
+
+class Rating(BaseModel):
+    score: int
+    description: Optional[str] = None
+
+
+class FixQuality(BaseModel):
+    safetyRating: Rating
+    effectivenessRating: Rating
+    cleanlinessRating: Rating
