@@ -61,7 +61,7 @@ class Reference(BaseModel):
         return self
 
 
-class Strategy(Enum):
+class Strategy(str, Enum):
     ai = "ai"
     hybrid = "hybrid"
     deterministic = "deterministic"
