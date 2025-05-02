@@ -79,6 +79,7 @@ class TestSemgrepNoCsrfExempt(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "8a8007b3-404d-4107-9e0d-4bb11536b78c",
                             "fingerprints": {"matchBasedId/v1": "a3ca2"},
                             "locations": [
                                 {
@@ -105,6 +106,7 @@ class TestSemgrepNoCsrfExempt(BaseSASTCodemodTest):
                             "ruleId": "python.django.security.audit.csrf-exempt.no-csrf-exempt",
                         },
                         {
+                            "guid": "71260758-6dee-4c96-a4e3-22b143b2633e",
                             "fingerprints": {"matchBasedId/v1": "1cc62"},
                             "locations": [
                                 {

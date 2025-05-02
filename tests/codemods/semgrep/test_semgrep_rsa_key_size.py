@@ -18,6 +18,7 @@ class TestSemgrepRsaKeySize(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "55b6e8fa-8e41-4470-b887-05c02a5e1196",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {

@@ -41,6 +41,7 @@ class TestSemgrepDjangoSecureSetCookie(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "ecf8007d-0eac-4151-92c7-c5dc8290f28e",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {

@@ -44,6 +44,7 @@ class TestSemgrepUrlSandbox(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "9cbf64ee-ea3d-418f-bdf8-97ec7a2d3418",
                             "fingerprints": {"matchBasedId/v1": "370059975f"},
                             "locations": [
                                 {
@@ -71,6 +72,7 @@ class TestSemgrepUrlSandbox(BaseSASTCodemodTest):
                             "ruleId": "python.django.security.injection.ssrf.ssrf-injection-requests.ssrf-injection-requests",
                         },
                         {
+                            "guid": "ba4cedcd-88fd-468b-be73-7df829d11802",
                             "fingerprints": {"matchBasedId/v1": "cd899"},
                             "locations": [
                                 {

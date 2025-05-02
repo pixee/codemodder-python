@@ -222,6 +222,7 @@ SARIF_CONTENT = {
             },
             "results": [
                 {
+                    "guid": "66018abf-e7e3-4725-b227-f130a8256ecc",
                     "ruleId": "python/sql-injection",
                     "message": {"text": "Possible SQL injection"},
                     "locations": [
@@ -243,6 +244,7 @@ SARIF_CONTENT = {
                     },
                 },
                 {
+                    "guid": "408ec96f-3c9f-4db7-ad23-1eb5c0fd9dc9",
                     "ruleId": "cs/web/missing-x-frame-options",
                     "message": {
                         "text": "Configuration file is missing the X-Frame-Options setting."
@@ -264,6 +266,7 @@ SARIF_CONTENT = {
                     },
                 },
                 {
+                    "guid": "b670d14a-36fe-47e4-94ff-b21a0c81219e",
                     "codeFlows": [
                         {
                             "threadFlows": [

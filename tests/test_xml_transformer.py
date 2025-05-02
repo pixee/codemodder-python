@@ -135,6 +135,7 @@ class TestElementAttributeXMLTransformer:
                         "tool": {"driver": {"name": "Semgrep OSS"}},
                         "results": [
                             {
+                                "guid": "d556141d-ee92-4bb7-85d8-ce605451289a",
                                 "message": {"text": "message"},
                                 "fingerprints": {"matchBasedId/v1": "123"},
                                 "locations": [

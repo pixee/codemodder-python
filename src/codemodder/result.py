@@ -113,7 +113,7 @@ class Result(ABCDataclass):
 
 @dataclass(frozen=True, kw_only=True)
 class SASTResult(Result):
-    finding_id: str | None
+    finding_id: str
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -127,6 +127,8 @@ class SarifResult(SASTResult):
     ) -> Self:
         rule_id = cls.extract_rule_id(sarif_result, sarif_run, truncate_rule_id)
         finding_id = cls.extract_finding_id(sarif_result)
+        if not finding_id:
+            raise ValueError("Result does not have a finding_id.")
         return cls(
             rule_id=rule_id,
             locations=cls.extract_locations(sarif_result, sarif_run),

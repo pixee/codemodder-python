@@ -1,70 +1,72 @@
 {
-  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "schema_uri": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
   "runs": [
     {
+      "tool": {
+        "driver": {
+          "name": "semgrep",
+          "semantic_version": "1.34.1",
+          "rules": [
+            {
+              "id": "codemodder.codemods.semgrep.secure-random",
+              "name": "codemodder.codemods.semgrep.secure-random",
+              "short_description": {
+                "text": "Semgrep Finding: codemodder.codemods.semgrep.secure-random"
+              },
+              "full_description": {
+                "text": "Insecure Random"
+              },
+              "default_configuration": {
+                "enabled": true,
+                "level": "warning"
+              },
+              "properties": {
+                "precision": "very-high",
+                "tags": []
+              }
+            }
+          ]
+        }
+      },
       "invocations": [
         {
-          "executionSuccessful": true,
+          "execution_successful": true,
           "toolExecutionNotifications": []
         }
       ],
       "results": [
         {
-          "fingerprints": {
-            "matchBasedId/v1": "3f3a6a72297040e2d8a9a0ff6d0eed04cba09aa7d3f86ceef72a0aeec4b17a5a5ff55913cabea108083a9e4824245305fc7e9a6fbe21f73daf0f1cbcf517efe4_0"
+          "rule_id": "codemodder.codemods.semgrep.secure-random",
+          "message": {
+            "text": "Insecure Random"
           },
           "locations": [
             {
-              "physicalLocation": {
-                "artifactLocation": {
+              "physical_location": {
+                "artifact_location": {
                   "uri": "tests/samples/insecure_random.py",
-                  "uriBaseId": "%SRCROOT%"
+                  "uri_base_id": "%SRCROOT%"
                 },
                 "region": {
-                  "endColumn": 16,
-                  "endLine": 3,
+                  "start_line": 3,
+                  "start_column": 1,
+                  "end_line": 3,
+                  "end_column": 16,
                   "snippet": {
                     "text": "random.random()"
-                  },
-                  "startColumn": 1,
-                  "startLine": 3
+                  }
                 }
               }
             }
           ],
-          "message": {
-            "text": "Insecure Random"
+          "guid": "0c1cc303-d47e-435f-83d4-f6b4999a86d0",
+          "fingerprints": {
+            "matchBasedId/v1": "3f3a6a72297040e2d8a9a0ff6d0eed04cba09aa7d3f86ceef72a0aeec4b17a5a5ff55913cabea108083a9e4824245305fc7e9a6fbe21f73daf0f1cbcf517efe4_0"
           },
-          "properties": {},
-          "ruleId": "codemodder.codemods.semgrep.secure-random"
+          "properties": {}
         }
-      ],
-      "tool": {
-        "driver": {
-          "name": "semgrep",
-          "rules": [
-            {
-              "defaultConfiguration": {
-                "level": "warning"
-              },
-              "fullDescription": {
-                "text": "Insecure Random"
-              },
-              "id": "codemodder.codemods.semgrep.secure-random",
-              "name": "codemodder.codemods.semgrep.secure-random",
-              "properties": {
-                "precision": "very-high",
-                "tags": []
-              },
-              "shortDescription": {
-                "text": "Semgrep Finding: codemodder.codemods.semgrep.secure-random"
-              }
-            }
-          ],
-          "semanticVersion": "1.34.1"
-        }
-      }
+      ]
     }
-  ],
-  "version": "2.1.0"
+  ]
 }
