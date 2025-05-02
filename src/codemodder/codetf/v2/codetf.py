@@ -127,6 +127,7 @@ class ChangeSet(BaseModel):
             strategy=self.strategy,
             provisional=self.provisional,
             fixedFindings=self.fixedFindings,
+            fixQuality=self.fixQuality,
         )
 
 
