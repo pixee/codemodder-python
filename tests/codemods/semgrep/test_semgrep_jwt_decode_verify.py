@@ -28,6 +28,7 @@ class TestSemgrepJwtDecodeVerify(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "3efd541b-4c31-4e7e-89f2-7fe0d7ebd468",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {

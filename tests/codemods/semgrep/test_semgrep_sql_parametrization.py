@@ -83,6 +83,7 @@ class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "2273caac-50fa-409d-97e8-a39219eb9afe",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {
@@ -110,6 +111,7 @@ class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
                             "ruleId": "python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute",
                         },
                         {
+                            "guid": "8e8fed36-7e72-4b1f-ad49-2e1a50587595",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {
@@ -137,6 +139,7 @@ class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
                             "ruleId": "python.lang.security.audit.formatted-sql-query.formatted-sql-query",
                         },
                         {
+                            "guid": "300df87d-e713-4cd4-a245-d64f25be03de",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {
@@ -164,6 +167,7 @@ class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
                             "ruleId": "python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query",
                         },
                         {
+                            "guid": "24695222-6db9-4e12-8555-c5e74eb7fe0f",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {
@@ -191,6 +195,7 @@ class TestSemgrepSQLParameterization(BaseSASTCodemodTest):
                             "ruleId": "python.django.security.injection.tainted-sql-string.tainted-sql-string",
                         },
                         {
+                            "guid": "c8355088-665d-4fe1-8790-725964ba0769",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {

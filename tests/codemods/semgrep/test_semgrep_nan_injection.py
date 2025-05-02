@@ -41,6 +41,7 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "b796b74b-275c-4785-b341-76170b43f6d4",
                             "fingerprints": {"matchBasedId/v1": "1932"},
                             "locations": [
                                 {
@@ -178,6 +179,7 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "6470e0a8-2eeb-4268-8677-f96161207b40",
                             "fingerprints": {"matchBasedId/v1": "1fdbd5a"},
                             "locations": [
                                 {
@@ -204,6 +206,7 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
                             "ruleId": "python.django.security.nan-injection.nan-injection",
                         },
                         {
+                            "guid": "b3056d9a-1618-40be-bf5e-989278305cf0",
                             "fingerprints": {"matchBasedId/v1": "1fdbd5a"},
                             "locations": [
                                 {
@@ -230,6 +233,7 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
                             "ruleId": "python.django.security.nan-injection.nan-injection",
                         },
                         {
+                            "guid": "3356587c-dd3a-49e1-baee-0aafc0a91511",
                             "fingerprints": {"matchBasedId/v1": "1fdbd5a"},
                             "locations": [
                                 {
@@ -256,6 +260,7 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
                             "ruleId": "python.django.security.nan-injection.nan-injection",
                         },
                         {
+                            "guid": "626d3911-ed0b-414d-a2c9-af2245b0baee",
                             "fingerprints": {"matchBasedId/v1": "1fdbd5a"},
                             "locations": [
                                 {
@@ -315,6 +320,7 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "60e089cd-472e-489e-a264-cfc6e33e651a",
                             "fingerprints": {"matchBasedId/v1": "asdfg"},
                             "locations": [
                                 {
@@ -373,6 +379,7 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "014e3945-144d-4c28-960b-4dd09f2a2b8f",
                             "fingerprints": {"matchBasedId/v1": "q324"},
                             "locations": [
                                 {
@@ -429,6 +436,7 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "d0540cd9-b999-4756-8392-ca2702e94438",
                             "fingerprints": {"matchBasedId/v1": "asdtg"},
                             "locations": [
                                 {
@@ -487,6 +495,7 @@ class TestSemgrepNanInjection(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "33ffdd04-0f27-475c-8c11-2405e9b77526",
                             "fingerprints": {"matchBasedId/v1": "asd2"},
                             "locations": [
                                 {

@@ -29,6 +29,7 @@ class TestSemgrepSubprocessShellFalse(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "84d249d9-2a25-4279-a5af-2a7739a06de6",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {

@@ -34,6 +34,7 @@ class TestSemgrepUseDefusedXml(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "e76d2149-3b55-4292-a4c6-49f67dc73f97",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {

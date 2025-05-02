@@ -29,6 +29,7 @@ class TestSemgrepHardenPyyaml(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "df15a793-eea0-4fee-a65d-8923ca058265",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {
@@ -88,6 +89,7 @@ class TestSemgrepHardenPyyaml(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "2291849a-3e04-4969-94b8-87a21e818889",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {

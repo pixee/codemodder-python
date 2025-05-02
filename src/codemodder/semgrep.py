@@ -1,5 +1,7 @@
 import itertools
+import json
 import subprocess
+import uuid
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Iterable, Optional
@@ -90,7 +92,9 @@ def run(
     if not yaml_files:
         raise ValueError("No Semgrep rules were provided")
 
-    with NamedTemporaryFile(prefix="semgrep", suffix=".sarif") as temp_sarif_file:
+    with NamedTemporaryFile(
+        prefix="semgrep", suffix=".sarif", mode="w+"
+    ) as temp_sarif_file:
         command = [
             "semgrep",
             "scan",
@@ -114,6 +118,17 @@ def run(
             stdout=None if execution_context.verbose else subprocess.PIPE,
             stderr=None if execution_context.verbose else subprocess.PIPE,
         )
+        # Insert guid in results
+        temp_sarif_file.seek(0)
+        sarif = Sarif.model_validate(json.load(temp_sarif_file))
+        for run in sarif.runs:
+            for result in run.results or []:
+                if not result.guid:
+                    result.guid = uuid.uuid4()
+        temp_sarif_file.seek(0)
+        temp_sarif_file.write(sarif.model_dump_json(exclude_none=True, by_alias=True))
+        temp_sarif_file.seek(0)
+
         if call.returncode != 0:
             if not execution_context.verbose:
                 logger.error("captured semgrep stderr: %s", call.stderr)

@@ -147,6 +147,7 @@ def test_sast_transformer(mocker, tmp_path_factory):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "e6e6f84a-0fac-472e-9215-4e31e6898f81",
                             "message": {"text": "message"},
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [

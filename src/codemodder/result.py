@@ -126,7 +126,9 @@ class SarifResult(SASTResult):
         cls, sarif_result: ResultModel, sarif_run: Run, truncate_rule_id: bool = False
     ) -> Self:
         rule_id = cls.extract_rule_id(sarif_result, sarif_run, truncate_rule_id)
-        finding_id = cls.extract_finding_id(sarif_result) or rule_id
+        finding_id = cls.extract_finding_id(sarif_result)
+        if not finding_id:
+            raise ValueError("Result does not have a finding_id.")
         return cls(
             rule_id=rule_id,
             locations=cls.extract_locations(sarif_result, sarif_run),

@@ -30,6 +30,7 @@ class TestEnableJinja2Autoescape(BaseSASTCodemodTest):
                     "tool": {"driver": {"name": "Semgrep OSS"}},
                     "results": [
                         {
+                            "guid": "282ad4eb-3b68-4ee4-b8ff-f779ea14b589",
                             "fingerprints": {"matchBasedId/v1": "123"},
                             "locations": [
                                 {
