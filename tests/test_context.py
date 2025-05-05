@@ -4,6 +4,22 @@ import pytest
 from azure.ai.inference import ChatCompletionsClient
 from openai import AzureOpenAI, OpenAI
 
+from codemodder.codetf import (
+    DetectionTool,
+    DiffSide,
+    Finding,
+    Rule,
+    UnfixedFinding,
+)
+from codemodder.codetf.common import FixQuality, Rating
+from codemodder.codetf.v2.codetf import (
+    AIMetadata,
+)
+from codemodder.codetf.v2.codetf import Change as V2Change
+from codemodder.codetf.v2.codetf import ChangeSet as V2ChangeSet
+from codemodder.codetf.v2.codetf import (
+    Strategy,
+)
 from codemodder.context import CodemodExecutionContext as Context
 from codemodder.dependency import Security
 from codemodder.llm import DEFAULT_AZURE_OPENAI_API_VERSION, MisconfiguredAIClient
@@ -298,3 +314,118 @@ class TestContext:
             ai_client=False,
         )
         assert context.openai_llm_client is None
+
+    def test_compile_results(self, mocker):
+        rule = rule = Rule(
+            id="roslyn.sonaranalyzer.security.cs:S5131",
+            name="Change this code to not reflect user-controlled data.",
+            url="https://rules.sonarsource.com/dotnet/RSPEC-5131/",
+        )
+        mock_codemod_xss = mocker.Mock()
+        mock_codemod_xss.id = "sonar:dotnet/xss"
+        mock_codemod_xss.summary = "XSS Codemod Summary"
+        mock_codemod_xss.description = "XSS Codemod Description"
+        mock_codemod_xss.detection_tool = DetectionTool(name="sonar")
+        mock_codemod_xss.references = []
+        mock_codemod_xss.detection_tool_rules = {rule}
+
+        codemods_to_run = [mock_codemod_xss]
+
+        context = Context(
+            mocker.Mock(),
+            True,
+            False,
+            load_registered_codemods(),
+            None,
+            PythonRepoManager(mocker.Mock()),
+            [],
+            [],
+        )
+
+        fix_quality = FixQuality(
+            safetyRating=Rating(
+                score=100,
+                description="The changes ...",
+            ),
+            effectivenessRating=Rating(
+                score=100,
+                description="The changes ...",
+            ),
+            cleanlinessRating=Rating(
+                score=100,
+                description="The changes ...",
+            ),
+        )
+        changeset_data = {
+            "sonar:dotnet/xss": [
+                V2ChangeSet(
+                    path="WebGoat/WebGoatCoins/Autocomplete.ashx.cs",
+                    diff="diff",
+                    changes=[
+                        V2Change(
+                            lineNumber=1,
+                            description="Added import for System.Net namespace to use WebUtility for HTML encoding.",
+                            diffSide=DiffSide.RIGHT,
+                            properties=None,
+                            packageActions=None,
+                            fixedFindings=[
+                                Finding(
+                                    id="AY-cCz4neXIgSHLjbCnv",
+                                    rule=rule,
+                                )
+                            ],
+                        ),
+                        V2Change(
+                            lineNumber=28,
+                            description="Wrapped Encoder.ToJSONSAutocompleteString with WebUtility.HtmlEncode to safely encode user input for output.",
+                            diffSide=DiffSide.RIGHT,
+                            properties=None,
+                            packageActions=None,
+                            fixedFindings=[
+                                Finding(
+                                    id="AY-cCz4neXIgSHLjbCnv",
+                                    rule=rule,
+                                )
+                            ],
+                        ),
+                    ],
+                    ai=AIMetadata(
+                        provider="openai",
+                        model="gpt-4o",
+                        tokens=86618,
+                        completion_tokens=12110,
+                        prompt_tokens=74508,
+                    ),
+                    strategy=Strategy.ai,
+                    provisional=False,
+                    fixedFindings=[
+                        Finding(
+                            id="AY-cCz4neXIgSHLjbCnv",
+                            rule=rule,
+                        )
+                    ],
+                    fixQuality=fix_quality,
+                )
+            ]
+        }
+        context._changesets_by_codemod = changeset_data
+
+        context._unfixed_findings_by_codemod = {
+            mock_codemod_xss.id: [
+                UnfixedFinding(
+                    rule=rule, path="some/path.cs", lineNumber=10, reason="unfixed"
+                )
+            ]
+        }
+        context._failures_by_codemod = {mock_codemod_xss.id: ["failed/file.cs"]}
+
+        results = context.compile_results(codemods_to_run)
+
+        assert len(results) == 1
+        assert results[0].changeset[0].fixQuality == fix_quality
+        assert results[0].changeset[0].fixedFindings == [
+            Finding(
+                id="AY-cCz4neXIgSHLjbCnv",
+                rule=rule,
+            )
+        ]
