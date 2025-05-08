@@ -67,7 +67,7 @@ test = [
     "Jinja2~=3.1.2",
     "jsonschema~=4.23.0",
     "lxml>=5.3.0,<6.0.0",
-    "openai>=1.77,<1.78",
+    "openai>=1.78,<1.79",
     "mock==5.2.*",
     "pre-commit<5",
     "Pyjwt~=2.10.0",
@@ -93,7 +93,7 @@ complexity = [
     "xenon==0.9.*",
 ]
 openai = [
-    "openai>=1.77,<1.78",
+    "openai>=1.78,<1.79",
 ]
 azure = [
     "azure-ai-inference>=1.0.0b1,<2.0",
