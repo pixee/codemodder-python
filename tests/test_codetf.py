@@ -17,6 +17,7 @@ from codemodder.codetf import (
     Rule,
 )
 from codemodder.codetf.v3.codetf import Finding as FindingV3
+from codemodder.codetf.v3.codetf import FixStatusType, from_v2
 
 
 @pytest.fixture(autouse=True)
@@ -186,3 +187,106 @@ def test_v2_finding_id_optional():
 def test_v3_finding_id_not_optional():
     with pytest.raises(ValidationError):
         FindingV3(id=None, rule=Rule(id="foo", name="whatever"))  # type: ignore[arg-type]
+
+
+def test_v2_to_v3_conversion():
+    with open("tests/samples/codetfv2_sample.codetf", "r") as f:
+        codetfv2 = CodeTF.model_validate_json(f.read())
+        codetf = from_v2(codetfv2)
+
+        # run
+        assert codetf.run
+        assert codetf.run.vendor == codetfv2.run.vendor
+        assert codetf.run.tool == codetfv2.run.tool
+        assert codetf.run.version == codetfv2.run.version
+        assert codetf.run.elapsed == codetfv2.run.elapsed
+
+        assert (
+            codetf.run.projectmetadata
+            and "directory" in codetf.run.projectmetadata.keys()
+            and codetf.run.projectmetadata["directory"] == codetfv2.run.directory
+        )
+        assert (
+            codetf.run.projectmetadata
+            and "projectName" not in codetf.run.projectmetadata.keys()
+            and not codetfv2.run.projectName
+        )
+
+        assert (
+            codetf.run.inputmetadata
+            and "commandLine" in codetf.run.inputmetadata.keys()
+            and codetf.run.inputmetadata["commandLine"] == codetfv2.run.commandLine
+        )
+        assert not codetfv2.run.sarifs
+        assert (
+            codetf.run.inputmetadata and "sarifs" not in codetf.run.inputmetadata.keys()
+        )
+        # results
+        v2_unfixed = [f for r in codetfv2.results for f in r.unfixedFindings or []]
+        v2_fixed = [
+            f
+            for r in codetfv2.results
+            for cs in r.changeset
+            for c in cs.changes
+            for f in c.fixedFindings or []
+        ]
+        unfixed = [
+            fr for fr in codetf.results if fr.fixStatus.status == FixStatusType.failed
+        ]
+        fixed = [
+            fr for fr in codetf.results if fr.fixStatus.status == FixStatusType.fixed
+        ]
+
+        # length
+        assert len(codetf.results) == len(v2_unfixed) + len(v2_fixed) == 3
+        assert len(unfixed) == len(v2_unfixed) == 1
+        assert len(fixed) == len(v2_fixed) == 2
+
+        assert len(codetfv2.results) == 1
+        assert len(codetfv2.results[0].changeset) == 1
+        v2result = codetfv2.results[0]
+        v2changeset = codetfv2.results[0].changeset[0]
+        v2_finding_to_change = {
+            f: c
+            for r in codetfv2.results
+            for cs in r.changeset
+            for c in cs.changes
+            for f in c.fixedFindings or []
+        }
+
+        for f in fixed:
+            # fix metadata
+            assert (
+                f.fixMetadata
+                and f.fixMetadata.generation
+                and f.fixMetadata.generation.ai == v2changeset.ai
+            )
+            assert (
+                f.fixMetadata
+                and f.fixMetadata.id
+                and f.fixMetadata.id == v2result.codemod
+            )
+            assert (
+                f.fixMetadata
+                and f.fixMetadata.summary
+                and f.fixMetadata.summary == v2result.summary
+            )
+            assert (
+                f.fixMetadata
+                and f.fixMetadata.description
+                and f.fixMetadata.description == v2result.description
+            )
+
+            # correctly associates findings to the change
+            assert f.changeSets and f.changeSets[0].path == v2changeset.path
+            assert f.changeSets and f.changeSets[0].diff == v2changeset.diff
+            assert isinstance(f.finding, Finding) and f.changeSets[0].changes == [
+                v2_finding_to_change[f.finding].to_common()
+            ]
+
+        # unfixed metadata
+        assert (
+            unfixed[0].fixStatus.reason
+            and unfixed[0].fixStatus.reason == v2_unfixed[0].reason
+        )
+        assert unfixed[0].finding == v2_unfixed[0]
