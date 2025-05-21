@@ -274,8 +274,8 @@ def test_v2_to_v3_conversion():
         # correctly associates findings to the change
         assert f.changeSets and f.changeSets[0].path == v2changeset.path
         assert f.changeSets and f.changeSets[0].diff == v2changeset.diff
-        assert isinstance(f.finding, Finding) and f.changeSets[0].changes == [
-            v2_finding_to_change[f.finding].to_common()
+        assert isinstance(f.finding, FindingV3) and f.changeSets[0].changes == [
+            v2_finding_to_change[Finding(**f.finding.model_dump())].to_common()
         ]
 
     # unfixed metadata
@@ -283,4 +283,4 @@ def test_v2_to_v3_conversion():
         unfixed[0].fixStatus.reason
         and unfixed[0].fixStatus.reason == v2_unfixed[0].reason
     )
-    assert unfixed[0].finding == v2_unfixed[0]
+    assert unfixed[0].finding == FindingV3(**v2_unfixed[0].model_dump())

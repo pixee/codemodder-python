@@ -8,7 +8,6 @@ from pydantic import BaseModel, model_validator
 from ..common import Change, CodeTFWriter, Finding, FixQuality
 from ..v2.codetf import AIMetadata as AIMetadatav2
 from ..v2.codetf import CodeTF as CodeTFv2
-from ..v2.codetf import Finding as V2Finding
 from ..v2.codetf import Result
 from ..v2.codetf import Run as Runv2
 
@@ -99,7 +98,7 @@ class FixMetadata(BaseModel):
 class FixResult(BaseModel):
     """Result corresponding to a single finding"""
 
-    finding: Finding | V2Finding
+    finding: Finding
     fixStatus: FixStatus
     changeSets: list[ChangeSet] = []
     fixMetadata: Optional[FixMetadata] = None
@@ -174,7 +173,7 @@ def from_v2_result(result: Result) -> list[FixResult]:
                 )
                 fix_results.append(
                     FixResult(
-                        finding=f,
+                        finding=Finding(**f.model_dump()),
                         fixStatus=FixStatus(status=FixStatusType.fixed),
                         changeSets=[changeset],
                         fixMetadata=fix_metadata,
@@ -185,7 +184,7 @@ def from_v2_result(result: Result) -> list[FixResult]:
     for f in result.unfixedFindings or []:
         fix_results.append(
             FixResult(
-                finding=f,
+                finding=Finding(**f.model_dump()),
                 fixStatus=FixStatus(status=FixStatusType.failed, reason=f.reason),
             )
         )
