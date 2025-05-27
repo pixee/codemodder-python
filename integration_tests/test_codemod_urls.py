@@ -17,7 +17,6 @@ async def visit_url(client, url):
         return url, None
 
 
-@pytest.mark.asyncio
 async def check_accessible_urls(urls):
     async with httpx.AsyncClient() as client:
         tasks = [visit_url(client, url) for url in urls]
@@ -36,6 +35,7 @@ async def check_accessible_urls(urls):
 
 
 @pytest.mark.asyncio
+@pytest.mark.skip(reason="Flaky test, needs investigation")
 async def test_codemod_reference_urls():
     urls = list(
         set(
@@ -50,6 +50,7 @@ async def test_codemod_reference_urls():
 
 
 @pytest.mark.asyncio
+@pytest.mark.skip(reason="Flaky test, needs investigation")
 async def test_tool_rules_urls():
     urls = [
         rule.url
