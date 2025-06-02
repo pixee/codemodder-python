@@ -72,7 +72,7 @@ test = [
     "pre-commit<5",
     "Pyjwt~=2.10.0",
     "pytest>=8.2,<9",
-    "pytest-asyncio~=0.23",
+    "pytest-asyncio~=1.0",
     "pytest-cov>=6.1,<7",
     "pytest-mock>=3.12,<3.15",
     "pytest-randomly==3.*",
