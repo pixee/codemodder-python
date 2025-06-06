@@ -16,8 +16,15 @@ from codemodder.codetf import (
     Result,
     Rule,
 )
+from codemodder.codetf.v2.codetf import (
+    Action,
+    DetectionTool,
+    PackageAction,
+    PackageResult,
+    Strategy,
+)
 from codemodder.codetf.v3.codetf import Finding as FindingV3
-from codemodder.codetf.v3.codetf import FixStatusType, from_v2
+from codemodder.codetf.v3.codetf import FixStatusType, from_v2, from_v2_result
 
 
 @pytest.fixture(autouse=True)
@@ -187,6 +194,69 @@ def test_v2_finding_id_optional():
 def test_v3_finding_id_not_optional():
     with pytest.raises(ValidationError):
         FindingV3(id=None, rule=Rule(id="foo", name="whatever"))  # type: ignore[arg-type]
+
+
+def test_v2_result_to_v3():
+    result = Result(
+        codemod="codeql:java/log-injection",
+        summary="Introduced protections against Log Inject    ion / Forging attacks",
+        description='This change ensures that log messages can\'t contain newline characters, leaving you vulnerable to Log Forging / Log Injection.\n\nIf malicious users     can get newline characters into a log message, they can inject and forge new log entries that look like they came from the server, and trick log analysis tools, administrators, and more    . This leads to vulnerabilities like Log Injection, Log Forging, and more attacks from there.\n\nOur change simply strips out newline characters from log messages, ensuring that they can    \'t be used to forge new log entries.\n```diff\n+ import io.github.pixee.security.Newlines;\n  ...\n  String orderId = getUserOrderId();\n- log.info("User order ID: " + orderId);\n+ log.    info("User order ID: " + Newlines.stripNewlines(orderId));\n```\n',
+        detectionTool=DetectionTool(name="CodeQL"),
+        references=[
+            Reference(
+                url="https://owasp.org/www-community/attacks/Log_Inj    ection",
+                description="https://owasp.org/www-community/attacks/Log_Injection",
+            ),
+            Reference(
+                url="https://knowledge-base.secureflag.com/vulnerabilities/inadequate_input_validation/log_inject    ion_vulnerability.html",
+                description="https://knowledge-base.secureflag.com/vulnerabilities/inadequate_input_validation/log_injection_vulnerability.html",
+            ),
+            Reference(
+                url="https://cwe.mit    re.org/data/definitions/117.html",
+                description="https://cwe.mitre.org/data/definitions/117.html",
+            ),
+        ],
+        properties={},
+        failedFiles=[],
+        changeset=[
+            ChangeSet(
+                path="app/src/main/java/org/apache    /roller/planet/business/fetcher/RomeFeedFetcher.java",
+                diff='--- RomeFeedFetcher.java\n+++ RomeFeedFetcher.java\n@@ -26,6 +26,7 @@\n import com.rometools.rome.io.FeedException;\n import     com.rometools.rome.io.SyndFeedInput;\n import com.rometools.rome.io.XmlReader;\n+import static io.github.pixee.security.Newlines.stripAll;\n \n import java.io.IOException;\n import java.    net.URI;\n@@ -87,7 +88,7 @@\n         }\n         \n         // fetch the feed\n-        log.debug("Fetching feed: "+feedURL);\n+        log.debug("Fetching feed: "+stripAll(feedURL));\n             SyndFeed feed;\n         try {\n             feed = fetchFeed(feedURL);',
+                changes=[
+                    Change(
+                        lineNumber=90,
+                        description="Added a call to replace any newlines the value",
+                        diffSide=DiffSide.LEFT,
+                        properties={},
+                        packageActions=[
+                            PackageAction(
+                                action=Action.ADD,
+                                result=PackageResult.FAILED,
+                                package="pkg:maven/io.github.pixee/java-security    -toolkit@1.2.1",
+                            )
+                        ],
+                        fixedFindings=[
+                            Finding(
+                                id="e5ceaca8-4a05-4f8d-ac74-6a822ac69d8f",
+                                rule=Rule(
+                                    id="log-injection",
+                                    name="Log Injection",
+                                    url="https://codeql.github.com/codeql-query-help/    java/java-log-injection/",
+                                ),
+                            )
+                        ],
+                    )
+                ],
+                ai=None,
+                strategy=Strategy.deterministic,
+                provisional=False,
+                fixedFindings=None,
+                fixQuality=None,
+            )
+        ],
+        unfixedFindings=[],
+    )
+    assert from_v2_result(result)
 
 
 def test_v2_to_v3_conversion():

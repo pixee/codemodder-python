@@ -15,13 +15,18 @@ from pydantic import BaseModel, ConfigDict, model_validator
 
 from codemodder import __version__
 
-from ..common import (
-    CaseInsensitiveEnum,
-)
+from ..common import Action as CommonAction
 from ..common import Change as CommonChange
 from ..common import (
     CodeTFWriter,
+)
+from ..common import DiffSide as CommonDiffSide
+from ..common import (
     FixQuality,
+)
+from ..common import PackageAction as CommonPackageAction
+from ..common import PackageResult as CommonPackageResult
+from ..common import (
     Rule,
 )
 
@@ -29,26 +34,13 @@ if TYPE_CHECKING:
     from codemodder.context import CodemodExecutionContext
 
 
-class Action(CaseInsensitiveEnum):
-    ADD = "add"
-    REMOVE = "remove"
+Action = CommonAction
 
+PackageResult = CommonPackageResult
 
-class PackageResult(CaseInsensitiveEnum):
-    COMPLETED = "completed"
-    FAILED = "failed"
-    SKIPPED = "skipped"
+DiffSide = CommonDiffSide
 
-
-class DiffSide(CaseInsensitiveEnum):
-    LEFT = "left"
-    RIGHT = "right"
-
-
-class PackageAction(BaseModel):
-    action: Action
-    result: PackageResult
-    package: str
+PackageAction = CommonPackageAction
 
 
 class Change(BaseModel):
