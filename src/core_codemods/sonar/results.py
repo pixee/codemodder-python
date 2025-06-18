@@ -120,8 +120,7 @@ class SonarResultSet(ResultSet):
 
             result_set = cls()
             for result in data.get("issues", []) + data.get("hotspots", []):
-                if result["status"].lower() in ("open", "to_review"):
-                    result_set.add_result(SonarResult.from_result(result))
+                result_set.add_result(SonarResult.from_result(result))
 
             return result_set
         except Exception:

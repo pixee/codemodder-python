@@ -216,39 +216,6 @@ class TestResults:
             result2["python:S5659"][Path("code.py")][0],
         ]
 
-    def test_sonar_only_open_issues(self, tmpdir):
-        issues = {
-            "issues": [
-                {
-                    "rule": "python:S5659",
-                    "status": "OPEN",
-                    "component": "code.py",
-                    "textRange": {
-                        "startLine": 1,
-                        "endLine": 1,
-                        "startOffset": 1,
-                        "endOffset": 1,
-                    },
-                },
-                {
-                    "rule": "python:S5659",
-                    "status": "RESOLVED",
-                    "component": "code.py",
-                    "textRange": {
-                        "startLine": 1,
-                        "endLine": 1,
-                        "startOffset": 1,
-                        "endOffset": 1,
-                    },
-                },
-            ]
-        }
-        sonar_json1 = Path(tmpdir) / "sonar1.json"
-        sonar_json1.write_text(json.dumps(issues))
-
-        result = SonarResultSet.from_json(sonar_json1)
-        assert len(result["python:S5659"][Path("code.py")]) == 1
-
     def test_sonar_flows(self, tmpdir):
         issues = {
             "issues": [
