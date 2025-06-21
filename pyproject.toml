@@ -52,7 +52,7 @@ get-hashes = 'codemodder.scripts.get_hashes:main'
 
 [project.optional-dependencies]
 semgrep = [
-    "semgrep>=1.125,<1.126",
+    "semgrep>=1.126,<1.127",
 ]
 test = [
     "azure-ai-inference>=1.0.0b1,<2.0",
@@ -67,7 +67,7 @@ test = [
     "Jinja2~=3.1.2",
     "jsonschema~=4.24.0",
     "lxml>=5.3.0,<6.0.0",
-    "openai>=1.86,<1.87",
+    "openai>=1.90,<1.91",
     "mock==5.2.*",
     "pre-commit<5",
     "Pyjwt~=2.10.0",
@@ -81,20 +81,20 @@ test = [
     "security==1.3.1",
     "types-mock==5.2.*",
     "django>=4,<6",
-    "numpy ~= 2.2.1; python_version == '3.10'",
+    "numpy ~=2.3.1; python_version == '3.10'",
     "numpy ~= 2.3.0; python_version > '3.10'",
     "flask_wtf~=1.2.0",
     "fickling~=0.1.0,>=0.1.3",
     "graphql-server~=3.0.0b7",
     "unidiff>=0.7.5",
-    "semgrep>=1.125,<1.126",
+    "semgrep>=1.126,<1.127",
 ]
 complexity = [
     "radon==6.0.*",
     "xenon==0.9.*",
 ]
 openai = [
-    "openai>=1.86,<1.87",
+    "openai>=1.90,<1.91",
 ]
 azure = [
     "azure-ai-inference>=1.0.0b1,<2.0",
