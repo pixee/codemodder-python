@@ -52,7 +52,7 @@ get-hashes = 'codemodder.scripts.get_hashes:main'
 
 [project.optional-dependencies]
 semgrep = [
-    "semgrep>=1.126,<1.127",
+    "semgrep>=1.127,<1.128",
 ]
 test = [
     "azure-ai-inference>=1.0.0b1,<2.0",
@@ -67,7 +67,7 @@ test = [
     "Jinja2~=3.1.2",
     "jsonschema~=4.24.0",
     "lxml>=6.0.0,<6.1.0",
-    "openai>=1.90,<1.91",
+    "openai>=1.92,<1.93",
     "mock==5.2.*",
     "pre-commit<5",
     "Pyjwt~=2.10.0",
@@ -87,14 +87,14 @@ test = [
     "fickling~=0.1.0,>=0.1.3",
     "graphql-server~=3.0.0b7",
     "unidiff>=0.7.5",
-    "semgrep>=1.126,<1.127",
+    "semgrep>=1.127,<1.128",
 ]
 complexity = [
     "radon==6.0.*",
     "xenon==0.9.*",
 ]
 openai = [
-    "openai>=1.90,<1.91",
+    "openai>=1.92,<1.93",
 ]
 azure = [
     "azure-ai-inference>=1.0.0b1,<2.0",
