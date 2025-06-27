@@ -8,6 +8,11 @@
     {
       "matchPackageNames": ["pydantic"],
       "enabled": false
+    },
+    {
+      "matchPackageNames": ["numpy"],
+      "matchCurrentValue": "==2.2.6",
+      "enabled": false
     }
   ]
 }
