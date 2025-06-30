@@ -285,7 +285,10 @@ def _run_cli(original_args, remediation=False) -> int:
         max_workers=argv.max_workers,
         original_cli_args=original_args,
         codemod_registry=codemod_registry,
-        sast_only=argv.sonar_issues_json or argv.sarif,
+        sast_only=argv.sonar_issues_json
+        or argv.sarif
+        or argv.sonar_hotspots_json
+        or argv.sonar_json,
         log_matched_files=True,
         remediation=remediation,
     )
