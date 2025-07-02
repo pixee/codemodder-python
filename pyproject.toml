@@ -16,8 +16,7 @@ dependencies = [
     "isort>=5.12,<6.1",
     "libcst>=1.8,<1.9",
     "packaging>=24.2,<25.1",
-    # do not update pydantic due to inconsistent test failures
-    "pydantic~=2.10.6",
+    "pydantic~=2.11.5",
     "pylint>=3.3,<3.4",
     "python-json-logger~=3.3.0",
     "PyYAML~=6.0.0",
