@@ -24,7 +24,12 @@ from codemodder.codetf.v2.codetf import (
     Strategy,
 )
 from codemodder.codetf.v3.codetf import Finding as FindingV3
-from codemodder.codetf.v3.codetf import FixStatusType, from_v2, from_v2_result
+from codemodder.codetf.v3.codetf import (
+    FixStatusType,
+    from_v2,
+    from_v2_result,
+    from_v2_result_per_finding,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -257,6 +262,126 @@ def test_v2_result_to_v3():
         unfixedFindings=[],
     )
     assert from_v2_result(result)
+
+
+def test_v2_result_to_v3_per_finding():
+    result = Result(
+        codemod="codeql:java/log-injection",
+        summary="Introduced protections against Log Inject    ion / Forging attacks",
+        description='This change ensures that log messages can\'t contain newline characters, leaving you vulnerable to Log Forging / Log Injection.\n\nIf malicious users     can get newline characters into a log message, they can inject and forge new log entries that look like they came from the server, and trick log analysis tools, administrators, and more    . This leads to vulnerabilities like Log Injection, Log Forging, and more attacks from there.\n\nOur change simply strips out newline characters from log messages, ensuring that they can    \'t be used to forge new log entries.\n```diff\n+ import io.github.pixee.security.Newlines;\n  ...\n  String orderId = getUserOrderId();\n- log.info("User order ID: " + orderId);\n+ log.    info("User order ID: " + Newlines.stripNewlines(orderId));\n```\n',
+        detectionTool=DetectionTool(name="CodeQL"),
+        references=[
+            Reference(
+                url="https://owasp.org/www-community/attacks/Log_Inj    ection",
+                description="https://owasp.org/www-community/attacks/Log_Injection",
+            ),
+            Reference(
+                url="https://knowledge-base.secureflag.com/vulnerabilities/inadequate_input_validation/log_inject    ion_vulnerability.html",
+                description="https://knowledge-base.secureflag.com/vulnerabilities/inadequate_input_validation/log_injection_vulnerability.html",
+            ),
+            Reference(
+                url="https://cwe.mit    re.org/data/definitions/117.html",
+                description="https://cwe.mitre.org/data/definitions/117.html",
+            ),
+        ],
+        properties={},
+        failedFiles=[],
+        changeset=[
+            ChangeSet(
+                path="app/src/main/java/org/apache/roller/planet/business/fetcher/RomeFeedFetcher.java",
+                diff='--- RomeFeedFetcher.java\n+++ RomeFeedFetcher.java\n@@ -26,6 +26,7 @@\n import com.rometools.rome.io.FeedException;\n import com.rometools.rome.io.SyndFeedInput;\n import com.rometools.rome.io.XmlReader;\n+import static io.github.pixee.security.Newlines.stripAll;\n \n import java.io.IOException;\n import java.net.URI;\n@@ -123,7 +124,7 @@\n         }\n         \n         if(log.isDebugEnabled()) {\n-            log.debug("Subscription is: " + newSub.toString());\n+            log.debug("Subscription is: " + stripAll(newSub.toString()));\n         }\n         \n         ',
+                changes=[
+                    Change(
+                        lineNumber=126,
+                        description="Added a call to replace any newlines the value",
+                        diffSide=DiffSide.LEFT,
+                        properties={},
+                        packageActions=[
+                            PackageAction(
+                                action=Action.ADD,
+                                result=PackageResult.COMPLETED,
+                                package="pkg:maven/io.github.pixee/java-security-toolkit@1.2.2",
+                            ),
+                            PackageAction(
+                                action=Action.ADD,
+                                result=PackageResult.COMPLETED,
+                                package="pkg:maven/io.github.pixee/java-security-toolkit@1.2.2",
+                            ),
+                        ],
+                        fixedFindings=[
+                            Finding(
+                                id="915a8320-3ee8-4b0e-849b-c1b380fb83e2",
+                                rule=Rule(
+                                    id="log-injection",
+                                    name="Log Injection",
+                                    url="https://codeql.github.com/codeql-query-help/java/java-log-injection/",
+                                ),
+                            )
+                        ],
+                    )
+                ],
+                ai=None,
+                strategy=Strategy.deterministic,
+                provisional=False,
+                fixedFindings=[
+                    Finding(
+                        id="915a8320-3ee8-4b0e-849b-c1b380fb83e2",
+                        rule=Rule(
+                            id="log-injection",
+                            name="Log Injection",
+                            url="https://codeql.github.com/codeql-query-help/java/java-log-injection/",
+                        ),
+                    )
+                ],
+                fixQuality=None,
+            ),
+            ChangeSet(
+                path="app/pom.xml",
+                diff="--- app/pom.xml\n+++ app/pom.xml\n@@ -591,9 +591,12 @@\n             <version>5.3.0</version>\n             <scope>test</scope>\n         </dependency>\n+  <dependency>\n+   <groupId>io.github.pixee</groupId>\n+   <artifactId>java-security-toolkit</artifactId>\n+  </dependency>\n+ </dependencies>\n \n-    </dependencies>\n-\n     <build>\n \n         <finalName>roller</finalName>",
+                changes=[
+                    Change(
+                        lineNumber=594,
+                        description="This library holds security tools for protecting Java API calls.\n\nLicense: MIT ✅ | [Open source](https://github.com/pixee/java-security-toolkit) ✅ | [More facts](https://mvnrepository.com/artifact/io.github.pixee/java-security-toolkit/1.2.2)\n",
+                        diffSide=DiffSide.RIGHT,
+                        properties={"contextual_description": "true"},
+                        packageActions=[],
+                        fixedFindings=[],
+                    )
+                ],
+                ai=None,
+                strategy=Strategy.deterministic,
+                provisional=False,
+                fixedFindings=[],
+                fixQuality=None,
+            ),
+            ChangeSet(
+                path="pom.xml",
+                diff="--- pom.xml\n+++ pom.xml\n@@ -48,7 +48,8 @@\n         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>\n         <roller.version>6.1.5</roller.version>\n         <slf4j.version>1.7.36</slf4j.version>\n-    </properties>\n+  <versions.java-security-toolkit>1.2.2</versions.java-security-toolkit>\n+ </properties>\n \n     <modules>\n         <module>app</module>\n@@ -110,7 +111,12 @@\n                 <version>5.11.4</version>\n                 <scope>test</scope>\n             </dependency>\n-        </dependencies>\n+   <dependency>\n+    <groupId>io.github.pixee</groupId>\n+    <artifactId>java-security-toolkit</artifactId>\n+    <version>${versions.java-security-toolkit}</version>\n+   </dependency>\n+  </dependencies>\n     </dependencyManagement>\n \n </project>",
+                changes=[
+                    Change(
+                        lineNumber=114,
+                        description="This library holds security tools for protecting Java API calls.\n\nLicense: MIT ✅ | [Open source](https://github.com/pixee/java-security-toolkit) ✅ | [More facts](https://mvnrepository.com/artifact/io.github.pixee/java-security-toolkit/1.2.2)\n",
+                        diffSide=DiffSide.RIGHT,
+                        properties={"contextual_description": "true"},
+                        packageActions=[],
+                        fixedFindings=[],
+                    )
+                ],
+                ai=None,
+                strategy=Strategy.deterministic,
+                provisional=False,
+                fixedFindings=[],
+                fixQuality=None,
+            ),
+        ],
+        unfixedFindings=[],
+    )
+    fix_result = from_v2_result_per_finding(result)
+    assert fix_result
+    assert len(fix_result.changeSets) == 3
+    all_paths = {cs.path for cs in fix_result.changeSets}
+    assert "app/pom.xml" in all_paths
+    assert "pom.xml" in all_paths
 
 
 def test_v2_to_v3_conversion():

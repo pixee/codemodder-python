@@ -5,8 +5,11 @@ from typing import Optional
 
 from pydantic import BaseModel, model_validator
 
+from codemodder.logging import logger
+
 from ..common import Change, CodeTFWriter, Finding, FixQuality
 from ..v2.codetf import AIMetadata as AIMetadatav2
+from ..v2.codetf import ChangeSet as v2ChangeSet
 from ..v2.codetf import CodeTF as CodeTFv2
 from ..v2.codetf import Result
 from ..v2.codetf import Run as Runv2
@@ -145,6 +148,48 @@ def from_v2_aimetadata(ai_metadata: AIMetadatav2) -> AIMetadata:
         models=[ai_metadata.model] if ai_metadata.model else None,
         total_tokens=ai_metadata.tokens,
         completion_tokens=ai_metadata.completion_tokens,
+    )
+
+
+def from_v2_result_per_finding(result: Result) -> FixResult | None:
+    """
+    This transformation assumes that the v2 result will only contain a single fixedFinding for all changesets.
+    """
+    # Find the changeset with a fixedFinding
+    try:
+        changeset: v2ChangeSet = next(cs for cs in result.changeset if cs.fixedFindings)
+    except StopIteration:
+        logger.debug("No fixedFinding in the given Result")
+        return None
+
+    assert changeset.fixedFindings
+    finding = changeset.fixedFindings[0]
+
+    v3changesets = [
+        ChangeSet(
+            path=cs.path, diff=cs.diff, changes=[c.to_common() for c in cs.changes]
+        )
+        for cs in result.changeset
+    ]
+
+    generation_metadata = GenerationMetadata(
+        strategy=Strategy.ai if changeset.ai else Strategy.deterministic,
+        ai=from_v2_aimetadata(changeset.ai) if changeset.ai else None,
+        provisional=False,
+    )
+
+    fix_metadata = FixMetadata(
+        id=result.codemod,
+        summary=result.summary,
+        description=result.description,
+        generation=generation_metadata,
+    )
+
+    return FixResult(
+        finding=Finding(**finding.model_dump()),
+        fixStatus=FixStatus(status=FixStatusType.fixed),
+        changeSets=v3changesets,
+        fixMetadata=fix_metadata,
     )
 
 
