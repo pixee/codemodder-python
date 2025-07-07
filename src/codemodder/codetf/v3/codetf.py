@@ -159,7 +159,7 @@ def from_v2_result_per_finding(result: Result) -> FixResult | None:
     try:
         changeset: v2ChangeSet = next(cs for cs in result.changeset if cs.fixedFindings)
     except StopIteration:
-        logger.debug("No fixedFinding in the given Result")
+        logger.debug("Either no changesets or no fixedFinding in the given Result")
         return None
 
     assert changeset.fixedFindings
