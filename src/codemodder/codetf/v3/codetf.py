@@ -11,6 +11,7 @@ from ..common import Change, CodeTFWriter, Finding, FixQuality
 from ..v2.codetf import AIMetadata as AIMetadatav2
 from ..v2.codetf import ChangeSet as v2ChangeSet
 from ..v2.codetf import CodeTF as CodeTFv2
+from ..v2.codetf import Finding as v2Finding
 from ..v2.codetf import Result
 from ..v2.codetf import Run as Runv2
 
@@ -151,19 +152,34 @@ def from_v2_aimetadata(ai_metadata: AIMetadatav2) -> AIMetadata:
     )
 
 
-def from_v2_result_per_finding(result: Result) -> FixResult | None:
+def from_v2_result_per_finding(
+    result: Result,
+    strategy: Strategy | None = None,
+    ai_metadata: AIMetadata | None = None,
+    provisional: bool | None = None,
+) -> FixResult | None:
     """
     This transformation assumes that the v2 result will only contain a single fixedFinding for all changesets.
     """
-    # Find the changeset with a fixedFinding
-    try:
-        changeset: v2ChangeSet = next(cs for cs in result.changeset if cs.fixedFindings)
-    except StopIteration:
-        logger.debug("Either no changesets or no fixedFinding in the given Result")
-        return None
 
-    assert changeset.fixedFindings
-    finding = changeset.fixedFindings[0]
+    changeset: v2ChangeSet | None = None
+    finding: v2Finding | None = None
+    # Find the changeset with a fixedFinding
+    for cs in result.changeset:
+        if cs.fixedFindings:
+            changeset = cs
+            finding = cs.fixedFindings[0]
+            break
+        else:
+            # check each individual change
+            for change in cs.changes:
+                if change.fixedFindings:
+                    changeset = cs
+                    finding = change.fixedFindings[0]
+                    break
+    if changeset is None or finding is None:
+        logger.debug("Either no changesets or fixed finding in the result")
+        return None
 
     v3changesets = [
         ChangeSet(
@@ -172,10 +188,19 @@ def from_v2_result_per_finding(result: Result) -> FixResult | None:
         for cs in result.changeset
     ]
 
+    # Generate the GenerationMetadata from the changeset if not passed as a parameter
+    fix_result_strategy = strategy or (
+        Strategy.ai if changeset.ai else Strategy.deterministic
+    )
+    fix_result_ai_metadata = ai_metadata or (
+        from_v2_aimetadata(changeset.ai) if changeset.ai else None
+    )
+    fix_result_provisional = provisional or changeset.provisional or False
+
     generation_metadata = GenerationMetadata(
-        strategy=Strategy.ai if changeset.ai else Strategy.deterministic,
-        ai=from_v2_aimetadata(changeset.ai) if changeset.ai else None,
-        provisional=False,
+        strategy=fix_result_strategy,
+        ai=fix_result_ai_metadata,
+        provisional=fix_result_provisional,
     )
 
     fix_metadata = FixMetadata(

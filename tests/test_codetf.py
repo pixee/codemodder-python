@@ -23,9 +23,15 @@ from codemodder.codetf.v2.codetf import (
     PackageResult,
     Strategy,
 )
+from codemodder.codetf.v3.codetf import (
+    AIMetadata,
+)
 from codemodder.codetf.v3.codetf import Finding as FindingV3
 from codemodder.codetf.v3.codetf import (
     FixStatusType,
+)
+from codemodder.codetf.v3.codetf import Strategy as StrategyV3
+from codemodder.codetf.v3.codetf import (
     from_v2,
     from_v2_result,
     from_v2_result_per_finding,
@@ -376,12 +382,24 @@ def test_v2_result_to_v3_per_finding():
         ],
         unfixedFindings=[],
     )
-    fix_result = from_v2_result_per_finding(result)
+    fix_result = from_v2_result_per_finding(
+        result,
+        strategy=StrategyV3.ai,
+        provisional=True,
+        ai_metadata=AIMetadata(provider="pixee"),
+    )
     assert fix_result
     assert len(fix_result.changeSets) == 3
     all_paths = {cs.path for cs in fix_result.changeSets}
     assert "app/pom.xml" in all_paths
     assert "pom.xml" in all_paths
+    assert fix_result.fixMetadata
+    # Assert that the metadata complies with the passed parameters
+    assert fix_result.fixMetadata.generation.strategy == StrategyV3.ai
+    assert fix_result.fixMetadata.generation.provisional
+    assert fix_result.fixMetadata.generation.ai
+    assert fix_result.fixMetadata.generation.ai.provider
+    assert fix_result.fixMetadata.generation.ai.provider == "pixee"
 
 
 def test_v2_to_v3_conversion():
