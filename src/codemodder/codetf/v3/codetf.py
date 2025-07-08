@@ -5,9 +5,13 @@ from typing import Optional
 
 from pydantic import BaseModel, model_validator
 
+from codemodder.logging import logger
+
 from ..common import Change, CodeTFWriter, Finding, FixQuality
 from ..v2.codetf import AIMetadata as AIMetadatav2
+from ..v2.codetf import ChangeSet as v2ChangeSet
 from ..v2.codetf import CodeTF as CodeTFv2
+from ..v2.codetf import Finding as v2Finding
 from ..v2.codetf import Result
 from ..v2.codetf import Run as Runv2
 
@@ -145,6 +149,72 @@ def from_v2_aimetadata(ai_metadata: AIMetadatav2) -> AIMetadata:
         models=[ai_metadata.model] if ai_metadata.model else None,
         total_tokens=ai_metadata.tokens,
         completion_tokens=ai_metadata.completion_tokens,
+    )
+
+
+def from_v2_result_per_finding(
+    result: Result,
+    strategy: Strategy | None = None,
+    ai_metadata: AIMetadata | None = None,
+    provisional: bool | None = None,
+) -> FixResult | None:
+    """
+    This transformation assumes that the v2 result will only contain a single fixedFinding for all changesets.
+    """
+
+    changeset: v2ChangeSet | None = None
+    finding: v2Finding | None = None
+    # Find the changeset with a fixedFinding
+    for cs in result.changeset:
+        if cs.fixedFindings:
+            changeset = cs
+            finding = cs.fixedFindings[0]
+            break
+        else:
+            # check each individual change
+            for change in cs.changes:
+                if change.fixedFindings:
+                    changeset = cs
+                    finding = change.fixedFindings[0]
+                    break
+    if changeset is None or finding is None:
+        logger.debug("Either no changesets or fixed finding in the result")
+        return None
+
+    v3changesets = [
+        ChangeSet(
+            path=cs.path, diff=cs.diff, changes=[c.to_common() for c in cs.changes]
+        )
+        for cs in result.changeset
+    ]
+
+    # Generate the GenerationMetadata from the changeset if not passed as a parameter
+    fix_result_strategy = strategy or (
+        Strategy.ai if changeset.ai else Strategy.deterministic
+    )
+    fix_result_ai_metadata = ai_metadata or (
+        from_v2_aimetadata(changeset.ai) if changeset.ai else None
+    )
+    fix_result_provisional = provisional or changeset.provisional or False
+
+    generation_metadata = GenerationMetadata(
+        strategy=fix_result_strategy,
+        ai=fix_result_ai_metadata,
+        provisional=fix_result_provisional,
+    )
+
+    fix_metadata = FixMetadata(
+        id=result.codemod,
+        summary=result.summary,
+        description=result.description,
+        generation=generation_metadata,
+    )
+
+    return FixResult(
+        finding=Finding(**finding.model_dump()),
+        fixStatus=FixStatus(status=FixStatusType.fixed),
+        changeSets=v3changesets,
+        fixMetadata=fix_metadata,
     )
 
 
