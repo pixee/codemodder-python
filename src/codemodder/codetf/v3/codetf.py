@@ -3,9 +3,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
-from codemodder.llm import TokenUsage
 from codemodder.logging import logger
 
 from ..common import Change, CodeTFWriter, Finding, FixQuality
@@ -39,6 +38,7 @@ class Run(BaseModel):
 class FixStatusType(str, Enum):
     """Status of a fix"""
 
+    model_config = ConfigDict(frozen=True)
     fixed = "fixed"
     skipped = "skipped"
     failed = "failed"
@@ -48,12 +48,15 @@ class FixStatusType(str, Enum):
 class FixStatus(BaseModel):
     """Metadata describing fix outcome"""
 
+    model_config = ConfigDict(frozen=True)
+
     status: FixStatusType
     reason: Optional[str] = None
     details: Optional[str] = None
 
 
 class ChangeSet(BaseModel):
+    model_config = ConfigDict(frozen=True)
     path: str
     diff: str
     changes: list[Change] = []
@@ -76,6 +79,7 @@ class Strategy(str, Enum):
 
 
 class AIMetadata(BaseModel):
+    model_config = ConfigDict(frozen=True)
     provider: Optional[str] = None
     models: Optional[list[str]] = None
     total_tokens: Optional[int] = None
@@ -84,12 +88,14 @@ class AIMetadata(BaseModel):
 
 
 class GenerationMetadata(BaseModel):
+    model_config = ConfigDict(frozen=True)
     strategy: Strategy
     ai: Optional[AIMetadata] = None
     provisional: bool
 
 
 class FixMetadata(BaseModel):
+    model_config = ConfigDict(frozen=True)
     # Fix provider ID, corresponds to legacy codemod ID
     id: str
     # A brief summary of the fix
@@ -102,6 +108,8 @@ class FixMetadata(BaseModel):
 
 class FixResult(BaseModel):
     """Result corresponding to a single finding"""
+
+    model_config = ConfigDict(frozen=True)
 
     finding: Finding
     fixStatus: FixStatus
@@ -119,27 +127,6 @@ class FixResult(BaseModel):
             if not self.fixMetadata:
                 raise ValueError("fixMetadata must be provided for fixed results")
         return self
-
-    def store_token_data(self, token_usage: TokenUsage):
-        if token_usage == TokenUsage() or not self.fixMetadata:
-            return
-
-        if not self.fixMetadata.generation.ai:
-            self.fixMetadata.generation.ai = AIMetadata(
-                total_tokens=token_usage.total,
-                completion_tokens=token_usage.completion_tokens,
-                prompt_tokens=token_usage.prompt_tokens,
-            )
-        else:
-            self.fixMetadata.generation.ai.completion_tokens = (
-                self.fixMetadata.generation.ai.completion_tokens or 0
-            ) + token_usage.completion_tokens
-            self.fixMetadata.generation.ai.prompt_tokens = (
-                self.fixMetadata.generation.ai.prompt_tokens or 0
-            ) + token_usage.prompt_tokens
-            self.fixMetadata.generation.ai.total_tokens = (
-                self.fixMetadata.generation.ai.total_tokens or 0
-            ) + token_usage.total
 
 
 class CodeTF(CodeTFWriter, BaseModel):
