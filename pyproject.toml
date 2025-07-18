@@ -64,7 +64,7 @@ test = [
     "Flask<4",
     "httpx~=0.27",
     "Jinja2~=3.1.2",
-    "jsonschema~=4.24.0",
+    "jsonschema~=4.25.0",
     "lxml>=6.0.0,<6.1.0",
     "openai>=1.97,<1.98",
     "mock==5.2.*",
