@@ -61,12 +61,14 @@ class DiffSide(CaseInsensitiveEnum):
 
 
 class PackageAction(BaseModel):
+    model_config = ConfigDict(frozen=True)
     action: Action
     result: PackageResult
     package: str
 
 
 class Change(BaseModel):
+    model_config = ConfigDict(frozen=True)
     lineNumber: int
     description: Optional[str]
     diffSide: DiffSide = DiffSide.RIGHT
@@ -87,11 +89,13 @@ class Change(BaseModel):
 
 
 class Rating(BaseModel):
+    model_config = ConfigDict(frozen=True)
     score: int
     description: Optional[str] = None
 
 
 class FixQuality(BaseModel):
+    model_config = ConfigDict(frozen=True)
     safetyRating: Rating
     effectivenessRating: Rating
     cleanlinessRating: Rating
