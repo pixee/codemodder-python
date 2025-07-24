@@ -51,11 +51,11 @@ get-hashes = 'codemodder.scripts.get_hashes:main'
 
 [project.optional-dependencies]
 semgrep = [
-    "semgrep>=1.128,<1.129",
+    "semgrep>=1.130,<1.131",
 ]
 test = [
     "azure-ai-inference>=1.0.0b1,<2.0",
-    "coverage>=7.9,<7.10",
+    "coverage>=7.10,<7.11",
     "coverage-threshold~=0.4",
     "defusedxml==0.7.1",
     "types-defusedxml==0.7.0.20250708",
@@ -86,7 +86,7 @@ test = [
     "fickling~=0.1.0,>=0.1.3",
     "graphql-server~=3.0.0b7",
     "unidiff>=0.7.5",
-    "semgrep>=1.128,<1.129",
+    "semgrep>=1.130,<1.131",
 ]
 complexity = [
     "radon==6.0.*",
