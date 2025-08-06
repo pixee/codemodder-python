@@ -158,6 +158,7 @@ def from_v2_aimetadata(ai_metadata: AIMetadatav2) -> AIMetadata:
         models=[ai_metadata.model] if ai_metadata.model else None,
         total_tokens=ai_metadata.tokens,
         completion_tokens=ai_metadata.completion_tokens,
+        prompt_tokens=ai_metadata.prompt_tokens,
     )
 
 
