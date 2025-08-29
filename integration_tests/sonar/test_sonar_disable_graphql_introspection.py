@@ -11,7 +11,7 @@ class TestSonarDisableGraphQLIntrospection(SonarIntegrationTest):
     codemod = SonarDisableGraphQLIntrospection
     code_path = "tests/samples/disable_graphql_introspection.py"
     expected_new_code = """\
-    from graphql_server.flask import GraphQLView
+    from graphql_server.flask.views import GraphQLView
     from flask import Flask
     from graphql import (
         GraphQLSchema, GraphQLObjectType, GraphQLField, GraphQLString)

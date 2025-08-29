@@ -84,7 +84,7 @@ test = [
     "numpy ~= 2.3.0; python_version > '3.10'",
     "flask_wtf~=1.2.0",
     "fickling~=0.1.0,>=0.1.3",
-    "graphql-server~=3.0.0b7",
+    "graphql-server~=3.0.0b9",
     "unidiff>=0.7.5",
     "semgrep>=1.134,<1.135",
 ]

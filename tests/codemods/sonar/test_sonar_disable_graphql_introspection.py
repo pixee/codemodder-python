@@ -15,7 +15,7 @@ class TestSonarDisableGraphQLIntrospection(BaseSASTCodemodTest):
 
     def test_simple(self, tmpdir):
         input_code = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
 
@@ -29,7 +29,7 @@ class TestSonarDisableGraphQLIntrospection(BaseSASTCodemodTest):
         )
         """
         expected = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
         from graphql.validation import NoSchemaIntrospectionCustomRule

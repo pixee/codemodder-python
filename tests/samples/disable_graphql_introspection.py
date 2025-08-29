@@ -1,4 +1,4 @@
-from graphql_server.flask import GraphQLView
+from graphql_server.flask.views import GraphQLView
 from flask import Flask
 from graphql import (
     GraphQLSchema, GraphQLObjectType, GraphQLField, GraphQLString)
