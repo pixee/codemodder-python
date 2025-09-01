@@ -41,6 +41,8 @@ class FindGraphQLViewsWithIntrospection(
     supported_functions = {
         "graphql_server.flask.GraphQLView",
         "graphql_server.flask.GraphQLView.as_view",
+        "graphql_server.flask.views.GraphQLView",
+        "graphql_server.flask.views.GraphQLView.as_view",
         "graphql_server.sanic.GraphQLView",
         "graphql_server.aiohttp.GraphQLView",
         "graphql_server.webob.GraphQLView",

@@ -12,7 +12,7 @@ class TestDisableGraphQLIntrospection(BaseCodemodTest):
 
     def test_simple_flask(self, tmpdir):
         input_code = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
 
@@ -26,7 +26,7 @@ class TestDisableGraphQLIntrospection(BaseCodemodTest):
         )
         """
         expected = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
         from graphql.validation import NoSchemaIntrospectionCustomRule
@@ -77,7 +77,7 @@ class TestDisableGraphQLIntrospection(BaseCodemodTest):
 
     def test_add_indirect(self, tmpdir):
         input_code = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
 
@@ -89,7 +89,7 @@ class TestDisableGraphQLIntrospection(BaseCodemodTest):
         )
         """
         expected = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
         from graphql.validation import NoSchemaIntrospectionCustomRule
@@ -105,7 +105,7 @@ class TestDisableGraphQLIntrospection(BaseCodemodTest):
 
     def test_add_list_double_indirect(self, tmpdir):
         input_code = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
 
@@ -117,7 +117,7 @@ class TestDisableGraphQLIntrospection(BaseCodemodTest):
         )
         """
         expected = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
         from graphql.validation import NoSchemaIntrospectionCustomRule
@@ -133,7 +133,7 @@ class TestDisableGraphQLIntrospection(BaseCodemodTest):
 
     def test_add_dict_indirect(self, tmpdir):
         input_code = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
 
@@ -146,7 +146,7 @@ class TestDisableGraphQLIntrospection(BaseCodemodTest):
         )
         """
         expected = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
         from graphql.validation import NoSchemaIntrospectionCustomRule
@@ -163,7 +163,7 @@ class TestDisableGraphQLIntrospection(BaseCodemodTest):
 
     def test_has_validation_rule(self, tmpdir):
         input_code = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
         from graphql.validation import NoSchemaIntrospectionCustomRule
@@ -178,7 +178,7 @@ class TestDisableGraphQLIntrospection(BaseCodemodTest):
 
     def test_has_graphene_validation_rule(self, tmpdir):
         input_code = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from .schemas import schema
         from graphene.validation import DisableIntrospection

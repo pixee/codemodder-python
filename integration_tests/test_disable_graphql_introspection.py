@@ -8,7 +8,7 @@ from core_codemods.disable_graphql_introspection import (
 class TestDisableGraphQLIntrospection(BaseIntegrationTest):
     codemod = DisableGraphQLIntrospection
     original_code = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from graphql import (
             GraphQLSchema, GraphQLObjectType, GraphQLField, GraphQLString)
@@ -32,7 +32,7 @@ class TestDisableGraphQLIntrospection(BaseIntegrationTest):
         )
     """
     expected_new_code = """
-        from graphql_server.flask import GraphQLView
+        from graphql_server.flask.views import GraphQLView
         from flask import Flask
         from graphql import (
             GraphQLSchema, GraphQLObjectType, GraphQLField, GraphQLString)

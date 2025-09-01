@@ -4,7 +4,7 @@ Introspection is often enabled by default in GraphQL without authentication. Thi
 
 Our changes look something like this:
 ```diff
-from graphql_server.flask import GraphQLView
+from graphql_server.flask.views import GraphQLView
 from flask import Flask
 from graphql import (
     GraphQLSchema, GraphQLObjectType, GraphQLField, GraphQLString)
