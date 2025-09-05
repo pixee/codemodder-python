@@ -14,7 +14,7 @@ from codemodder.codemods.semgrep import SemgrepRuleDetector
 from codemodder.codetf import CodeTF
 from codemodder.context import CodemodExecutionContext
 from codemodder.dependency import Dependency
-from codemodder.llm import MisconfiguredAIClient, TokenUsage, log_token_usage
+from codemodder.llm import TokenUsage, log_token_usage
 from codemodder.logging import configure_logger, log_list, log_section, logger
 from codemodder.project_analysis.file_parsers.package_store import PackageStore
 from codemodder.project_analysis.python_repo_manager import PythonRepoManager
@@ -134,7 +134,6 @@ def run(
     original_cli_args: list[str] | None = None,
     codemod_registry: registry.CodemodRegistry | None = None,
     sast_only: bool = False,
-    ai_client: bool = True,
     log_matched_files: bool = False,
     remediation: bool = False,
 ) -> tuple[CodeTF | None, int, TokenUsage]:
@@ -162,24 +161,18 @@ def run(
 
     repo_manager = PythonRepoManager(Path(directory))
 
-    try:
-        context = CodemodExecutionContext(
-            Path(directory),
-            dry_run,
-            verbose,
-            codemod_registry,
-            provider_registry,
-            repo_manager,
-            path_include,
-            path_exclude,
-            tool_result_files_map,
-            max_workers,
-            ai_client,
-        )
-    except MisconfiguredAIClient as e:
-        logger.error(e)
-        # Codemodder instructions conflicted (according to spec)
-        return None, 3, token_usage
+    context = CodemodExecutionContext(
+        Path(directory),
+        dry_run,
+        verbose,
+        codemod_registry,
+        provider_registry,
+        repo_manager,
+        path_include,
+        path_exclude,
+        tool_result_files_map,
+        max_workers,
+    )
 
     context.repo_manager.parse_project()
 
