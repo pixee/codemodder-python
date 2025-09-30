@@ -43,6 +43,8 @@ class FixStatusType(str, Enum):
     skipped = "skipped"
     failed = "failed"
     wontfix = "wontfix"
+    blocked = "blocked"
+    out_of_scope = "out_of_scope"
 
 
 class FixStatus(BaseModel):
