@@ -1,5 +1,6 @@
 [run]
 source = codemodder
+patch = subprocess
 omit =
     */codemodder/scripts/*
     */codemodder/_version.py
