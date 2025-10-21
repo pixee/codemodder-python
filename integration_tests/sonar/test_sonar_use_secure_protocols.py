@@ -10,7 +10,7 @@ class TestSonarUseSecureProtocols(SonarIntegrationTest):
     code_path = "tests/samples/use_secure_protocols.py"
     replacement_lines = [
         (
-            5,
+            4,
             """url = "https://example.com"\n""",
         ),
     ]
@@ -18,13 +18,13 @@ class TestSonarUseSecureProtocols(SonarIntegrationTest):
     expected_diff = (
     """--- \n"""
     """+++ \n"""
-    """@@ -2,4 +2,4 @@\n"""
+    """@@ -1,4 +1,4 @@\n"""
+    ''' import ftplib\n'''
     ''' import smtplib\n'''
-    ''' import telnetlib\n'''
     ''' \n'''
     '''-url = "http://example.com"\n'''
     '''+url = "https://example.com"\n'''
     )
     # fmt: on
-    expected_line_change = "5"
+    expected_line_change = "4"
     change_description = SonarUseSecureProtocolsTransformer.change_description

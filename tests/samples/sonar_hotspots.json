@@ -136,13 +136,13 @@
       "securityCategory": "encrypt-data",
       "vulnerabilityProbability": "LOW",
       "status": "TO_REVIEW",
-      "line": 5,
+      "line": 4,
       "message": "Using http protocol is insecure. Use https instead",
       "creationDate": "2025-01-22T13:20:10+0100",
       "updateDate": "2025-01-22T13:29:45+0100",
       "textRange": {
-        "startLine": 5,
-        "endLine": 5,
+        "startLine": 4,
+        "endLine": 4,
         "startOffset": 6,
         "endOffset": 26
       },
