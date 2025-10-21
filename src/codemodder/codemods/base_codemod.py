@@ -2,13 +2,18 @@ from __future__ import annotations
 
 import functools
 import importlib.resources
+import sys
 from abc import ABCMeta, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import cached_property
-from importlib.abc import Traversable
 from pathlib import Path
+
+if sys.version_info >= (3, 14):
+    from importlib.resources.abc import Traversable
+else:
+    from importlib.abc import Traversable
 
 from codemodder.code_directory import file_line_patterns
 from codemodder.codemods.base_detector import BaseDetector

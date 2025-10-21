@@ -16,7 +16,7 @@ dependencies = [
     "isort>=6.1,<7",
     "libcst>=1.8,<1.9",
     "packaging>=24.2,<25.1",
-    "pydantic~=2.11.5",
+    "pydantic~=2.12.3",
     "pylint>=4,<4.1",
     "python-json-logger~=4.0.0",
     "PyYAML~=6.0.0",
@@ -24,7 +24,7 @@ dependencies = [
     "tomlkit~=0.13.0",
     "wrapt~=1.17.0",
     "chardet~=5.2.0",
-    "sarif-pydantic~=0.5.1",
+    "sarif-pydantic~=0.6.1",
     "setuptools~=80.0",
 ]
 keywords = ["codemod", "codemods", "security", "fix", "fixes"]
@@ -32,6 +32,8 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.10",
@@ -51,11 +53,11 @@ get-hashes = 'codemodder.scripts.get_hashes:main'
 
 [project.optional-dependencies]
 semgrep = [
-    "semgrep>=1.134,<1.135",
+    "semgrep>=1.140,<1.141",
 ]
 test = [
     "azure-ai-inference>=1.0.0b1,<2.0",
-    "coverage>=7.10,<7.11",
+    "coverage>=7.11,<7.12",
     "coverage-threshold~=0.4",
     "defusedxml==0.7.1",
     "types-defusedxml==0.7.0.20250822",
@@ -86,7 +88,7 @@ test = [
     "fickling~=0.1.0,>=0.1.3",
     "graphql-server~=3.0.0b9",
     "unidiff>=0.7.5",
-    "semgrep>=1.134,<1.135",
+    "semgrep>=1.140,<1.141",
 ]
 complexity = [
     "radon==6.0.*",
