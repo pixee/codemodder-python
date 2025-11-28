@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Check out codemodder
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set Up Python
         uses: actions/setup-python@v6
         with:
@@ -33,7 +33,7 @@ jobs:
       - name: Install Test Dependencies
         run: pip install ".[test]"
       - name: Check out Pygoat
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: pixee/pygoat
           path: pygoat
