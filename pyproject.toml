@@ -15,7 +15,7 @@ dependencies = [
     "GitPython<4",
     "isort>=6.1,<7",
     "libcst>=1.8,<1.9",
-    "packaging>=24.2,<25.1",
+    "packaging>=26.3,<27",
     "pydantic~=2.12.3",
     "pylint>=4,<4.1",
     "python-json-logger~=4.0.0",
