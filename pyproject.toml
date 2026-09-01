@@ -11,7 +11,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 description = "A pluggable framework for building codemods in Python"
 dependencies = [
-    "boltons>=21.0,<25.1",
+    "boltons>=26.1,<27",
     "GitPython<4",
     "isort>=6.1,<7",
     "libcst>=1.8,<1.9",
