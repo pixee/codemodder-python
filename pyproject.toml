@@ -95,7 +95,7 @@ complexity = [
     "xenon==0.9.*",
 ]
 openai = [
-    "openai>=1.109,<1.110",
+    "openai>=3.8,<3.9",
 ]
 azure = [
     "azure-ai-inference>=1.0.0b1,<2.0",
